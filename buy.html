@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/js/libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/js/libs/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">ThemeMY!</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1>Please Confirm your Order</h1>
+      </div>
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Theme Name</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Twenty Eleven</td>
+            <td>$49</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th><span class="pull-right">Total</span></th>
+            <th>$49</th>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="row">
+        <div class="span6">
+          <form class="form-horizontal" method="post" action="">
+            <fieldset>
+              <legend>Log in</legend>
+
+              <div class="control-group">
+                <label class="control-label" for="email">Email Address</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="email">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="password">Password</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="password">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Log In</button>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+
+        <div class="span6">
+          <form class="form-horizontal" method="post" action="">
+            <fieldset>
+              <legend>Create an account</legend>
+
+              <div class="control-group">
+                <label class="control-label" for="new-first-name">First Name</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="new-first-name">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="new-last-name">Last Name</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="new-last-name">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="new-email">Email Address</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="new-email">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="new-password">Password</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="new-password">
+                </div>
+              </div>
+
+              <div class="control-group">
+                <label class="control-label" for="new-password-confirmation">Password Confirmation</label>
+                <div class="controls">
+                  <input type="text" class="input-xlarge" id="new-password-confirmation">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Account</button>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+
+      <div class="page-header">
+        <h2>Billing Details</h2>
+      </div>
+      <form class="form-horizontal" method="post" action="thanks.html">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="billing-first-name">First Name</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-first-name">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-last-name">Last Name</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-last-name">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-card-number">Credit Card Number</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-card-number">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-card-code">Security Code (CVV/CVC)</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-card-code">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-card-expiry-month">Expiry Date</label>
+            <div class="controls">
+              <select class="input-small" id="billing-card-expiry-month">
+                <option></option>
+                <option>01</option>
+                <option>02</option>
+                <option>03</option>
+                <option>04</option>
+                <option>05</option>
+                <option>06</option>
+                <option>07</option>
+                <option>08</option>
+                <option>09</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+              </select>
+              <select class="input-medium" id="billing-card-expiry-year">
+                <option></option>
+                <option>2012</option>
+                <option>2013</option>
+                <option>2014</option>
+                <option>2015</option>
+                <option>2016</option>
+                <option>2017</option>
+                <option>2018</option>
+                <option>2019</option>
+                <option>2020</option>
+                <option>2021</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-address">Address</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-address">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-city">City</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-city">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-state">State</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-state">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-zip">Zip/Postal Code</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="billing-zip">
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="billing-country">Country</label>
+            <div class="controls">
+              <select class="input-xlarge" id="billing-country">
+                <option></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Process Order</button>
+          </div>
+        </fieldset>
+      </form>
+
+    </div> <!-- /container -->
+
+  </body>
+</html>
