@@ -5,66 +5,72 @@ define([
   ], function($, _, Backbone){
   var BaseView = Backbone.View.extend({
       initialize: function(options) {
-      this.loadModel();
-      this.switchModes();
       this.saveChanges();
+      this.switchModes();
+      this.loadModel();
     }
 
     // Load model data in corresponding elements
     , loadModel: function () {
-      var _this = this;
+      _.each(this.editables, function(f, c) {
+        switch( f.type ) {
+          case "text" :
+            this.$(c).text(this.model.get(f.name));
+          break;
 
-      _.each(_this.editables, function(f, c) {
-        if (f.type === "text")
-          _this.$(c).text(_this.model.get(f.name));
-        else if( f.type === "html")
-          _this.$(c).html(_this.model.get(f.name));
-      });
+          case "html" :
+            this.$(c).html(this.model.get(f.name));
+          break;
+        }
+      }, this);
     }
 
     // Highlight contenteditable areas on edit
     , switchModes: function () {
-      var _this = this;
-
       EventDispatcher.on("mode:edit", function () {
-        _.each(_this.editables, function(f, c) {
+        _.each(this.editables, function(f, c) {
           switch (f.type) {
             case "text":
-              _this.$(c).attr("contenteditable", true);
+              this.$(c).attr("contenteditable", true);
             break;
+
             case "image":
-              _this.$(c).prepend("<div class='x-edit' style='position: absolute; right: 0; padding: 5px 10px; background-color: #ffffe0;'>Change Image</div>");
+              this.$(c).prepend("<div class='x-edit' style='position: absolute; right: 0; padding: 5px 10px; background-color: #ffffe0;'>Change Image</div>");
             break;
           }
-        });
-      });
+        }, this);
+      }, this);
 
       EventDispatcher.on("mode:view", function () {
-        _.each(_this.editables, function(f, c) {
+        _.each(this.editables, function(f, c) {
           switch (f.type) {
             case "text":
-              _this.$(c).attr("contenteditable", false);
+              this.$(c).attr("contenteditable", false);
             break;
+
             case "image":
-              _this.$(c).find(".x-edit").remove();
+              this.$(c).find(".x-edit").remove();
             break;
           }
-        });
-      });
+        }, this);
+      }, this);
     }
 
     // Save changes to model when an element is edited
     , saveChanges: function () {
-      var _this = this;
+      _.each(this.editables, function(f, c) {
+        this.$(c).on("blur keyup paste", function () {
+          switch (f.type) {
+            case "text" :
+              this.model.set(f.name, $(this).text());
+            break;
 
-      _.each(_this.editables, function(f, c) {
-        _this.$(c).on("blur keyup paste", function () {
-          if (f.type === "text")
-            _this.model.set(f.name, $(this).text());
-          else if (f.type === "html")
-            _this.model.set(f.name, $(this).html());
-        });
-      });
+            case "html" :
+              this.model.set(f.name, $(this).html());
+            break;
+          }
+        }, this);
+      }, this);
     }
   });
 
