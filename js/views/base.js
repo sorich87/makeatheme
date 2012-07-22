@@ -4,7 +4,7 @@ define([
   'backbone',
   ], function($, _, Backbone){
   var BaseView = Backbone.View.extend({
-      initialize: function(options) {
+    initialize: function(options) {
       this.saveChanges();
       this.switchModes();
       this.loadModel();
@@ -25,7 +25,7 @@ define([
       }, this);
     }
 
-    // Highlight contenteditable areas on edit
+    // Highlight editable areas on edit
     , switchModes: function () {
       EventDispatcher.on("mode:edit", function () {
         _.each(this.editables, function(f, c) {
@@ -56,7 +56,7 @@ define([
       }, this);
     }
 
-    // Save changes to model when an element is edited
+    // Save changes to model when an element is modified
     , saveChanges: function () {
       _.each(this.editables, function(f, c) {
         var _this = this;

@@ -9,16 +9,16 @@ define([
   // Global event dispatcher to coordinate events between views
   window.EventDispatcher = _.clone(Backbone.Events);
 
-  var AppView;
-
-  AppView = Backbone.View.extend({
+  var AppView = Backbone.View.extend({
     el: $('body')
 
+    // All the view initialize functions are in the order:
+    // prepare DOM -> listen to events -> load data
     , initialize: function() {
       this.resizeIframe();
-      this.loadModels();
       this.switchModes();
       this.listenNotifications();
+      this.loadModels();
     }
 
     // Load models
@@ -37,6 +37,7 @@ define([
     }
 
     // Trigger mode:edit and mode:view events other views listen to
+    // Show or hide the customize and preview buttons
     , switchModes: function () {
       var _this = this;
 
@@ -70,7 +71,7 @@ define([
       }, this);
     }
 
-    // Resize the iframe so that it fits all the window
+    // Resize the iframe so that it fills all the window
     , resizeIframe: function() {
       var _this = this;
 

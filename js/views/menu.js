@@ -14,10 +14,10 @@ define([
     }
 
     , loadModel: function () {
-      Menu.reset([{id: 1, name: "Page", url: "#", parent: 0}, {id: 2, name: "Second Page", url: "#", parent: 0},
-                 {id: 3, name: "Third Page", url: "#", parent: 1}, {id: 4, name: "Fourth Page", url: "#", parent: 3}]);
+      Menu.reset(Menu.models);
     }
 
+    // Show "Add Page" links on edit
     , switchModes: function () {
       EventDispatcher.on("mode:edit", function () {
         this.$el.find(">li, >li>ul>li").each(function () {
@@ -42,6 +42,7 @@ define([
       Menu.on('reset', this.addAll, this);
     }
 
+    // Build menu item as parent or children element
     , addOne: function(menu_item) {
       var view, parent, $parent, ul, item_el;
 
@@ -65,6 +66,9 @@ define([
       }
     }
 
+    // Build three-levels menu structure
+    // Loop through the items array three times, adding top level items
+    // and items which parent was already added and rejecting those which parent was not added
     , addAll: function() {
       var items = Menu.models;
 
