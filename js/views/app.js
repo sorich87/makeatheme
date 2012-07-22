@@ -1,10 +1,10 @@
 define([
-       'jquery',
-       'underscore',
-       'backbone',
-       'collections/menu',
-       'models/menu_item',
-], function($, _, Backbone, Menu, MenuItem) {
+  'jquery',
+  'underscore',
+  'backbone',
+  'collections/menu',
+  'models/menu_item'
+  ], function($, _, Backbone, Menu, MenuItem) {
 
   // Global event dispatcher to coordinate events between views
   window.EventDispatcher = _.clone(Backbone.Events);
@@ -29,6 +29,10 @@ define([
 
       require(["models/page", "views/page"], function (Page, PageView) {
         new PageView({model: new Page});
+      });
+
+      require(["views/menu"], function (MenuView) {
+        new MenuView();
       });
     }
 

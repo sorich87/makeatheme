@@ -8,5 +8,5 @@ define([
     model: MenuItem
   });
 
-  return MenuCollection;
+  return new MenuCollection;
 });
