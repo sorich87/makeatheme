@@ -10,8 +10,14 @@
 .x-page-header-image .x-edit {
   background-color: #ffffe0 !important;
   color: #1982d1 !important;
+  text-decoration: none;
   position: absolute !important;
   right: 0 !important;
   padding: 5px 10px !important;
   display: block;
+}
+.x-menu .x-edit a:hover,
+.x-page-header-image .x-edit:hover {
+  background-color: #efefef !important;
+  text-decoration: none;
 }

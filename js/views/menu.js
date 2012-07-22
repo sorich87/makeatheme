@@ -14,11 +14,21 @@ define([
     }
 
     , loadModel: function () {
-      Menu.reset([{name: "Page", url: "#"}, {name: "Another Page", url: "#"}]);
+      Menu.reset([{id: 1, name: "Page", url: "#", parent: 0}, {id: 2, name: "Second Page", url: "#", parent: 0},
+                 {id: 3, name: "Third Page", url: "#", parent: 1}, {id: 4, name: "Fourth Page", url: "#", parent: 3}]);
     }
 
     , switchModes: function () {
       EventDispatcher.on("mode:edit", function () {
+        this.$el.find(">li, >li>ul>li").each(function () {
+          var ul = $(this).children("ul");
+
+          if (ul.length === 0)
+            ul = $("<ul></ul>").appendTo(this);
+
+          $(ul).append("<li class='x-edit'><a href=''>Add Page</a></li>");
+        });
+
         this.$el.append("<li class='x-edit'><a href=''>Add Page</a></li>");
       }, this);
 
@@ -33,12 +43,41 @@ define([
     }
 
     , addOne: function(menu_item) {
-      var view = new MenuItemView({model: menu_item});
-      this.$el.append(view.render().el);
+      var view, parent, $parent, ul, item_el;
+
+      parent = menu_item.get("parent");
+
+      item_el = new MenuItemView({
+        model: menu_item,
+        id: "menu-item-" + menu_item.get("id")
+      }).render().el;
+
+      if (parent === 0) {
+        this.$el.append(item_el);
+      } else {
+        $parent = this.$("#menu-item-" + parent);
+        ul = $parent.children("ul");
+
+        if (ul.length === 0)
+          ul = $("<ul></ul>").appendTo($parent);
+
+        $(ul).append(item_el);
+      }
     }
 
     , addAll: function() {
-      Menu.each(this.addOne, this);
+      var items = Menu.models;
+
+      for (var i = 0; i < 3; i++) {
+        items = _.reject(items, function (item) {
+          var parent = item.get("parent");
+
+          if (parent === 0 || this.$("#menu-item-" + parent).length) {
+            this.addOne(item);
+            return true;
+          }
+        }, this);
+      }
     }
   });
 
