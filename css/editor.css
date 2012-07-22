@@ -1,3 +1,17 @@
 [contenteditable=true] {
-  background: #ffffe0;
+  background: #ffffe0 !important;
+  color: #000 !important;
+}
+.x-menu .x-edit a {
+  background-color: #ffffe0 !important;
+  color: #1982d1 !important;
+  display: block;
+}
+.x-page-header-image .x-edit {
+  background-color: #ffffe0 !important;
+  color: #1982d1 !important;
+  position: absolute !important;
+  right: 0 !important;
+  padding: 5px 10px !important;
+  display: block;
 }

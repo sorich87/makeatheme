@@ -43,16 +43,12 @@ define([
       _this.$(".customize").on("click", function () {
         EventDispatcher.trigger("mode:edit");
 
-        _this.$el.addClass("x-edit");
-
         $(this).hide("slow");
-        _this.$(".save").show("slow");
+        _this.$(".preview").show("slow");
       });
 
-      _this.$(".save").on("click", function () {
+      _this.$(".preview").on("click", function () {
         EventDispatcher.trigger("mode:view", this);
-
-        _this.$el.removeClass("x-edit");
 
         $(this).hide("slow");
         _this.$(".customize").show("slow");
@@ -63,17 +59,15 @@ define([
 
     // Listen to notification events and display them
     , listenNotifications: function () {
-      var _this = this;
-
       require(['bootstrap/js/bootstrap-alert'], function () {
         $(".alert").alert();
       });
 
       EventDispatcher.on("notification", function (opts) {
-        $(_this.make("div", { class: "alert alert-" + opts[1] + " notification" },
+        $(this.make("div", { class: "alert alert-" + opts[1] + " notification" },
                     '<button class="close" data-dismiss="alert">×</button>' + opts[0]))
-                    .appendTo(_this.el);
-      });
+                    .appendTo(this.el);
+      }, this);
     }
 
     // Resize the iframe so that it fits all the window

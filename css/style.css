@@ -37,7 +37,7 @@ body.theme {
 #theme iframe {
   width: 100%;
 }
-body.theme .save {
+body.theme .preview {
   display: none;
 }
 .notification {

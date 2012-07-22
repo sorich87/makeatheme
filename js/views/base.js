@@ -35,7 +35,7 @@ define([
             break;
 
             case "image":
-              this.$(c).prepend("<div class='x-edit' style='position: absolute; right: 0; padding: 5px 10px; background-color: #ffffe0;'>Change Image</div>");
+              this.$(c).prepend("<a class='x-edit' href=''>Change Image</a>");
             break;
           }
         }, this);
@@ -59,17 +59,19 @@ define([
     // Save changes to model when an element is edited
     , saveChanges: function () {
       _.each(this.editables, function(f, c) {
+        var _this = this;
+
         this.$(c).on("blur keyup paste", function () {
           switch (f.type) {
             case "text" :
-              this.model.set(f.name, $(this).text());
+              _this.model.set(f.name, $(this).text());
             break;
 
             case "html" :
-              this.model.set(f.name, $(this).html());
+              _this.model.set(f.name, $(this).html());
             break;
           }
-        }, this);
+        });
       }, this);
     }
   });

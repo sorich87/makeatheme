@@ -19,7 +19,11 @@ define([
 
     , switchModes: function () {
       EventDispatcher.on("mode:edit", function () {
-        this.$el.append("<li class='x-edit'><a style='background-color: #ffffe0; color: #1982d1;'>Add Page</a></li>");
+        this.$el.append("<li class='x-edit'><a href=''>Add Page</a></li>");
+      }, this);
+
+      EventDispatcher.on("mode:view", function () {
+        this.$(".x-edit").remove();
       }, this);
     }
 
