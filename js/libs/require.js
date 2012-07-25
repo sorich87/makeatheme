@@ -2061,10 +2061,21 @@ var jam = {
         {
             "name": "bootstrap",
             "location": "libs/bootstrap"
+        },
+        {
+            "name": "jquerypp",
+            "location": "libs/jquerypp",
+            "main": "index.js"
         }
     ],
     "version": "0.1.11",
-    "shim": {}
+    "shim": {
+        "jquerypp": {
+            "deps": [
+                "jquery"
+            ]
+        }
+    }
 };
 
 if (typeof require !== "undefined" && require.config) {
