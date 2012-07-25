@@ -2059,11 +2059,6 @@ var jam = {
             "main": "text.js"
         },
         {
-            "name": "handlebars",
-            "location": "libs/handlebars",
-            "main": "handlebars.js"
-        },
-        {
             "name": "bootstrap",
             "location": "libs/bootstrap"
         }
