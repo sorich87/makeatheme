@@ -1,57 +1,85 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width" />
-  <title>2011</title>
-  <link rel="stylesheet" type="text/css" media="all" href="style.css" />
-  <link rel="stylesheet" type="text/css" media="all" href="../css/editor.css" />
-</head>
 
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8" />
+
+  <!-- Set the viewport width to device width for mobile -->
+  <meta name="viewport" content="width=device-width" />
+
+  <title>Welcome to Foundation</title>
+
+  <script data-main="../js/main" src="../js/libs/require.js"></script>
+
+  <!-- Included CSS Files -->
+  <link rel="stylesheet" href="foundation.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../css/editor.css">
+
+  <!-- IE Fix for HTML5 Tags -->
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+
+</head>
 <body class="page two-column right-sidebar">
   <div id="page" class="hfeed">
     <header id="branding" role="banner">
-      <hgroup>
-        <h1 id="site-title"><span><a href="#" title="" rel="home" class="x-site-title"></a></span></h1>
-        <h2 id="site-description" class="x-site-description"></h2>
-      </hgroup>
+      <div class="row">
+        <hgroup class="eight columns">
+          <h1 id="site-title"><span><a href="#" title="" rel="home" class="x-site-title"></a></span></h1>
+          <p id="site-description" class="x-site-description"></p>
+        </hgroup>
 
-      <a href="#" class="x-page-header-image">
-        <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />
-      </a>
-
-      <form method="get" id="searchform" action="#">
-        <label for="s" class="assistive-text">Search</label>
-        <input type="text" class="field" name="s" id="s" placeholder="Search" />
-        <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
-      </form>
-
-      <nav id="access" role="navigation">
-        <h3 class="assistive-text">Main menu</h3>
-        <div class="skip-link"><a class="assistive-text" href="#content" title="Skip to primary content">Skip to primary content</a></div>
-        <div class="skip-link"><a class="assistive-text" href="#secondary" title="Skip to secondary content">Skip to secondary content</a></div>
-        <div class="menu x-menu">
+        <div class="four columns">
+          <form method="get" id="searchform" action="#">
+            <label for="s" class="assistive-text">Search</label>
+            <input type="text" class="field" name="s" id="s" placeholder="Search" />
+            <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+          </form>
         </div>
-      </nav><!-- #access -->
+      </div>
+
+      <div class="row">
+        <div class="twelve columns">
+          <a href="#" class="x-page-header-image">
+            <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />
+          </a>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="twelve columns">
+          <nav id="access" role="navigation">
+            <h3 class="assistive-text">Main menu</h3>
+            <div class="skip-link"><a class="assistive-text" href="#content" title="Skip to primary content">Skip to primary content</a></div>
+            <div class="skip-link"><a class="assistive-text" href="#secondary" title="Skip to secondary content">Skip to secondary content</a></div>
+            <div class="menu x-menu">
+            </div>
+          </nav><!-- #access -->
+        </div>
+      </div>
     </header><!-- #branding -->
 
-    <div id="main">
-      <div id="primary">
-        <div id="content" role="main">
-          <article id="post-0" class="page hentry">
-            <header class="entry-header">
-              <h1 class="entry-title x-page-title"></h1>
-            </header><!-- .entry-header -->
+    <div class="row">
+      <div class="eight columns">
+        <article id="post-0" class="page hentry">
+          <header class="entry-header">
+            <h1 class="entry-title x-page-title"></h1>
+          </header><!-- .entry-header -->
 
-            <div class="entry-content x-page-content"></div><!-- .entry-content -->
+          <div class="entry-content x-page-content"></div><!-- .entry-content -->
 
-            <footer class="entry-meta">
-            </footer><!-- .entry-meta -->
-          </article><!-- #post-0 -->
-        </div><!-- #content -->
-      </div><!-- #primary -->
+          <footer class="entry-meta">
+          </footer><!-- .entry-meta -->
+        </article><!-- #post-0 -->
+      </div>
 
-      <div id="secondary" class="widget-area" role="complementary">
+      <div class="four columns widget-area" role="complementary">
         <aside class="widget widget_search">
           <form method="get" id="searchform" action="http://localhost.dev/~sorich87/wordpress/">
             <label for="s" class="assistive-text">Search</label>
@@ -88,15 +116,17 @@
             <li><a href="http://wordpress.org/" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>
           </ul>
         </aside>
-      </div><!-- #secondary .widget-area -->
-    </div><!-- #main -->
+      </div>
+    </div>
 
     <footer id="colophon" role="contentinfo">
-      <div id="site-generator">
-        <span class="x-site-credits"></span>
-        | <a href="http://wordpress.org/" title="Semantic Personal Publishing Platform" rel="generator">Proudly powered by WordPress</a>
+      <div id="site-generator" class="row">
+        <div class="twelve columns">
+          <span class="x-site-credits"></span>
+          | <a href="http://wordpress.org/" title="Semantic Personal Publishing Platform" rel="generator">Proudly powered by WordPress</a>
+        </div>
       </div>
     </footer><!-- #colophon -->
-  </div><!-- #page -->
+  </div>
 </body>
 </html>

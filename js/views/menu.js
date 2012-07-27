@@ -7,7 +7,7 @@ define([
   'views/menu_item'
   ], function($, _, Backbone, BaseView, Menu, MenuItemView) {
   var MenuView = BaseView.extend({
-      el: $("<ul></ul>").appendTo($('#theme iframe').contents().find(".x-menu"))
+      el: $("<ul></ul>").appendTo(".x-menu")
 
     , initialize: function (options) {
       this.constructor.__super__.initialize.apply(this, [options])

@@ -12,6 +12,9 @@ define([
 
     // Load model data in corresponding elements
     , loadModel: function () {
+      if (this.editables === undefined)
+        return;
+
       _.each(this.editables, function(f, c) {
         switch( f.type ) {
           case "text" :
@@ -27,6 +30,9 @@ define([
 
     // Highlight editable areas on edit
     , switchModes: function () {
+      if (this.editables === undefined)
+        return;
+
       EventDispatcher.on("mode:edit", function () {
         _.each(this.editables, function(f, c) {
           switch (f.type) {
@@ -58,6 +64,9 @@ define([
 
     // Save changes to model when an element is modified
     , saveChanges: function () {
+      if (this.editables === undefined)
+        return;
+
       _.each(this.editables, function(f, c) {
         var _this = this;
 

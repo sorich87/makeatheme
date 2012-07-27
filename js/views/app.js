@@ -10,7 +10,7 @@ define([
   window.EventDispatcher = _.clone(Backbone.Events);
 
   var AppView = Backbone.View.extend({
-    el: $('body')
+      el: $("body", window.parent.document)
 
     // All the view initialize functions are in the order:
     // prepare DOM -> listen to events -> load data
@@ -33,6 +33,10 @@ define([
 
       require(["views/menu"], function (MenuView) {
         new MenuView();
+      });
+
+      require(["views/layout"], function (LayoutView) {
+        new LayoutView();
       });
     }
 
