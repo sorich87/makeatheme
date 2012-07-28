@@ -27,6 +27,9 @@ define([
           // Links in draggable areas shouldn't be clickable
           _this.$(".columns a").on("click", preventDefault);
 
+          // Links and images in draggable areas shoulnd't be draggable
+          _this.$(".columns a, .columns img").on("mousedown", preventDefault);
+
           // Does total width of all columns children of a drop row
           // allow a new column?
           var isRowFull = function (dropElement, dragElement) {
@@ -110,6 +113,9 @@ define([
 
           // Links are clickable again
           _this.$(".columns a").off("click", preventDefault);
+
+          // Links and images are draggable again
+          _this.$(".columns a, .columns img").off("mousedown", preventDefault);
         });
       });
     }
