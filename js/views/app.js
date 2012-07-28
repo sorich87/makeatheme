@@ -48,12 +48,16 @@ define([
       _this.$(".customize").on("click", function () {
         EventDispatcher.trigger("mode:edit");
 
+        $("body").addClass("x-edit");
+
         $(this).hide();
         _this.$(".preview").show();
       });
 
       _this.$(".preview").on("click", function () {
         EventDispatcher.trigger("mode:view");
+
+        $("body").removeClass("x-edit");
 
         $(this).hide();
         _this.$(".customize").show();

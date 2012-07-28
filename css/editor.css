@@ -1,6 +1,14 @@
 [contenteditable=true] {
   background: #ffffe0 !important;
   color: #000 !important;
+  cursor: text;
+}
+body.x-edit .columns:hover {
+  border: 1px solid #1982d1 !important;
+  cursor: move;
+}
+body.x-edit .columns:hover a {
+  cursor: move;
 }
 .x-menu .x-edit a {
   background-color: #ffffe0 !important;
