@@ -48,15 +48,15 @@ define([
       _this.$(".customize").on("click", function () {
         EventDispatcher.trigger("mode:edit");
 
-        $(this).hide("slow");
-        _this.$(".preview").show("slow");
+        $(this).hide();
+        _this.$(".preview").show();
       });
 
       _this.$(".preview").on("click", function () {
-        EventDispatcher.trigger("mode:view", this);
+        EventDispatcher.trigger("mode:view");
 
-        $(this).hide("slow");
-        _this.$(".customize").show("slow");
+        $(this).hide();
+        _this.$(".customize").show();
 
         EventDispatcher.trigger("notification", ['Customization saved! You can <a href="#">buy the theme now</a> or come back later.', 'success']);
       });
