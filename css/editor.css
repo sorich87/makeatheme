@@ -29,3 +29,14 @@ body.x-edit .columns:hover a {
   background-color: #efefef !important;
   text-decoration: none;
 }
+.x-full:after {
+  content: "+";
+  font-size: 28px;
+  text-align: center;
+  background-color: #f0f8ff;
+  color: #000;
+  width: 100%;
+}
+.x-not-full {
+  background-color: #f0f8ff;
+}

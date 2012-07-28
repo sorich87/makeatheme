@@ -27,6 +27,21 @@ define([
           // Links in draggable areas shouldn't be clickable
           _this.$(".columns a").on("click", preventDefault);
 
+          // Does total width of all columns children of a drop row
+          // allow a new column?
+          var isRowFull = function (dropElement, dragElement) {
+            var rowWidth = $(dropElement).width()
+              , totalColumnsWidth = _.reduce($(dropElement).children(), function (memo, child) {
+              if ($(child).is(dragElement)) {
+                return memo;
+              } else {
+                return memo + parseFloat($(child).outerWidth());
+              }
+            }, 0, this);
+
+            return (rowWidth - totalColumnsWidth) < (rowWidth * 8.333 / 100);
+          };
+
           _this.$el.on({
             draginit: function (ev, drag) {
               // Limit drag to first container
@@ -42,31 +57,31 @@ define([
           }, ".columns");
 
           _this.$el.on({
-            dropon: function (ev, drop, drag) {
-              var rowWidth, totalColumnsWidth, dragParent;
-
-              // Width of the drop row
-              rowWidth = $(this).width();
-
-              // Total width of all columns children of the drop row
-              totalColumnsWidth = _.reduce($(this).children(), function (memo, child) {
-                if ($(child).is(drag.element)) {
-                  return memo;
-                } else {
-                  return memo + parseFloat($(child).outerWidth());
-                }
-              }, 0, this);
-
-              // Add column to row. If the row is full, add a new one
-              if ((rowWidth - totalColumnsWidth) >= (rowWidth * 8.333 / 100)) {
-                row = this;
+            dropover: function (ev, drop, drag) {
+              if (isRowFull(this, drag.element)) {
+                $(this).addClass("x-full");
               } else {
-                row = $("<div class='row'></div>").insertAfter(this);
+                $(this).addClass("x-not-full");
               }
+            }
 
-              // Save original parent then append the column to drop row
+            , dropout: function (ev, drop, drag) {
+              // Remove x-full and x-not-full classes if one was previously added
+              $(this).removeClass("x-full x-not-full");
+            }
+
+            , dropon: function (ev, drop, drag) {
+              var row, dragParent;
+
+              // Save original parent
               dragParent = $(drag.element).parent();
 
+              // Add column to row. If the row is full, add to a new one
+              if (isRowFull(this, drag.element)) {
+                row = $("<div class='row'></div>").insertAfter(this);
+              } else {
+                row = this;
+              }
               $(drag.element).appendTo(row).css({top: 0, left: 0});
 
               // If original parent doesn't have any more children,
@@ -74,6 +89,9 @@ define([
               if ($(dragParent).children().length <= 0) {
                 $(dragParent).remove();
               }
+
+              // Remove x-full and x-not-full classes if one was previously added
+              $(this).removeClass("x-full x-not-full");
             }
           }, ".row");
         });
