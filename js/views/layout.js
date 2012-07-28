@@ -79,7 +79,7 @@ define([
             }
 
             , dropon: function (ev, drop, drag) {
-              var row, dragParent;
+              var row, dragParent, dragGrandParent;
 
               // Save original parent
               dragParent = $(drag.element).parent();
@@ -92,10 +92,19 @@ define([
               }
               $(drag.element).appendTo(row);
 
-              // If original parent doesn't have any more children,
-              // remove it
-              if ($(dragParent).children().length <= 0) {
-                $(dragParent).remove();
+              $(this).removeClass("x-empty");
+
+              // If original parent doesn't have any more children
+              // and is not a <header> or <footer>, remove it
+              if ($(dragParent).children().length <= 0 ) {
+                dragGrandParent = $(dragParent).parent();
+
+                if ($(dragGrandParent).is("header, footer") && $(dragGrandParent).children().length === 1) {
+                  // Highlight <header> and <footer>
+                  $(dragGrandParent).children().addClass("x-empty");
+                } else {
+                  $(dragParent).remove();
+                }
               }
 
               // Remove x-full and x-not-full classes if one was previously added

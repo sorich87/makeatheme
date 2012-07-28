@@ -29,7 +29,7 @@ body.x-edit .columns:hover a {
   background-color: #efefef !important;
   text-decoration: none;
 }
-.x-full:after {
+.x-full:after, .x-empty:after {
   content: "+";
   font-size: 28px;
   text-align: center;
