@@ -5,7 +5,7 @@ define([
   'views/base'
   ], function($, _, Backbone, BaseView) {
   var SiteView = BaseView.extend({
-    el: $('#theme iframe').contents()
+    el: $(document)
 
     , editables: {
         ".x-site-title" : {

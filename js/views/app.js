@@ -10,12 +10,11 @@ define([
   window.EventDispatcher = _.clone(Backbone.Events);
 
   var AppView = Backbone.View.extend({
-      el: $("body", window.parent.document)
+      el: $(window.parent.document)
 
     // All the view initialize functions are in the order:
     // prepare DOM -> listen to events -> load data
     , initialize: function() {
-      this.resizeIframe();
       this.switchModes();
       this.listenNotifications();
       this.loadModels();
@@ -77,23 +76,6 @@ define([
                     '<button class="close" data-dismiss="alert">×</button>' + opts[0]))
                     .appendTo(this.el);
       }, this);
-    }
-
-    // Resize the iframe so that it fills all the window
-    , resizeIframe: function() {
-      var _this = this;
-
-      var adjustIframeHeight = function () {
-        _this.$("#theme iframe").height(function () {
-          return $(document).height();
-        });
-      };
-
-      adjustIframeHeight();
-
-      $(window).resize(function () {
-        adjustIframeHeight();
-      });
     }
   });
 

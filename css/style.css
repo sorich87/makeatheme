@@ -31,11 +31,22 @@ body.theme {
   padding-bottom: 35px;
 }
 #theme {
-  padding-left: 0;
-  padding-right: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 #theme iframe {
+  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  height: 100%;
   width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 40px 0;
 }
 body.theme .preview {
   display: none;

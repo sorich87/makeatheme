@@ -5,7 +5,7 @@ define([
   'views/base'
   ], function($, _, Backbone, BaseView) {
   var PageView = BaseView.extend({
-    el: $('#theme iframe').contents()
+    el: $("html")
 
     , editables: {
         ".x-page-title" : {

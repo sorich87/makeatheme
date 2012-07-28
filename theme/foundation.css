@@ -39,13 +39,14 @@ p a, p a:visited { line-height: inherit; }
 #map_canvas object { max-width: none; }
 
 /* The Grid ---------------------- */
-.row { width: 940px; max-width: 100%; min-width: 768px; margin: 0 auto; }
+.row { width: auto; max-width: 100%; min-width: 768px; margin: 0 auto; }
 .row .row { width: auto; max-width: none; min-width: 0; margin: 0 -15px; }
 .row.collapse .column, .row.collapse .columns { padding: 0; }
 .row .row { width: auto; max-width: none; min-width: 0; margin: 0 -15px; }
 .row .row.collapse { margin: 0; }
 
 .column, .columns { float: left; min-height: 1px; padding: 0 15px; position: relative; }
+.twelve.columns { padding: 0; }
 .column.centered, .columns.centered { float: none; margin: 0 auto; }
 
 [class*="column"] + [class*="column"]:last-child { float: right; }

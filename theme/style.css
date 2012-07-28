@@ -69,12 +69,6 @@ footer, header, hgroup, menu, nav, section {
 /* =Structure
 ----------------------------------------------- */
 
-.row {
-  width: 1000px;
-}
-.twelve.columns {
-  padding: 0;
-}
 body {
 	padding: 0 2em;
 }
@@ -630,9 +624,9 @@ a:hover {
 
 /* Search Form */
 #branding #searchform {
-	position: absolute;
-	top: 3.8em;
-	right: 7.6%;
+	position: relative;
+	padding-top: 3.8em;
+	padding-right: 7.6%;
 	text-align: right;
 }
 #branding #searchform div {
