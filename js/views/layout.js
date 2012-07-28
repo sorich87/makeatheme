@@ -54,6 +54,11 @@ define([
                 drag.cancel();
               }
             }
+
+            , dragend: function (ev, drag) {
+              // Reset positioning
+              $(drag.element).animate({top: 0, left: 0});
+            }
           }, ".columns");
 
           _this.$el.on({
@@ -82,7 +87,7 @@ define([
               } else {
                 row = this;
               }
-              $(drag.element).appendTo(row).css({top: 0, left: 0});
+              $(drag.element).appendTo(row);
 
               // If original parent doesn't have any more children,
               // remove it
