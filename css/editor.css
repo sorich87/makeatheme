@@ -23,9 +23,10 @@
   position: absolute !important;
   right: 0 !important;
   padding: 5px 10px !important;
-  display: block;
+  display: none;
 }
-.x-page-header-image .x-edit:hover {
+.x-page-header-image:hover .x-edit {
+  display: block;
   cursor: pointer;
 }
 .x-menu .x-edit a:hover,
