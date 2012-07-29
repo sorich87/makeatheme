@@ -102,21 +102,6 @@ define([
           }
           $(drag.element).appendTo(row);
 
-          $(this).removeClass("x-empty");
-
-          // If original parent doesn't have any more children
-          // and is not a <header> or <footer>, remove it
-          if ($(dragParent).children().length <= 0 ) {
-            dragGrandParent = $(dragParent).parent();
-
-            if ($(dragGrandParent).is("header, footer") && $(dragGrandParent).children().length === 1) {
-              // Highlight <header> and <footer>
-              $(dragGrandParent).children().addClass("x-empty");
-            } else {
-              $(dragParent).remove();
-            }
-          }
-
           // Remove x-full and x-not-full classes if one was previously added
           $(this).removeClass("x-full x-not-full");
         }
