@@ -15,7 +15,7 @@ define([
     }
 
     , setupDragAndDrop: function () {
-      var preventDefault, isRowFull;
+      var preventDefault, isRowFull, gradPosition;
 
       preventDefault = function (e) {
         if (!this.isContentEditable) {
@@ -46,6 +46,16 @@ define([
 
       this.$el.on({
           draginit: function (ev, drag) {
+          var $dragElement = $(drag.element);
+
+          dragPosition = {
+              position: $dragElement.css("position")
+            , top: $dragElement.css("top")
+            , bottom: $dragElement.css("bottom")
+            , left: $dragElement.css("left")
+            , right: $dragElement.css("right")
+          };
+
           // Limit drag to first container
           drag.limit($("body").children());
         }
@@ -58,8 +68,8 @@ define([
         }
 
         , dragend: function (ev, drag) {
-          // Reset positioning
-          $(drag.element).css({top: 0, left: 0});
+          // Reset position
+          $(drag.element).css(dragPosition);
         }
       }, ".columns");
 

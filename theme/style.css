@@ -88,8 +88,7 @@ body {
 	width: 100%;
 }
 #content {
-	margin: 0 34% 0 7.6%;
-	width: 58.4%;
+	padding: 0 0 0 7.6%;
 }
 #secondary {
 	float: right;
@@ -508,7 +507,6 @@ a:hover {
 	z-index: 9999;
 }
 #site-title {
-	margin-right: 270px;
 	padding: 3.65625em 0 0;
 }
 #site-title a {
@@ -526,7 +524,7 @@ a:hover {
 #site-description {
 	color: #7a7a7a;
 	font-size: 14px;
-	margin: 0 270px 3.65625em 0;
+	margin: 0 0 3.65625em 0;
 }
 #branding img {
 	height: auto;
@@ -623,10 +621,12 @@ a:hover {
 }
 
 /* Search Form */
+#branding #search {
+  position: absolute;
+	top: 3.8em;
+  right: 0;
+}
 #branding #searchform {
-	position: relative;
-	padding-top: 3.8em;
-	padding-right: 7.6%;
 	text-align: right;
 }
 #branding #searchform div {
@@ -2260,8 +2260,8 @@ p.comment-form-comment {
 
 @media (max-width: 800px) {
 	/* Simplify the basic layout */
-	#main #content {
-		margin: 0 7.6%;
+	#content {
+		padding: 0 7.6%;
 		width: auto;
 	}
 	#nav-below {
@@ -2415,7 +2415,7 @@ p.comment-form-comment {
 		margin-right: 0;
 	}
 	/* Make sure the logo and search form don't collide */
-	#branding #searchform {
+	#branding #search {
 		top: 1.625em !important;
 	}
 	/* Floated content doesn't work well at this size */

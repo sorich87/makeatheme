@@ -16,7 +16,7 @@
   <script data-main="../js/main" src="../js/libs/require.js"></script>
 
   <!-- Included CSS Files -->
-  <link rel="stylesheet" href="foundation.css">
+  <link rel="stylesheet" href="grid.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="../css/editor.css">
 
@@ -26,16 +26,16 @@
   <![endif]-->
 
 </head>
-<body class="page two-column right-sidebar">
+<body class="page">
   <div id="page" class="hfeed">
     <header id="branding" role="banner">
       <div class="row">
         <hgroup class="eight columns">
           <h1 id="site-title"><span><a href="#" title="" rel="home" class="x-site-title"></a></span></h1>
-          <p id="site-description" class="x-site-description"></p>
+          <h2 id="site-description" class="x-site-description"></h2>
         </hgroup>
 
-        <div class="four columns">
+        <div class="four columns" id="search">
           <form method="get" id="searchform" action="#">
             <label for="s" class="assistive-text">Search</label>
             <input type="text" class="field" name="s" id="s" placeholder="Search" />
@@ -66,7 +66,7 @@
     </header><!-- #branding -->
 
     <div class="row">
-      <div class="eight columns">
+      <div class="eight columns" id="content">
         <article id="post-0" class="page hentry">
           <header class="entry-header">
             <h1 class="entry-title x-page-title"></h1>

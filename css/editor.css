@@ -2,19 +2,18 @@
   background: #ffffe0 !important;
   color: #000 !important;
   cursor: text !important;
-  display: block !important;
 }
 .columns:hover {
   border: 1px solid #1982d1 !important;
-  cursor: move;
+  cursor: move !important;
 }
 .columns:hover a {
-  cursor: move;
+  cursor: move !important;
 }
 .x-menu .x-edit a {
   background-color: #ffffe0 !important;
   color: #1982d1 !important;
-  display: block;
+  display: block !important;
 }
 .x-page-header-image .x-edit {
   background-color: #ffffe0 !important;
@@ -23,25 +22,25 @@
   position: absolute !important;
   right: 0 !important;
   padding: 5px 10px !important;
-  display: none;
+  display: none !important;
 }
 .x-page-header-image:hover .x-edit {
-  display: block;
-  cursor: pointer;
+  display: block !important;
+  cursor: pointer !important;
 }
 .x-menu .x-edit a:hover,
 .x-page-header-image .x-edit:hover {
   background-color: #efefef !important;
-  text-decoration: none;
+  text-decoration: none !important;
 }
 .x-full:after, .x-empty:after {
-  content: "+";
-  font-size: 28px;
-  text-align: center;
-  background-color: #f0f8ff;
-  color: #000;
-  width: 100%;
+  content: "+" !important;
+  font-size: 28px !important;
+  text-align: center !important;
+  background-color: #f0f8ff !important;
+  color: #000 !important;
+  width: 100% !important;
 }
 .x-not-full {
-  background-color: #f0f8ff;
+  background-color: #f0f8ff !important;
 }
