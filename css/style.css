@@ -48,14 +48,6 @@ body.theme {
   right: 0;
   padding: 40px 0;
 }
-body.theme .preview {
-  display: none;
-}
-.notification {
-  left: 10px;
-  top: 60px;
-  position: fixed;
-}
 .addthis_toolbox {
   display: inline-block;
   *display: inline;

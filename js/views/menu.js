@@ -5,41 +5,33 @@ define([
   'views/base',
   'collections/menu',
   'views/menu_item'
-  ], function($, _, Backbone, BaseView, Menu, MenuItemView) {
-  var MenuView = BaseView.extend({
+  ], function($, _, Backbone, BaseView, MenuCollection, MenuItemView) {
+
+  var menu, MenuView;
+
+  menu = new MenuCollection;
+
+  MenuView = Backbone.View.extend({
       el: $("<ul></ul>").appendTo(".x-menu")
 
-    , initialize: function (options) {
-      this.constructor.__super__.initialize.apply(this, [options])
+    , initialize: function () {
+      this.buildMenu();
+      this.loadDefault();
     }
 
-    , loadModel: function () {
-      Menu.reset(Menu.models);
+    , loadDefault: function () {
+      // Load menu items
+      menu.reset([
+        {id: 1, name: "Page", url: "#", parent: 0},
+        {id: 2, name: "Second Page", url: "#", parent: 0},
+        {id: 3, name: "Third Page", url: "#", parent: 1},
+        {id: 4, name: "Fourth Page", url: "#", parent: 3}
+      ]);
     }
 
-    // Show "Add Page" links on edit
-    , switchModes: function () {
-      EventDispatcher.on("mode:edit", function () {
-        this.$el.find(">li, >li>ul>li").each(function () {
-          var ul = $(this).children("ul");
-
-          if (ul.length === 0)
-            ul = $("<ul></ul>").appendTo(this);
-
-          $(ul).append("<li class='x-edit'><a href=''>Add Page</a></li>");
-        });
-
-        this.$el.append("<li class='x-edit'><a href=''>Add Page</a></li>");
-      }, this);
-
-      EventDispatcher.on("mode:view", function () {
-        this.$(".x-edit").remove();
-      }, this);
-    }
-
-    , saveChanges: function () {
-      Menu.on('add',   this.addOne, this);
-      Menu.on('reset', this.addAll, this);
+    , buildMenu: function () {
+      menu.on('add',   this.addOne, this);
+      menu.on('reset', this.addAll, this);
     }
 
     // Build menu item as parent or children element
@@ -70,7 +62,7 @@ define([
     // Loop through the items array three times, adding top level items
     // and items which parent was already added and rejecting those which parent was not added
     , addAll: function() {
-      var items = Menu.models;
+      var items = menu.models;
 
       for (var i = 0; i < 3; i++) {
         items = _.reject(items, function (item) {

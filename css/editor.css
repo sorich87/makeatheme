@@ -1,13 +1,14 @@
-[contenteditable=true] {
+.columns:hover [contenteditable=true], [contenteditable=true]:focus {
   background: #ffffe0 !important;
   color: #000 !important;
-  cursor: text;
+  cursor: text !important;
+  display: block !important;
 }
-body.x-edit .columns:hover {
+.columns:hover {
   border: 1px solid #1982d1 !important;
   cursor: move;
 }
-body.x-edit .columns:hover a {
+.columns:hover a {
   cursor: move;
 }
 .x-menu .x-edit a {
@@ -23,6 +24,9 @@ body.x-edit .columns:hover a {
   right: 0 !important;
   padding: 5px 10px !important;
   display: block;
+}
+.x-page-header-image .x-edit:hover {
+  cursor: pointer;
 }
 .x-menu .x-edit a:hover,
 .x-page-header-image .x-edit:hover {

@@ -2,131 +2,115 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'views/base'
-  ], function ($, _, Backbone, BaseView) {
+  "jquerypp/event/drag",
+  "jquerypp/event/drag.limit",
+  "jquerypp/event/drop"
+  ], function ($, _, Backbone) {
 
-  var LayoutView = BaseView.extend({
-      el: $("html")
+  var LayoutView = Backbone.View.extend({
+      el: $("body")
 
-    , initialize: function (options) {
-      this.constructor.__super__.initialize.apply(this, [options])
+    , initialize: function () {
+      this.setupDragAndDrop();
     }
 
-    , switchModes: function () {
-      var _this = this
-        , preventDefault = function (e) {
+    , setupDragAndDrop: function () {
+      var preventDefault, isRowFull;
+
+      preventDefault = function (e) {
+        if (!this.isContentEditable) {
           e.preventDefault();
-        };
+        }
+      };
 
-      EventDispatcher.on("mode:edit", function () {
-        require([
-                "jquerypp/event/drag",
-                "jquerypp/event/drag.limit",
-                "jquerypp/event/drop"
-        ], function () {
-          // Links in draggable areas shouldn't be clickable
-          _this.$(".columns a").on("click", preventDefault);
+      // Does total width of all columns children of a drop row
+      // allow a new column?
+      isRowFull = function (dropElement, dragElement) {
+        var rowWidth = $(dropElement).width()
+        , totalColumnsWidth = _.reduce($(dropElement).children(), function (memo, child) {
+          if ($(child).is(dragElement)) {
+            return memo;
+          } else {
+            return memo + parseFloat($(child).outerWidth());
+          }
+        }, 0, this);
 
-          // Links and images in draggable areas shoulnd't be draggable
-          _this.$(".columns a, .columns img").on("mousedown", preventDefault);
+        return (rowWidth - totalColumnsWidth) < (rowWidth * 8.333 / 100);
+      };
 
-          // Does total width of all columns children of a drop row
-          // allow a new column?
-          var isRowFull = function (dropElement, dragElement) {
-            var rowWidth = $(dropElement).width()
-              , totalColumnsWidth = _.reduce($(dropElement).children(), function (memo, child) {
-              if ($(child).is(dragElement)) {
-                return memo;
-              } else {
-                return memo + parseFloat($(child).outerWidth());
-              }
-            }, 0, this);
+      // Links in draggable areas shouldn't be clickable
+      this.$el.on("click", ".columns a", preventDefault);
 
-            return (rowWidth - totalColumnsWidth) < (rowWidth * 8.333 / 100);
-          };
+      // Links and images in draggable areas shoulnd't be draggable
+      this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
 
-          _this.$el.on({
-            draginit: function (ev, drag) {
-              // Limit drag to first container
-              drag.limit($("body").children());
+      this.$el.on({
+          draginit: function (ev, drag) {
+          // Limit drag to first container
+          drag.limit($("body").children());
+        }
+
+        , dragdown: function (ev, drag) {
+          // Cancel drag on editable areas to allow edit
+          if ($(ev.target).is(".x-edit") || $(ev.target).is("[contenteditable=true]")) {
+            drag.cancel();
+          }
+        }
+
+        , dragend: function (ev, drag) {
+          // Reset positioning
+          $(drag.element).css({top: 0, left: 0});
+        }
+      }, ".columns");
+
+      this.$el.on({
+          dropover: function (ev, drop, drag) {
+          // Mark the row as full or not
+          if (isRowFull(this, drag.element)) {
+            $(this).addClass("x-full");
+          } else {
+            $(this).addClass("x-not-full");
+          }
+        }
+
+        , dropout: function (ev, drop, drag) {
+          // Remove x-full or x-not-full class if previously added
+          $(this).removeClass("x-full x-not-full");
+        }
+
+        , dropon: function (ev, drop, drag) {
+          var row, dragParent, dragGrandParent;
+
+          // Save original parent
+          dragParent = $(drag.element).parent();
+
+          // Add column to row. If the row is full, add to a new one
+          if (isRowFull(this, drag.element)) {
+            row = $("<div class='row'></div>").insertAfter(this);
+          } else {
+            row = this;
+          }
+          $(drag.element).appendTo(row);
+
+          $(this).removeClass("x-empty");
+
+          // If original parent doesn't have any more children
+          // and is not a <header> or <footer>, remove it
+          if ($(dragParent).children().length <= 0 ) {
+            dragGrandParent = $(dragParent).parent();
+
+            if ($(dragGrandParent).is("header, footer") && $(dragGrandParent).children().length === 1) {
+              // Highlight <header> and <footer>
+              $(dragGrandParent).children().addClass("x-empty");
+            } else {
+              $(dragParent).remove();
             }
+          }
 
-            , dragdown: function (ev, drag) {
-              // Cancel drag on editable areas to allow edit
-              if ($(ev.target).attr("contenteditable") === true || $(ev.target).hasClass("x-edit")) {
-                drag.cancel();
-              }
-            }
-
-            , dragend: function (ev, drag) {
-              // Reset positioning
-              $(drag.element).animate({top: 0, left: 0});
-            }
-          }, ".columns");
-
-          _this.$el.on({
-            dropover: function (ev, drop, drag) {
-              if (isRowFull(this, drag.element)) {
-                $(this).addClass("x-full");
-              } else {
-                $(this).addClass("x-not-full");
-              }
-            }
-
-            , dropout: function (ev, drop, drag) {
-              // Remove x-full and x-not-full classes if one was previously added
-              $(this).removeClass("x-full x-not-full");
-            }
-
-            , dropon: function (ev, drop, drag) {
-              var row, dragParent, dragGrandParent;
-
-              // Save original parent
-              dragParent = $(drag.element).parent();
-
-              // Add column to row. If the row is full, add to a new one
-              if (isRowFull(this, drag.element)) {
-                row = $("<div class='row'></div>").insertAfter(this);
-              } else {
-                row = this;
-              }
-              $(drag.element).appendTo(row);
-
-              $(this).removeClass("x-empty");
-
-              // If original parent doesn't have any more children
-              // and is not a <header> or <footer>, remove it
-              if ($(dragParent).children().length <= 0 ) {
-                dragGrandParent = $(dragParent).parent();
-
-                if ($(dragGrandParent).is("header, footer") && $(dragGrandParent).children().length === 1) {
-                  // Highlight <header> and <footer>
-                  $(dragGrandParent).children().addClass("x-empty");
-                } else {
-                  $(dragParent).remove();
-                }
-              }
-
-              // Remove x-full and x-not-full classes if one was previously added
-              $(this).removeClass("x-full x-not-full");
-            }
-          }, ".row");
-        });
-      });
-
-      EventDispatcher.on("mode:view", function () {
-        require(["jquerypp/event/drag"], function () {
-          // Unbind drag events
-          _this.$el.off("draginit", ".columns");
-          _this.$el.off("dragdown", ".columns");
-
-          // Links are clickable again
-          _this.$(".columns a").off("click", preventDefault);
-
-          // Links and images are draggable again
-          _this.$(".columns a, .columns img").off("mousedown", preventDefault);
-        });
-      });
+          // Remove x-full and x-not-full classes if one was previously added
+          $(this).removeClass("x-full x-not-full");
+        }
+      }, ".row");
     }
   });
 
