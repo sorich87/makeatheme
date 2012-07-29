@@ -89,31 +89,32 @@ define([
         }
 
         , dropon: function (ev, drop, drag) {
-          var row, dragParent, dragGrandParent;
+          var row, $drag, $dragParent, $dragGrandParent;
 
           // Save original parent
-          dragParent = $(drag.element).parent();
+          $drag = $(drag.element);
+          $dragParent = $drag.parent();
 
           // Add column to row. If the row is full, add to a new one
-          if (isRowFull(this, drag.element)) {
+          if (isRowFull(this, $drag)) {
             row = $("<div class='row'></div>").insertAfter(this);
           } else {
             row = this;
           }
-          $(drag.element).appendTo(row);
+          $drag.appendTo(row);
 
           $(this).removeClass("x-empty");
 
           // If original parent doesn't have any more children
-          // and is not a <header> or <footer>, remove it
-          if ($(dragParent).children().length <= 0 ) {
-            dragGrandParent = $(dragParent).parent();
+          // and is not a <header> or <footer> and has no id attribute, remove it
+          if ($dragParent.children().length === 0 ) {
+            $dragGrandParent = $dragParent.parent();
 
-            if ($(dragGrandParent).is("header, footer") && $(dragGrandParent).children().length === 1) {
-              // Highlight <header> and <footer>
-              $(dragGrandParent).children().addClass("x-empty");
+            if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
+                || $dragParent.attr("id") !== undefined) {
+              $dragParent.addClass("x-empty");
             } else {
-              $(dragParent).remove();
+              $dragParent.remove();
             }
           }
 
