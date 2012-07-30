@@ -168,8 +168,16 @@ define([
           };
         }
         , dragmove: function (e, drag) {
-          var $column = $(this).parent();
-          $column.width(drag.location.x() - $column.offset().left);
+          var $column = $(this).parent()
+            , $row = $column.parent();
+
+          width = drag.location.x() - $column.offset().left;
+          if (width >= $row.width()) {
+            width = $row.width();
+            e.preventDefault();
+          }
+
+          $column.width(width);
         }
 
         , dragend: function (ev, drag) {
