@@ -1,21 +1,28 @@
-.columns:hover [contenteditable=true], [contenteditable=true]:focus {
+.columns.x-edit [contenteditable=true], [contenteditable=true]:focus {
   background: #ffffe0 !important;
   color: #000 !important;
   cursor: text !important;
 }
-.columns:hover {
-  border: 1px solid #1982d1 !important;
+.columns.x-edit {
+  outline: 1px solid #1982d1 !important;
   cursor: move !important;
 }
-.columns:hover a {
-  cursor: move !important;
-}
-.x-menu .x-edit a {
-  background-color: #ffffe0 !important;
+.columns .x-resize {
+  position: absolute !important;
+  top: 0 !important;
+  right: -12px !important;
+  font-size: 24px !important;
   color: #1982d1 !important;
-  display: block !important;
+  display: none;
 }
-.x-page-header-image .x-edit {
+.columns.x-edit .x-resize {
+  display: block !important;
+  cursor: col-resize !important;
+}
+.columns.x-edit a {
+  cursor: move !important;
+}
+.columns .x-page-header-image .x-edit {
   background-color: #ffffe0 !important;
   color: #1982d1 !important;
   text-decoration: none;
@@ -24,9 +31,16 @@
   padding: 5px 10px !important;
   display: none !important;
 }
-.x-page-header-image:hover .x-edit {
+.columns.x-edit .x-page-header-image .x-edit {
   display: block !important;
+}
+.columns.x-edit .x-page-header-image .x-edit:hover {
   cursor: pointer !important;
+}
+.x-menu .x-edit a {
+  background-color: #ffffe0 !important;
+  color: #1982d1 !important;
+  display: block !important;
 }
 .x-menu .x-edit a:hover,
 .x-page-header-image .x-edit:hover {

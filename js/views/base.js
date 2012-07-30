@@ -25,7 +25,7 @@ define([
           break;
 
           case "image" :
-            this.$(c).prepend("<a class='x-edit' href=''>Change Image</a>");
+            this.$(c).prepend("<div class='x-edit'>Change Image</div>");
           break;
         }
       }, this);

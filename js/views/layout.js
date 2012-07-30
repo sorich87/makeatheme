@@ -11,11 +11,24 @@ define([
       el: $("body")
 
     , initialize: function () {
+      this.highlightColumns();
       this.setupDragAndDrop();
+      this.setupResize();
+    }
+
+    , highlightColumns: function () {
+      this.$el.on("hover", ".columns", function (e) {
+        $(".columns.x-edit").removeClass("x-edit");
+        $(e.currentTarget).addClass("x-edit")
+
+        if (e.currentTarget.lastChild.className !== 'x-resize') {
+          e.currentTarget.innerHTML += "<div class='x-resize'>&harr;</div>";
+        }
+      });
     }
 
     , setupDragAndDrop: function () {
-      var preventDefault, isRowFull, gradPosition;
+      var preventDefault, totalColumnsWidth, isRowFull, gradPosition;
 
       preventDefault = function (e) {
         if (!this.isContentEditable) {
@@ -23,19 +36,22 @@ define([
         }
       };
 
-      // Does total width of all columns children of a drop row
-      // allow a new column?
-      isRowFull = function (dropElement, dragElement) {
-        var rowWidth = $(dropElement).width()
-        , totalColumnsWidth = _.reduce($(dropElement).children(), function (memo, child) {
+      totalColumnsWidth = function (dropElement, dragElement) {
+        return _.reduce($(dropElement).children(), function (memo, child) {
           if ($(child).is(dragElement)) {
             return memo;
           } else {
             return memo + parseFloat($(child).outerWidth());
           }
-        }, 0, this);
+        }, 0);
+      };
 
-        return (rowWidth - totalColumnsWidth) < (rowWidth * 8.333 / 100);
+      // Does total width of all columns children of a drop row
+      // allow a new column?
+      isRowFull = function (dropElement, dragElement) {
+        var rowWidth = $(dropElement).width();
+
+        return (rowWidth - totalColumnsWidth(dropElement, dragElement)) < (rowWidth * 8.333 / 100);
       };
 
       // Links in draggable areas shouldn't be clickable
@@ -74,7 +90,15 @@ define([
       }, ".columns");
 
       this.$el.on({
-          dropover: function (ev, drop, drag) {
+          dropinit: function (ev, drop, drag) {
+          var $drag = $(drag.element);
+
+          if ($drag.hasClass("x-resize")) {
+            drop.cancel();
+          }
+        }
+
+        , dropover: function (ev, drop, drag) {
           // Mark the row as full or not
           if (isRowFull(this, drag.element)) {
             $(this).addClass("x-full");
@@ -122,6 +146,37 @@ define([
           $(this).removeClass("x-full x-not-full");
         }
       }, ".row");
+    }
+
+    , setupResize: function () {
+      var dragPosition;
+
+      this.$el.on({
+        draginit: function (e, drag) {
+          var $dragElement = $(drag.element);
+
+          // Resize is done horizontally
+          drag.horizontal();
+
+          // Save element position to reset it later
+          dragPosition = {
+              position: $dragElement.css("position")
+            , top: $dragElement.css("top")
+            , bottom: $dragElement.css("bottom")
+            , left: $dragElement.css("left")
+            , right: $dragElement.css("right")
+          };
+        }
+        , dragmove: function (e, drag) {
+          var $column = $(this).parent();
+          $column.width(drag.location.x() - $column.offset().left);
+        }
+
+        , dragend: function (ev, drag) {
+          // Reset position
+          $(drag.element).css(dragPosition);
+        }
+      }, ".x-resize");
     }
   });
 
