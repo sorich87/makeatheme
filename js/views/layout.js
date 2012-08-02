@@ -6,8 +6,31 @@ define([
   "jquerypp/event/drag.limit",
   "jquerypp/event/drop"
   ], function ($, _, Backbone) {
+  var LayoutView, totalColumnsWidth, isRowFull;
 
-  var LayoutView = Backbone.View.extend({
+  // Return total width of all columns children of a row
+  // except the one being dragged
+  totalColumnsWidth = function (dropElement, dragElement) {
+    return _.reduce($(dropElement).children(), function (memo, child) {
+      if ($(child).is(dragElement)) {
+        return memo;
+      } else {
+        return memo + parseFloat($(child).outerWidth());
+      }
+    }, 0);
+
+  };
+
+  // Does total width of all columns children of a drop row
+  // allow a new column?
+  isRowFull = function (dropElement, dragElement) {
+    var rowWidth = $(dropElement).width();
+
+    return (rowWidth - totalColumnsWidth(dropElement, dragElement)) < (rowWidth * 8.333 / 100);
+  };
+
+
+  LayoutView = Backbone.View.extend({
       el: $("body")
 
     , initialize: function () {
@@ -18,8 +41,8 @@ define([
 
     , highlightColumns: function () {
       this.$el.on("hover", ".columns", function (e) {
-        $(".columns.x-edit").removeClass("x-edit");
-        $(e.currentTarget).addClass("x-edit")
+        $(".columns.x-current").removeClass("x-current");
+        $(e.currentTarget).addClass("x-current")
 
         if (e.currentTarget.lastChild.className !== 'x-resize') {
           e.currentTarget.innerHTML += "<div class='x-resize'>&harr;</div>";
@@ -28,30 +51,12 @@ define([
     }
 
     , setupDragAndDrop: function () {
-      var preventDefault, totalColumnsWidth, isRowFull, gradPosition;
+      var preventDefault, gradPosition;
 
       preventDefault = function (e) {
         if (!this.isContentEditable) {
           e.preventDefault();
         }
-      };
-
-      totalColumnsWidth = function (dropElement, dragElement) {
-        return _.reduce($(dropElement).children(), function (memo, child) {
-          if ($(child).is(dragElement)) {
-            return memo;
-          } else {
-            return memo + parseFloat($(child).outerWidth());
-          }
-        }, 0);
-      };
-
-      // Does total width of all columns children of a drop row
-      // allow a new column?
-      isRowFull = function (dropElement, dragElement) {
-        var rowWidth = $(dropElement).width();
-
-        return (rowWidth - totalColumnsWidth(dropElement, dragElement)) < (rowWidth * 8.333 / 100);
       };
 
       // Links in draggable areas shouldn't be clickable
@@ -167,17 +172,27 @@ define([
             , right: $dragElement.css("right")
           };
         }
+
         , dragmove: function (e, drag) {
           var $column = $(this).parent()
-            , $row = $column.parent();
+            , $row = $column.parent()
+            , one_column = 1000 * 0.08333
+            , cssClass, cssClasses = {}, classNames;
 
           width = drag.location.x() - $column.offset().left;
+          width = Math.round( width / one_column ) * one_column
+
+          // Sum of column widths should never be larger than row
           if (width >= $row.width()) {
             width = $row.width();
+            e.preventDefault();
+          } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
+            width = $row.width() - totalColumnsWidth($row, $column);
             e.preventDefault();
           }
 
           $column.width(width);
+          drag.position(new $.Vector(width + $column.offset().left, drag.location.y()));
         }
 
         , dragend: function (ev, drag) {

@@ -1,9 +1,9 @@
-.columns.x-edit [contenteditable=true], [contenteditable=true]:focus {
+.columns.x-current [contenteditable=true], [contenteditable=true]:focus {
   background: #ffffe0 !important;
   color: #000 !important;
   cursor: text !important;
 }
-.columns.x-edit {
+.columns.x-current {
   outline: 1px solid #1982d1 !important;
   cursor: move !important;
 }
@@ -15,11 +15,11 @@
   color: #1982d1 !important;
   display: none;
 }
-.columns.x-edit .x-resize {
+.columns.x-current .x-resize {
   display: block !important;
   cursor: col-resize !important;
 }
-.columns.x-edit a {
+.columns.x-current a {
   cursor: move !important;
 }
 .columns .x-page-header-image .x-edit {
@@ -31,10 +31,10 @@
   padding: 5px 10px !important;
   display: none !important;
 }
-.columns.x-edit .x-page-header-image .x-edit {
+.columns.x-current .x-page-header-image .x-edit {
   display: block !important;
 }
-.columns.x-edit .x-page-header-image .x-edit:hover {
+.columns.x-current .x-page-header-image .x-edit:hover {
   cursor: pointer !important;
 }
 .x-menu .x-edit a {
