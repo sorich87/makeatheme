@@ -35,7 +35,8 @@ define([
 
     , initialize: function () {
       this.highlightColumns();
-      this.setupDragAndDrop();
+      this.setupDrag();
+      this.setupDrop();
       this.setupResize();
     }
 
@@ -50,8 +51,8 @@ define([
       });
     }
 
-    , setupDragAndDrop: function () {
-      var preventDefault, gradPosition;
+    , setupDrag: function () {
+      var preventDefault, dragPosition;
 
       preventDefault = function (e) {
         if (!this.isContentEditable) {
@@ -66,7 +67,7 @@ define([
       this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
 
       this.$el.on({
-          draginit: function (ev, drag) {
+        draginit: function (ev, drag) {
           var $dragElement = $(drag.element);
 
           dragPosition = {
@@ -93,7 +94,9 @@ define([
           $(drag.element).css(dragPosition);
         }
       }, ".columns");
+    }
 
+    , setupDrop: function () {
       this.$el.on({
           dropinit: function (ev, drop, drag) {
           var $drag = $(drag.element);
