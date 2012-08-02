@@ -67,7 +67,7 @@ define([
       this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
 
       this.$el.on({
-        draginit: function (ev, drag) {
+        draginit: function (e, drag) {
           var $dragElement = $(drag.element);
 
           dragPosition = {
@@ -82,14 +82,14 @@ define([
           drag.limit($("body").children());
         }
 
-        , dragdown: function (ev, drag) {
+        , dragdown: function (e, drag) {
           // Cancel drag on editable areas to allow edit
-          if ($(ev.target).is(".x-edit") || $(ev.target).is("[contenteditable=true]")) {
+          if ($(e.target).is(".x-edit") || $(e.target).is("[contenteditable=true]")) {
             drag.cancel();
           }
         }
 
-        , dragend: function (ev, drag) {
+        , dragend: function (e, drag) {
           // Reset position
           $(drag.element).css(dragPosition);
         }
@@ -97,16 +97,27 @@ define([
     }
 
     , setupDrop: function () {
-      this.$el.on({
-          dropinit: function (ev, drop, drag) {
-          var $drag = $(drag.element);
+      var preventDrop = function (e, drag) {
+        var $drag = $(drag.element);
 
-          if ($drag.hasClass("x-resize")) {
-            drop.cancel();
+        if ($drag.hasClass("x-resize")) {
+          return true;
+        }
+      };
+
+      this.$el.on({
+        dropinit: function (e, drop, drag) {
+          if ( preventDrop(e, drag) ) {
+            e.preventDefault();
           }
         }
 
-        , dropover: function (ev, drop, drag) {
+        , dropover: function (e, drop, drag) {
+          if ( preventDrop(e, drag) ) {
+            e.preventDefault();
+            return;
+          }
+
           // Mark the row as full or not
           if (isRowFull(this, drag.element)) {
             $(this).addClass("x-full");
@@ -115,16 +126,27 @@ define([
           }
         }
 
-        , dropout: function (ev, drop, drag) {
+        , dropout: function (e, drop, drag) {
+          if ( preventDrop(e, drag) ) {
+            e.preventDefault();
+            return;
+          }
+
           // Remove x-full or x-not-full class if previously added
           $(this).removeClass("x-full x-not-full");
         }
 
-        , dropon: function (ev, drop, drag) {
+        , dropon: function (e, drop, drag) {
+          if ( preventDrop(e, drag) ) {
+            e.preventDefault();
+            return;
+          }
+
           var row, $drag, $dragParent, $dragGrandParent;
 
-          // Save original parent
           $drag = $(drag.element);
+
+          // Save original parent
           $dragParent = $drag.parent();
 
           // Add column to row. If the row is full, add to a new one
@@ -198,7 +220,7 @@ define([
           drag.position(new $.Vector(width + $column.offset().left, drag.location.y()));
         }
 
-        , dragend: function (ev, drag) {
+        , dragend: function (e, drag) {
           // Reset position
           $(drag.element).css(dragPosition);
         }
