@@ -33,6 +33,8 @@ define([
   LayoutView = Backbone.View.extend({
       el: $("body")
 
+    , currentAction: null
+
     , initialize: function () {
       this.highlightColumns();
       this.setupDrag();
@@ -41,14 +43,18 @@ define([
     }
 
     , highlightColumns: function () {
-      this.$el.on("hover", ".columns", function (e) {
+      this.$el.on("hover", ".columns", $.proxy(function (e) {
+        if (this.currentAction !== null) {
+          return;
+        }
+
         $(".columns.x-current").removeClass("x-current");
         $(e.currentTarget).addClass("x-current")
 
         if (e.currentTarget.lastChild.className !== 'x-resize') {
           e.currentTarget.innerHTML += "<div class='x-resize'>&harr;</div>";
         }
-      });
+      }, this));
     }
 
     , setupDrag: function () {
@@ -67,7 +73,9 @@ define([
       this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
 
       this.$el.on({
-        draginit: function (e, drag) {
+        draginit: $.proxy(function (e, drag) {
+          this.currentAction = "drag";
+
           var $dragElement = $(drag.element);
 
           dragPosition = {
@@ -80,7 +88,7 @@ define([
 
           // Limit drag to first container
           drag.limit($("body").children());
-        }
+        }, this)
 
         , dragdown: function (e, drag) {
           // Cancel drag on editable areas to allow edit
@@ -89,10 +97,12 @@ define([
           }
         }
 
-        , dragend: function (e, drag) {
+        , dragend: $.proxy(function (e, drag) {
           // Reset position
           $(drag.element).css(dragPosition);
-        }
+
+          this.currentAction = null;
+        }, this)
       }, ".columns");
     }
 
@@ -182,7 +192,9 @@ define([
       var dragPosition;
 
       this.$el.on({
-        draginit: function (e, drag) {
+        draginit: $.proxy(function (e, drag) {
+          this.currentAction = "resize";
+
           var $dragElement = $(drag.element);
 
           // Resize is done horizontally
@@ -196,13 +208,12 @@ define([
             , left: $dragElement.css("left")
             , right: $dragElement.css("right")
           };
-        }
+        }, this)
 
         , dragmove: function (e, drag) {
           var $column = $(this).parent()
             , $row = $column.parent()
-            , one_column = 1000 * 0.08333
-            , cssClass, cssClasses = {}, classNames;
+            , one_column = 1000 * 0.08333;
 
           width = drag.location.x() - $column.offset().left;
           width = Math.round( width / one_column ) * one_column
@@ -220,10 +231,12 @@ define([
           drag.position(new $.Vector(width + $column.offset().left, drag.location.y()));
         }
 
-        , dragend: function (e, drag) {
+        , dragend: $.proxy(function (e, drag) {
           // Reset position
           $(drag.element).css(dragPosition);
-        }
+
+          this.currentAction = null;
+        }, this)
       }, ".x-resize");
     }
   });
