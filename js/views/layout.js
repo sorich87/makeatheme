@@ -26,7 +26,7 @@ define([
   isRowFull = function (dropElement, dragElement) {
     var rowWidth = $(dropElement).width();
 
-    return (rowWidth - totalColumnsWidth(dropElement, dragElement)) < (rowWidth * 8.333 / 100);
+    return rowWidth <= totalColumnsWidth(dropElement, dragElement);
   };
 
 
@@ -212,11 +212,9 @@ define([
 
         , dragmove: function (e, drag) {
           var $column = $(this).parent()
-            , $row = $column.parent()
-            , one_column = 1000 * 0.08333;
+            , $row = $column.parent();
 
           width = drag.location.x() - $column.offset().left;
-          width = Math.round( width / one_column ) * one_column
 
           // Sum of column widths should never be larger than row
           if (width >= $row.width()) {
