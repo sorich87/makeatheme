@@ -15,7 +15,7 @@ define([
       if ($(child).is(dragElement)) {
         return memo;
       } else {
-        return memo + parseFloat($(child).outerWidth());
+        return memo + $(child).outerWidth(true);
       }
     }, 0);
 
