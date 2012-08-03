@@ -222,6 +222,9 @@ define([
             e.preventDefault();
           } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
             width = $row.width() - totalColumnsWidth($row, $column);
+            // When width is a float, calculation is incorrect because browsers use integers
+            // The following line fixes that. Replace as soon as you find a cleaner solution
+            width = width - 1
             e.preventDefault();
           }
 
