@@ -1,8 +1,3 @@
-.columns.x-current [contenteditable=true], [contenteditable=true]:focus {
-  background: #ffffe0 !important;
-  color: #000 !important;
-  cursor: text !important;
-}
 .columns.x-current {
   outline: 1px solid #1982d1 !important;
   cursor: move !important;
@@ -37,31 +32,6 @@
 }
 .columns.x-current a {
   cursor: move !important;
-}
-.columns .x-page-header-image .x-edit {
-  background-color: #ffffe0 !important;
-  color: #1982d1 !important;
-  text-decoration: none;
-  position: absolute !important;
-  right: 0 !important;
-  padding: 5px 10px !important;
-  display: none !important;
-}
-.columns.x-current .x-page-header-image .x-edit {
-  display: block !important;
-}
-.columns.x-current .x-page-header-image .x-edit:hover {
-  cursor: pointer !important;
-}
-.x-menu .x-edit a {
-  background-color: #ffffe0 !important;
-  color: #1982d1 !important;
-  display: block !important;
-}
-.x-menu .x-edit a:hover,
-.x-page-header-image .x-edit:hover {
-  background-color: #efefef !important;
-  text-decoration: none !important;
 }
 .x-full:after, .x-empty:after {
   content: "+" !important;

@@ -88,10 +88,6 @@ define([
         }, this)
 
         , dragdown: function (e, drag) {
-          // Cancel drag on editable areas to allow edit
-          if ($(e.target).is(".x-edit") || $(e.target).is("[contenteditable=true]")) {
-            drag.cancel();
-          }
         }
 
         , dragend: $.proxy(function (e, drag) {
