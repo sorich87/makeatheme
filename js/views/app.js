@@ -29,6 +29,25 @@ define([
         new MenuView();
       });
 
+      require([
+        "collections/templates",
+        "views/template_select"
+      ], function (TemplatesCollection, TemplateSelectView) {
+
+        var templates = new TemplatesCollection([
+          {
+              filename: "index.html"
+            , name: "Default"
+          }
+          , {
+              filename: "page.html"
+            , name: "Page"
+          }
+        ]);
+
+        new TemplateSelectView({collection: templates});
+      });
+
       require(["views/layout"], function (LayoutView) {
         new LayoutView();
       });
