@@ -40,6 +40,7 @@ define([
       this.setupDrag();
       this.setupDrop();
       this.setupResize();
+      this.setupRemove();
     }
 
     , highlightColumns: function () {
@@ -49,11 +50,7 @@ define([
         }
 
         $(".columns.x-current").removeClass("x-current");
-        $(e.currentTarget).addClass("x-current")
-
-        if (e.currentTarget.lastChild.className !== 'x-resize') {
-          e.currentTarget.innerHTML += "<div class='x-resize'>&harr;</div>";
-        }
+        $(e.currentTarget).addClass("x-current");
       }, this));
     }
 
@@ -191,6 +188,11 @@ define([
     , setupResize: function () {
       var dragPosition;
 
+      // Add resize handle
+      $(".columns").html(function (i, html) {
+        return html + "<div class='x-resize'>&harr;</div>";
+      });
+
       this.$el.on({
         draginit: $.proxy(function (e, drag) {
           this.currentAction = "resize";
@@ -239,6 +241,19 @@ define([
           this.currentAction = null;
         }, this)
       }, ".x-resize");
+    }
+
+    , setupRemove: function () {
+      // Add remove handle
+      $(".columns").html(function (i, html) {
+        return html + "<div class='x-remove'>&otimes;</div>";
+      });
+
+      this.$el.on("click", ".x-remove", function () {
+        if (confirm("Are you sure you want to remove this element?")) {
+          $(this).parent().remove();
+        }
+      });
     }
   });
 

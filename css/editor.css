@@ -10,14 +10,30 @@
 .columns .x-resize {
   position: absolute !important;
   top: 0 !important;
+  display: none;
   right: -12px !important;
   font-size: 24px !important;
+  margin-top: 9px !important;
   color: #1982d1 !important;
+}
+.columns .x-remove {
+  position: absolute !important;
+  top: 0 !important;
   display: none;
+  font-size: 18px;
+  padding: 2px 4px;
+  line-height: 18px;
+  right: 0 !important;
+  color: #f00 !important;
+  background-color: #ffffe0 !important;
 }
 .columns.x-current .x-resize {
   display: block !important;
   cursor: col-resize !important;
+}
+.columns.x-current .x-remove {
+  display: block !important;
+  cursor: pointer !important;
 }
 .columns.x-current a {
   cursor: move !important;
