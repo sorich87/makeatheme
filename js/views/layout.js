@@ -186,7 +186,7 @@ define([
 
       // Add resize handle
       $(".columns").html(function (i, html) {
-        return html + "<div class='x-resize'>&harr;</div>";
+        return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
       });
 
       this.$el.on({
@@ -242,7 +242,7 @@ define([
     , setupRemove: function () {
       // Add remove handle
       $(".columns").html(function (i, html) {
-        return html + "<div class='x-remove'>&otimes;</div>";
+        return html + "<div class='x-remove' title='Remove element'>x</div>";
       });
 
       this.$el.on("click", ".x-remove", function () {

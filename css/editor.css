@@ -13,12 +13,14 @@
 }
 .columns .x-remove {
   position: absolute !important;
+  right: 0 !important;
   top: 0 !important;
   display: none;
-  font-size: 18px;
-  padding: 2px 4px;
-  line-height: 18px;
-  right: 0 !important;
+  font-size: 14px;
+  line-height: 14px;
+  width: 16px;
+  height: 16px;
+  text-align: center;
   color: #f00 !important;
   background-color: #ffffe0 !important;
 }
