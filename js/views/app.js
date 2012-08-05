@@ -2,16 +2,41 @@ define([
   'jquery',
   'underscore',
   'backbone',
+  "jquerypp/event/drag"
   ], function($, _, Backbone, Menu, MenuItem) {
 
   var AppView = Backbone.View.extend({
+    el: $("body")
+
     // All the view initialize functions are in the order:
     // prepare DOM -> listen to events -> load data
-    initialize: function() {
-      this.templatePath = "theme/";
+    , initialize: function() {
       this.currentTemplate = window.document.URL.split("/").pop();
 
+      this.loadEditor();
       this.loadViews();
+    }
+
+    , loadEditor: function () {
+      this.$el[0].innerHTML += "<div id='x-layout-editor'>\
+        <div class='x-handle'></div>\
+        <form>\
+          <label>Current Template</label>\
+          <div id='x-templates-list'></div>\
+        </form>\
+      </div>";
+
+      $(window.document).on({
+        draginit: function (e, drag) {
+          var mouse = drag.mouseElementPosition;
+
+          drag.representative($(drag.element).parent(), mouse.left(), mouse.top());
+        }
+
+        , dragmove: function (e, drag) {
+          $(drag.element).parent().css("zIndex", 9999);
+        }
+      }, "#x-layout-editor .x-handle");
     }
 
     // Load views
@@ -34,7 +59,6 @@ define([
 
         new TemplateSelectView({
             collection: templates
-          , templatePath: this.templatePath
           , currentTemplate: this.currentTemplate
         });
       }, this));

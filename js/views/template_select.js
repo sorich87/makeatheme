@@ -9,7 +9,6 @@ define([
       el: $("<select></select>")
 
     , initialize: function (options) {
-      this.templatePath = options.templatePath;
       this.currentTemplate = options.currentTemplate;
       this.buildSelect();
       this.loadTemplates();
@@ -42,11 +41,11 @@ define([
         this.addOne(t);
       }, this);
 
-      $("#templates-list", window.parent.document).html(this.$el);
+      $("#x-templates-list").html(this.$el);
     }
 
     , switchTemplate: function () {
-      $("#theme iframe", window.parent.document).attr("src", this.templatePath + this.$el.val());
+      window.location.href = this.$el.val();
     }
   });
 

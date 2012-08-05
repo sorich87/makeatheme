@@ -103,7 +103,7 @@ define([
       var preventDrop = function (e, drag) {
         var $drag = $(drag.element);
 
-        if ($drag.hasClass("x-resize")) {
+        if (!$drag.hasClass("columns")) {
           return true;
         }
       };
