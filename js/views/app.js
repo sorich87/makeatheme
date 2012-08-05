@@ -2,8 +2,6 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  'collections/menu',
-  'models/menu_item'
   ], function($, _, Backbone, Menu, MenuItem) {
 
   var AppView = Backbone.View.extend({
@@ -19,14 +17,6 @@ define([
     , loadWidgets: function() {
       require(["models/site", "views/site"], function (Site, SiteView) {
         new SiteView({model: new Site});
-      });
-
-      require(["models/page", "views/page"], function (Page, PageView) {
-        new PageView({model: new Page});
-      });
-
-      require(["views/menu"], function (MenuView) {
-        new MenuView();
       });
 
       require([
