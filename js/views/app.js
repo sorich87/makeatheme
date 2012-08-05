@@ -30,7 +30,7 @@ define([
         draginit: function (e, drag) {
           var mouse = drag.mouseElementPosition;
 
-          drag.representative($(drag.element).parent(), mouse.left(), mouse.top());
+          drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
         }
 
         , dragmove: function (e, drag) {

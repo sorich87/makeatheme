@@ -100,27 +100,8 @@ define([
     }
 
     , setupDrop: function () {
-      var preventDrop = function (e, drag) {
-        var $drag = $(drag.element);
-
-        if (!$drag.hasClass("columns")) {
-          return true;
-        }
-      };
-
       this.$el.on({
-        dropinit: function (e, drop, drag) {
-          if ( preventDrop(e, drag) ) {
-            e.preventDefault();
-          }
-        }
-
-        , dropover: function (e, drop, drag) {
-          if ( preventDrop(e, drag) ) {
-            e.preventDefault();
-            return;
-          }
-
+        dropover: function (e, drop, drag) {
           // Mark the row as full or not
           if (isRowFull(this, drag.element)) {
             $(this).addClass("x-full");
@@ -130,21 +111,11 @@ define([
         }
 
         , dropout: function (e, drop, drag) {
-          if ( preventDrop(e, drag) ) {
-            e.preventDefault();
-            return;
-          }
-
           // Remove x-full or x-not-full class if previously added
           $(this).removeClass("x-full x-not-full");
         }
 
         , dropon: function (e, drop, drag) {
-          if ( preventDrop(e, drag) ) {
-            e.preventDefault();
-            return;
-          }
-
           var row, $drag, $dragParent, $dragGrandParent;
 
           $drag = $(drag.element);
@@ -195,8 +166,8 @@ define([
 
           var $dragElement = $(drag.element);
 
-          // Resize is done horizontally
-          drag.horizontal();
+          // Resize is done horizontally and doesn't notify drops
+          drag.horizontal().only();
 
           // Save element position to reset it later
           dragPosition = {
