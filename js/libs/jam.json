@@ -6,6 +6,7 @@
         "underscore": null,
         "text": null,
         "bootstrap": null,
-        "jquerypp": null
+        "jquerypp": null,
+        "handlebars": null
     }
 }

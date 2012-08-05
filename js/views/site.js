@@ -1,42 +1,33 @@
 define([
   'jquery',
   'underscore',
-  'backbone'
-  ], function($, _, Backbone) {
+  'backbone',
+  "handlebars",
+  "text!templates/headerimage.html",
+  "text!templates/menu.html",
+  "text!templates/page.html",
+  "text!templates/searchform.html",
+  "text!templates/sidebar.html"
+  ], function($, _, Backbone, Handlebars,
+             headerimage, menu, page, searchform, sidebar) {
+
   var SiteView = Backbone.View.extend({
-    el: $(document)
+    el: $("body")
 
-    , editables: {
-        ".x-site-title" : {
-          name: "title"
-        , type: "text"
-      }
-      , ".x-site-description" : {
-          name: "description"
-        , type: "text"
-      }
-    }
+    , initialize: function() {
+      var el = this.$el[0]
+        , template = Handlebars.compile(el.outerHTML);
 
-    , initialize: function(options) {
-      this.loadModel();
-    }
-
-    // Load model data in corresponding elements
-    , loadModel: function () {
-      if (this.editables === undefined)
-        return;
-
-      _.each(this.editables, function(f, c) {
-        switch( f.type ) {
-          case "text" :
-            this.$(c).text(this.model.get(f.name));
-          break;
-
-          case "html" :
-            this.$(c).html(this.model.get(f.name));
-          break;
-        }
-      }, this);
+      el.outerHTML = template({
+          site_title: "Theme Preview"
+        , site_description: "Preview Another WordPress Theme"
+        , home_url: "#"
+        , header_image: headerimage
+        , menu: menu
+        , content: page
+        , search_form: searchform
+        , sidebar: sidebar
+      });
     }
   });
 

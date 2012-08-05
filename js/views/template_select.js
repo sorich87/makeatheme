@@ -8,9 +8,9 @@ define([
   var TemplateSelectView = Backbone.View.extend({
       el: $("<select></select>")
 
-    , currentTemplate: window.document.URL.split("/").pop()
-
-    , initialize: function () {
+    , initialize: function (options) {
+      this.templatePath = options.templatePath;
+      this.currentTemplate = options.currentTemplate;
       this.buildSelect();
       this.loadTemplates();
     }
@@ -46,7 +46,7 @@ define([
     }
 
     , switchTemplate: function () {
-      $("#theme iframe", window.parent.document).attr("src", "theme/" + this.$el.val());
+      $("#theme iframe", window.parent.document).attr("src", this.templatePath + this.$el.val());
     }
   });
 

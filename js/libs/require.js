@@ -2066,6 +2066,11 @@ var jam = {
             "name": "jquerypp",
             "location": "libs/jquerypp",
             "main": "index.js"
+        },
+        {
+            "name": "handlebars",
+            "location": "libs/handlebars",
+            "main": "handlebars.js"
         }
     ],
     "version": "0.1.11",
