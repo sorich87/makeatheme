@@ -37,7 +37,7 @@
 }
 .x-full:after, .x-empty:after {
   content: "+";
-  font-size: 28px;
+  font-size: 18px;
   text-align: center;
   background-color: #f0f8ff;
   color: #000;
@@ -58,6 +58,7 @@
   z-index: 9999;
   padding: 0;
   margin: 20px 0;
+  font-size: 13px;
 }
 #x-layout-editor .x-handle {
   height: 20px;
@@ -66,4 +67,31 @@
 }
 #x-layout-editor form {
   padding: 10px;
+}
+#x-layout-editor h4 {
+  font-weight: bold;
+}
+#x-layout-editor p {
+  margin: 0;
+}
+#x-block-insert {
+  margin: 0;
+  padding: 10px;
+}
+#x-block-insert ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#x-block-insert a {
+  display: block;
+  background-color: #1982D1;
+  color: #fff;
+  text-decoration: none;
+  margin: 1px;
+  padding: 2px;
+  cursor: move;
+}
+#x-block-insert a span {
+  padding: 0 10px 0 10px;
 }

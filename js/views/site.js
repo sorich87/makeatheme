@@ -19,9 +19,10 @@ define([
         , template = Handlebars.compile(el.outerHTML);
 
       el.outerHTML = template({
-          site_title: "Theme Preview"
-        , site_description: "Preview Another WordPress Theme"
-        , home_url: "#"
+          site_title: this.model.get("title")
+        , site_description: this.model.get("description")
+        , home_url: this.model.get("home_url")
+        , site_url: this.model.get("site_url")
         , header_image: headerimage
         , menu: menu
         , content: page

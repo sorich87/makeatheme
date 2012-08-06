@@ -21,7 +21,7 @@ define([
       this.$el[0].innerHTML += "<div id='x-layout-editor'>\
         <div class='x-handle'></div>\
         <form>\
-          <label>Current Template</label>\
+          <h4><label>Current Template</label></h4>\
           <div id='x-templates-list'></div>\
         </form>\
       </div>";
@@ -62,6 +62,42 @@ define([
           , currentTemplate: this.currentTemplate
         });
       }, this));
+
+      require([
+        "collections/blocks",
+        "views/block_insert"
+      ], function (BlocksCollection, BlockInsertView) {
+
+        var blocks = new BlocksCollection([
+          {
+              id: "headerimage"
+            , name: "Header Image"
+            , filename: "headerimage.html"
+          }
+          , {
+              id: "menu"
+            , name: "Menu"
+            , filename: "menu.html"
+          }
+          , {
+              id: "content"
+            , name: "Content"
+            , filename: "page.html"
+          }
+          , {
+              id: "searchform"
+            , name: "Search Form"
+            , filename: "searchform.html"
+          }
+          , {
+              id: "sidebar"
+            , name: "Sidebar"
+            , filename: "sidebar.html"
+          }
+        ]);
+
+        new BlockInsertView({collection: blocks});
+      });
 
       require(["models/site", "views/site"], function (Site, SiteView) {
         new SiteView({model: new Site});
