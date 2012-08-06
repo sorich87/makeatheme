@@ -49,8 +49,16 @@ define([
           return;
         }
 
+        var $column = $(e.currentTarget);
+
         $(".columns.x-current").removeClass("x-current");
-        $(e.currentTarget).addClass("x-current");
+        $column.addClass("x-current")
+
+        if ($column.children(".x-resize").length === 0) {
+          $column.html(function (i, html) {
+            return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+          });
+        }
       }, this));
     }
 
@@ -153,11 +161,6 @@ define([
     }
 
     , setupResize: function () {
-      // Add resize handle
-      $(".columns").html(function (i, html) {
-        return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
-      });
-
       this.$el.on({
         draginit: $.proxy(function (e, drag) {
           this.currentAction = "resize";
