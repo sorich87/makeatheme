@@ -1,8 +1,7 @@
 define([
   "jquery",
   "underscore",
-  "backbone",
-  "views/template_select"
+  "backbone"
 ], function ($, _, Backbone) {
 
   var TemplateSelectView = Backbone.View.extend({
