@@ -21,10 +21,12 @@ define([
 
 			$(window.document).on({
 				draginit: function (e, drag) {
-					drag.ghost();
+					// Replace the drag element by its clone
+					drag.element = drag.ghost();
 				}
 
 				, dragend: $.proxy(function (e, drag) {
+					// Load the actual template chuck to insert
 					var block = this.collection.get(drag.element.data("id"));
 
 					require([
@@ -44,6 +46,7 @@ define([
 		}
 
 		, addAll: function () {
+			// Build the list of blocks to insert
 			_.each(this.collection.models, function (block) {
 				this.addOne(block);
 			}, this);
