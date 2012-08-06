@@ -153,8 +153,6 @@ define([
     }
 
     , setupResize: function () {
-      var dragPosition;
-
       // Add resize handle
       $(".columns").html(function (i, html) {
         return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
@@ -181,9 +179,10 @@ define([
 
         , dragmove: function (e, drag) {
           var $column = $(this).parent()
-            , $row = $column.parent();
+            , $row = $column.parent()
+            , $drag = $(drag.element);
 
-          width = drag.location.x() - $column.offset().left;
+          width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
 
           // Sum of column widths should never be larger than row
           if (width >= $row.width()) {
@@ -198,7 +197,7 @@ define([
           }
 
           $column.width(width);
-          drag.position(new $.Vector(width + $column.offset().left, drag.location.y()));
+          drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
         }
 
         , dragend: $.proxy(function (e, drag) {
