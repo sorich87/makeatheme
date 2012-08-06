@@ -59,6 +59,13 @@ define([
             return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
           });
         }
+
+        if ($column.children(".x-remove").length === 0) {
+          $column.html(function (i, html) {
+            return html + "<div class='x-remove' title='Remove element'>x</div>";
+          });
+        }
+
       }, this));
     }
 
@@ -213,11 +220,6 @@ define([
     }
 
     , setupRemove: function () {
-      // Add remove handle
-      $(".columns").html(function (i, html) {
-        return html + "<div class='x-remove' title='Remove element'>x</div>";
-      });
-
       this.$el.on("click", ".x-remove", function () {
         if (confirm("Are you sure you want to remove this element?")) {
           $(this).parent().remove();
