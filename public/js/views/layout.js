@@ -70,7 +70,7 @@ define([
     }
 
     , setupDrag: function () {
-      var preventDefault, dragPosition;
+      var preventDefault;
 
       preventDefault = function (e) {
         if (!this.isContentEditable) {
@@ -90,16 +90,8 @@ define([
 
           var $dragElement = $(drag.element);
 
-          dragPosition = {
-              position: $dragElement.css("position")
-            , top: $dragElement.css("top")
-            , bottom: $dragElement.css("bottom")
-            , left: $dragElement.css("left")
-            , right: $dragElement.css("right")
-          };
-
           // Limit drag to first container
-          drag.limit($("body").children());
+          drag.limit($("body").children()).revert();
         }, this)
 
         , dragdown: function (e, drag) {
@@ -107,7 +99,10 @@ define([
 
         , dragend: $.proxy(function (e, drag) {
           // Reset position
-          $(drag.element).css(dragPosition);
+          $(drag.element).css({
+            top: drag.startPosition.top() + "px",
+            left: drag.startPosition.left() + "px"
+          });
 
           this.currentAction = null;
         }, this)
@@ -176,15 +171,6 @@ define([
 
           // Resize is done horizontally and doesn't notify drops
           drag.horizontal().only();
-
-          // Save element position to reset it later
-          dragPosition = {
-              position: $dragElement.css("position")
-            , top: $dragElement.css("top")
-            , bottom: $dragElement.css("bottom")
-            , left: $dragElement.css("left")
-            , right: $dragElement.css("right")
-          };
         }, this)
 
         , dragmove: function (e, drag) {
@@ -212,7 +198,11 @@ define([
 
         , dragend: $.proxy(function (e, drag) {
           // Reset position
-          $(drag.element).css(dragPosition);
+          $(drag.element).css({
+              position: "absolute"
+            , right: "-12px"
+            , left: "auto"
+          });
 
           this.currentAction = null;
         }, this)
