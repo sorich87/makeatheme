@@ -63,6 +63,8 @@
 #x-layout-editor .x-handle {
   height: 20px;
   background: #1982d1;
+  color: #fff;
+  padding: 2px 2px 2px 10px;
   cursor: move;
 }
 #x-layout-editor form {
