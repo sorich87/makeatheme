@@ -62,7 +62,7 @@ define([
 
         if ($column.children(".x-remove").length === 0) {
           $column.html(function (i, html) {
-            return html + "<div class='x-remove' title='Remove element'>x</div>";
+            return html + "<div class='x-remove' title='Remove element'>&times;</div>";
           });
         }
 
