@@ -19,7 +19,7 @@ define([
 
     , loadEditor: function () {
       this.$el[0].innerHTML += "<div id='x-layout-editor'>\
-        <div class='x-handle'></div>\
+        <div class='x-handle'>&Dagger;</div>\
         <form>\
           <h4><label>Current Template</label></h4>\
           <div id='x-templates-list'></div>\
