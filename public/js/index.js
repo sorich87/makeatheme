@@ -15,17 +15,14 @@ require([
     }
 
     , index: function () {
-      require([
-        "collections/themes",
-        "views/theme_list"
-      ], function (ThemesCollection, ThemeListView) {
-        new ThemeListView({collection: new ThemesCollection});
+      require(['views/index'], function(IndexView) {
+        new IndexView;
       });
     }
 
     , theme: function (id) {
-      require(['views/app'], function(AppView) {
-        var app_view = new AppView;
+      require(['views/editor'], function(EditorView) {
+        new EditorView;
       });
     }
   });
@@ -34,12 +31,6 @@ require([
     new AppRouter();
 
     Backbone.history.start({pushState: true});
-
-    require(["bootstrap/js/bootstrap-collapse"], function () {
-      // Show FAQ on index, collapsed by default
-      $(".collapse").collapse();
-      $("[href='#faq']").on("click", function (e) { e.preventDefault() });
-    });
 
     require(["bootstrap/js/bootstrap-modal"], function () {
       // Hide modal previously shown before showing a new one

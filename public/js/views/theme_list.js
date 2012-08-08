@@ -3,7 +3,7 @@ define([
   "underscore",
   "backbone",
   "init",
-  "text!templates/themes_list.html"
+  "text!templates/theme_list.html"
 ], function ($, _, Backbone, init, themeList) {
 
   var ThemeListView = Backbone.View.extend({

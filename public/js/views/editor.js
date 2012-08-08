@@ -5,7 +5,7 @@ define([
   "jquerypp/event/drag"
   ], function($, _, Backbone, Menu, MenuItem) {
 
-  var AppView = Backbone.View.extend({
+  var EditorView = Backbone.View.extend({
     el: $("body")
 
     // All the view initialize functions are in the order:
@@ -109,5 +109,5 @@ define([
     }
   });
 
-  return AppView;
+  return EditorView;
 });
