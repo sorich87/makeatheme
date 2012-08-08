@@ -7,6 +7,9 @@ require 'kaminari'
 
 Mongoid.load!("config/mongoid.yml", :development)
 
+# Load initializers
+Dir["config/initializers/*.rb"].each {|file| require file }
+
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 

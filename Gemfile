@@ -9,6 +9,8 @@ gem 'kaminari'
 gem 'bcrypt-ruby'
 gem 'sinatra-session'
 gem 'sinatra-respond_to'
+gem 'paperclip', '~> 3.0.0'
+gem 'fog', '~> 1.3.0'
 
 # Automatic reload when editing files
 gem 'shotgun'

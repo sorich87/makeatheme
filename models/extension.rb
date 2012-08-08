@@ -1,10 +1,12 @@
 require 'models/version'
+require 'paperclip'
+require 'fog'
 
 class Extension
   include Mongoid::Document
   include Mongoid::Timestamps
   #include Paperclip
-  #include Paperclip::Glue
+  include Paperclip::Glue
 
   paginates_per 16
 
@@ -18,6 +20,11 @@ class Extension
   field :screenshot_content_type
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
+
+  has_attached_file :screenshot,
+    styles: { thumb: '320x240>' },
+    fog_public: true,
+    path: 'extensions/:attachment/:id/:style/:filename'
 
   embeds_many :versions, :cascade_callbacks => true do
     def current
