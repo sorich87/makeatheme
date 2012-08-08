@@ -1,12 +1,12 @@
 {
     "jam_version": "0.1.11",
     "dependencies": {
-        "jquery": null,
         "backbone": null,
-        "underscore": null,
-        "text": null,
         "bootstrap": null,
+        "handlebars": null,
+        "jquery": null,
         "jquerypp": null,
-        "handlebars": null
+        "text": null,
+        "underscore": null
     }
 }
