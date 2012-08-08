@@ -19,6 +19,8 @@ define([
     , render: function () {
       this.renderLinks();
       this.renderModals();
+
+      return this;
     }
 
     , renderLinks: function () {
