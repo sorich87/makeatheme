@@ -3,8 +3,9 @@ define([
   "underscore",
   "backbone",
   "init",
+  "handlebars",
   "text!templates/theme_list.html"
-], function ($, _, Backbone, init, themeList) {
+], function ($, _, Backbone, init, Handlebars, themeListTemplate) {
 
   var ThemeListView = Backbone.View.extend({
       el: $("<ul class='thumbnails'></ul>").appendTo("#main")
@@ -23,7 +24,8 @@ define([
     }
 
     , addOne: function (theme) {
-      var template = _.template(themeList);
+      var template = Handlebars.compile(themeListTemplate);
+
       this.$el.append(template(theme.toJSON()));
     }
 

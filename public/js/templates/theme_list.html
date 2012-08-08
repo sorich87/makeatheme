@@ -1,10 +1,11 @@
 <li class="span3">
   <div class="thumbnail">
-    <a href="/themes/<%= _id %>"><img src="theme/screenshot.png" alt=""></a>
+    <a href="/themes/{{_id}}"><img src="theme/screenshot.png" alt=""></a>
     <div class="caption">
-      <h4><%= name %></h4>
+      <h4>{{name}}</h4>
+      <p>by <a href="{{author_uri}}">{{author}}</a></p>
       <div>
-        <a class="btn btn-primary pull-right" href="/themes/<%= _id %>"><i class="icon-pencil icon-white"></i> Customize</a>
+        <a class="btn btn-primary pull-right" href="/themes/{{_id}}"><i class="icon-pencil icon-white"></i> Customize</a>
       </div>
     </div>
   </div>
