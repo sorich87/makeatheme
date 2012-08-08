@@ -1,0 +1,6 @@
+development:
+  sessions:
+    default:
+      database: theme_my_development
+      hosts:
+        - localhost:27017

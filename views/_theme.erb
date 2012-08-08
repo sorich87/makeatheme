@@ -1,0 +1,13 @@
+<% version = theme.versions.current %>
+<li class="span3">
+  <div class="thumbnail">
+    <a href="/themes/<%=theme.id%>"><img src="theme/screenshot.png" alt=""></a>
+    <div class="caption">
+      <h4><%= theme.name %></h4>
+      <p>by <a href="<%=version.author_uri%>"><%= version.author %></a></p>
+      <div>
+        <a class="btn btn-primary pull-right" href="/themes/<%=theme.id%>"><i class="icon-pencil icon-white"></i> Customize</a>
+      </div>
+    </div>
+  </div>
+</li>

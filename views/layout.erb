@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Bootstrap, from Twitter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <script data-main="/js/index" src="/js/libs/require.js"></script>
+
+    <!-- Le styles -->
+    <link href="/js/libs/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/js/libs/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">ThemeMY!</a>
+          <div class="pull-right">
+            <ul class="nav">
+            <% unless current_user %>
+              <li><a href="#register" data-toggle="modal">Register</a></li>
+              <li><a href="#login" data-toggle="modal">Log in</a></li>
+            <% else %>
+              <li>
+                <a href="/session" data-method="delete">Log out</a>
+              </li>
+            <% end %>
+            </ul>
+          </div>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <%= yield %>
+    </div> <!-- /container -->
+
+    <div class="modal hide" id="login">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Please authenticate yourself</h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" method="post" action="/session">
+          <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="email">Email Address</label>
+              <div class="controls">
+                <input type="text" name="session[email]" class="input-xlarge" id="email">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="password">Password</label>
+              <div class="controls">
+                <input type="text" name="session[password]" class="input-xlarge" id="password">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="controls">
+                <button type="submit" class="btn btn-primary">Log In</button>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <ul class="unstyled">
+          <li>Forgot your password? <a href="#new-password" data-toggle="modal">Reset</a></li>
+          <li>Didn't receive confirmation instructions? <a href="#confirm-password" data-toggle="modal">Resend</a></li>
+          <li>Don't have an account yet? <a href="#register" data-toggle="modal">Register</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal hide" id="register">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">×</button>
+        <h3>Create an account</h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" method="post" action="">
+          <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="new-first-name">First Name</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="new-first-name">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="new-last-name">Last Name</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="new-last-name">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="new-email">Email Address</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="new-email">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="new-password">Password</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="new-password">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label class="control-label" for="new-password-confirmation">Password Confirmation</label>
+              <div class="controls">
+                <input type="text" class="input-xlarge" id="new-password-confirmation">
+              </div>
+            </div>
+
+            <div class="control-group">
+              <div class="controls">
+                <button type="submit" class="btn btn-primary">Register</button>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+        <ul class="unstyled">
+          <li>Already have an account? <a href="#login" data-toggle="modal">Log in</a></li>
+        </ul>
+      </div>
+    </div>
+
+  </body>
+</html>
