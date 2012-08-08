@@ -2039,38 +2039,38 @@ var requirejs, require, define;
 var jam = {
     "packages": [
         {
-            "name": "jquery",
-            "location": "libs/jquery",
-            "main": "jquery.js"
-        },
-        {
             "name": "backbone",
-            "location": "libs/backbone",
+            "location": "vendor/backbone",
             "main": "backbone.js"
         },
         {
-            "name": "underscore",
-            "location": "libs/underscore",
-            "main": "underscore.js"
-        },
-        {
-            "name": "text",
-            "location": "libs/text",
-            "main": "text.js"
-        },
-        {
             "name": "bootstrap",
-            "location": "libs/bootstrap"
-        },
-        {
-            "name": "jquerypp",
-            "location": "libs/jquerypp",
-            "main": "index.js"
+            "location": "vendor/bootstrap"
         },
         {
             "name": "handlebars",
-            "location": "libs/handlebars",
+            "location": "vendor/handlebars",
             "main": "handlebars.js"
+        },
+        {
+            "name": "jquery",
+            "location": "vendor/jquery",
+            "main": "jquery.js"
+        },
+        {
+            "name": "jquerypp",
+            "location": "vendor/jquerypp",
+            "main": "index.js"
+        },
+        {
+            "name": "text",
+            "location": "vendor/text",
+            "main": "text.js"
+        },
+        {
+            "name": "underscore",
+            "location": "vendor/underscore",
+            "main": "underscore.js"
         }
     ],
     "version": "0.1.11",
