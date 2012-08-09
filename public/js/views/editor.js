@@ -2,8 +2,9 @@ define([
   'jquery',
   'underscore',
   'backbone',
+  "collections/blocks",
   "jquerypp/event/drag"
-  ], function($, _, Backbone, Menu, MenuItem) {
+  ], function($, _, Backbone, BlocksCollection) {
 
   var EditorView = Backbone.View.extend({
     el: $("body")
@@ -41,6 +42,34 @@ define([
 
     // Load views
     , loadViews: function() {
+      var blocks = new BlocksCollection([
+        {
+            id: "header_image"
+          , name: "Header Image"
+          , filename: "headerimage.html"
+        }
+        , {
+            id: "menu"
+          , name: "Menu"
+          , filename: "menu.html"
+        }
+        , {
+            id: "content"
+          , name: "Content"
+          , filename: "page.html"
+        }
+        , {
+            id: "search_form"
+          , name: "Search Form"
+          , filename: "searchform.html"
+        }
+        , {
+            id: "sidebar"
+          , name: "Sidebar"
+          , filename: "sidebar.html"
+        }
+      ]);
+
       require([
         "collections/templates",
         "views/template_select"
@@ -63,44 +92,15 @@ define([
         });
       }, this));
 
-      require([
-        "collections/blocks",
-        "views/block_insert"
-      ], function (BlocksCollection, BlockInsertView) {
-
-        var blocks = new BlocksCollection([
-          {
-              id: "headerimage"
-            , name: "Header Image"
-            , filename: "headerimage.html"
-          }
-          , {
-              id: "menu"
-            , name: "Menu"
-            , filename: "menu.html"
-          }
-          , {
-              id: "content"
-            , name: "Content"
-            , filename: "page.html"
-          }
-          , {
-              id: "searchform"
-            , name: "Search Form"
-            , filename: "searchform.html"
-          }
-          , {
-              id: "sidebar"
-            , name: "Sidebar"
-            , filename: "sidebar.html"
-          }
-        ]);
-
+      require(["views/block_insert"], function (BlockInsertView) {
         new BlockInsertView({collection: blocks});
       });
 
       require(["models/site", "views/site"], function (Site, SiteView) {
-        new SiteView({model: new Site});
+        new SiteView({
+          model: new Site,
+          collection: blocks
+        });
       });
 
       require(["views/layout"], function (LayoutView) {

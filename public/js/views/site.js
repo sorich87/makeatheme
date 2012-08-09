@@ -3,11 +3,11 @@ define([
   'underscore',
   'backbone',
   "handlebars",
-  "text!templates/headerimage.html",
-  "text!templates/menu.html",
-  "text!templates/page.html",
-  "text!templates/searchform.html",
-  "text!templates/sidebar.html"
+  "text!templates/blocks/headerimage.html",
+  "text!templates/blocks/menu.html",
+  "text!templates/blocks/page.html",
+  "text!templates/blocks/searchform.html",
+  "text!templates/blocks/sidebar.html"
   ], function($, _, Backbone, Handlebars,
              headerimage, menu, page, searchform, sidebar) {
 
@@ -15,20 +15,31 @@ define([
     el: $("body")
 
     , initialize: function() {
-      var el = this.$el[0]
+      this.render();
+    }
+
+    , render: function () {
+      var replacements, blocks
+        , el = this.$el[0]
         , template = Handlebars.compile(el.outerHTML);
 
-      el.outerHTML = template({
+      replacements = {
           site_title: this.model.get("title")
         , site_description: this.model.get("description")
         , home_url: this.model.get("home_url")
         , site_url: this.model.get("site_url")
-        , header_image: headerimage
-        , menu: menu
-        , content: page
-        , search_form: searchform
-        , sidebar: sidebar
-      });
+      };
+
+      _.each(this.collection.models, function (block) {
+        var id = block.get("id")
+          , html = require("text!templates/blocks/" + block.get("filename"));
+
+        replacements[id] = html;
+      }, this);
+
+      el.outerHTML = template(replacements);
+
+      return this;
     }
   });
 
