@@ -90,5 +90,6 @@ delete '/session.json' do
 end
 
 not_found do
+  status 200
   load_index
 end
