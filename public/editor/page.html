@@ -13,7 +13,13 @@
 
   <title>Welcome to Foundation</title>
 
-  <script data-main="../js/index" src="../js/vendor/require.js"></script>
+  <script data-main="/js/index" src="/js/vendor/require.js"></script>
+
+  <script>
+    define('init', function() {
+      return { editor: true };
+    });
+  </script>
 
   <!-- Included CSS Files -->
   <link rel="stylesheet" href="grid.css">

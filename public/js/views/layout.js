@@ -31,7 +31,7 @@ define([
 
 
   LayoutView = Backbone.View.extend({
-      el: $("body")
+      el: $(window.document)
 
     , currentAction: null
 
@@ -45,7 +45,6 @@ define([
 
     , highlightColumns: function () {
       this.$el.on("hover", ".columns", $.proxy(function (e) {
-        console.log("test");
         if (this.currentAction !== null) {
           return;
         }

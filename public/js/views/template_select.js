@@ -11,6 +11,7 @@ define([
       this.currentTemplate = options.currentTemplate;
       this.buildSelect();
       this.loadTemplates();
+      this.switchTemplate();
     }
 
     , loadTemplates: function () {
@@ -20,8 +21,6 @@ define([
     , buildSelect: function () {
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
-
-      this.$el.on("change", $.proxy(this.switchTemplate, this));
     }
 
     , addOne: function (template) {
@@ -43,8 +42,10 @@ define([
       $("#x-templates-list").html(this.$el);
     }
 
-    , switchTemplate: function () {
-      window.location.href = this.$el.val();
+    , switchTemplate: function (e) {
+      $(window.document).on("change", this.$el, function (e) {
+        window.location.href = $(e.target).val();
+      });
     }
   });
 

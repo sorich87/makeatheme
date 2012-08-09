@@ -19,7 +19,7 @@ define([
 
     // All the view initialize functions are in the order:
     // prepare DOM -> listen to events -> load data
-    , render: function() {
+    , initialize: function() {
       this.currentTemplate = window.document.URL.split("/").pop();
 
       this.loadEditor();
