@@ -43,7 +43,7 @@ get '/' do
   load_index
 end
 
-get '/themes' do
+get '/themes.json' do
   Theme.all.order_by([:name, :desc]).page(params[:page]).to_json
 end
 
@@ -84,24 +84,9 @@ post '/session.json' do
   end
 end
 
-post '/session' do
-  session_params = params[:session]
-  user = StoreUser.authenticate(session_params[:email], session_params[:password])
-  if user
-    authenticate_user!(user)
-    redirect to('/')
-  else
-    redirect to('/')
-  end
-end
-
-delete '/session' do
+delete '/session.json' do
   session_end!
-  if request.xhr?
-    status 204
-  else
-    redirect to('/')
-  end
+  status 204
 end
 
 not_found do
