@@ -32,25 +32,25 @@ helpers do
   def current_user
     @current_user ||= StoreUser.find(session[:user_id]) if session[:user_id]
   end
+
+  def load_index
+    themes = Theme.order_by([:name, :desc]).page(params[:page])
+    erb :index, :locals => {:themes => themes}
+  end
 end
 
 get '/' do
-  themes = Theme.order_by([:name, :desc]).page(params[:page])
-  erb :index, :locals => {:themes => themes}
+  load_index
 end
 
 get '/themes' do
   Theme.all.order_by([:name, :desc]).page(params[:page]).to_json
 end
 
-get '/themes/:id' do
+get '/themes/:id.json' do
   theme = Theme.find(params[:id])
   if theme
-    if request.xhr?
-      theme.to_json
-    else
-      erb :theme, :locals => {:theme => theme }
-    end
+    theme.to_json
   else
     status 404
   end
@@ -102,4 +102,8 @@ delete '/session' do
   else
     redirect to('/')
   end
+end
+
+not_found do
+  load_index
 end
