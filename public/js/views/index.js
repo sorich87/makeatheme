@@ -10,7 +10,7 @@ define([
   var IndexView = Backbone.View.extend({
       el: $("#main")
 
-    , initialize: function () {
+    , render: function () {
       this.loadFaq();
       this.loadThemeList();
     }

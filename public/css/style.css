@@ -30,20 +30,14 @@ body.theme {
   padding-top: 40px;
   padding-bottom: 35px;
 }
-#theme {
+body.theme #main {
   padding: 0;
   margin: 0;
   overflow: hidden;
 }
-#theme iframe {
+body.theme #main iframe {
   overflow: hidden;
   height: 100%;
   width: 100%;
   position: absolute;
-}
-.addthis_toolbox {
-  display: inline-block;
-  *display: inline;
-  *zoom: 1;
-  padding-top: 8px;
 }

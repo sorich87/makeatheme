@@ -45,6 +45,7 @@ define([
 
     , highlightColumns: function () {
       this.$el.on("hover", ".columns", $.proxy(function (e) {
+        console.log("test");
         if (this.currentAction !== null) {
           return;
         }

@@ -2,24 +2,29 @@ define([
   "jquery",
   "underscore",
   "backbone",
-], function($, _, Backbone) {
+  "views/index",
+  "views/theme",
+  "views/editor"
+], function($, _, Backbone,
+            IndexView, ThemeView, EditorView) {
 
   var AppRouter = Backbone.Router.extend({
     routes: {
         "": "index"
       , "themes/:id": "theme"
+      , "editor/*path" : "editor"
     }
 
     , index: function () {
-      require(['views/index'], function(IndexView) {
-        new IndexView;
-      });
+      (new IndexView).render();
     }
 
     , theme: function (id) {
-      require(['views/editor'], function(EditorView) {
-        new EditorView;
-      });
+      (new ThemeView).render();
+    }
+
+    , editor: function () {
+      (new EditorView).render();
     }
   });
 

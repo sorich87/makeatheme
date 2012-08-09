@@ -3,15 +3,23 @@ define([
   'underscore',
   'backbone',
   "collections/blocks",
+  "collections/templates",
+  "models/site",
+  "views/block_insert",
+  "views/layout",
+  "views/site",
+  "views/template_select",
   "jquerypp/event/drag"
-  ], function($, _, Backbone, BlocksCollection) {
+  ], function($, _, Backbone,
+              BlocksCollection, TemplatesCollection, Site,
+              BlockInsertView, LayoutView, SiteView, TemplateSelectView) {
 
   var EditorView = Backbone.View.extend({
     el: $("body")
 
     // All the view initialize functions are in the order:
     // prepare DOM -> listen to events -> load data
-    , initialize: function() {
+    , render: function() {
       this.currentTemplate = window.document.URL.split("/").pop();
 
       this.loadEditor();
@@ -70,42 +78,31 @@ define([
         }
       ]);
 
-      require([
-        "collections/templates",
-        "views/template_select"
-      ], $.proxy(function (TemplatesCollection, TemplateSelectView) {
+      var templates = new TemplatesCollection([
+        {
+            filename: "index.html"
+          , name: "Default"
+        }
+        , {
+            filename: "page.html"
+          , name: "Page"
+        }
+      ]);
 
-        var templates = new TemplatesCollection([
-          {
-              filename: "index.html"
-            , name: "Default"
-          }
-          , {
-              filename: "page.html"
-            , name: "Page"
-          }
-        ]);
 
-        new TemplateSelectView({
-            collection: templates
-          , currentTemplate: this.currentTemplate
-        });
-      }, this));
-
-      require(["views/block_insert"], function (BlockInsertView) {
-        new BlockInsertView({collection: blocks});
+      new TemplateSelectView({
+          collection: templates
+        , currentTemplate: this.currentTemplate
       });
 
-      require(["models/site", "views/site"], function (Site, SiteView) {
-        new SiteView({
-          model: new Site,
-          collection: blocks
-        });
+      new BlockInsertView({collection: blocks});
+
+      new SiteView({
+          model: new Site
+        , collection: blocks
       });
 
-      require(["views/layout"], function (LayoutView) {
-        new LayoutView();
-      });
+      new LayoutView;
     }
   });
 

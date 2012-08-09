@@ -29,6 +29,8 @@ require([
     });
 
     // Load authentication modals
-    new AuthModalsView;
+    if (init.editor !== true) {
+      new AuthModalsView;
+    }
   });
 });
