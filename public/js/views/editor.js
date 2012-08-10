@@ -2,7 +2,6 @@ define([
   'jquery',
   'underscore',
   'backbone',
-  "init",
   "collections/regions",
   "collections/blocks",
   "collections/templates",
@@ -12,7 +11,7 @@ define([
   "views/site",
   "views/template_select",
   "jquerypp/event/drag"
-  ], function($, _, Backbone, init,
+  ], function($, _, Backbone,
               RegionsCollection, BlocksCollection, TemplatesCollection, Site,
               BlockInsertView, LayoutView, SiteView, TemplateSelectView) {
 
@@ -21,25 +20,16 @@ define([
 
     , initialize: function () {
       this.currentTemplate = window.document.URL.split("/").pop();
-
-      window.addEventListener("message", $.proxy(this.setup, this), false);
-      this.notifyParent();
     }
 
-    // Notify parent window that editor is ready to receive init settings
-    , notifyParent: function () {
-      window.parent.postMessage("ready", window.location.origin);
-    }
+    // Call parent window require function to get data and load editor and views
+    , render: function () {
+      window.parent.require(["init"], $.proxy(function (init) {
+        this.themeData = init;
 
-    // Get settings from parent window and load editor and views
-    , setup: function (e) {
-      if (e.origin !== window.location.origin)
-        return;
-
-      this.themeData = e.data
-
-      this.loadEditor();
-      this.loadViews();
+        this.loadEditor();
+        this.loadViews();
+      }, this));
     }
 
     , loadEditor: function () {
