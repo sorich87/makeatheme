@@ -10,11 +10,11 @@
     <script data-main="/js/index" src="/js/vendor/require.js"></script>
 
     <script>
-      define('init', function() {
-        return {
+      define("init", ["underscore", "defaults"], function(underscore, defaults) {
+        return _.defaults({
             themes: <%= themes.to_json %>
           <% unless current_user.nil? %>, current_user: <%= current_user.to_json %><% end %>
-        };
+        }, defaults);
       });
     </script>
 

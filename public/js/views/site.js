@@ -9,7 +9,7 @@ define([
   var SiteView = Backbone.View.extend({
     el: $("body")
 
-    , initialize: function() {
+    , initialize: function () {
       this.render();
     }
 
@@ -17,12 +17,16 @@ define([
       var replacements, requires, el, template;
 
       el = this.$el[0]
-      template = Handlebars.compile(el.outerHTML);
 
-      // Build list of blocks templates to pass to requirejs
-      requires = _.map(this.collection.models, function (block) {
-        return "text!templates/blocks/" + block.get("filename");
+      // Build list of region templates to pass to requirejs
+      requires = _.map(this.options.regions, function (region) {
+        return "text!/editor/" + region.get("type") + ".html";
       });
+
+      // Add list of blocks templates to pass to requirejs
+      requires = _.union(requires, _.map(this.options.blocks, function (block) {
+        return "text!templates/blocks/" + block.get("filename") + ".html";
+      }));
 
       require(requires, $.proxy(function () {
         // Site details replacements
@@ -33,16 +37,27 @@ define([
           , site_url: this.model.get("site_url")
         };
 
+        // Regions replacements
+        _.each(this.options.regions, function (region) {
+          var type = region.get("type")
+            , html = require("text!/editor/" + type + ".html");
+
+          replacements[type] = html;
+        });
+
         // Blocks replacements
-        _.each(this.collection.models, function (block) {
+        _.each(this.options.blocks, function (block) {
           var id = block.get("id")
-            , html = require("text!templates/blocks/" + block.get("filename"));
+            , html = require("text!templates/blocks/" + block.get("filename") + ".html");
 
           replacements[id] = html;
         });
 
-        // Perform the replacement
-        el.outerHTML = template(replacements);
+        // Perform a double replacement because regions contain tags
+        template = Handlebars.compile(this.$el[0].outerHTML);
+        template = template(replacements);
+        template = Handlebars.compile(template);
+        this.$el[0].outerHTML = template(replacements);
       }, this));
 
       return this;
