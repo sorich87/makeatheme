@@ -1,15 +1,10 @@
+// Replace Handlebars tags by site details and blocks
 define([
   'jquery',
   'underscore',
   'backbone',
   "handlebars",
-  "text!templates/blocks/headerimage.html",
-  "text!templates/blocks/menu.html",
-  "text!templates/blocks/page.html",
-  "text!templates/blocks/searchform.html",
-  "text!templates/blocks/sidebar.html"
-  ], function($, _, Backbone, Handlebars,
-             headerimage, menu, page, searchform, sidebar) {
+], function($, _, Backbone, Handlebars) {
 
   var SiteView = Backbone.View.extend({
     el: $("body")
@@ -19,25 +14,36 @@ define([
     }
 
     , render: function () {
-      var replacements, blocks
-        , el = this.$el[0]
-        , template = Handlebars.compile(el.outerHTML);
+      var replacements, requires, el, template;
 
-      replacements = {
-          site_title: this.model.get("title")
-        , site_description: this.model.get("description")
-        , home_url: this.model.get("home_url")
-        , site_url: this.model.get("site_url")
-      };
+      el = this.$el[0]
+      template = Handlebars.compile(el.outerHTML);
 
-      _.each(this.collection.models, function (block) {
-        var id = block.get("id")
-          , html = require("text!templates/blocks/" + block.get("filename"));
+      // Build list of blocks templates to pass to requirejs
+      requires = _.map(this.collection.models, function (block) {
+        return "text!templates/blocks/" + block.get("filename");
+      });
 
-        replacements[id] = html;
-      }, this);
+      require(requires, $.proxy(function () {
+        // Site details replacements
+        replacements = {
+            site_title: this.model.get("title")
+          , site_description: this.model.get("description")
+          , home_url: this.model.get("home_url")
+          , site_url: this.model.get("site_url")
+        };
 
-      el.outerHTML = template(replacements);
+        // Blocks replacements
+        _.each(this.collection.models, function (block) {
+          var id = block.get("id")
+            , html = require("text!templates/blocks/" + block.get("filename"));
+
+          replacements[id] = html;
+        });
+
+        // Perform the replacement
+        el.outerHTML = template(replacements);
+      }, this));
 
       return this;
     }
