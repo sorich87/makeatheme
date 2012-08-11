@@ -1,31 +1,18 @@
 <header id="branding" role="banner">
   <div class="row">
     <hgroup class="eight columns">
-    <h1 id="site-title"><span><a href="{{ home_url }}" title="" rel="home">{{{ site_title }}}</a></span></h1>
+      <h1 id="site-title"><span><a href="{{ home_url }}" title="" rel="home">{{{ site_title }}}</a></span></h1>
       <h2 id="site-description">{{{ site_description }}}</h2>
     </hgroup>
 
-    <div class="four columns" id="search">
-      {{{ search_form }}}
-    </div>
+    {{{ search_form }}}
   </div>
 
   <div class="row">
-    <div class="twelve columns">
-      <a href="{{ home_url }}">
-        {{{ header_image }}}
-      </a>
-    </div>
+    {{{ header_image }}}
   </div>
 
   <div class="row">
-    <div class="twelve columns">
-      <nav id="access" role="navigation">
-        <h3 class="assistive-text">Main menu</h3>
-        <div class="skip-link"><a class="assistive-text" href="#content" title="Skip to primary content">Skip to primary content</a></div>
-        <div class="skip-link"><a class="assistive-text" href="#secondary" title="Skip to secondary content">Skip to secondary content</a></div>
-        {{{ menu }}}
-      </nav><!-- #access -->
-    </div>
+    {{{ menu }}}
   </div>
 </header><!-- #branding -->

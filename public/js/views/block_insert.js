@@ -53,7 +53,7 @@ define([
       require([
         "text!templates/blocks/" + block.get("filename") + ".html"
       ], function (blockTemplate) {
-        drag.element[0].outerHTML = "<div class='columns'>" + blockTemplate + "</div>";
+        drag.element[0].outerHTML = blockTemplate;
       });
     }
   });
