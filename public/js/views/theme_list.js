@@ -2,24 +2,24 @@ define([
   "jquery",
   "underscore",
   "backbone",
-  "init",
   "handlebars",
   "text!templates/theme_list.html"
-], function ($, _, Backbone, init, Handlebars, themeListTemplate) {
+], function ($, _, Backbone, Handlebars, themeListTemplate) {
 
   var ThemeListView = Backbone.View.extend({
       el: $("<ul class='thumbnails'></ul>")
 
     , initialize: function () {
-      this.buildList();
-      this.loadThemes();
+      this.bindEvents();
     }
 
-    , loadThemes: function () {
-      this.collection.reset(init.themes);
+    , render: function () {
+      this.collection.reset(this.collection.models);
+
+      return this;
     }
 
-    , buildList: function () {
+    , bindEvents: function () {
       this.collection.on("reset", this.addAll, this);
     }
 
@@ -30,7 +30,7 @@ define([
     }
 
     , addAll: function () {
-      this.$el.html("");
+      this.$el.empty();
 
       this.collection.each(function (theme) {
         this.addOne(theme);

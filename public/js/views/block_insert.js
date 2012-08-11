@@ -1,41 +1,45 @@
 define([
-	"jquery",
-	"underscore",
-	"backbone"
+  "jquery",
+  "underscore",
+  "backbone"
 ], function ($, _, Backbone) {
 
-	var BlockView = Backbone.View.extend({
-		el: $("<div id='x-block-insert'><h4>Blocks</h4><p>Drag and drop to insert</p><ul></ul></div>")
+  var BlockView = Backbone.View.extend({
+      el: $("<div id='x-block-insert'><h4>Blocks</h4>\
+            <p>Drag and drop to insert</p><ul></ul></div>")
 
-		, initialize: function () {
-			this.bindEvents();
-		}
+    , initialize: function () {
+      this.bindEvents();
+    }
 
-		, render: function () {
-			this.collection.reset(this.collection.models);
+    , render: function () {
+      this.collection.reset(this.collection.models);
 
       return this;
-		}
+    }
 
-		, bindEvents: function () {
-			this.collection.on("reset", this.addAll, this);
+    , bindEvents: function () {
+      this.collection.on("reset", this.addAll, this);
 
-			$(window.document).on("draginit", "#x-block-insert a", this.draginit);
-			$(window.document).on("dragend", "#x-block-insert a", $.proxy(this.dragend, this));
-		}
+      $(window.document).on("draginit", "#x-block-insert a", this.draginit);
+      $(window.document).on("dragend", "#x-block-insert a", $.proxy(this.dragend, this));
+    }
 
-		, addOne: function (block) {
-			var name = block.get("name")
-				, id = block.get("id");
+    , addOne: function (block) {
+      var name = block.get("name")
+      , id = block.get("id");
 
-			this.$("ul").append("<li><a href='#' data-id='" + id + "'><span>&Dagger;</span> " + name + "</a></li>");
-		}
+      this.$("ul").append("<li><a href='#' data-id='" + id + "'>\
+                          <span>&Dagger;</span> " + name + "</a></li>");
+    }
 
-		, addAll: function () {
-			_.each(this.collection.models, function (block) {
-				this.addOne(block);
-			}, this);
-		}
+    , addAll: function () {
+      this.$("ul").empty();
+
+      _.each(this.collection.models, function (block) {
+        this.addOne(block);
+      }, this);
+    }
 
     // Replace the drag element by its clone
     , draginit: function (e, drag) {
@@ -52,7 +56,7 @@ define([
         drag.element[0].outerHTML = "<div class='columns'>" + blockTemplate + "</div>";
       });
     }
-	});
+  });
 
-	return BlockView;
+  return BlockView;
 });

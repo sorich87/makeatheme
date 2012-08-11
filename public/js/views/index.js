@@ -2,37 +2,36 @@ define([
   "jquery",
   "underscore",
   "backbone",
+  "init",
   "text!templates/faq.html",
-  "collections/themes",
-  "views/theme_list"
-], function ($, _, Backbone, faqTemplate, ThemesCollection, ThemeListView) {
+  "views/theme_list",
+  "bootstrap/js/bootstrap-collapse"
+], function ($, _, Backbone, init, faqTemplate, ThemeListView) {
 
   var IndexView = Backbone.View.extend({
       el: $("#main")
 
+    , initialize: function () {
+      this.bindEvents();
+    }
+
     , render: function () {
-      this.clearElement();
-      this.loadFaq();
-      this.loadThemeList();
+      this.loadViews();
     }
 
-    , clearElement: function () {
-      this.$el.html("");
-    }
-
-    , loadFaq: function () {
+    , bindEvents: function () {
       // Show FAQ collapsed by default
-      require(["bootstrap/js/bootstrap-collapse"], $.proxy(function () {
         $("#faq").collapse();
-        this.$el.on("click", "[href='#faq']", function (e) { e.preventDefault() });
-
-        // Load template file
-        $(faqTemplate).find("#faq").collapse("hide").end().prependTo(this.$el);
-      }, this));
+        $(window.document).on("click", "[href='#faq']", function (e) { e.preventDefault() });
     }
 
-    , loadThemeList: function () {
-      new ThemeListView({collection: new ThemesCollection}).$el.appendTo(this.$el);
+    , loadViews: function () {
+      this.$el
+        .empty()
+        .append(faqTemplate)
+        .append(new ThemeListView({
+        collection: init.themes
+      }).render().$el);
     }
   });
 
