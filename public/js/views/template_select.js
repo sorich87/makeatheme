@@ -5,10 +5,10 @@ define([
 ], function ($, _, Backbone) {
 
   var TemplateSelectView = Backbone.View.extend({
-      el: $("<select></select>")
+      el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
+            <form><select></select></form></div>")
 
     , initialize: function (options) {
-      this.currentTemplate = options.currentTemplate;
       this.buildSelect();
       this.loadTemplates();
       this.switchTemplate();
@@ -24,28 +24,37 @@ define([
     }
 
     , addOne: function (template) {
-      var src
-        , filename = template.get("filename")
-        , name = template.get("name");
+      var selected = "";
 
-      selected = this.currentTemplate === filename ? " selected='selected'" : "";
+      if (template.get("current")) {
+        // Load selected attribute
+        selected = " selected='selected'";
 
-      this.$el.append("<option value='" + filename + "'" + selected + ">"
-                      + name + "</option>");
+        // Save current template
+        this.currentTemplate = template;
+      }
+
+      this.$("select").append("<option value='" + template.cid + "'" + selected + ">"
+                      + template.get("name") + "</option>");
     }
 
     , addAll: function () {
       _.each(this.collection.models, function (t) {
         this.addOne(t);
       }, this);
-
-      $("#x-templates-list").html(this.$el);
     }
 
     , switchTemplate: function (e) {
-      $(window.document).on("change", this.$el, function (e) {
-        window.location.href = $(e.target).val() + ".html";
-      });
+      $(window.document).on("change", this.$el, $.proxy(function (e) {
+        var template = this.collection.getByCid($(e.target).val());
+
+        // Reset current template
+        this.currentTemplate.set("current", false);
+        template.set("current", true);
+
+        // Load template file
+        window.location.href = template.get("filename") + ".html";
+      }, this));
     }
   });
 

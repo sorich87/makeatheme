@@ -39,6 +39,7 @@ define(function () {
         {
           filename: "index"
         , name: "Default"
+        , current: true
       }
       , {
           filename: "page"

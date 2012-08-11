@@ -4,15 +4,13 @@ define([
   "backbone",
   "views/index",
   "views/theme",
-  "views/editor"
 ], function($, _, Backbone,
-            IndexView, ThemeView, EditorView) {
+            IndexView, ThemeView) {
 
   var AppRouter = Backbone.Router.extend({
     routes: {
         "": "index"
       , "themes/:id": "theme"
-      , "editor/*path" : "editor"
     }
 
     , index: function () {
@@ -21,10 +19,6 @@ define([
 
     , theme: function (id) {
       (new ThemeView).render();
-    }
-
-    , editor: function () {
-      (new EditorView).render();
     }
   });
 
