@@ -44,7 +44,7 @@ define([
 
     , switchTemplate: function (e) {
       $(window.document).on("change", this.$el, function (e) {
-        window.location.href = $(e.target).val();
+        window.location.href = $(e.target).val() + ".html";
       });
     }
   });

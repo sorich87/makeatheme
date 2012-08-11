@@ -30,7 +30,7 @@ define([
 					var block = this.collection.get(drag.element.data("id"));
 
 					require([
-						"text!templates/blocks/" + block.get("filename")
+						"text!templates/blocks/" + block.get("filename") + ".html"
 					], function (blockTemplate) {
 						drag.element[0].outerHTML = "<div class='columns'>" + blockTemplate + "</div>";
 					});
