@@ -11,18 +11,19 @@ define([
               BlockInsertView, LayoutView, SiteView, TemplateSelectView) {
 
   var EditorView = Backbone.View.extend({
-    el: $("body")
+    el: $("<div id='x-layout-editor'>\
+        <div class='x-handle'>&Dagger;</div>\
+        </div>")
 
     , initialize: function () {
       this.draggableEditor();
+      this.draggableColumns();
     }
 
     // Call parent window require function to get data and load views
     , render: function () {
       window.parent.require(["init"], $.proxy(function (init) {
-        this.themeData = init;
-
-        this.loadViews();
+        this.loadViews(init);
       }, this));
     }
 
@@ -41,26 +42,28 @@ define([
     }
 
     // Load views
-    , loadViews: function() {
-      // Setup editor box
-      $("<div id='x-layout-editor'>\
-        <div class='x-handle'>&Dagger;</div>\
-        </div>")
-      // Append template select view
+    , loadViews: function(init) {
+      this.$el
+
+        // Append template select view
         .append(new TemplateSelectView({
-          collection: this.themeData.templates
-        }).$el)
-      // Append block insertion view
-        .append(new BlockInsertView({collection: this.themeData.blocks}).$el)
-      // Append result to body element
-        .appendTo(this.$el);
+          collection: init.templates
+        }).render().$el)
 
-      new SiteView({
-          model: this.themeData.site
-        , regions: this.themeData.regions.models
-        , blocks: this.themeData.blocks.models
-      });
+        // Append block insertion view
+        .append(new BlockInsertView({
+          collection: init.blocks
+        }).render().$el)
 
+        // Append result to body element
+        .appendTo(new SiteView({
+            model: init.site
+          , regions: init.regions.models
+          , blocks: init.blocks.models
+        }).render().$el);
+    }
+
+    , draggableColumns: function () {
       new LayoutView;
     }
   });

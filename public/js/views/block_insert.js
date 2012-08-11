@@ -8,49 +8,50 @@ define([
 		el: $("<div id='x-block-insert'><h4>Blocks</h4><p>Drag and drop to insert</p><ul></ul></div>")
 
 		, initialize: function () {
-			this.buildBox();
-			this.loadBlocks();
+			this.bindEvents();
 		}
 
-		, loadBlocks: function () {
+		, render: function () {
 			this.collection.reset(this.collection.models);
+
+      return this;
 		}
 
-		, buildBox: function () {
+		, bindEvents: function () {
 			this.collection.on("reset", this.addAll, this);
 
-			$(window.document).on({
-				draginit: function (e, drag) {
-					// Replace the drag element by its clone
-					drag.element = drag.ghost();
-				}
-
-				, dragend: $.proxy(function (e, drag) {
-					// Load the actual template chuck to insert
-					var block = this.collection.get(drag.element.data("id"));
-
-					require([
-						"text!templates/blocks/" + block.get("filename") + ".html"
-					], function (blockTemplate) {
-						drag.element[0].outerHTML = "<div class='columns'>" + blockTemplate + "</div>";
-					});
-				}, this)
-			}, "#x-block-insert a");
+			$(window.document).on("draginit", "#x-block-insert a", this.draginit);
+			$(window.document).on("dragend", "#x-block-insert a", $.proxy(this.dragend, this));
 		}
 
 		, addOne: function (block) {
 			var name = block.get("name")
 				, id = block.get("id");
 
-			this.$el.children("ul").append("<li><a href='#' data-id='" + id + "'><span>&Dagger;</span> " + name + "</a></li>");
+			this.$("ul").append("<li><a href='#' data-id='" + id + "'><span>&Dagger;</span> " + name + "</a></li>");
 		}
 
 		, addAll: function () {
-			// Build the list of blocks to insert
 			_.each(this.collection.models, function (block) {
 				this.addOne(block);
 			}, this);
 		}
+
+    // Replace the drag element by its clone
+    , draginit: function (e, drag) {
+      drag.element = drag.ghost();
+    }
+
+    // Load the actual template chuck to insert
+    , dragend: function (e, drag) {
+      var block = this.collection.get(drag.element.data("id"));
+
+      require([
+        "text!templates/blocks/" + block.get("filename") + ".html"
+      ], function (blockTemplate) {
+        drag.element[0].outerHTML = "<div class='columns'>" + blockTemplate + "</div>";
+      });
+    }
 	});
 
 	return BlockView;

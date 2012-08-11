@@ -9,14 +9,8 @@ define([
   var SiteView = Backbone.View.extend({
     el: $("body")
 
-    , initialize: function () {
-      this.render();
-    }
-
     , render: function () {
-      var replacements, requires, el, template;
-
-      el = this.$el[0]
+      var replacements, requires, template;
 
       // Build list of region templates to pass to requirejs
       requires = _.map(this.options.regions, function (region) {

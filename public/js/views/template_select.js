@@ -9,18 +9,20 @@ define([
             <form><select></select></form></div>")
 
     , initialize: function (options) {
-      this.buildSelect();
-      this.loadTemplates();
-      this.switchTemplate();
+      this.bindEvents();
     }
 
-    , loadTemplates: function () {
+    , render: function () {
       this.collection.reset(this.collection.models);
+
+      return this;
     }
 
-    , buildSelect: function () {
+    , bindEvents: function () {
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
+
+      $(window.document).on("change", this.$el, $.proxy(this.switchTemplate, this));
     }
 
     , addOne: function (template) {
@@ -39,22 +41,21 @@ define([
     }
 
     , addAll: function () {
-      _.each(this.collection.models, function (t) {
-        this.addOne(t);
+      _.each(this.collection.models, function (template) {
+        this.addOne(template);
       }, this);
     }
 
     , switchTemplate: function (e) {
-      $(window.document).on("change", this.$el, $.proxy(function (e) {
-        var template = this.collection.getByCid($(e.target).val());
+      var modelCid = $(e.target).val()
+        , template = this.collection.getByCid(modelCid);
 
-        // Reset current template
-        this.currentTemplate.set("current", false);
-        template.set("current", true);
+      // Reset current template
+      this.currentTemplate.set("current", false);
+      template.set("current", true);
 
-        // Load template file
-        window.location.href = template.get("filename") + ".html";
-      }, this));
+      // Load template file
+      window.location.href = template.get("filename") + ".html";
     }
   });
 
