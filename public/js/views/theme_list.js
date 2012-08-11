@@ -8,7 +8,7 @@ define([
 ], function ($, _, Backbone, init, Handlebars, themeListTemplate) {
 
   var ThemeListView = Backbone.View.extend({
-      el: $("<ul class='thumbnails'></ul>").appendTo("#main")
+      el: $("<ul class='thumbnails'></ul>")
 
     , initialize: function () {
       this.buildList();
@@ -30,6 +30,8 @@ define([
     }
 
     , addAll: function () {
+      this.$el.html("");
+
       this.collection.each(function (theme) {
         this.addOne(theme);
       }, this);

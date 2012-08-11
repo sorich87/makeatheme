@@ -11,8 +11,13 @@ define([
       el: $("#main")
 
     , render: function () {
+      this.clearElement();
       this.loadFaq();
       this.loadThemeList();
+    }
+
+    , clearElement: function () {
+      this.$el.html("");
     }
 
     , loadFaq: function () {
@@ -27,7 +32,7 @@ define([
     }
 
     , loadThemeList: function () {
-      new ThemeListView({collection: new ThemesCollection});
+      new ThemeListView({collection: new ThemesCollection}).$el.appendTo(this.$el);
     }
   });
 

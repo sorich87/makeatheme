@@ -13,6 +13,13 @@ define([
       this.$el.html(theme);
 
       $("body").addClass("theme");
+
+      // Remove body class when navigating away from this view
+      Backbone.history.on("route", function (e, name) {
+        if (name !== "theme") {
+          $("body").removeClass("theme");
+        }
+      });
     }
   });
 
