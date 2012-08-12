@@ -5,10 +5,12 @@ define([
   "views/block_insert",
   "views/layout",
   "views/site",
+  "views/style_edit",
   "views/template_select",
   "jquerypp/event/drag"
 ], function ($, _, Backbone,
-              BlockInsertView, LayoutView, SiteView, TemplateSelectView) {
+              BlockInsertView, LayoutView, SiteView,
+              StyleEditView, TemplateSelectView) {
 
   var EditorView = Backbone.View.extend({
     el: $("<div id='x-layout-editor'>\
@@ -53,6 +55,11 @@ define([
         // Append block insertion view
         .append(new BlockInsertView({
           collection: init.blocks
+        }).render().$el)
+
+        // Append CSS editor view
+        .append(new StyleEditView({
+          collection: init.styles
         }).render().$el)
 
         // Append result to body element
