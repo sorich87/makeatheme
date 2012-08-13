@@ -1,0 +1,92 @@
+<div class="modal hide" id="login">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Please authenticate yourself</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal" method="post" action="/session">
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label" for="email">Email Address</label>
+          <div class="controls">
+            <input type="text" name="session[email]" class="input-xlarge" id="email">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="password">Password</label>
+          <div class="controls">
+            <input type="text" name="session[password]" class="input-xlarge" id="password">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn btn-primary">Log In</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <ul class="unstyled">
+      <li>Forgot your password? <a href="#new-password" data-toggle="modal">Reset</a></li>
+      <li>Didn't receive confirmation instructions? <a href="#confirm-password" data-toggle="modal">Resend</a></li>
+      <li>Don't have an account yet? <a href="#register" data-toggle="modal">Register</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="modal hide" id="register">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal">×</button>
+    <h3>Create an account</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal" method="post" action="">
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label" for="new-first-name">First Name</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" id="new-first-name">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new-last-name">Last Name</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" id="new-last-name">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new-email">Email Address</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" id="new-email">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new-password">Password</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" id="new-password">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label" for="new-password-confirmation">Password Confirmation</label>
+          <div class="controls">
+            <input type="text" class="input-xlarge" id="new-password-confirmation">
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="controls">
+            <button type="submit" class="btn btn-primary">Register</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <ul class="unstyled">
+      <li>Already have an account? <a href="#login" data-toggle="modal">Log in</a></li>
+    </ul>
+  </div>
+</div>
