@@ -368,6 +368,10 @@ window.require.define({"models/block": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
+      defaults: {
+          name: ""
+        , filename: ""
+    }
   });
   
 }});
@@ -377,6 +381,16 @@ window.require.define({"models/region": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
+      defaults: {
+          type: ""
+        , name: ""
+    }
+
+    , validate: function (attrs) {
+      if (["header", "footer", "content", "sidebar"].indexOf(attrs.type) < 0) {
+        return "Region type must be header, footer, content or sidebar.";
+      }
+    }
   });
   
 }});
@@ -411,6 +425,11 @@ window.require.define({"models/template": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
+      defaults: {
+          name: ""
+        , filename: ""
+        , current: false
+    }
   });
   
 }});
@@ -420,7 +439,13 @@ window.require.define({"models/theme": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-    idAttribute: "_id"
+      idAttribute: "_id"
+
+    , defaults: {
+        name: ""
+      , author: ""
+      , author_uri: ""
+    }
   });
   
 }});

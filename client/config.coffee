@@ -15,6 +15,7 @@ exports.config =
       joinTo:
         'javascripts/app.js': /^app/
         'javascripts/vendor.js': /^vendor/
+        'test/javascripts/app.js': /^test/
       # Defines compilation order.
       # `vendor` files will be compiled before other ones
       # even if they are not present here.

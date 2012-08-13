@@ -2,5 +2,11 @@
 var Model = require("models/base/model");
 
 module.exports = Model.extend({
-  idAttribute: "_id"
+    idAttribute: "_id"
+
+  , defaults: {
+      name: ""
+    , author: ""
+    , author_uri: ""
+  }
 });
