@@ -207,27 +207,6 @@ window.require.define({"initialize": function(exports, require, module) {
   
 }});
 
-window.require.define({"lib/data_method": function(exports, require, module) {
-  jQuery(function ($) {
-    $('[data-method]').click(function(e) {
-      e.preventDefault();
-
-      // TODO: Add "Are you sure?" if link has data-confirm = true
-      var f = document.createElement('form');
-      var method = $(this).attr('data-method').toLowerCase();
-      $(this).after($(f).attr({
-        method: 'post',
-        action: $(this).attr('href'),
-        style: "visibility:hidden;display:none;"
-      }).append('<input type="hidden" name="_method" value="'
-          + method
-          + '" />'));
-      $(f).submit();
-    });
-  });
-  
-}});
-
 window.require.define({"lib/defaults": function(exports, require, module) {
   module.exports = {
     regions: [
@@ -579,23 +558,10 @@ window.require.define({"views/faq": function(exports, require, module) {
     , template = require("views/templates/faq");
 
   module.exports = View.extend({
-    events: {
-      "click [href='#faq']": "preventDefault"
-    }
-
-    , initialize: function () {
-      // Show FAQ collapsed by default
-      $("#faq").collapse();
-    }
-
-    , render: function () {
+    render: function () {
       this.setElement(template());
 
       return this;
-    }
-
-    , preventDefault: function (e) {
-      e.preventDefault();
     }
   });
   
@@ -1013,13 +979,28 @@ window.require.define({"views/templates/blocks/menu": function(exports, require,
     return "<nav class=\"columns site-navigation main-navigation\" role=\"navigation\">\n  <h1 class=\"assistive-text\">Menu</h1>\n  <div class=\"skip-link assistive-text\">\n    <a href=\"#content\" title=\"Skip to content\">Skip to content</a>\n  </div>\n  <div>\n    <ul class=\"menu\">\n      <li class=\"menu-item\"><a href=\"#\">Page</a>\n        <ul class=\"sub-menu\">\n          <li class=\"menu-item\"><a href=\"#\">Third Page</a>\n            <ul class=\"sub-menu\">\n              <li class=\"menu-item\"><a href=\"#\">Fourth Page</a></li>\n            </ul>\n          </li>\n        </ul>\n      </li>\n      <li class=\"menu-item\"><a href=\"#\">Second Page</a></li>\n    </ul>\n  </div>\n</nav>\n";});
 }});
 
+window.require.define({"views/templates/blocks/searchform": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div class=\"columns searchform\">\n  <form method=\"get\" id=\"searchform\" action=\"";
+    foundHelper = helpers.home_url;
+    stack1 = foundHelper || depth0.home_url;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "home_url", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" role=\"search\">\n    <label for=\"s\" class=\"assistive-text\">Search</label>\n    <input type=\"text\" class=\"field\" name=\"s\" id=\"s\" placeholder=\"Search &hellip;\" />\n    <input type=\"submit\" class=\"submit\" name=\"submit\" id=\"searchsubmit\" value=\"Search\" />\n  </form>\n</div>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/faq": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
-    return "<div class=\"well\">\n  <div class=\"page-header\">\n    <h1>\n      Premium Designs\n      <small>for your WordPress site</small>\n    </h1>\n  </div>\n  <p class=\"lead\">Customize before you download! Start by choosing a theme below.\n  (<a data-toggle=\"collapse\" data-target=\"#faq\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n  <div id=\"faq\" class=\"collapse\">\n    <h3>Frequently Asked Questions</h3>\n    <h4>How it works?</h4>\n    <ul>\n      <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n      <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n      to the customizer where you can make edits until you are satisfied.</li>\n      <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n    </ul>\n    <h4>Something doesn't work. What should I do?</h4>\n    <p>It maybe our fault and we are sorry for that. This site is a work in progress and\n    we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n    and we will quickly find a solution.</p>\n\n    <p><a data-toggle=\"collapse\" data-target=\"#faq\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n  </div>\n</div>\n";});
+    return "<div class=\"well\">\n  <div class=\"page-header\">\n    <h1>\n      Premium Designs\n      <small>for your WordPress site</small>\n    </h1>\n  </div>\n  <p class=\"lead\">Customize before you download! Start by choosing a theme below.\n  (<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n  <div id=\"faq\" class=\"collapse\">\n    <h3>Frequently Asked Questions</h3>\n    <h4>How it works?</h4>\n    <ul>\n      <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n      <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n      to the customizer where you can make edits until you are satisfied.</li>\n      <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n    </ul>\n    <h4>Something doesn't work. What should I do?</h4>\n    <p>It maybe our fault and we are sorry for that. This site is a work in progress and\n    we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n    and we will quickly find a solution.</p>\n\n    <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {
