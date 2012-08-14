@@ -2,9 +2,9 @@
 var Model = require("models/base/model");
 
 module.exports = Model.extend({
-    defaults: {
-        type: ""
-      , name: ""
+  defaults: {
+      type: "sidebar"
+    , name: ""
   }
 
   , validate: function (attrs) {

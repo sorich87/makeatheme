@@ -6,7 +6,7 @@ describe ("Region", function () {
     var region = new Region();
 
     expect(region.get("name")).to.equal("");
-    expect(region.get("type")).to.equal("");
+    expect(region.get("type")).to.equal("sidebar");
   });
 
   it ("will set passed attributes on the model instance when created", function () {
