@@ -7,7 +7,9 @@ module.exports = Backbone.Router.extend({
   }
 
   , index: function() {
-    $("#main").html(app.indexView.render().$el);
+    $("#main").empty()
+      .append(app.faqView.render().$el)
+      .append(app.themeListView.render().$el);
   }
 
   , theme: function(id) {

@@ -2,7 +2,7 @@
 Application.initialize = function() {
   var defaults = require("lib/defaults")
 
-    // data from server
+    // merge data from server with default values
     , data = _.defaults(this.data, defaults)
 
     // collections
@@ -15,7 +15,7 @@ Application.initialize = function() {
     , Site = require("models/site")
 
     // views
-    , IndexView = require("views/index")
+    , FaqView = require("views/faq")
     , ThemeView = require("views/theme")
     , AuthModalView = require("views/auth_modals")
     , ThemeListView = require("views/theme_list")
@@ -29,7 +29,7 @@ Application.initialize = function() {
   this.themes = new ThemesCollection(data.themes);
   this.site = new Site;
 
-  this.indexView = new IndexView();
+  this.faqView = new FaqView();
   this.themeView = new ThemeView();
 
   this.authModalView = new AuthModalView();
@@ -42,6 +42,7 @@ Application.initialize = function() {
 
   this.authModalView.render();
 
+  // Application object should not be modified
   if (typeof Object.freeze === 'function') Object.freeze(this);
 };
 

@@ -79,7 +79,7 @@ window.require.define({"application": function(exports, require, module) {
   Application.initialize = function() {
     var defaults = require("lib/defaults")
 
-      // data from server
+      // merge data from server with default values
       , data = _.defaults(this.data, defaults)
 
       // collections
@@ -92,7 +92,7 @@ window.require.define({"application": function(exports, require, module) {
       , Site = require("models/site")
 
       // views
-      , IndexView = require("views/index")
+      , FaqView = require("views/faq")
       , ThemeView = require("views/theme")
       , AuthModalView = require("views/auth_modals")
       , ThemeListView = require("views/theme_list")
@@ -106,7 +106,7 @@ window.require.define({"application": function(exports, require, module) {
     this.themes = new ThemesCollection(data.themes);
     this.site = new Site;
 
-    this.indexView = new IndexView();
+    this.faqView = new FaqView();
     this.themeView = new ThemeView();
 
     this.authModalView = new AuthModalView();
@@ -119,6 +119,7 @@ window.require.define({"application": function(exports, require, module) {
 
     this.authModalView.render();
 
+    // Application object should not be modified
     if (typeof Object.freeze === 'function') Object.freeze(this);
   };
 
@@ -183,7 +184,25 @@ window.require.define({"initialize": function(exports, require, module) {
 
   $(function() {
     application.initialize();
-    Backbone.history.start();
+
+    // Enable HTML5 pushstate
+    Backbone.history.start({pushState: true});
+
+    // All navigation that is relative should be passed through the navigate
+    // method, to be processed by the router. If the link has a `data-bypass`
+    // attribute, bypass the delegation completely.
+    jQuery(function ($) {
+      $(document).on("click", "a:not([data-bypass])", function(e) {
+        var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
+          , root = location.protocol + "//" + location.host + "/";
+
+        if (href.prop && href.prop.slice(0, root.length) === root) {
+          e.preventDefault();
+
+          Backbone.history.navigate(href.attr, true);
+        }
+      });
+  });
   });
   
 }});
@@ -261,81 +280,6 @@ window.require.define({"lib/defaults": function(exports, require, module) {
   
 }});
 
-window.require.define({"lib/editor": function(exports, require, module) {
-  var View = require("views/base/view")
-    , BlockInsertView = require("views/block_insert")
-    , LayoutView = require("views/layout")
-    , SiteView = require("views/site")
-    , StyleEditView = require("views/style_edit")
-    , TemplateSelectView = require("views/template_select");
-
-  module.exports = View.extend({
-    el: $("<div id='x-layout-editor'>\
-        <div class='x-handle'>&Dagger;</div>\
-        </div>")
-
-    , initialize: function () {
-      this.draggableEditor();
-      this.draggableColumns();
-    }
-
-    // Call parent window require function to get data and load views
-    , render: function () {
-      window.parent.require(["init"], $.proxy(function (init) {
-        this.loadViews(init);
-      }, this));
-    }
-
-    , draggableEditor: function () {
-      $(window.document).on({
-        draginit: function (e, drag) {
-          var mouse = drag.mouseElementPosition;
-
-          drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
-        }
-
-        , dragmove: function (e, drag) {
-          $(drag.element).parent().css("zIndex", 9999);
-        }
-      }, "#x-layout-editor .x-handle");
-    }
-
-    // Load views
-    , loadViews: function(init) {
-      this.$el
-
-        // Append template select view
-        .append(new TemplateSelectView({
-          collection: init.templates
-        }).render().$el)
-
-        // Append block insertion view
-        .append(new BlockInsertView({
-          collection: init.blocks
-        }).render().$el)
-
-        // Append CSS editor view
-        .append(new StyleEditView({
-          collection: init.styles
-        }).render().$el)
-
-        // Append result to body element
-        .appendTo(new SiteView({
-            model: init.site
-          , regions: init.regions.models
-          , blocks: init.blocks.models
-        }).render().$el);
-    }
-
-    , draggableColumns: function () {
-      new LayoutView;
-    }
-  });
-
-  (new EditorView).render();
-  
-}});
-
 window.require.define({"lib/router": function(exports, require, module) {
   var app = require("application");
 
@@ -346,7 +290,9 @@ window.require.define({"lib/router": function(exports, require, module) {
     }
 
     , index: function() {
-      $("#main").html(app.indexView.render().$el);
+      $("#main").empty()
+        .append(app.faqView.render().$el)
+        .append(app.themeListView.render().$el);
     }
 
     , theme: function(id) {
@@ -553,33 +499,99 @@ window.require.define({"views/block_insert": function(exports, require, module) 
   
 }});
 
-window.require.define({"views/index": function(exports, require, module) {
-  var app = require("application")
-    , View = require("views/base/view")
+window.require.define({"views/editor": function(exports, require, module) {
+  var View = require("views/base/view")
+    , BlockInsertView = require("views/block_insert")
+    , LayoutView = require("views/layout")
+    , SiteView = require("views/site")
+    , StyleEditView = require("views/style_edit")
+    , TemplateSelectView = require("views/template_select");
+
+  module.exports = View.extend({
+    el: $("<div id='x-layout-editor'>\
+        <div class='x-handle'>&Dagger;</div>\
+        </div>")
+
+    , initialize: function () {
+      this.draggableEditor();
+      this.draggableColumns();
+    }
+
+    // Call parent window require function to get data and load views
+    , render: function () {
+      window.parent.require(["init"], $.proxy(function (init) {
+        this.loadViews(init);
+      }, this));
+    }
+
+    , draggableEditor: function () {
+      $(window.document).on({
+        draginit: function (e, drag) {
+          var mouse = drag.mouseElementPosition;
+
+          drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+        }
+
+        , dragmove: function (e, drag) {
+          $(drag.element).parent().css("zIndex", 9999);
+        }
+      }, "#x-layout-editor .x-handle");
+    }
+
+    // Load views
+    , loadViews: function(init) {
+      this.$el
+
+        // Append template select view
+        .append(new TemplateSelectView({
+          collection: init.templates
+        }).render().$el)
+
+        // Append block insertion view
+        .append(new BlockInsertView({
+          collection: init.blocks
+        }).render().$el)
+
+        // Append CSS editor view
+        .append(new StyleEditView({
+          collection: init.styles
+        }).render().$el)
+
+        // Append result to body element
+        .appendTo(new SiteView({
+            model: init.site
+          , regions: init.regions.models
+          , blocks: init.blocks.models
+        }).render().$el);
+    }
+
+    , draggableColumns: function () {
+      new LayoutView;
+    }
+  });
+
+  (new EditorView).render();
+  
+}});
+
+window.require.define({"views/faq": function(exports, require, module) {
+  var View = require("views/base/view")
     , template = require("views/templates/faq");
 
   module.exports = View.extend({
-      id: "#themes-list"
-
-    , events: {
+    events: {
       "click [href='#faq']": "preventDefault"
     }
 
     , initialize: function () {
-      this.collapseFaq();
+      // Show FAQ collapsed by default
+      $("#faq").collapse();
     }
 
     , render: function () {
-      this.$el
-        .append(template())
-        .append(app.themeListView.render().$el);
+      this.setElement(template());
 
       return this;
-    }
-
-    // Show FAQ collapsed by default
-    , collapseFaq: function () {
-      $("#faq").collapse();
     }
 
     , preventDefault: function (e) {
@@ -1001,21 +1013,6 @@ window.require.define({"views/templates/blocks/menu": function(exports, require,
     return "<nav class=\"columns site-navigation main-navigation\" role=\"navigation\">\n  <h1 class=\"assistive-text\">Menu</h1>\n  <div class=\"skip-link assistive-text\">\n    <a href=\"#content\" title=\"Skip to content\">Skip to content</a>\n  </div>\n  <div>\n    <ul class=\"menu\">\n      <li class=\"menu-item\"><a href=\"#\">Page</a>\n        <ul class=\"sub-menu\">\n          <li class=\"menu-item\"><a href=\"#\">Third Page</a>\n            <ul class=\"sub-menu\">\n              <li class=\"menu-item\"><a href=\"#\">Fourth Page</a></li>\n            </ul>\n          </li>\n        </ul>\n      </li>\n      <li class=\"menu-item\"><a href=\"#\">Second Page</a></li>\n    </ul>\n  </div>\n</nav>\n";});
 }});
 
-window.require.define({"views/templates/blocks/searchform": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div class=\"columns searchform\">\n  <form method=\"get\" id=\"searchform\" action=\"";
-    foundHelper = helpers.home_url;
-    stack1 = foundHelper || depth0.home_url;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "home_url", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" role=\"search\">\n    <label for=\"s\" class=\"assistive-text\">Search</label>\n    <input type=\"text\" class=\"field\" name=\"s\" id=\"s\" placeholder=\"Search &hellip;\" />\n    <input type=\"submit\" class=\"submit\" name=\"submit\" id=\"searchsubmit\" value=\"Search\" />\n  </form>\n</div>\n";
-    return buffer;});
-}});
-
 window.require.define({"views/templates/faq": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -1083,10 +1080,8 @@ window.require.define({"views/theme": function(exports, require, module) {
     , template = require("views/templates/theme");
 
   module.exports = View.extend({
-      el: $("#main")
-
-    , render: function () {
-      this.$el.html(template());
+    render: function () {
+      this.setElement(template());
 
       $("body").addClass("theme");
 
@@ -1096,6 +1091,8 @@ window.require.define({"views/theme": function(exports, require, module) {
           $("body").removeClass("theme");
         }
       });
+
+      return this;
     }
   });
   

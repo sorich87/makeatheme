@@ -2,10 +2,8 @@ var View = require("views/base/view")
   , template = require("views/templates/theme");
 
 module.exports = View.extend({
-    el: $("#main")
-
-  , render: function () {
-    this.$el.html(template());
+  render: function () {
+    this.setElement(template());
 
     $("body").addClass("theme");
 
@@ -15,5 +13,7 @@ module.exports = View.extend({
         $("body").removeClass("theme");
       }
     });
+
+    return this;
   }
 });
