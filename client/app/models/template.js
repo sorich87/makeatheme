@@ -12,9 +12,8 @@
 var Model = require("models/base/model");
 
 module.exports = Model.extend({
-    defaults: {
-        name: ""
-      , filename: ""
-      , current: false
+  defaults: {
+      name: ""
+    , filename: ""
   }
 });
