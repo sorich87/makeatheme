@@ -26,20 +26,23 @@ exports.config =
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone.js',
           'vendor/scripts/backbone-mediator.js',
-          'vendor/scripts/handlebars.js',
 
           # jQuery++
           'vendor/scripts/jquerypp/jquery.compare.js',
           'vendor/scripts/jquerypp/jquery.within.js',
           'vendor/scripts/jquerypp/jquery.lang.vector.js',
           'vendor/scripts/jquerypp/jquery.event.livehack.js',
+          'vendor/scripts/jquerypp/jquery.event.dom.js',
+          'vendor/scripts/jquerypp/jquery.event.dom.cur_styles.js',
           'vendor/scripts/jquerypp/jquery.event.drag.js',
+          'vendor/scripts/jquerypp/jquery.event.drag.limit.js',
           'vendor/scripts/jquerypp/jquery.event.drop.js',
 
           # Bootstrap from Twitter
           'vendor/scripts/bootstrap/bootstrap-collapse.js',
           'vendor/scripts/bootstrap/bootstrap-modal.js'
         ]
+        after: ['vendor/scripts/handlebars.js']
 
     stylesheets:
       defaultExtension: 'styl'

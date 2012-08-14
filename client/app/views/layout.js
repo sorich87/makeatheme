@@ -1,4 +1,5 @@
-var totalColumnsWidth, isRowFull;
+var totalColumnsWidth, isRowFull
+  , View = require("views/base/view");
 
 // Return total width of all columns children of a row
 // except the one being dragged

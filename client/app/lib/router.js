@@ -4,6 +4,7 @@ module.exports = Backbone.Router.extend({
   routes: {
       "": "index"
     , "themes/:id": "theme"
+    , "editor/:file": "editor"
   }
 
   , index: function() {
@@ -14,5 +15,9 @@ module.exports = Backbone.Router.extend({
 
   , theme: function(id) {
     $("#main").html(app.themeView.render().$el);
+  }
+
+  , editor: function(file) {
+    app.editorView.render();
   }
 });

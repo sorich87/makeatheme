@@ -76,17 +76,20 @@
 
 window.require.define({"application": function(exports, require, module) {
   // Application bootstrapper.
+
+  Application = window.Application || {};
+
   Application.initialize = function() {
     var defaults = require("lib/defaults")
 
-      // merge data from server with default values
-      , data = _.defaults(this.data, defaults)
+      // Get data set in the page, or parent frame if in iframe
+      , data = this.data || window.parent.Application.data
 
       // collections
-      , BlocksCollection = require("collections/blocks")
-      , RegionsCollection = require("collections/regions")
-      , TemplatesCollection = require("collections/templates")
-      , ThemesCollection = require("collections/themes")
+      , Blocks = require("collections/blocks")
+      , Regions = require("collections/regions")
+      , Templates = require("collections/templates")
+      , Themes = require("collections/themes")
 
       // models
       , Site = require("models/site")
@@ -96,19 +99,23 @@ window.require.define({"application": function(exports, require, module) {
       , ThemeView = require("views/theme")
       , AuthModalView = require("views/auth_modals")
       , ThemeListView = require("views/theme_list")
+      , EditorView = require("views/editor")
 
       // router
       , Router = require("lib/router");
 
-    this.regions = new RegionsCollection(data.regions);
-    this.blocks = new BlocksCollection(data.blocks);
-    this.templates = new TemplatesCollection(data.templates);
-    this.themes = new ThemesCollection(data.themes);
+    // merge data from server with default values
+    data = _.defaults(data, defaults);
+
+    this.regions = new Regions(data.regions);
+    this.blocks = new Blocks(data.blocks);
+    this.templates = new Templates(data.templates);
+    this.themes = new Themes(data.themes);
     this.site = new Site;
 
     this.faqView = new FaqView();
     this.themeView = new ThemeView();
-
+    this.editorView = new EditorView();
     this.authModalView = new AuthModalView();
 
     this.themeListView = new ThemeListView({
@@ -117,7 +124,10 @@ window.require.define({"application": function(exports, require, module) {
 
     this.router = new Router();
 
-    this.authModalView.render();
+    // Show modals when not in editor iframe
+    if (! this.editor) {
+      this.authModalView.render();
+    }
 
     // Application object should not be modified
     if (typeof Object.freeze === 'function') Object.freeze(this);
@@ -266,6 +276,7 @@ window.require.define({"lib/router": function(exports, require, module) {
     routes: {
         "": "index"
       , "themes/:id": "theme"
+      , "editor/:file": "editor"
     }
 
     , index: function() {
@@ -276,6 +287,10 @@ window.require.define({"lib/router": function(exports, require, module) {
 
     , theme: function(id) {
       $("#main").html(app.themeView.render().$el);
+    }
+
+    , editor: function(file) {
+      app.editorView.render();
     }
   });
   
@@ -468,18 +483,15 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     , dragend: function (e, drag) {
       var block = this.collection.get(drag.element.data("id"));
 
-      require([
-        "text!templates/blocks/" + block.get("filename") + ".html"
-      ], function (blockTemplate) {
-        drag.element[0].outerHTML = blockTemplate;
-      });
+      drag.element[0].outerHTML = require("views/templates/blocks/" + block.get("filename"))();
     }
   });
   
 }});
 
 window.require.define({"views/editor": function(exports, require, module) {
-  var View = require("views/base/view")
+  var app = require("application")
+    , View = require("views/base/view")
     , BlockInsertView = require("views/block_insert")
     , LayoutView = require("views/layout")
     , SiteView = require("views/site")
@@ -494,13 +506,6 @@ window.require.define({"views/editor": function(exports, require, module) {
     , initialize: function () {
       this.draggableEditor();
       this.draggableColumns();
-    }
-
-    // Call parent window require function to get data and load views
-    , render: function () {
-      window.parent.require(["init"], $.proxy(function (init) {
-        this.loadViews(init);
-      }, this));
     }
 
     , draggableEditor: function () {
@@ -518,29 +523,29 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
 
     // Load views
-    , loadViews: function(init) {
+    , render: function() {
       this.$el
 
         // Append template select view
         .append(new TemplateSelectView({
-          collection: init.templates
+          collection: app.templates
         }).render().$el)
 
         // Append block insertion view
         .append(new BlockInsertView({
-          collection: init.blocks
+          collection: app.blocks
         }).render().$el)
 
         // Append CSS editor view
         .append(new StyleEditView({
-          collection: init.styles
+          collection: app.styles
         }).render().$el)
 
         // Append result to body element
         .appendTo(new SiteView({
-            model: init.site
-          , regions: init.regions.models
-          , blocks: init.blocks.models
+            model: app.site
+          , regions: app.regions.models
+          , blocks: app.blocks.models
         }).render().$el);
     }
 
@@ -548,8 +553,6 @@ window.require.define({"views/editor": function(exports, require, module) {
       new LayoutView;
     }
   });
-
-  (new EditorView).render();
   
 }});
 
@@ -568,7 +571,8 @@ window.require.define({"views/faq": function(exports, require, module) {
 }});
 
 window.require.define({"views/layout": function(exports, require, module) {
-  var totalColumnsWidth, isRowFull;
+  var totalColumnsWidth, isRowFull
+    , View = require("views/base/view");
 
   // Return total width of all columns children of a row
   // except the one being dragged
@@ -790,49 +794,42 @@ window.require.define({"views/site": function(exports, require, module) {
     el: $("body")
 
     , render: function () {
-      var replacements, requires, template;
+      var replacements, requests, template
+        , el = this.el;
 
-      // Build list of region templates to pass to requirejs
-      _.each(this.options.regions, function (region) {
-        return "text!/editor/" + region.get("type") + ".html";
-      });
+      // Site details replacements
+      replacements = {
+          site_title: this.model.get("title")
+        , site_description: this.model.get("description")
+        , home_url: this.model.get("home_url")
+        , site_url: this.model.get("site_url")
+      };
 
-      // Add list of blocks templates to pass to requirejs
-      requires = _.union(requires, _.map(this.options.blocks, function (block) {
-        return "text!templates/blocks/" + block.get("filename") + ".html";
-      }));
+      // Regions replacements
+      requests = _.map(this.options.regions, function (region) {
+        var type = region.get("type");
 
-      require(requires, $.proxy(function () {
-        // Site details replacements
-        replacements = {
-            site_title: this.model.get("title")
-          , site_description: this.model.get("description")
-          , home_url: this.model.get("home_url")
-          , site_url: this.model.get("site_url")
-        };
-
-        // Regions replacements
-        _.each(this.options.regions, function (region) {
-          var type = region.get("type")
-            , html = require("text!/editor/" + type + ".html");
-
+        return $.get("/editor/" + type + ".html", function (html) {
           replacements[type] = html;
         });
+      });
 
-        // Blocks replacements
-        _.each(this.options.blocks, function (block) {
-          var id = block.get("id")
-            , html = require("text!templates/blocks/" + block.get("filename") + ".html");
+      // Blocks replacements
+      _.each(this.options.blocks, function (block) {
+        var id = block.get("id")
+          , block_template = require("views/templates/blocks/" + block.get("filename"));
 
-          replacements[id] = html;
-        });
+        replacements[id] = block_template(replacements);
+      });
 
-        // Perform a double replacement because regions contain tags
-        template = Handlebars.compile(this.$el[0].outerHTML);
+      // Wait for AJAX requests to complete
+      // And perform a double replacement because regions contain tags
+      $.when.apply($, requests).done(function (e) {
+        template = Handlebars.compile(el.outerHTML)
         template = template(replacements);
         template = Handlebars.compile(template);
-        this.$el[0].outerHTML = template(replacements);
-      }, this));
+        el.outerHTML = template(replacements);
+      });
 
       return this;
     }

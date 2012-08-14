@@ -1,4 +1,5 @@
-var View = require("views/base/view")
+var app = require("application")
+  , View = require("views/base/view")
   , BlockInsertView = require("views/block_insert")
   , LayoutView = require("views/layout")
   , SiteView = require("views/site")
@@ -13,13 +14,6 @@ module.exports = View.extend({
   , initialize: function () {
     this.draggableEditor();
     this.draggableColumns();
-  }
-
-  // Call parent window require function to get data and load views
-  , render: function () {
-    window.parent.require(["init"], $.proxy(function (init) {
-      this.loadViews(init);
-    }, this));
   }
 
   , draggableEditor: function () {
@@ -37,29 +31,29 @@ module.exports = View.extend({
   }
 
   // Load views
-  , loadViews: function(init) {
+  , render: function() {
     this.$el
 
       // Append template select view
       .append(new TemplateSelectView({
-        collection: init.templates
+        collection: app.templates
       }).render().$el)
 
       // Append block insertion view
       .append(new BlockInsertView({
-        collection: init.blocks
+        collection: app.blocks
       }).render().$el)
 
       // Append CSS editor view
       .append(new StyleEditView({
-        collection: init.styles
+        collection: app.styles
       }).render().$el)
 
       // Append result to body element
       .appendTo(new SiteView({
-          model: init.site
-        , regions: init.regions.models
-        , blocks: init.blocks.models
+          model: app.site
+        , regions: app.regions.models
+        , blocks: app.blocks.models
       }).render().$el);
   }
 
@@ -67,5 +61,3 @@ module.exports = View.extend({
     new LayoutView;
   }
 });
-
-(new EditorView).render();

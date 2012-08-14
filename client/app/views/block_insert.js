@@ -47,10 +47,6 @@ module.exports = View.extend({
   , dragend: function (e, drag) {
     var block = this.collection.get(drag.element.data("id"));
 
-    require([
-      "text!templates/blocks/" + block.get("filename") + ".html"
-    ], function (blockTemplate) {
-      drag.element[0].outerHTML = blockTemplate;
-    });
+    drag.element[0].outerHTML = require("views/templates/blocks/" + block.get("filename"))();
   }
 });

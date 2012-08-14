@@ -5,49 +5,42 @@ module.exports = View.extend({
   el: $("body")
 
   , render: function () {
-    var replacements, requires, template;
+    var replacements, requests, template
+      , el = this.el;
 
-    // Build list of region templates to pass to requirejs
-    _.each(this.options.regions, function (region) {
-      return "text!/editor/" + region.get("type") + ".html";
-    });
+    // Site details replacements
+    replacements = {
+        site_title: this.model.get("title")
+      , site_description: this.model.get("description")
+      , home_url: this.model.get("home_url")
+      , site_url: this.model.get("site_url")
+    };
 
-    // Add list of blocks templates to pass to requirejs
-    requires = _.union(requires, _.map(this.options.blocks, function (block) {
-      return "text!templates/blocks/" + block.get("filename") + ".html";
-    }));
+    // Regions replacements
+    requests = _.map(this.options.regions, function (region) {
+      var type = region.get("type");
 
-    require(requires, $.proxy(function () {
-      // Site details replacements
-      replacements = {
-          site_title: this.model.get("title")
-        , site_description: this.model.get("description")
-        , home_url: this.model.get("home_url")
-        , site_url: this.model.get("site_url")
-      };
-
-      // Regions replacements
-      _.each(this.options.regions, function (region) {
-        var type = region.get("type")
-          , html = require("text!/editor/" + type + ".html");
-
+      return $.get("/editor/" + type + ".html", function (html) {
         replacements[type] = html;
       });
+    });
 
-      // Blocks replacements
-      _.each(this.options.blocks, function (block) {
-        var id = block.get("id")
-          , html = require("text!templates/blocks/" + block.get("filename") + ".html");
+    // Blocks replacements
+    _.each(this.options.blocks, function (block) {
+      var id = block.get("id")
+        , block_template = require("views/templates/blocks/" + block.get("filename"));
 
-        replacements[id] = html;
-      });
+      replacements[id] = block_template(replacements);
+    });
 
-      // Perform a double replacement because regions contain tags
-      template = Handlebars.compile(this.$el[0].outerHTML);
+    // Wait for AJAX requests to complete
+    // And perform a double replacement because regions contain tags
+    $.when.apply($, requests).done(function (e) {
+      template = Handlebars.compile(el.outerHTML)
       template = template(replacements);
       template = Handlebars.compile(template);
-      this.$el[0].outerHTML = template(replacements);
-    }, this));
+      el.outerHTML = template(replacements);
+    });
 
     return this;
   }
