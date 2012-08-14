@@ -368,9 +368,9 @@ window.require.define({"models/block": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-      defaults: {
-          name: ""
-        , filename: ""
+    defaults: {
+        name: ""
+      , filename: ""
     }
   });
   
@@ -381,9 +381,9 @@ window.require.define({"models/region": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-      defaults: {
-          type: ""
-        , name: ""
+    defaults: {
+        type: "sidebar"
+      , name: ""
     }
 
     , validate: function (attrs) {
@@ -425,10 +425,9 @@ window.require.define({"models/template": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-      defaults: {
-          name: ""
-        , filename: ""
-        , current: false
+    defaults: {
+        name: ""
+      , filename: ""
     }
   });
   
