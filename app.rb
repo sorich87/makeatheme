@@ -5,7 +5,13 @@ require 'sinatra/session'
 require 'mongoid'
 require 'kaminari'
 
-Mongoid.load!("config/mongoid.yml", :development)
+configure :development do
+  Mongoid.load!("config/mongoid.yml", :development)
+end
+
+configure :test do
+  Mongoid.load!("config/mongoid.yml", :test)
+end
 
 # Load initializers
 Dir["config/initializers/*.rb"].each {|file| require file }
@@ -14,7 +20,7 @@ set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 
 # Models
-require 'models/extension'
+require 'models/theme'
 require 'models/store_user'
 
 helpers do
@@ -71,15 +77,21 @@ post '/user.json' do
 end
 
 post '/session.json' do
-  session_params = JSON.parse(request.body.read)["session"]
-  user = StoreUser.authenticate(session_params["email"], session_params["password"])
+  request_body = request.body.read
+  if !request_body.empty?
+    session_params = JSON.parse(request_body)["session"]
+    user = StoreUser.authenticate(session_params["email"], session_params["password"])
+  else
+    user = nil
+  end
 
-  if user
+
+  unless user.nil?
     authenticate_user!(user)
     status 201
     body user.to_json
   else
-    status 404
+    status 400
     body( { "error" => "Invalid user or password combination" }.to_json )
   end
 end
