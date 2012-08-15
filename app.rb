@@ -26,7 +26,8 @@ require 'models/store_user'
 helpers do
   def require_auth!
     unless session?
-      status 403
+      # Meh this is stupid.
+      redirect "/login", 403
     end
   end
 

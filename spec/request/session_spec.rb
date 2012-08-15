@@ -41,4 +41,20 @@ describe :session do
       last_response.status.should == 204
     end
   end
+
+  describe 'being authenticated' do
+    it "should be OK to visit a restricted area" do
+      post '/session.json', {:session => @user_attributes}.to_json
+      get '/restricted'
+      last_response.status.should == 201
+    end
+  end
+
+  describe 'not being authenticated' do
+    it "should not be able to visit restricted areas" do
+      delete '/session.json'
+      get '/restricted'
+      last_response.status.should == 403
+    end
+  end
 end
