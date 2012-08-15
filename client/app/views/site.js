@@ -21,6 +21,9 @@ module.exports = View.extend({
       var type = region.get("type");
 
       return $.get("/editor/" + type + ".html", function (html) {
+        // Set region template here, but it should come from the server instead
+        region.set("template", html);
+
         replacements[type] = html;
       });
     });

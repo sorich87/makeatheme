@@ -258,7 +258,6 @@ window.require.define({"lib/defaults": function(exports, require, module) {
         {
           filename: "index"
         , name: "Default"
-        , current: true
       }
       , {
           filename: "page"
@@ -324,6 +323,7 @@ window.require.define({"models/region": function(exports, require, module) {
     defaults: {
         type: "sidebar"
       , name: ""
+      , template: ""
     }
 
     , validate: function (attrs) {
@@ -810,6 +810,9 @@ window.require.define({"views/site": function(exports, require, module) {
         var type = region.get("type");
 
         return $.get("/editor/" + type + ".html", function (html) {
+          // Set region template here, but it should come from the server instead
+          region.set("template", html);
+
           replacements[type] = html;
         });
       });
@@ -905,7 +908,9 @@ window.require.define({"views/template_select": function(exports, require, modul
         , template = this.collection.getByCid(modelCid);
 
       // Reset current template
-      this.currentTemplate.set("current", false);
+      if (this.currentTemplate) {
+        this.currentTemplate.set("current", false);
+      }
       template.set("current", true);
 
       // Load template file

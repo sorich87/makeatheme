@@ -49,7 +49,9 @@ module.exports = View.extend({
       , template = this.collection.getByCid(modelCid);
 
     // Reset current template
-    this.currentTemplate.set("current", false);
+    if (this.currentTemplate) {
+      this.currentTemplate.set("current", false);
+    }
     template.set("current", true);
 
     // Load template file
