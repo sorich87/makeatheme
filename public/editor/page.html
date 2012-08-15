@@ -13,11 +13,16 @@
 
   <title>Welcome to Foundation</title>
 
-  <script data-main="/js/editor" src="/js/vendor/require.js"></script>
+  <script src="/javascripts/vendor.js"></script>
+  <script src="/javascripts/app.js"></script>
+  <script>
+    Application = { editor: true };
+    require('initialize');
+  </script>
 
   <!-- Included CSS Files -->
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="/css/editor.css">
+  <link rel="stylesheet" href="editor.css">
 
   <!-- IE Fix for HTML5 Tags -->
   <!--[if lt IE 9]>
@@ -27,19 +32,19 @@
 </head>
 <body class="page">
   <div id="page" class="hfeed">
-    {{{header}}}
+    {{{ header }}}
 
     <div class="row" id="main">
       <div class="eight columns" id="content">
-        {{{content}}}
+        {{{ content }}}
       </div>
 
       <div class="four columns widget-area" role="complementary">
-        {{{sidebar}}}
+        {{{ sidebar }}}
       </div>
     </div>
 
-    {{{footer}}}
+    {{{ footer }}}
   </div>
 </body>
 </html>

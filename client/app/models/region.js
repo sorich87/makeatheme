@@ -5,6 +5,7 @@ module.exports = Model.extend({
   defaults: {
       type: "sidebar"
     , name: ""
+    , template: ""
   }
 
   , validate: function (attrs) {

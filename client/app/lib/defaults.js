@@ -38,7 +38,6 @@ module.exports = {
       {
         filename: "index"
       , name: "Default"
-      , current: true
     }
     , {
         filename: "page"
