@@ -22,6 +22,7 @@ class Theme
 
   def as_json(options={})
     {
+      :_id => self._id,
       :name => self.name,
       :author => self.author,
       :author_uri => self.author_uri,
