@@ -313,6 +313,8 @@ window.require.define({"lib/router": function(exports, require, module) {
     }
 
     , theme: function (id) {
+      // Set theme ID used in editor.
+      window.themeID = id;
       $("#main").html(app.themeView.render().$el);
     }
 
@@ -523,21 +525,27 @@ window.require.define({"views/download_button": function(exports, require, modul
     , app = require("application");
 
   module.exports = View.extend({
-      el: "<button id='x-download-button' class='x-btn x-btn-success'>Download Theme</button>"
+      id: "x-download-button"
 
-    , initialize: function () {
-      _.bindAll(this, ["download"]);
-      $(window.document).on("click", this.$el, this.download);
+    , render: function () {
+      this.$el.html("<button class='x-btn x-btn-success'>Download Theme</button>");
+
+      $(window.document).on("click", "button", this.download);
+
+      return this;
     }
 
     , download: function () {
       var customization = {
-          regions: app.regions.toJSON()
-        , templates: app.templates.toJSON()
+          regions: app.regions.models
+        , templates: app.templates.models
       };
 
-      $.post("/themes/" + theme + "/customize.json", function (data) {
-        // Do something with the result
+      $.ajax({
+          url: "/themes/" + window.parent.themeID + "/customize.json"
+        , type: "POST"
+        , contentType: "application/json; charset=utf-8"
+        , data: JSON.stringify(customization)
       });
     }
   });

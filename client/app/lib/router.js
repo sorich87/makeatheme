@@ -14,6 +14,8 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
+    // Set theme ID used in editor.
+    window.themeID = id;
     $("#main").html(app.themeView.render().$el);
   }
 
