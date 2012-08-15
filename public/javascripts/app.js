@@ -99,6 +99,12 @@ window.require.define({"application": function(exports, require, module) {
       , ThemeView = require("views/theme")
       , AuthModalView = require("views/auth_modals")
       , ThemeListView = require("views/theme_list")
+      , TemplateSelectView = require("views/template_select")
+      , BlockInsertView = require("views/block_insert")
+      , StyleEditView = require("views/style_edit")
+      , DownloadButtonView = require("views/download_button")
+      , SiteView = require("views/site")
+      , LayoutView = require("views/layout")
       , EditorView = require("views/editor")
 
       // router
@@ -118,9 +124,31 @@ window.require.define({"application": function(exports, require, module) {
     this.editorView = new EditorView();
     this.authModalView = new AuthModalView();
 
+    this.templateSelectView = new TemplateSelectView({
+      collection: this.templates
+    });
+
+    this.blockInsertView = new BlockInsertView({
+      collection: this.blocks
+    });
+
+    this.styleEditView = new StyleEditView({
+      collection: this.styles
+    });
+
+    this.downloadButtonView = new DownloadButtonView;
+
     this.themeListView = new ThemeListView({
       collection: this.themes
     });
+
+    this.siteView = new SiteView({
+        model: this.site
+      , regions: this.regions.models
+      , blocks: this.blocks.models
+    });
+
+    this.layoutView = new LayoutView();
 
     this.router = new Router();
 
@@ -278,18 +306,19 @@ window.require.define({"lib/router": function(exports, require, module) {
       , "editor/:file": "editor"
     }
 
-    , index: function() {
+    , index: function () {
       $("#main").empty()
         .append(app.faqView.render().$el)
         .append(app.themeListView.render().$el);
     }
 
-    , theme: function(id) {
+    , theme: function (id) {
       $("#main").html(app.themeView.render().$el);
     }
 
-    , editor: function(file) {
+    , editor: function (file) {
       app.editorView.render();
+      app.layoutView.render();
     }
   });
   
@@ -489,14 +518,35 @@ window.require.define({"views/block_insert": function(exports, require, module) 
   
 }});
 
+window.require.define({"views/download_button": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+      el: "<button id='x-download-button' class='x-btn x-btn-success'>Download Theme</button>"
+
+    , initialize: function () {
+      _.bindAll(this, ["download"]);
+      $(window.document).on("click", this.$el, this.download);
+    }
+
+    , download: function () {
+      var customization = {
+          regions: app.regions.toJSON()
+        , templates: app.templates.toJSON()
+      };
+
+      $.post("/themes/" + theme + "/customize.json", function (data) {
+        // Do something with the result
+      });
+    }
+  });
+  
+}});
+
 window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
-    , View = require("views/base/view")
-    , BlockInsertView = require("views/block_insert")
-    , LayoutView = require("views/layout")
-    , SiteView = require("views/site")
-    , StyleEditView = require("views/style_edit")
-    , TemplateSelectView = require("views/template_select");
+    , View = require("views/base/view");
 
   module.exports = View.extend({
     el: $("<div id='x-layout-editor'>\
@@ -504,11 +554,6 @@ window.require.define({"views/editor": function(exports, require, module) {
         </div>")
 
     , initialize: function () {
-      this.draggableEditor();
-      this.draggableColumns();
-    }
-
-    , draggableEditor: function () {
       $(window.document).on({
         draginit: function (e, drag) {
           var mouse = drag.mouseElementPosition;
@@ -527,30 +572,19 @@ window.require.define({"views/editor": function(exports, require, module) {
       this.$el
 
         // Append template select view
-        .append(new TemplateSelectView({
-          collection: app.templates
-        }).render().$el)
+        .append(app.templateSelectView.render().$el)
 
         // Append block insertion view
-        .append(new BlockInsertView({
-          collection: app.blocks
-        }).render().$el)
+        .append(app.blockInsertView.render().$el)
 
         // Append CSS editor view
-        .append(new StyleEditView({
-          collection: app.styles
-        }).render().$el)
+        .append(app.styleEditView.render().$el)
+
+        // Append download button view
+        .append(app.downloadButtonView.render().$el)
 
         // Append result to body element
-        .appendTo(new SiteView({
-            model: app.site
-          , regions: app.regions.models
-          , blocks: app.blocks.models
-        }).render().$el);
-    }
-
-    , draggableColumns: function () {
-      new LayoutView;
+        .appendTo(app.siteView.render().$el);
     }
   });
   
@@ -601,7 +635,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , currentAction: null
 
-    , initialize: function () {
+    , render: function () {
       this.highlightColumns();
       this.setupDrag();
       this.setupDrop();

@@ -22,6 +22,12 @@ Application.initialize = function() {
     , ThemeView = require("views/theme")
     , AuthModalView = require("views/auth_modals")
     , ThemeListView = require("views/theme_list")
+    , TemplateSelectView = require("views/template_select")
+    , BlockInsertView = require("views/block_insert")
+    , StyleEditView = require("views/style_edit")
+    , DownloadButtonView = require("views/download_button")
+    , SiteView = require("views/site")
+    , LayoutView = require("views/layout")
     , EditorView = require("views/editor")
 
     // router
@@ -41,9 +47,31 @@ Application.initialize = function() {
   this.editorView = new EditorView();
   this.authModalView = new AuthModalView();
 
+  this.templateSelectView = new TemplateSelectView({
+    collection: this.templates
+  });
+
+  this.blockInsertView = new BlockInsertView({
+    collection: this.blocks
+  });
+
+  this.styleEditView = new StyleEditView({
+    collection: this.styles
+  });
+
+  this.downloadButtonView = new DownloadButtonView;
+
   this.themeListView = new ThemeListView({
     collection: this.themes
   });
+
+  this.siteView = new SiteView({
+      model: this.site
+    , regions: this.regions.models
+    , blocks: this.blocks.models
+  });
+
+  this.layoutView = new LayoutView();
 
   this.router = new Router();
 

@@ -7,17 +7,18 @@ module.exports = Backbone.Router.extend({
     , "editor/:file": "editor"
   }
 
-  , index: function() {
+  , index: function () {
     $("#main").empty()
       .append(app.faqView.render().$el)
       .append(app.themeListView.render().$el);
   }
 
-  , theme: function(id) {
+  , theme: function (id) {
     $("#main").html(app.themeView.render().$el);
   }
 
-  , editor: function(file) {
+  , editor: function (file) {
     app.editorView.render();
+    app.layoutView.render();
   }
 });
