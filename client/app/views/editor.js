@@ -1,10 +1,5 @@
 var app = require("application")
-  , View = require("views/base/view")
-  , BlockInsertView = require("views/block_insert")
-  , LayoutView = require("views/layout")
-  , SiteView = require("views/site")
-  , StyleEditView = require("views/style_edit")
-  , TemplateSelectView = require("views/template_select");
+  , View = require("views/base/view");
 
 module.exports = View.extend({
   el: $("<div id='x-layout-editor'>\
@@ -12,11 +7,6 @@ module.exports = View.extend({
       </div>")
 
   , initialize: function () {
-    this.draggableEditor();
-    this.draggableColumns();
-  }
-
-  , draggableEditor: function () {
     $(window.document).on({
       draginit: function (e, drag) {
         var mouse = drag.mouseElementPosition;
@@ -35,29 +25,18 @@ module.exports = View.extend({
     this.$el
 
       // Append template select view
-      .append(new TemplateSelectView({
-        collection: app.templates
-      }).render().$el)
+      .append(app.templateSelectView.render().$el)
 
       // Append block insertion view
-      .append(new BlockInsertView({
-        collection: app.blocks
-      }).render().$el)
+      .append(app.blockInsertView.render().$el)
 
       // Append CSS editor view
-      .append(new StyleEditView({
-        collection: app.styles
-      }).render().$el)
+      .append(app.styleEditView.render().$el)
+
+      // Append download button view
+      .append(app.downloadButtonView.render().$el)
 
       // Append result to body element
-      .appendTo(new SiteView({
-          model: app.site
-        , regions: app.regions.models
-        , blocks: app.blocks.models
-      }).render().$el);
-  }
-
-  , draggableColumns: function () {
-    new LayoutView;
+      .appendTo(app.siteView.render().$el);
   }
 });

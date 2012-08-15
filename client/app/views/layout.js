@@ -28,7 +28,7 @@ module.exports = View.extend({
 
   , currentAction: null
 
-  , initialize: function () {
+  , render: function () {
     this.highlightColumns();
     this.setupDrag();
     this.setupDrop();
