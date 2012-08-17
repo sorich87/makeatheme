@@ -4,6 +4,7 @@ require 'sinatra'
 require 'sinatra/session'
 require 'mongoid'
 require 'kaminari'
+require 'base64'
 
 configure :development do
   Mongoid.load!("config/mongoid.yml", :development)
@@ -22,6 +23,9 @@ set :method_override, true
 # Models
 require 'models/theme'
 require 'models/store_user'
+
+# Classes
+require 'classes/customization_parser'
 
 helpers do
   def require_auth!
@@ -72,6 +76,24 @@ get '/themes/:id.json' do
   else
     status 404
   end
+end
+
+post '/themes/:id/customize.json' do
+  json = JSON.parse(request.body.read)
+  puts json
+
+  # Adding template strings to templates here, should be in JSON or implemented
+  # some other way in reality.
+  json["templates"].each_with_index do |template, index|
+    filename = File.join('public/editor/', "#{template['filename']}.html")
+    template_string = File.read(filename)
+    json["templates"][index]["template"] = template_string
+  end
+
+  cs = CustomizationParser.parse(json)
+  zipfile_path = cs.zipfile_path
+
+  response.write(Base64.encode64(File.read(zipfile_path)))
 end
 
 post '/user.json' do

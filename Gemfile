@@ -13,6 +13,7 @@ gem 'paperclip', '~> 3.0.0'
 gem 'fog', '~> 1.3.0'
 gem 'handlebars', '~> 0.3.1'
 gem 'rspec', '~> 2.11.0'
+gem "rubyzip", "~> 0.9.9"
 
 # Automatic reload when editing files
 gem 'shotgun'

@@ -546,6 +546,10 @@ window.require.define({"views/download_button": function(exports, require, modul
         , type: "POST"
         , contentType: "application/json; charset=utf-8"
         , data: JSON.stringify(customization)
+        , success: function(data) {
+            var el = '<iframe src="data:application.zip/octet-stream;base64,'+data+'"></iframe>.';
+            $('body').append($(el));
+        }
       });
     }
   });
