@@ -6,13 +6,7 @@ require 'mongoid'
 require 'kaminari'
 require 'base64'
 
-configure :development do
-  Mongoid.load!("config/mongoid.yml", :development)
-end
-
-configure :test do
-  Mongoid.load!("config/mongoid.yml", :test)
-end
+Mongoid.load!("config/mongoid.yml")
 
 # Load initializers
 Dir["config/initializers/*.rb"].each {|file| require file }
