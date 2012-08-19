@@ -4989,3 +4989,7 @@ body.theme #main iframe {
   width: 100%;
   position: absolute;
 }
+/* Not found */
+#not-found {
+  text-align: center;
+}

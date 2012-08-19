@@ -18,9 +18,11 @@ Application.initialize = function() {
     , Site = require("models/site")
 
     // views
+    , AuthView = require("views/auth")
     , FaqView = require("views/faq")
     , ThemeView = require("views/theme")
-    , AuthModalView = require("views/auth_modals")
+    , LoginView = require("views/login")
+    , RegisterView = require("views/register")
     , ThemeListView = require("views/theme_list")
     , TemplateSelectView = require("views/template_select")
     , BlockInsertView = require("views/block_insert")
@@ -29,6 +31,7 @@ Application.initialize = function() {
     , SiteView = require("views/site")
     , LayoutView = require("views/layout")
     , EditorView = require("views/editor")
+    , NotFoundView = require("views/not_found")
 
     // router
     , Router = require("lib/router");
@@ -45,8 +48,9 @@ Application.initialize = function() {
   this.faqView = new FaqView();
   this.themeView = new ThemeView();
   this.editorView = new EditorView();
-  this.authModalView = new AuthModalView();
-
+  this.loginView = new LoginView();
+  this.registerView = new RegisterView();
+  this.notFoundView = new NotFoundView();
   this.templateSelectView = new TemplateSelectView({
     collection: this.templates
   });
@@ -75,10 +79,9 @@ Application.initialize = function() {
 
   this.router = new Router();
 
-  // Show modals when not in editor iframe
-  if (! this.editor) {
-    this.authModalView.render();
-  }
+  (new AuthView({
+    user: this.currentUser
+  }).render())
 
   // Application object should not be modified
   if (typeof Object.freeze === 'function') Object.freeze(this);

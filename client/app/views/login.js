@@ -1,5 +1,5 @@
 var View = require("views/base/view");
 
 module.exports = View.extend({
-  template: "faq"
+  template: "login"
 });

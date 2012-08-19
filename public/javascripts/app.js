@@ -95,9 +95,11 @@ window.require.define({"application": function(exports, require, module) {
       , Site = require("models/site")
 
       // views
+      , AuthView = require("views/auth")
       , FaqView = require("views/faq")
       , ThemeView = require("views/theme")
-      , AuthModalView = require("views/auth_modals")
+      , LoginView = require("views/login")
+      , RegisterView = require("views/register")
       , ThemeListView = require("views/theme_list")
       , TemplateSelectView = require("views/template_select")
       , BlockInsertView = require("views/block_insert")
@@ -106,6 +108,7 @@ window.require.define({"application": function(exports, require, module) {
       , SiteView = require("views/site")
       , LayoutView = require("views/layout")
       , EditorView = require("views/editor")
+      , NotFoundView = require("views/not_found")
 
       // router
       , Router = require("lib/router");
@@ -122,8 +125,9 @@ window.require.define({"application": function(exports, require, module) {
     this.faqView = new FaqView();
     this.themeView = new ThemeView();
     this.editorView = new EditorView();
-    this.authModalView = new AuthModalView();
-
+    this.loginView = new LoginView();
+    this.registerView = new RegisterView();
+    this.notFoundView = new NotFoundView();
     this.templateSelectView = new TemplateSelectView({
       collection: this.templates
     });
@@ -152,10 +156,9 @@ window.require.define({"application": function(exports, require, module) {
 
     this.router = new Router();
 
-    // Show modals when not in editor iframe
-    if (! this.editor) {
-      this.authModalView.render();
-    }
+    (new AuthView({
+      user: this.currentUser
+    }).render())
 
     // Application object should not be modified
     if (typeof Object.freeze === 'function') Object.freeze(this);
@@ -226,10 +229,23 @@ window.require.define({"initialize": function(exports, require, module) {
     // Enable HTML5 pushstate
     Backbone.history.start({pushState: true});
 
-    // All navigation that is relative should be passed through the navigate
-    // method, to be processed by the router. If the link has a `data-bypass`
-    // attribute, bypass the delegation completely.
     jQuery(function ($) {
+
+      // When a modal is closed, go back to the previous page
+      // or go to the homepage if no previous page (#main is empty)
+      $(document).on("hidden", ".modal", function () {
+        if ($("#main").children().length === 0) {
+          Backbone.history.navigate("/", true);
+        } else {
+          history.go(-1);
+        }
+      });
+
+      // All navigation that is relative should be passed through the navigate
+      // method, to be processed by the router.
+      // If the link has a `data-bypass` attribute, bypass the delegation completely.
+      // If the link has a `data-replace` attribute, update the URL without creating
+      // an entry in the browser history.
       $(document).on("click", "a:not([data-bypass])", function(e) {
         var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
           , root = location.protocol + "//" + location.host + "/";
@@ -237,10 +253,13 @@ window.require.define({"initialize": function(exports, require, module) {
         if (href.prop && href.prop.slice(0, root.length) === root) {
           e.preventDefault();
 
-          Backbone.history.navigate(href.attr, true);
+          Backbone.history.navigate(href.attr, {
+            trigger: true,
+            replace: !!$(this).data("replace")
+          });
         }
       });
-  });
+    });
   });
   
 }});
@@ -304,6 +323,9 @@ window.require.define({"lib/router": function(exports, require, module) {
         "": "index"
       , "themes/:id": "theme"
       , "editor/:file": "editor"
+      , "login": "login"
+      , "register": "register"
+      , "*actions": "notFound"
     }
 
     , index: function () {
@@ -321,6 +343,28 @@ window.require.define({"lib/router": function(exports, require, module) {
     , editor: function (file) {
       app.editorView.render();
       app.layoutView.render();
+    }
+
+    , login: function () {
+      // Remove all modals and show the 'login' one
+      // We could use modal("hide") here but it would trigger
+      // events which we don't want
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.loginView.render().$el.modal("show"));
+    }
+
+    , register: function () {
+      // Remove all modals and show the 'register' one
+      // We could use modal("hide") here but it would trigger
+      // events which we don't want
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.registerView.render().$el.modal("show"));
+    }
+
+    , notFound: function () {
+      $("#main").html(app.notFoundView.render().$el);
     }
   });
   
@@ -420,38 +464,20 @@ window.require.define({"models/theme": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/auth_modals": function(exports, require, module) {
-  // Display the login and register links and modals
-  var app = require("application")
-    , View = require("views/base/view")
-    , authLinksTemplate = require("views/templates/auth_links")
-    , authModalsTemplate = require("views/templates/auth_modals");
+window.require.define({"views/auth": function(exports, require, module) {
+  // Display the login and register links
+  var View = require("views/base/view")
+    , template = require("views/templates/auth_links");
 
   module.exports = View.extend({
       el: $("body")
 
     , render: function () {
-      this.renderLinks();
-      this.renderModals();
+      var links = template({currentUser: this.options.currentUser});
+
+      $("#auth-links").html(links);
 
       return this;
-    }
-
-    , renderLinks: function () {
-      var links;
-
-      links = authLinksTemplate({currentUser: app.currentUser});
-
-      $("#auth-links").html("<ul class='nav'>" + links + "</ul>");
-    }
-
-    , renderModals: function () {
-      // Hide modal previously shown before showing a new one
-      $("#register, #login, #new-password, #confirm-password").on("show", function () {
-        $("#register, #login, #new-password, #confirm-password").not("#" + this.id).modal("hide");
-      })
-
-      $(authModalsTemplate()).appendTo(this.$el);
     }
   });
   
@@ -460,6 +486,14 @@ window.require.define({"views/auth_modals": function(exports, require, module) {
 window.require.define({"views/base/view": function(exports, require, module) {
   // Base class for all views.
   module.exports = Backbone.View.extend({
+    render: function () {
+      // If template attribute is set, render the template
+      if (this.template) {
+        this.setElement(require("views/templates/" + this.template)());
+      }
+
+      return this;
+    }
   });
   
 }});
@@ -603,15 +637,10 @@ window.require.define({"views/editor": function(exports, require, module) {
 }});
 
 window.require.define({"views/faq": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/faq");
+  var View = require("views/base/view");
 
   module.exports = View.extend({
-    render: function () {
-      this.setElement(template());
-
-      return this;
-    }
+    template: "faq"
   });
   
 }});
@@ -832,6 +861,33 @@ window.require.define({"views/layout": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/login": function(exports, require, module) {
+  var View = require("views/base/view");
+
+  module.exports = View.extend({
+    template: "login"
+  });
+  
+}});
+
+window.require.define({"views/not_found": function(exports, require, module) {
+  var View = require("views/base/view");
+
+  module.exports = View.extend({
+    template: "not_found"
+  });
+  
+}});
+
+window.require.define({"views/register": function(exports, require, module) {
+  var View = require("views/base/view");
+
+  module.exports = View.extend({
+    template: "register"
+  });
+  
+}});
+
 window.require.define({"views/site": function(exports, require, module) {
   var View = require("views/base/view");
 
@@ -974,13 +1030,14 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <li><a href=\"/session\" data-method=\"delete\">Log out</a></li>\n";}
+    return "\n    <li><a href=\"/session\" data-method=\"delete\">Log out</a></li>\n  ";}
 
   function program3(depth0,data) {
     
     
-    return "\n  <li><a href=\"#register\" data-toggle=\"modal\">Register</a></li>\n  <li><a href=\"#login\" data-toggle=\"modal\">Log in</a></li>\n";}
+    return "\n    <li><a href=\"/register\">Register</a></li>\n    <li><a href=\"/login\">Log in</a></li>\n  ";}
 
+    buffer += "<ul class=\"nav\">\n  ";
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
     stack2 = helpers['if'];
@@ -990,17 +1047,8 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += "\n</ul>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/auth_modals": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<div class=\"modal hide\" id=\"login\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Please authenticate yourself</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\" method=\"post\" action=\"/session\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Forgot your password? <a href=\"#new-password\" data-toggle=\"modal\">Reset</a></li>\n      <li>Didn't receive confirmation instructions? <a href=\"#confirm-password\" data-toggle=\"modal\">Resend</a></li>\n      <li>Don't have an account yet? <a href=\"#register\" data-toggle=\"modal\">Register</a></li>\n    </ul>\n  </div>\n</div>\n\n<div class=\"modal hide\" id=\"register\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Create an account</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\" method=\"post\" action=\"\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-first-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-last-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password-confirmation\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Register</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Already have an account? <a href=\"#login\" data-toggle=\"modal\">Log in</a></li>\n    </ul>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/blocks/headerimage": function(exports, require, module) {
@@ -1049,6 +1097,33 @@ window.require.define({"views/templates/faq": function(exports, require, module)
 
 
     return "<div class=\"well\">\n  <div class=\"page-header\">\n    <h1>\n      Premium Designs\n      <small>for your WordPress site</small>\n    </h1>\n  </div>\n  <p class=\"lead\">Customize before you download! Start by choosing a theme below.\n  (<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n  <div id=\"faq\" class=\"collapse\">\n    <h3>Frequently Asked Questions</h3>\n    <h4>How it works?</h4>\n    <ul>\n      <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n      <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n      to the customizer where you can make edits until you are satisfied.</li>\n      <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n    </ul>\n    <h4>Something doesn't work. What should I do?</h4>\n    <p>It maybe our fault and we are sorry for that. This site is a work in progress and\n    we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n    and we will quickly find a solution.</p>\n\n    <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n  </div>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/login": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div class=\"modal\" id=\"login\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Please authenticate yourself</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n      <li>Didn't receive confirmation instructions? <a href=\"\" data-replace=\"true\">Resend</a></li>\n      <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n    </ul>\n  </div>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/not_found": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div id=\"not-found\">\n  <h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n  <p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n  <p>Go back to <a href=\"/\" title=\"thememy.com\">homepage</a> or contact us about a problem.</p>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/register": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div class=\"modal\" id=\"register\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Create an account</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\" method=\"post\" action=\"\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-first-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-last-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password-confirmation\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Register</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    </ul>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {

@@ -1,6 +1,8 @@
-{{#if currentUser}}
-  <li><a href="/session" data-method="delete">Log out</a></li>
-{{else}}
-  <li><a href="#register" data-toggle="modal">Register</a></li>
-  <li><a href="#login" data-toggle="modal">Log in</a></li>
-{{/if}}
+<ul class="nav">
+  {{#if currentUser}}
+    <li><a href="/session" data-method="delete">Log out</a></li>
+  {{else}}
+    <li><a href="/register">Register</a></li>
+    <li><a href="/login">Log in</a></li>
+  {{/if}}
+</ul>
