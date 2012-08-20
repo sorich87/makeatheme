@@ -46,7 +46,9 @@ exports.config =
 
     stylesheets:
       defaultExtension: 'styl'
-      joinTo: 'stylesheets/app.css'
+      joinTo:
+        'stylesheets/app.css': /^(app(\/|\\)styles(\/|\\)(?!editor)|vendor)/
+        'stylesheets/editor.css': /^app(\/|\\)styles(\/|\\)(?=editor)/
       order:
        before: ['vendor/styles/bootstrap/bootstrap.less']
        after: ['vendor/styles/bootstrap/bootstrap-responsive.less']
