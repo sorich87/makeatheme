@@ -16,6 +16,7 @@ Application.initialize = function() {
 
     // models
     , Site = require("models/site")
+    , User = require("models/user")
 
     // views
     , AuthView = require("views/auth")
@@ -43,13 +44,19 @@ Application.initialize = function() {
   this.blocks = new Blocks(data.blocks);
   this.templates = new Templates(data.templates);
   this.themes = new Themes(data.themes);
+
   this.site = new Site;
+  this.currentUser = new User(data.currentUser);
 
   this.faqView = new FaqView();
   this.themeView = new ThemeView();
   this.editorView = new EditorView();
-  this.loginView = new LoginView();
-  this.registerView = new RegisterView();
+  this.loginView = new LoginView({
+    model: this.currentUser
+  });
+  this.registerView = new RegisterView({
+    model: this.currentUser
+  });
   this.notFoundView = new NotFoundView();
   this.templateSelectView = new TemplateSelectView({
     collection: this.templates
@@ -80,7 +87,7 @@ Application.initialize = function() {
   this.router = new Router();
 
   (new AuthView({
-    user: this.currentUser
+    model: this.currentUser
   }).render())
 
   // Application object should not be modified

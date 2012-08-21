@@ -91,7 +91,7 @@ post '/themes/:id/customize.json' do
 end
 
 post '/user.json' do
-  user_params = JSON.parse(request.body.read)["user"]
+  user_params = JSON.parse(request.body.read)
   user_params.slice!("first_name", "last_name", "email", "password")
   user = StoreUser.new(user_params)
   if user.valid?

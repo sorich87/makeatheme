@@ -93,6 +93,7 @@ window.require.define({"application": function(exports, require, module) {
 
       // models
       , Site = require("models/site")
+      , User = require("models/user")
 
       // views
       , AuthView = require("views/auth")
@@ -120,13 +121,19 @@ window.require.define({"application": function(exports, require, module) {
     this.blocks = new Blocks(data.blocks);
     this.templates = new Templates(data.templates);
     this.themes = new Themes(data.themes);
+
     this.site = new Site;
+    this.currentUser = new User(data.currentUser);
 
     this.faqView = new FaqView();
     this.themeView = new ThemeView();
     this.editorView = new EditorView();
-    this.loginView = new LoginView();
-    this.registerView = new RegisterView();
+    this.loginView = new LoginView({
+      model: this.currentUser
+    });
+    this.registerView = new RegisterView({
+      model: this.currentUser
+    });
     this.notFoundView = new NotFoundView();
     this.templateSelectView = new TemplateSelectView({
       collection: this.templates
@@ -157,7 +164,7 @@ window.require.define({"application": function(exports, require, module) {
     this.router = new Router();
 
     (new AuthView({
-      user: this.currentUser
+      model: this.currentUser
     }).render())
 
     // Application object should not be modified
@@ -464,6 +471,44 @@ window.require.define({"models/theme": function(exports, require, module) {
   
 }});
 
+window.require.define({"models/user": function(exports, require, module) {
+  // User model class.
+  var Model = require("models/base/model");
+
+  module.exports = Model.extend({
+      defaults: {
+        first_name: ""
+      , last_name: ""
+      , email: ""
+      , password: ""
+      , password_confirmation: ""
+    }
+
+    , url: "/user.json"
+
+    , validation: {
+        first_name: {
+          required: true
+      }
+      , last_name: {
+          required: true
+      }
+      , email: {
+          required: true
+        , pattern: 'email'
+      }
+      , password: {
+          required: true
+      }
+      , password_confirmation: {
+          required: true
+        , equalTo: 'password'
+      }
+    }
+  });
+  
+}});
+
 window.require.define({"views/auth": function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
@@ -472,8 +517,12 @@ window.require.define({"views/auth": function(exports, require, module) {
   module.exports = View.extend({
       el: $("body")
 
+    , initialize: function () {
+      this.model.on("change", this.render, this);
+    }
+
     , render: function () {
-      var links = template({currentUser: this.options.currentUser});
+      var links = template({currentUser: this.model.toJSON()});
 
       $("#auth-links").html(links);
 
@@ -883,7 +932,68 @@ window.require.define({"views/register": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-    template: "register"
+      template: "register"
+
+    , events: {
+        "click .submit": "createUser"
+      , "change input[type=text]": "removeError"
+    }
+
+    , initialize: function () {
+      Backbone.Validation.bind(this);
+    }
+
+    // Create current user from form input values and submit to the server.
+    // Display error messages in the form.
+    // Hide modal on success.
+    , createUser: function (e) {
+      e.preventDefault();
+
+      var user = this.model
+        , attrs = {};
+
+      this.$("input").each(function () {
+        attrs[this.getAttribute("name")] = this.value;
+      });
+
+      user.save(attrs, {
+        success: function (model, err) {
+          this.$el.modal("hide");
+        }.bind(this)
+
+        , error: function (model, err) {
+          if (err.hasOwnProperty("readyState")) {
+            // Handle validation error messages from server.
+            this.addErrors(JSON.parse(err.responseText));
+          } else {
+            // Handle validation error messages from client.
+            this.addErrors(err);
+          }
+        }.bind(this)
+      });
+    }
+
+    // Display errors in the form.
+    , addErrors: function (errors) {
+      Object.keys(errors).forEach(function (attr) {
+        var msg = errors[attr];
+
+        // When coming from server, messages are in an array,
+        // just display the first one.
+        msg = Array.isArray(msg) ? msg[0] : msg;
+
+        this.$("input[name='" + attr + "']")
+          .after("<span class='help-block'>" + msg + "</span>")
+          .closest(".control-group").addClass("error");
+      });
+    }
+
+    // Remove error message from a field.
+    , removeError: function (e) {
+      $(e.target)
+        .next(".help-block").remove().end()
+        .closest(".control-group").removeClass("error");
+    }
   });
   
 }});
@@ -1040,6 +1150,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     buffer += "<ul class=\"nav\">\n  ";
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
+    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.email);
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -1105,7 +1216,7 @@ window.require.define({"views/templates/login": function(exports, require, modul
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal\" id=\"login\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Please authenticate yourself</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n      <li>Didn't receive confirmation instructions? <a href=\"\" data-replace=\"true\">Resend</a></li>\n      <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n    </ul>\n  </div>\n</div>\n";});
+    return "<div class=\"modal\" id=\"login\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Please authenticate yourself</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n      <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n    </ul>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -1123,7 +1234,7 @@ window.require.define({"views/templates/register": function(exports, require, mo
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal\" id=\"register\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Create an account</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\" method=\"post\" action=\"\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-first-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-last-name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" id=\"new-password-confirmation\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Register</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    </ul>\n  </div>\n</div>\n";});
+    return "<div class=\"modal\" id=\"register\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Create an account</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"password_confirmation\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    </ul>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {
