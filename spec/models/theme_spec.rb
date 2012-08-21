@@ -14,5 +14,4 @@ describe Theme do
   it { should validate_presence_of(:screenshot) }
 
   it { should embed_many(:theme_files) }
-
 end
