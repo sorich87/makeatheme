@@ -96,6 +96,7 @@ post '/user.json' do
   user = StoreUser.new(user_params)
   if user.valid?
     user.save
+    authenticate_user!(user)
     status 201
     body user.to_json
   else
@@ -112,7 +113,6 @@ post '/session.json' do
   else
     user = nil
   end
-
 
   unless user.nil?
     authenticate_user!(user)
