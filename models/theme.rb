@@ -22,7 +22,7 @@ class Theme
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
 
-  validates_presence_of [:name, :author, :author_uri, :description, :screenshot]
+  validates_presence_of [:name, :author, :author_uri, :description]
 
   embeds_many :theme_files
 
