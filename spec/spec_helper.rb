@@ -1,5 +1,6 @@
 require 'rspec'
 require 'rack/test'
+require 'mongoid-rspec'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -17,4 +18,5 @@ end
 
 RSpec.configure do |conf|
   conf.include Rack::Test::Methods
+  conf.include Mongoid::Matchers
 end

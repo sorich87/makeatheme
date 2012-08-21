@@ -18,6 +18,7 @@ group :test, :development do
   gem 'rspec', '~> 2.11.0'
   # Automatic reload when editing files
   gem 'shotgun'
+  gem 'mongoid-rspec'
 end
 
 group :production do

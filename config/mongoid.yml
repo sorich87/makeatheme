@@ -1,7 +1,7 @@
 development:
   sessions:
     default:
-      database: theme_my_development
+      database: pushly_store_development
       hosts:
         - localhost:27017
 test:

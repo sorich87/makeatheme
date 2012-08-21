@@ -1,5 +1,6 @@
 require 'paperclip'
 require 'fog'
+require 'models/theme_file'
 
 class Theme
   include Mongoid::Document
@@ -8,9 +9,12 @@ class Theme
 
   paginates_per 16
 
-  field :name,        type: String
+  field :uri,         type: String
+  field :version,     type: String
   field :author,      type: String
   field :author_uri,  type: String
+  field :description, type: String
+  field :tags,        type: Array
 
   # Fields used by Paperclip
   field :screenshot_file_name
@@ -18,7 +22,9 @@ class Theme
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
 
-  validates_presence_of [:name, :author]
+  validates_presence_of [:name, :author, :author_uri, :description, :screenshot]
+
+  embeds_many :theme_files
 
   def as_json(options={})
     {
