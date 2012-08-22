@@ -935,8 +935,7 @@ window.require.define({"views/register": function(exports, require, module) {
       template: "register"
 
     , events: {
-        "click .submit": "createUser"
-      , "change input[type=text]": "removeError"
+      "click .submit": "createUser"
     }
 
     , initialize: function () {
@@ -944,7 +943,7 @@ window.require.define({"views/register": function(exports, require, module) {
     }
 
     // Create current user from form input values and submit to the server.
-    // Display error messages in the form.
+    // Handle error messages from server.
     // Hide modal on success.
     , createUser: function (e) {
       e.preventDefault();
@@ -957,42 +956,27 @@ window.require.define({"views/register": function(exports, require, module) {
       });
 
       user.save(attrs, {
-        success: function (model, err) {
+        success: function (model, res) {
           this.$el.modal("hide");
         }.bind(this)
 
         , error: function (model, err) {
-          if (err.hasOwnProperty("readyState")) {
-            // Handle validation error messages from server.
-            this.addErrors(JSON.parse(err.responseText));
-          } else {
-            // Handle validation error messages from client.
-            this.addErrors(err);
-          }
+          this.displayServerErrors(err);
         }.bind(this)
       });
     }
 
-    // Display errors in the form.
-    , addErrors: function (errors) {
-      Object.keys(errors).forEach(function (attr) {
-        var msg = errors[attr];
+    , displayServerErrors: function (err) {
+      if (! err.responseText) {
+        return;
+      }
 
-        // When coming from server, messages are in an array,
-        // just display the first one.
-        msg = Array.isArray(msg) ? msg[0] : msg;
+      var msgs = JSON.parse(err.responseText);
 
-        this.$("input[name='" + attr + "']")
-          .after("<span class='help-block'>" + msg + "</span>")
-          .closest(".control-group").addClass("error");
+      Object.keys(msgs).forEach(function (attr) {
+        var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
+        Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
       });
-    }
-
-    // Remove error message from a field.
-    , removeError: function (e) {
-      $(e.target)
-        .next(".help-block").remove().end()
-        .closest(".control-group").removeClass("error");
     }
   });
   

@@ -26,6 +26,7 @@ exports.config =
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone.js',
           'vendor/scripts/backbone-validation.js',
+          'vendor/scripts/backbone-validation-bootstrap.coffee',
 
           # jQuery++
           'vendor/scripts/jquerypp/jquery.compare.js',
