@@ -487,26 +487,22 @@ window.require.define({"models/user": function(exports, require, module) {
     , url: "/user.json"
 
     , validation: {
-      first_name: {
-        required: true
+        first_name: {
+          required: true
       }
       , last_name: {
-        required: true
+          required: true
       }
       , email: {
           required: true
-        , pattern: "email"
+        , pattern: 'email'
       }
       , password: {
-        required: function () {
-          if (this.isNew()) {
-            return true;
-          }
-          return false;
-        }
+          required: true
       }
       , password_confirmation: {
-        equalTo: "password"
+          required: true
+        , equalTo: 'password'
       }
     }
   });
@@ -519,11 +515,7 @@ window.require.define({"views/auth": function(exports, require, module) {
     , template = require("views/templates/auth_links");
 
   module.exports = View.extend({
-      el: $("#auth-links")
-
-    , events: {
-      "click #logout": "deleteSession"
-    }
+      el: $("body")
 
     , initialize: function () {
       this.model.on("change", this.render, this);
@@ -532,24 +524,9 @@ window.require.define({"views/auth": function(exports, require, module) {
     , render: function () {
       var links = template({currentUser: this.model.toJSON()});
 
-      this.$el.empty().append(links);
+      $("#auth-links").html(links);
 
       return this;
-    }
-
-    // Send request to delete current user session
-    // and redirect to homepage on success
-    , deleteSession: function () {
-      $.ajax({
-          contentType: "application/json; charset=UTF-8"
-        , type: "DELETE"
-        , url: "/session.json"
-        , complete: function (jqXHR, textStatus) {
-          if (textStatus === "success") {
-            window.location = "/";
-          }
-        }.bind(this)
-      });
     }
   });
   
@@ -959,8 +936,8 @@ window.require.define({"views/register": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      className: "modal"
-
+      id: "register"
+    , className: "modal"
     , template: "register"
 
     , events: {
@@ -986,8 +963,6 @@ window.require.define({"views/register": function(exports, require, module) {
 
       user.save(attrs, {
         success: function (model, res) {
-          model.set(res);
-
           this.$el.modal("hide");
         }.bind(this)
 
@@ -1155,16 +1130,17 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
+    return "\n    <li><a href=\"/session\" data-method=\"delete\">Log out</a></li>\n  ";}
 
   function program3(depth0,data) {
     
     
-    return "\n  <ul class=\"nav\">\n    <li><a id=\"register\" href=\"/register\">Register</a></li>\n    <li><a id=\"login\" href=\"/login\">Log in</a></li>\n  </ul>\n";}
+    return "\n    <li><a href=\"/register\">Register</a></li>\n    <li><a href=\"/login\">Log in</a></li>\n  ";}
 
+    buffer += "<ul class=\"nav\">\n  ";
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
-    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.id);
+    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.email);
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -1172,7 +1148,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += "\n</ul>\n";
     return buffer;});
 }});
 
