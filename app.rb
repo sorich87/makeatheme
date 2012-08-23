@@ -53,7 +53,13 @@ helpers do
   end
 end
 
+# Set default content type to JSON
+before do
+  content_type :json
+end
+
 get '/' do
+  content_type :html
   load_index
 end
 
@@ -110,7 +116,7 @@ end
 post '/session.json' do
   request_body = request.body.read
   if !request_body.empty?
-    session_params = JSON.parse(request_body)["session"]
+    session_params = JSON.parse(request_body)
     user = StoreUser.authenticate(session_params["email"], session_params["password"])
   else
     user = nil
