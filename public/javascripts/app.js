@@ -538,7 +538,7 @@ window.require.define({"views/base/view": function(exports, require, module) {
     render: function () {
       // If template attribute is set, render the template
       if (this.template) {
-        this.setElement(require("views/templates/" + this.template)());
+        this.$el.empty().append(require("views/templates/" + this.template)());
       }
 
       return this;
@@ -689,7 +689,8 @@ window.require.define({"views/faq": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-    template: "faq"
+      className: "well"
+    , template: "faq"
   });
   
 }});
@@ -914,7 +915,9 @@ window.require.define({"views/login": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-    template: "login"
+      id: "#login"
+    , className: "modal"
+    , template: "login"
   });
   
 }});
@@ -923,7 +926,8 @@ window.require.define({"views/not_found": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-    template: "not_found"
+      id: "not-found"
+    , template: "not_found"
   });
   
 }});
@@ -932,7 +936,9 @@ window.require.define({"views/register": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      template: "register"
+      id: "register"
+    , className: "modal"
+    , template: "register"
 
     , events: {
       "click .submit": "createUser"
@@ -976,7 +982,7 @@ window.require.define({"views/register": function(exports, require, module) {
       Object.keys(msgs).forEach(function (attr) {
         var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
         Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
-      });
+      }.bind(this));
     }
   });
   
@@ -1191,7 +1197,7 @@ window.require.define({"views/templates/faq": function(exports, require, module)
     var foundHelper, self=this;
 
 
-    return "<div class=\"well\">\n  <div class=\"page-header\">\n    <h1>\n      Premium Designs\n      <small>for your WordPress site</small>\n    </h1>\n  </div>\n  <p class=\"lead\">Customize before you download! Start by choosing a theme below.\n  (<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n  <div id=\"faq\" class=\"collapse\">\n    <h3>Frequently Asked Questions</h3>\n    <h4>How it works?</h4>\n    <ul>\n      <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n      <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n      to the customizer where you can make edits until you are satisfied.</li>\n      <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n    </ul>\n    <h4>Something doesn't work. What should I do?</h4>\n    <p>It maybe our fault and we are sorry for that. This site is a work in progress and\n    we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n    and we will quickly find a solution.</p>\n\n    <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n  </div>\n</div>\n";});
+    return "<div class=\"page-header\">\n  <h1>\n    Premium Designs\n    <small>for your WordPress site</small>\n  </h1>\n</div>\n<p class=\"lead\">Customize before you download! Start by choosing a theme below.\n(<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n<div id=\"faq\" class=\"collapse\">\n  <h3>Frequently Asked Questions</h3>\n  <h4>How it works?</h4>\n  <ul>\n    <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n    <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n    to the customizer where you can make edits until you are satisfied.</li>\n    <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n  </ul>\n  <h4>Something doesn't work. What should I do?</h4>\n  <p>It maybe our fault and we are sorry for that. This site is a work in progress and\n  we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n  and we will quickly find a solution.</p>\n\n  <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
@@ -1200,7 +1206,7 @@ window.require.define({"views/templates/login": function(exports, require, modul
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal\" id=\"login\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Please authenticate yourself</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n      <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n    </ul>\n  </div>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"session[email]\" class=\"input-xlarge\" id=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"session[password]\" class=\"input-xlarge\" id=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -1209,7 +1215,7 @@ window.require.define({"views/templates/not_found": function(exports, require, m
     var foundHelper, self=this;
 
 
-    return "<div id=\"not-found\">\n  <h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n  <p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n  <p>Go back to <a href=\"/\" title=\"thememy.com\">homepage</a> or contact us about a problem.</p>\n</div>\n";});
+    return "<h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n<p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n<p>Go back to <a href=\"/\" title=\"thememy.com\">homepage</a> or contact us about a problem.</p>\n";});
 }});
 
 window.require.define({"views/templates/register": function(exports, require, module) {
@@ -1218,7 +1224,7 @@ window.require.define({"views/templates/register": function(exports, require, mo
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal\" id=\"register\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3>Create an account</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-horizontal\">\n      <fieldset>\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-email\">Email Address</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password\">Password</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"password\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n          <div class=\"controls\">\n            <input type=\"text\" class=\"input-xlarge\" name=\"password_confirmation\">\n          </div>\n        </div>\n\n        <div class=\"control-group\">\n          <div class=\"controls\">\n            <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n          </div>\n        </div>\n      </fieldset>\n    </form>\n    <ul class=\"unstyled\">\n      <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    </ul>\n  </div>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create an account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {

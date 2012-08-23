@@ -1,7 +1,9 @@
 var View = require("views/base/view");
 
 module.exports = View.extend({
-    template: "register"
+    id: "register"
+  , className: "modal"
+  , template: "register"
 
   , events: {
     "click .submit": "createUser"
@@ -45,6 +47,6 @@ module.exports = View.extend({
     Object.keys(msgs).forEach(function (attr) {
       var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
       Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
-    });
+    }.bind(this));
   }
 });
