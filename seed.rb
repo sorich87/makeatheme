@@ -6,11 +6,13 @@ attrs = [
     name: "Easel",
     author: "Frumph",
     author_uri: "http://profiles.wordpress.org/frumph",
+    description: "Just some theme I threw together ;-)"
   },
   {
     name: "Hatch",
     author: "Griden",
-    author_uri: "http://profiles.wordpress.org/griden"
+    author_uri: "http://profiles.wordpress.org/griden",
+    description: "Best SEO optimization AJAX, JSON, SOAP, XML and other buzzwords for your buzzness."
   }
 ]
 
