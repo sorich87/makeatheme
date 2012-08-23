@@ -42,11 +42,8 @@ describe ("User", function () {
   it("will require password for new users", function () {
     var user = new User();
 
-    expect(user.validation.password.required.call(user)).to.be.true;
-
-    user.set({id: "1"});
-
-    expect(user.validation.password.required.call(user)).to.be.false;
+    expect(user.validation.password.required.call(user, "", "password", {id: ""})).to.be.true;
+    expect(user.validation.password.required.call(user, "", "password", {id: "1"})).to.be.false;
   });
 
   it ("will save users on the server", function () {

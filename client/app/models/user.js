@@ -24,8 +24,8 @@ module.exports = Model.extend({
       , pattern: "email"
     }
     , password: {
-      required: function () {
-        if (this.isNew()) {
+      required: function (value, attr, computed) {
+        if (computed && !computed.id) {
           return true;
         }
         return false;
