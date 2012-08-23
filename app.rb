@@ -1,4 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'models'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'classes'))
 
 require 'sinatra'
 require 'sinatra/session'
@@ -15,11 +17,11 @@ set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 
 # Models
-require 'models/theme'
-require 'models/store_user'
+require 'theme'
+require 'store_user'
 
 # Classes
-require 'classes/customization_parser'
+require 'customization_parser'
 
 helpers do
   def require_auth!
@@ -130,6 +132,8 @@ delete '/session.json' do
 end
 
 not_found do
-  status 200
-  load_index
+  if Sinatra::Base.production?
+    status 200
+    load_index
+  end
 end
