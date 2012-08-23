@@ -13,22 +13,26 @@ module.exports = Model.extend({
   , url: "/user.json"
 
   , validation: {
-      first_name: {
-        required: true
+    first_name: {
+      required: true
     }
     , last_name: {
-        required: true
+      required: true
     }
     , email: {
         required: true
-      , pattern: 'email'
+      , pattern: "email"
     }
     , password: {
-        required: true
+      required: function () {
+        if (this.isNew()) {
+          return true;
+        }
+        return false;
+      }
     }
     , password_confirmation: {
-        required: true
-      , equalTo: 'password'
+      equalTo: "password"
     }
   }
 });

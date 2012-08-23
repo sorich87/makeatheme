@@ -35,9 +35,18 @@ describe ("User", function () {
     expect(user.validation).to.have.deep.property("last_name.required", true);
     expect(user.validation).to.have.deep.property("email.required", true);
     expect(user.validation).to.have.deep.property("email.pattern", "email");
-    expect(user.validation).to.have.deep.property("password.required", true);
-    expect(user.validation).to.have.deep.property("password_confirmation.required", true);
+    expect(user.validation.password.required).to.be.a("function");
     expect(user.validation).to.have.deep.property("password_confirmation.equalTo", "password");
+  });
+
+  it("will require password for new users", function () {
+    var user = new User();
+
+    expect(user.validation.password.required.call(user)).to.be.true;
+
+    user.set({id: "1"});
+
+    expect(user.validation.password.required.call(user)).to.be.false;
   });
 
   it ("will save users on the server", function () {
@@ -61,5 +70,7 @@ describe ("User", function () {
     expect(stub).to.have.been.calledOnce;
     expect(stubArgs[0].url).to.equal("/user.json");
     expect(stubArgs[0].data).to.equal(JSON.stringify(attrs));
+
+    window.jQuery.ajax.restore();
   });
 });

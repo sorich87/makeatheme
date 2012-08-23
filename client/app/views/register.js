@@ -1,8 +1,8 @@
 var View = require("views/base/view");
 
 module.exports = View.extend({
-    id: "register"
-  , className: "modal"
+    className: "modal"
+
   , template: "register"
 
   , events: {
@@ -28,6 +28,8 @@ module.exports = View.extend({
 
     user.save(attrs, {
       success: function (model, res) {
+        model.set(res);
+
         this.$el.modal("hide");
       }.bind(this)
 

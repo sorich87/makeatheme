@@ -1,7 +1,7 @@
 var View = require("views/base/view");
 
 module.exports = View.extend({
-    id: "#login"
-  , className: "modal"
+    className: "modal"
+
   , template: "login"
 });

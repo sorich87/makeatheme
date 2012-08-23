@@ -487,22 +487,26 @@ window.require.define({"models/user": function(exports, require, module) {
     , url: "/user.json"
 
     , validation: {
-        first_name: {
-          required: true
+      first_name: {
+        required: true
       }
       , last_name: {
-          required: true
+        required: true
       }
       , email: {
           required: true
-        , pattern: 'email'
+        , pattern: "email"
       }
       , password: {
-          required: true
+        required: function () {
+          if (this.isNew()) {
+            return true;
+          }
+          return false;
+        }
       }
       , password_confirmation: {
-          required: true
-        , equalTo: 'password'
+        equalTo: "password"
       }
     }
   });
@@ -515,7 +519,11 @@ window.require.define({"views/auth": function(exports, require, module) {
     , template = require("views/templates/auth_links");
 
   module.exports = View.extend({
-      el: $("body")
+      el: $("#auth-links")
+
+    , events: {
+      "click #logout": "deleteSession"
+    }
 
     , initialize: function () {
       this.model.on("change", this.render, this);
@@ -524,9 +532,24 @@ window.require.define({"views/auth": function(exports, require, module) {
     , render: function () {
       var links = template({currentUser: this.model.toJSON()});
 
-      $("#auth-links").html(links);
+      this.$el.empty().append(links);
 
       return this;
+    }
+
+    // Send request to delete current user session
+    // and redirect to homepage on success
+    , deleteSession: function () {
+      $.ajax({
+          contentType: "application/json; charset=UTF-8"
+        , type: "DELETE"
+        , url: "/session.json"
+        , complete: function (jqXHR, textStatus) {
+          if (textStatus === "success") {
+            window.location = "/";
+          }
+        }.bind(this)
+      });
     }
   });
   
@@ -915,8 +938,8 @@ window.require.define({"views/login": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      id: "#login"
-    , className: "modal"
+      className: "modal"
+
     , template: "login"
   });
   
@@ -936,8 +959,8 @@ window.require.define({"views/register": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      id: "register"
-    , className: "modal"
+      className: "modal"
+
     , template: "register"
 
     , events: {
@@ -963,6 +986,8 @@ window.require.define({"views/register": function(exports, require, module) {
 
       user.save(attrs, {
         success: function (model, res) {
+          model.set(res);
+
           this.$el.modal("hide");
         }.bind(this)
 
@@ -1130,17 +1155,16 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n    <li><a href=\"/session\" data-method=\"delete\">Log out</a></li>\n  ";}
+    return "\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
 
   function program3(depth0,data) {
     
     
-    return "\n    <li><a href=\"/register\">Register</a></li>\n    <li><a href=\"/login\">Log in</a></li>\n  ";}
+    return "\n  <ul class=\"nav\">\n    <li><a id=\"register\" href=\"/register\">Register</a></li>\n    <li><a id=\"login\" href=\"/login\">Log in</a></li>\n  </ul>\n";}
 
-    buffer += "<ul class=\"nav\">\n  ";
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
-    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.email);
+    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.id);
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -1148,7 +1172,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</ul>\n";
+    buffer += "\n";
     return buffer;});
 }});
 
