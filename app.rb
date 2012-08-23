@@ -132,8 +132,6 @@ delete '/session.json' do
 end
 
 not_found do
-  if Sinatra::Base.production?
-    status 200
-    load_index
-  end
+  status 200
+  load_index
 end
