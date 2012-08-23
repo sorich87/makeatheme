@@ -64,5 +64,7 @@ describe("AuthView", function () {
     this.authView.render().$("#logout").click();
 
     expect(window.location).to.equal("/");
+
+    window.jQuery.ajax.restore();
   });
 });

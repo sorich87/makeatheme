@@ -26,7 +26,7 @@ describe("RegisterView", function () {
   });
 
   it ("will render the registration modal", function () {
-    expect(this.loginView.render().el.className).to.equal("modal");
+    expect(this.registerView.render().el.className).to.equal("modal");
     expect(this.registerView.render().el.innerHTML).to.contain("<h3>Create an account</h3>");
   });
 
