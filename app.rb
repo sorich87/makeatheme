@@ -74,7 +74,10 @@ end
 get '/themes/:id.json' do
   theme = Theme.find(params[:id])
   if theme
-    theme.to_json
+    theme.to_json.merge(
+      :templates => theme.theme_files.as_json,
+      :static_files => theme.static_theme_files.as_json
+    )
   else
     status 404
   end
@@ -82,7 +85,6 @@ end
 
 post '/themes/:id/customize.json' do
   json = JSON.parse(request.body.read)
-  puts json
 
   # Adding template strings to templates here, should be in JSON or implemented
   # some other way in reality.
@@ -96,6 +98,37 @@ post '/themes/:id/customize.json' do
   zipfile_path = cs.zipfile_path
 
   response.write(Base64.encode64(File.read(zipfile_path)))
+end
+
+post '/themes.json' do
+  require_auth!
+
+  file = params[:file]
+  if file.nil?
+    status 400
+    body( {:error => "Attach a .zip-file and attributes for your theme."}.to_json )
+    return
+  end
+
+  attributes = {
+    author: current_user,
+    author_uri: 'http//not.implemented.example.com',
+    theme_uri: 'http://not.impelemented.example.com'
+  }.merge(params.slice('name', 'description', 'tags'))
+
+  puts params[:file]
+  puts params[:file][:tempfile]
+
+  theme = Theme.create_from_zip(file[:tempfile], attributes)
+
+  if theme.valid?
+    theme.save
+    status 201
+    body theme.to_json
+  else
+    status 400
+    body theme.errors.to_json
+  end
 end
 
 post '/user.json' do

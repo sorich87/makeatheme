@@ -16,12 +16,14 @@ class StoreUser
   validates_presence_of :password, :on => :create
   validates_uniqueness_of :email
 
+  has_many :themes, :inverse_of => :author
+
   attr_protected :password_hash
 
   before_create :generate_password_hash
 
   def to_fullname
-    "#{self.first_name self.last_name}"
+    "#{self.first_name} #{self.last_name}"
   end
 
   def self.authenticate(email, password)
