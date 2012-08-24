@@ -50,10 +50,10 @@ describe "theme upload" do
 
   describe 'with valid attributes' do
     before do
-      post '/themes.json', { :file => @theme_file_upload, :theme => @theme_attributes }
+      post '/themes.json', @theme_attributes.merge(:file => @theme_file_upload)
     end
 
-    it 'should return status code 204' do
+    it 'should return status code 201' do
       last_response.status.should == 201
     end
 
