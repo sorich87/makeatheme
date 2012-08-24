@@ -19,19 +19,19 @@ describe :session do
     end
 
     it 'should not be OK with a valid password combination' do
-      post '/session.json', {:session => @user_attributes.merge(:password => "wrong_password")}.to_json
+      post '/session.json', @user_attributes.merge(:password => "wrong_password").to_json
       last_response.status.should == 400
     end
 
     it 'should be OK with a valid password combination' do
-      post '/session.json', {:session => @user_attributes}.to_json
+      post '/session.json', @user_attributes.to_json
       last_response.status.should == 201
     end
   end
 
   describe 'de-authenticating' do
     it "should be OK if we're authenticated" do
-      post '/session.json', {:session => @user_attributes}.to_json
+      post '/session.json', @user_attributes.to_json
       delete '/session.json'
       last_response.status.should == 204
     end
@@ -44,7 +44,7 @@ describe :session do
 
   describe 'being authenticated' do
     it "should be OK to visit a restricted area" do
-      post '/session.json', {:session => @user_attributes}.to_json
+      post '/session.json', @user_attributes.to_json
       get '/restricted'
       last_response.status.should == 201
     end
