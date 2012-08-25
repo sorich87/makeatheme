@@ -1,8 +1,10 @@
-var View = require("views/base/view");
+var View = require("views/base/view")
+  , app = require("application");
 
 module.exports = View.extend({
     className: "modal"
   , template: "login"
+  , model: app.currentUser
 
   , events: {
     "click button[type=submit]": "loginUser"

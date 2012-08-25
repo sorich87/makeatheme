@@ -2,96 +2,58 @@
 
 Application = window.Application || {};
 
-Application.initialize = function() {
-  var defaults = require("lib/defaults")
+_.extend(Application, {
+  initialize: function() {
+    var defaults = require("lib/defaults")
+      , Router = require("lib/router")
+      , User = require("models/user");
 
-    // Get data set in the page, or parent frame if in iframe
-    , data = this.data || window.parent.Application.data
+    // merge data from server with default values
+    // get data set in the page, or parent frame if in iframe
+    this.data = _.defaults(this.data, defaults);
 
-    // collections
-    , Blocks = require("collections/blocks")
-    , Regions = require("collections/regions")
-    , Templates = require("collections/templates")
-    , Themes = require("collections/themes")
+    // Initialize current user model instance
+    this.currentUser = new User(this.data.currentUser);
 
-    // models
-    , Site = require("models/site")
-    , User = require("models/user")
+    // Initialize router
+    this.router = new Router();
 
-    // views
-    , AuthView = require("views/auth")
-    , FaqView = require("views/faq")
-    , ThemeView = require("views/theme")
-    , LoginView = require("views/login")
-    , RegisterView = require("views/register")
-    , ThemeListView = require("views/theme_list")
-    , TemplateSelectView = require("views/template_select")
-    , BlockInsertView = require("views/block_insert")
-    , StyleEditView = require("views/style_edit")
-    , DownloadButtonView = require("views/download_button")
-    , SiteView = require("views/site")
-    , LayoutView = require("views/layout")
-    , EditorView = require("views/editor")
-    , NotFoundView = require("views/not_found")
+    // Render the login and logout links
+    this.reuseView("auth_links").render();
 
-    // router
-    , Router = require("lib/router");
+    // Prevent further modification of the application object
+    Object.freeze(this);
+  }
 
-  // merge data from server with default values
-  data = _.defaults(data, defaults);
+  // Create a new view, cleanup if the view previously existed
+  , createView: function (name, options) {
+    var views = this.views || {}
+      , View = require("views/" + name);
 
-  this.regions = new Regions(data.regions);
-  this.blocks = new Blocks(data.blocks);
-  this.templates = new Templates(data.templates);
-  this.themes = new Themes(data.themes);
+    if (views[name] !== void 0) {
+      views[name].undelegateEvents();
+      views[name].remove();
+      views[name].off();
+    }
 
-  this.site = new Site;
-  this.currentUser = new User(data.currentUser);
+    views[name] = new View(options);
+    this.views = views;
+    return views[name];
+  }
 
-  this.faqView = new FaqView();
-  this.themeView = new ThemeView();
-  this.editorView = new EditorView();
-  this.loginView = new LoginView({
-    model: this.currentUser
-  });
-  this.registerView = new RegisterView({
-    model: this.currentUser
-  });
-  this.notFoundView = new NotFoundView();
-  this.templateSelectView = new TemplateSelectView({
-    collection: this.templates
-  });
+  // Return existing view, otherwise create a new one
+  , reuseView: function(name, options) {
+    var views = this.views || {}
+      , View = require("views/" + name);
 
-  this.blockInsertView = new BlockInsertView({
-    collection: this.blocks
-  });
+    if (views[name] !== void 0) {
+      return views[name];
+    }
 
-  this.styleEditView = new StyleEditView({
-    collection: this.styles
-  });
-
-  this.downloadButtonView = new DownloadButtonView;
-
-  this.themeListView = new ThemeListView({
-    collection: this.themes
-  });
-
-  this.siteView = new SiteView({
-      model: this.site
-    , regions: this.regions.models
-    , blocks: this.blocks.models
-  });
-
-  this.layoutView = new LayoutView();
-
-  this.router = new Router();
-
-  (new AuthView({
-    model: this.currentUser
-  }).render())
-
-  // Application object should not be modified
-  if (typeof Object.freeze === 'function') Object.freeze(this);
-};
+    views[name] = new View(options);
+    this.views = views;
+    return views[name];
+  }
+}, Backbone.Events);
 
 module.exports = Application;

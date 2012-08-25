@@ -1,4 +1,5 @@
-var View = require("views/base/view");
+var View = require("views/base/view")
+  , app = require("application");
 
 module.exports = View.extend({
     el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\

@@ -1,9 +1,11 @@
 // Display the login and register links
 var View = require("views/base/view")
-  , template = require("views/templates/auth_links");
+  , template = require("views/templates/auth_links")
+  , app = require("application");
 
 module.exports = View.extend({
     el: $("#auth-links")
+  , model: app.currentUser
 
   , events: {
     "click #logout": "deleteSession"

@@ -79,97 +79,59 @@ window.require.define({"application": function(exports, require, module) {
 
   Application = window.Application || {};
 
-  Application.initialize = function() {
-    var defaults = require("lib/defaults")
+  _.extend(Application, {
+    initialize: function() {
+      var defaults = require("lib/defaults")
+        , Router = require("lib/router")
+        , User = require("models/user");
 
-      // Get data set in the page, or parent frame if in iframe
-      , data = this.data || window.parent.Application.data
+      // merge data from server with default values
+      // get data set in the page, or parent frame if in iframe
+      this.data = _.defaults(this.data, defaults);
 
-      // collections
-      , Blocks = require("collections/blocks")
-      , Regions = require("collections/regions")
-      , Templates = require("collections/templates")
-      , Themes = require("collections/themes")
+      // Initialize current user model instance
+      this.currentUser = new User(this.data.currentUser);
 
-      // models
-      , Site = require("models/site")
-      , User = require("models/user")
+      // Initialize router
+      this.router = new Router();
 
-      // views
-      , AuthView = require("views/auth")
-      , FaqView = require("views/faq")
-      , ThemeView = require("views/theme")
-      , LoginView = require("views/login")
-      , RegisterView = require("views/register")
-      , ThemeListView = require("views/theme_list")
-      , TemplateSelectView = require("views/template_select")
-      , BlockInsertView = require("views/block_insert")
-      , StyleEditView = require("views/style_edit")
-      , DownloadButtonView = require("views/download_button")
-      , SiteView = require("views/site")
-      , LayoutView = require("views/layout")
-      , EditorView = require("views/editor")
-      , NotFoundView = require("views/not_found")
+      // Render the login and logout links
+      this.reuseView("auth_links").render();
 
-      // router
-      , Router = require("lib/router");
+      // Prevent further modification of the application object
+      Object.freeze(this);
+    }
 
-    // merge data from server with default values
-    data = _.defaults(data, defaults);
+    // Create a new view, cleanup if the view previously existed
+    , createView: function (name, options) {
+      var views = this.views || {}
+        , View = require("views/" + name);
 
-    this.regions = new Regions(data.regions);
-    this.blocks = new Blocks(data.blocks);
-    this.templates = new Templates(data.templates);
-    this.themes = new Themes(data.themes);
+      if (views[name] !== void 0) {
+        views[name].undelegateEvents();
+        views[name].remove();
+        views[name].off();
+      }
 
-    this.site = new Site;
-    this.currentUser = new User(data.currentUser);
+      views[name] = new View(options);
+      this.views = views;
+      return views[name];
+    }
 
-    this.faqView = new FaqView();
-    this.themeView = new ThemeView();
-    this.editorView = new EditorView();
-    this.loginView = new LoginView({
-      model: this.currentUser
-    });
-    this.registerView = new RegisterView({
-      model: this.currentUser
-    });
-    this.notFoundView = new NotFoundView();
-    this.templateSelectView = new TemplateSelectView({
-      collection: this.templates
-    });
+    // Return existing view, otherwise create a new one
+    , reuseView: function(name, options) {
+      var views = this.views || {}
+        , View = require("views/" + name);
 
-    this.blockInsertView = new BlockInsertView({
-      collection: this.blocks
-    });
+      if (views[name] !== void 0) {
+        return views[name];
+      }
 
-    this.styleEditView = new StyleEditView({
-      collection: this.styles
-    });
-
-    this.downloadButtonView = new DownloadButtonView;
-
-    this.themeListView = new ThemeListView({
-      collection: this.themes
-    });
-
-    this.siteView = new SiteView({
-        model: this.site
-      , regions: this.regions.models
-      , blocks: this.blocks.models
-    });
-
-    this.layoutView = new LayoutView();
-
-    this.router = new Router();
-
-    (new AuthView({
-      model: this.currentUser
-    }).render())
-
-    // Application object should not be modified
-    if (typeof Object.freeze === 'function') Object.freeze(this);
-  };
+      views[name] = new View(options);
+      this.views = views;
+      return views[name];
+    }
+  }, Backbone.Events);
 
   module.exports = Application;
   
@@ -337,19 +299,31 @@ window.require.define({"lib/router": function(exports, require, module) {
 
     , index: function () {
       $("#main").empty()
-        .append(app.faqView.render().$el)
-        .append(app.themeListView.render().$el);
+        .append(app.reuseView("faq").render().$el)
+        .append(app.reuseView("theme_list").render().$el);
     }
 
     , theme: function (id) {
       // Set theme ID used in editor.
       window.themeID = id;
-      $("#main").html(app.themeView.render().$el);
+
+      $("#main").empty()
+        .append(app.createView("theme").render().$el);
     }
 
     , editor: function (file) {
-      app.editorView.render();
-      app.layoutView.render();
+      // Setup editor box
+      editorView.render().$el
+        .append(app.createView("template_select").render().$el)
+        .append(app.createView("block_insert").render().$el)
+        .append(app.createView("style_edit").render().$el)
+        .append(app.createView("download_button").render().$el)
+
+      // Render page and append editor to it
+        .appendTo(app.createView("site").render().$el);
+
+      // Setup drag and drop and resize
+      app.createView("layout").render();
     }
 
     , login: function () {
@@ -358,7 +332,7 @@ window.require.define({"lib/router": function(exports, require, module) {
       // events which we don't want
       $("body").removeClass("modal-open")
         .find(".modal, .modal-backdrop").remove().end()
-        .append(app.loginView.render().$el.modal("show"));
+        .append(app.reuseView("login").render().$el.modal("show"));
     }
 
     , register: function () {
@@ -367,11 +341,12 @@ window.require.define({"lib/router": function(exports, require, module) {
       // events which we don't want
       $("body").removeClass("modal-open")
         .find(".modal, .modal-backdrop").remove().end()
-        .append(app.registerView.render().$el.modal("show"));
+        .append(app.reuseView("register").render().$el.modal("show"));
     }
 
     , notFound: function () {
-      $("#main").html(app.notFoundView.render().$el);
+      $("#main").empty()
+        .append(app.reuseView("not_found").render().$el);
     }
   });
   
@@ -513,13 +488,15 @@ window.require.define({"models/user": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/auth": function(exports, require, module) {
+window.require.define({"views/auth_links": function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
-    , template = require("views/templates/auth_links");
+    , template = require("views/templates/auth_links")
+    , app = require("application");
 
   module.exports = View.extend({
       el: $("#auth-links")
+    , model: app.currentUser
 
     , events: {
       "click #logout": "deleteSession"
@@ -683,26 +660,6 @@ window.require.define({"views/editor": function(exports, require, module) {
           $(drag.element).parent().css("zIndex", 9999);
         }
       }, "#x-layout-editor .x-handle");
-    }
-
-    // Load views
-    , render: function() {
-      this.$el
-
-        // Append template select view
-        .append(app.templateSelectView.render().$el)
-
-        // Append block insertion view
-        .append(app.blockInsertView.render().$el)
-
-        // Append CSS editor view
-        .append(app.styleEditView.render().$el)
-
-        // Append download button view
-        .append(app.downloadButtonView.render().$el)
-
-        // Append result to body element
-        .appendTo(app.siteView.render().$el);
     }
   });
   
@@ -935,11 +892,13 @@ window.require.define({"views/layout": function(exports, require, module) {
 }});
 
 window.require.define({"views/login": function(exports, require, module) {
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , app = require("application");
 
   module.exports = View.extend({
       className: "modal"
     , template: "login"
+    , model: app.currentUser
 
     , events: {
       "click button[type=submit]": "loginUser"
@@ -1021,12 +980,13 @@ window.require.define({"views/not_found": function(exports, require, module) {
 }});
 
 window.require.define({"views/register": function(exports, require, module) {
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , app = require("application");
 
   module.exports = View.extend({
       className: "modal"
-
     , template: "register"
+    , model: app.currentUser
 
     , events: {
       "click .submit": "createUser"
@@ -1149,7 +1109,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 }});
 
 window.require.define({"views/template_select": function(exports, require, module) {
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , app = require("application");
 
   module.exports = View.extend({
       el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
@@ -1394,10 +1355,14 @@ window.require.define({"views/theme": function(exports, require, module) {
 
 window.require.define({"views/theme_list": function(exports, require, module) {
   var View = require("views/base/view")
-    , template = require("views/templates/theme_list");
+    , Themes = require("collections/themes")
+    , template = require("views/templates/theme_list")
+    , app = require("application");
 
   module.exports = View.extend({
       el: $("<ul class='thumbnails'></ul>")
+
+    , collection: new Themes(app.data.themes)
 
     , initialize: function () {
       this.bindEvents();

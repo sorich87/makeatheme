@@ -12,19 +12,31 @@ module.exports = Backbone.Router.extend({
 
   , index: function () {
     $("#main").empty()
-      .append(app.faqView.render().$el)
-      .append(app.themeListView.render().$el);
+      .append(app.reuseView("faq").render().$el)
+      .append(app.reuseView("theme_list").render().$el);
   }
 
   , theme: function (id) {
     // Set theme ID used in editor.
     window.themeID = id;
-    $("#main").html(app.themeView.render().$el);
+
+    $("#main").empty()
+      .append(app.createView("theme").render().$el);
   }
 
   , editor: function (file) {
-    app.editorView.render();
-    app.layoutView.render();
+    // Setup editor box
+    editorView.render().$el
+      .append(app.createView("template_select").render().$el)
+      .append(app.createView("block_insert").render().$el)
+      .append(app.createView("style_edit").render().$el)
+      .append(app.createView("download_button").render().$el)
+
+    // Render page and append editor to it
+      .appendTo(app.createView("site").render().$el);
+
+    // Setup drag and drop and resize
+    app.createView("layout").render();
   }
 
   , login: function () {
@@ -33,7 +45,7 @@ module.exports = Backbone.Router.extend({
     // events which we don't want
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.loginView.render().$el.modal("show"));
+      .append(app.reuseView("login").render().$el.modal("show"));
   }
 
   , register: function () {
@@ -42,10 +54,11 @@ module.exports = Backbone.Router.extend({
     // events which we don't want
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.registerView.render().$el.modal("show"));
+      .append(app.reuseView("register").render().$el.modal("show"));
   }
 
   , notFound: function () {
-    $("#main").html(app.notFoundView.render().$el);
+    $("#main").empty()
+      .append(app.reuseView("not_found").render().$el);
   }
 });

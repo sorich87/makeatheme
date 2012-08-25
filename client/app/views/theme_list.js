@@ -1,8 +1,12 @@
 var View = require("views/base/view")
-  , template = require("views/templates/theme_list");
+  , Themes = require("collections/themes")
+  , template = require("views/templates/theme_list")
+  , app = require("application");
 
 module.exports = View.extend({
     el: $("<ul class='thumbnails'></ul>")
+
+  , collection: new Themes(app.data.themes)
 
   , initialize: function () {
     this.bindEvents();

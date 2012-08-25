@@ -19,24 +19,4 @@ module.exports = View.extend({
       }
     }, "#x-layout-editor .x-handle");
   }
-
-  // Load views
-  , render: function() {
-    this.$el
-
-      // Append template select view
-      .append(app.templateSelectView.render().$el)
-
-      // Append block insertion view
-      .append(app.blockInsertView.render().$el)
-
-      // Append CSS editor view
-      .append(app.styleEditView.render().$el)
-
-      // Append download button view
-      .append(app.downloadButtonView.render().$el)
-
-      // Append result to body element
-      .appendTo(app.siteView.render().$el);
-  }
 });
