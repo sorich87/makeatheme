@@ -41,6 +41,7 @@ helpers do
   end
 
   def load_index
+    content_type :html
     themes = Theme.order_by([:name, :desc]).page(params[:page])
     erb :index, :locals => {:themes => themes}
   end
@@ -59,7 +60,6 @@ before do
 end
 
 get '/' do
-  content_type :html
   load_index
 end
 
