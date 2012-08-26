@@ -17,16 +17,24 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
-    // Set theme ID used in editor.
-    window.themeID = id;
+    var themeView = app.createView("theme", {themeID: id});
 
-    $("#main").empty()
-      .append(app.createView("theme").render().$el);
+    $("#main").empty().append(themeView.render().$el);
+
+    // Add theme class to body
+    $("body").addClass("theme");
+
+    // Remove body class when navigating away from this route
+    Backbone.history.on("route", function (e, name) {
+      if (name !== "theme") {
+        $("body").removeClass("theme");
+      }
+    });
   }
 
-  , editor: function (file) {
+  , editor: function (id) {
     // Setup editor box
-    editorView.render().$el
+    app.createView("editor").render().$el
       .append(app.createView("template_select").render().$el)
       .append(app.createView("block_insert").render().$el)
       .append(app.createView("style_edit").render().$el)

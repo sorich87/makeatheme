@@ -1,18 +1,11 @@
 var View = require("views/base/view")
-  , template = require("views/templates/theme");
+  , template = require("views/templates/theme")
+  , application = require("application");
 
 module.exports = View.extend({
   render: function () {
-    this.setElement(template());
-
-    $("body").addClass("theme");
-
-    // Remove body class when navigating away from this view
-    Backbone.history.on("route", function (e, name) {
-      if (name !== "theme") {
-        $("body").removeClass("theme");
-      }
-    });
+    this.$el.empty()
+      .append(template({id: this.options.themeID}));
 
     return this;
   }

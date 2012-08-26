@@ -304,16 +304,24 @@ window.require.define({"lib/router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      // Set theme ID used in editor.
-      window.themeID = id;
+      var themeView = app.createView("theme", {themeID: id});
 
-      $("#main").empty()
-        .append(app.createView("theme").render().$el);
+      $("#main").empty().append(themeView.render().$el);
+
+      // Add theme class to body
+      $("body").addClass("theme");
+
+      // Remove body class when navigating away from this route
+      Backbone.history.on("route", function (e, name) {
+        if (name !== "theme") {
+          $("body").removeClass("theme");
+        }
+      });
     }
 
-    , editor: function (file) {
+    , editor: function (id) {
       // Setup editor box
-      editorView.render().$el
+      app.createView("editor").render().$el
         .append(app.createView("template_select").render().$el)
         .append(app.createView("block_insert").render().$el)
         .append(app.createView("style_edit").render().$el)
@@ -1289,10 +1297,16 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 window.require.define({"views/templates/theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    return "<iframe id=\"theme\" name=\"theme\" src=\"/editor/index.html\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";});
+    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/editor/";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/theme_list": function(exports, require, module) {
@@ -1332,20 +1346,13 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
 
 window.require.define({"views/theme": function(exports, require, module) {
   var View = require("views/base/view")
-    , template = require("views/templates/theme");
+    , template = require("views/templates/theme")
+    , application = require("application");
 
   module.exports = View.extend({
     render: function () {
-      this.setElement(template());
-
-      $("body").addClass("theme");
-
-      // Remove body class when navigating away from this view
-      Backbone.history.on("route", function (e, name) {
-        if (name !== "theme") {
-          $("body").removeClass("theme");
-        }
-      });
+      this.$el.empty()
+        .append(template({id: this.options.themeID}));
 
       return this;
     }

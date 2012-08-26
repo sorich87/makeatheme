@@ -16,6 +16,10 @@ Dir["config/initializers/*.rb"].each {|file| require file }
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 
+# Handlebars template engine
+require 'handlebars_template'
+Tilt.register HandlebarsTemplate, :hbs
+
 # Models
 require 'theme'
 require 'store_user'
@@ -24,6 +28,16 @@ require 'store_user'
 require 'customization_parser'
 
 helpers do
+  # Render handlebars template
+  def hbs(*args)
+    render(:hbs, *args)
+  end
+
+  # Mark a local to be returned as non escaped by handlebars
+  def hbs_safe(local)
+    proc { Handlebars::SafeString.new(local) }
+  end
+
   def require_auth!
     unless session?
       # Meh this is stupid.
@@ -61,6 +75,55 @@ end
 
 get '/' do
   load_index
+end
+
+# Render a theme template with regions replaced
+# and dummy content inserted
+# Double render because regions contain tags
+get '/editor/:id' do
+  content_type :html
+
+  theme = Theme.find(params[:id])
+
+  status 404 and return unless theme
+
+  content = {
+    site_title: "Theme Preview",
+    site_description: "Just another WordPress site",
+    search_form: "",
+    header_image: "",
+    menu: ""
+  }
+
+  # TODO: this should come from the database
+  regions = [
+    {
+      type: 'header',
+      template: File.read('public/editor/header.html')
+    },
+    {
+      type: 'content',
+      template: File.read('public/editor/content.html')
+    },
+    {
+      type: 'sidebar',
+      template: File.read('public/editor/sidebar.html')
+    },
+    {
+      type: 'footer',
+      template: File.read('public/editor/footer.html')
+    },
+  ]
+
+  locals = regions.inject({}) do |memo, region|
+    memo[region[:type]] = region[:template]
+    memo
+  end
+  locals.merge!(content)
+  locals[:theme] = hbs_safe(theme.to_json)
+
+  html = hbs :editor, locals: locals
+  hbs html, locals: locals
 end
 
 get '/themes.json' do

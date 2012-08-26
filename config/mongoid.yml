@@ -1,16 +1,25 @@
+defaults: &defaults
+  options:
+    allow_dynamic_fields: false
+    raise_not_found_error: false
+    use_activesupport_time_zone: false
+    use_utc: true
 development:
+  <<: *defaults
   sessions:
     default:
       database: pushly_store_development
       hosts:
         - localhost:27017
 test:
+  <<: *defaults
   sessions:
     default:
       database: pushly_store_test
       hosts:
         - localhost:27017
 production:
+  <<: *defaults
   sessions:
     default:
       uri: <%= ENV['MONGOLAB_URI'] %>
