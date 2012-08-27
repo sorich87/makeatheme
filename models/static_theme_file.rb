@@ -23,5 +23,6 @@ class StaticThemeFile
 
   has_attached_file :file,
     fog_public: true, # For now
-    path: 'themes/:id/:filename'
+    path: 'themes/:id/:filename',
+    url: 'themes/:id/:filename'
 end

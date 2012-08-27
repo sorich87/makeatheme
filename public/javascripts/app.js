@@ -294,6 +294,7 @@ window.require.define({"lib/router": function(exports, require, module) {
       , "editor/:file": "editor"
       , "login": "login"
       , "register": "register"
+      , "upload": "upload"
       , "*actions": "notFound"
     }
 
@@ -350,6 +351,12 @@ window.require.define({"lib/router": function(exports, require, module) {
       $("body").removeClass("modal-open")
         .find(".modal, .modal-backdrop").remove().end()
         .append(app.reuseView("register").render().$el.modal("show"));
+    }
+
+    , upload: function () {
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.reuseView("theme_upload").render().$el.modal("show"));
     }
 
     , notFound: function () {
@@ -1127,7 +1134,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
+    return "\n  <a href=\"/upload\" class=\"btn\" id=\"upload_theme\">Upload</a>\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
 
   function program3(depth0,data) {
     
@@ -1243,6 +1250,15 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     return buffer;});
 }});
 
+window.require.define({"views/templates/theme_upload": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form action=\"/themes.json\", method=\"POST\" enctype=\"multipart/form-data\" class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"name\"></label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"name\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"description\"></label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"description\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\"></label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Submit theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
+}});
+
 window.require.define({"views/theme": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/theme")
@@ -1294,6 +1310,48 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       this.collection.each(function (theme) {
         this.addOne(theme);
       }, this);
+    }
+  });
+  
+}});
+
+window.require.define({"views/theme_upload": function(exports, require, module) {
+  var View = require("views/base/view");
+
+  module.exports = View.extend({
+      className: "modal"
+    , template: "theme_upload"
+
+    , initialize: function() {
+      var $el = this.$el;
+
+      $(document).ready(function() {
+        var $form = $el.find("form");
+
+        $form.submit(function(e) {
+          e.preventDefault();
+          var formData;
+
+          formData = new FormData($form[0]);
+
+          $.ajax({
+              type: "POST"
+            , url: "/themes.json"
+            , data: formData
+            , success: function(data, textStatus, jqXHR) {
+                console.log(data, textStatus, jqXHR);
+              }
+            , error: function(jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR, textStatus, errorThrown);
+              }
+            , cache: false
+            , contentType: false
+            , processData: false
+          });
+
+          return false;
+        });
+      })
     }
   });
   

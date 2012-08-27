@@ -1,0 +1,36 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">×</button>
+  <h3>Upload a new theme</h3>
+</div>
+<div class="modal-body">
+  <form action="/themes.json", method="POST" enctype="multipart/form-data" class="form-horizontal">
+    <fieldset>
+      <div class="control-group">
+        <label class="control-label" for="name"></label>
+        <div class="controls">
+          <input type="text" name="name" class="input-xlarge">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="description"></label>
+        <div class="controls">
+          <input type="text" name="description" class="input-xlarge">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="file"></label>
+        <div class="controls">
+          <input type="file" name="file" class="input-xlarge">
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="controls">
+          <button type="submit" class="btn btn-primary">Submit theme</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</div>

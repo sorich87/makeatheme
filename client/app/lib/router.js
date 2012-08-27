@@ -7,6 +7,7 @@ module.exports = Backbone.Router.extend({
     , "editor/:file": "editor"
     , "login": "login"
     , "register": "register"
+    , "upload": "upload"
     , "*actions": "notFound"
   }
 
@@ -63,6 +64,12 @@ module.exports = Backbone.Router.extend({
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
       .append(app.reuseView("register").render().$el.modal("show"));
+  }
+
+  , upload: function () {
+    $("body").removeClass("modal-open")
+      .find(".modal, .modal-backdrop").remove().end()
+      .append(app.reuseView("theme_upload").render().$el.modal("show"));
   }
 
   , notFound: function () {
