@@ -133,7 +133,8 @@ get '/editor/:theme/?:template?' do
 
   locals = {
    theme: theme.to_json,
-   template: theme_template(theme, params[:template])
+   template: theme_template(theme, params[:template]),
+   static_files_dir: theme.static_files_dir
   }
   erb :editor, locals: locals
 end

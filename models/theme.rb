@@ -67,6 +67,11 @@ class Theme
     templates.select { |t| t[:name] = name || 'index' }.first[:template]
   end
 
+  # TODO: Return the location where files are stored on S3
+  def static_files_dir
+    "/editor"
+  end
+
   def as_json(options={})
     {
       :_id => self._id,
