@@ -48,8 +48,3 @@ attrs.each do |theme_attr|
     end
   end
 end
-
-Theme.all.each do |t|
-  s = t.static_theme_files.first
-  puts s.file
-end
