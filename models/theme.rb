@@ -1,6 +1,6 @@
 require 'paperclip'
 require 'fog'
-require 'theme_file'
+#require 'theme_file'
 require 'static_theme_file'
 require 'theme_parser'
 
@@ -30,7 +30,7 @@ class Theme
 
   validates_presence_of [:name, :author, :author_uri, :description]
 
-  embeds_many :theme_files
+  #embeds_many :theme_files
   embeds_many :static_theme_files
 
   has_attached_file :screenshot,
@@ -87,12 +87,9 @@ class Theme
 
     begin
       parser = ThemeParser.parse(zip_file)
-      parser.stored_files.each do |stored_file|
-        theme.theme_files.build(
-          :file_name => stored_file[:filename],
-          :file_content => stored_file[:template]
-        )
-      end
+
+      theme.templates = parser.templates
+      theme.regions = parser.regions
 
       parser.static_files.each do |static_file|
         theme.static_theme_files.build(

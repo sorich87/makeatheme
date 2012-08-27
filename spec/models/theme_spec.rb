@@ -18,7 +18,6 @@ describe Theme do
   it { should validate_presence_of(:author_uri) }
   it { should validate_presence_of(:description) }
 
-  it { should embed_many(:theme_files) }
   it { should belong_to(:author) }
 
   describe '.create_from_zip' do
@@ -31,8 +30,12 @@ describe Theme do
       @theme.should be_persisted
     end
 
-    it 'should create embedded theme files' do
-      @theme.theme_files.count.should > 0
+    it 'should create embedded theme templates' do
+      @theme.templates.count.should > 0
+    end
+
+    it 'should create embedded theme regions' do
+      @theme.regions.count.should > 0
     end
 
     it 'should create embedded static theme files' do

@@ -9,10 +9,8 @@ class ThemeParser
 
   def initialize(zip_file)
     @zip_file = zip_file
-    @stored_files = {
-      :templates => [],
-      :regions => []
-    }
+    @templates = []
+    @regions = []
 
     @static_files = []
 
@@ -25,7 +23,7 @@ class ThemeParser
     if filename =~ /.html\z/
       add_stored_file(zip_file)
     elsif filename =~ /.css\z/
-      #add_css_file(zip_file)
+      add_css_file(zip_file)
     else
       add_static_file(zip_file)
     end
@@ -38,18 +36,19 @@ class ThemeParser
       file_content = html_file.read
 
       if @@templates.include?(filename)
-        @stored_files[:templates] << {
-          :filename => template_name,
+        @templates << {
+          :name => template_name,
           :template => file_content
         }
-        puts "Added #{filename} to @stored_files[:templates]"
+        puts "Added #{filename} to @templates"
       else
-        @stored_files[:regions] << {
+        @regions << {
           :id => template_name,
           :filename => template_name,
-          :template => file_content
+          :template => file_content,
+          :type => get_region_type(template_name)
         }
-        puts "Added #{filename} to @stored_files[:regions]"
+        puts "Added #{filename} to @regions, type: #{get_region_type(template_name)}"
       end
     end
   end
@@ -69,11 +68,26 @@ class ThemeParser
     }
   end
 
-  def stored_files
-    @stored_files[:templates] + @stored_files[:regions]
+  def add_css_file(entry)
+    entry.get_input_stream do |entry_file|
+      @css << entry_file.read
+    end
+  end
+
+  def regions
+    @regions
+  end
+
+  def templates
+    @templates
   end
 
   def static_files
     @static_files
+  end
+
+  def get_region_type(filename)
+    match = /\A(sidebar|header|footer|content)/.match(filename)
+    match[1]
   end
 end
