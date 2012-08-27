@@ -23,7 +23,27 @@ attrs = [
     name: "Easel",
     author: author,
     author_uri: "http://profiles.wordpress.org/frumph",
-    description: "Just some theme I threw together ;-)"
+    description: "Just some theme I threw together ;-)",
+    templates: [
+      {
+        name: "index",
+        template: File.read('public/editor/index.html')
+      },
+      {
+        name: "page",
+        template: File.read('public/editor/page.html')
+      }
+    ],
+    regions: [
+      {
+        type: 'header',
+        template: File.read('public/editor/header.html')
+      },
+      {
+        type: 'footer',
+        template: File.read('public/editor/footer.html')
+      },
+    ]
   },
   {
     name: "Hatch",

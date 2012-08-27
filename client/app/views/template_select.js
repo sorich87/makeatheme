@@ -1,9 +1,12 @@
 var View = require("views/base/view")
+  , Templates = require("collections/templates")
   , app = require("application");
 
 module.exports = View.extend({
     el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
           <form><select></select></form></div>")
+
+  , collection: new Templates(app.data.templates)
 
   , initialize: function (options) {
     this.bindEvents();

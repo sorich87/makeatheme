@@ -328,7 +328,7 @@ window.require.define({"lib/router": function(exports, require, module) {
         .append(app.createView("download_button").render().$el)
 
       // Render page and append editor to it
-        .appendTo(app.createView("site").render().$el);
+        .appendTo($("body"));
 
       // Setup drag and drop and resize
       app.createView("layout").render();
@@ -395,21 +395,6 @@ window.require.define({"models/region": function(exports, require, module) {
       if (["header", "footer", "content", "sidebar"].indexOf(attrs.type) < 0) {
         return "Region type must be header, footer, content or sidebar.";
       }
-    }
-  });
-  
-}});
-
-window.require.define({"models/site": function(exports, require, module) {
-  // Site model class.
-  var Model = require("models/base/model");
-
-  module.exports = Model.extend({
-    defaults: {
-        title: "Your Site Name"
-      , description: "Just another WordPress site"
-      , home_url: "#"
-      , site_url: "#"
     }
   });
   
@@ -557,11 +542,15 @@ window.require.define({"views/base/view": function(exports, require, module) {
 
 window.require.define({"views/block_insert": function(exports, require, module) {
   // Display list of blocks to insert
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , Blocks = require("collections/blocks")
+    , app = require("application");
 
   module.exports = View.extend({
       el: $("<div id='x-block-insert'><h4>Blocks</h4>\
             <p>Drag and drop to insert</p><ul></ul></div>")
+
+    , collection: new Blocks(app.data.blocks)
 
     , initialize: function () {
       this.bindEvents();
@@ -1046,60 +1035,6 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/site": function(exports, require, module) {
-  var View = require("views/base/view");
-
-  // Replace Handlebars tags by site details and blocks
-  module.exports = View.extend({
-    el: $("body")
-
-    , render: function () {
-      var replacements, requests, template
-        , el = this.el;
-
-      // Site details replacements
-      replacements = {
-          site_title: this.model.get("title")
-        , site_description: this.model.get("description")
-        , home_url: this.model.get("home_url")
-        , site_url: this.model.get("site_url")
-      };
-
-      // Regions replacements
-      requests = _.map(this.options.regions, function (region) {
-        var type = region.get("type");
-
-        return $.get("/editor/" + type + ".html", function (html) {
-          // Set region template here, but it should come from the server instead
-          region.set("template", html);
-
-          replacements[type] = html;
-        });
-      });
-
-      // Blocks replacements
-      _.each(this.options.blocks, function (block) {
-        var id = block.get("id")
-          , block_template = require("views/templates/blocks/" + block.get("filename"));
-
-        replacements[id] = block_template(replacements);
-      });
-
-      // Wait for AJAX requests to complete
-      // And perform a double replacement because regions contain tags
-      $.when.apply($, requests).done(function (e) {
-        template = Handlebars.compile(el.outerHTML)
-        template = template(replacements);
-        template = Handlebars.compile(template);
-        el.outerHTML = template(replacements);
-      });
-
-      return this;
-    }
-  });
-  
-}});
-
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit");
@@ -1118,11 +1053,14 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
 window.require.define({"views/template_select": function(exports, require, module) {
   var View = require("views/base/view")
+    , Templates = require("collections/templates")
     , app = require("application");
 
   module.exports = View.extend({
       el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
             <form><select></select></form></div>")
+
+    , collection: new Templates(app.data.templates)
 
     , initialize: function (options) {
       this.bindEvents();
@@ -1207,45 +1145,6 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/blocks/headerimage": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div class=\"columns header-image\">\n  <a href=\"";
-    foundHelper = helpers.site_url;
-    stack1 = foundHelper || depth0.site_url;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "site_url", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">\n    <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />\n  </a>\n</div>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/blocks/menu": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<nav class=\"columns site-navigation main-navigation\" role=\"navigation\">\n  <h1 class=\"assistive-text\">Menu</h1>\n  <div class=\"skip-link assistive-text\">\n    <a href=\"#content\" title=\"Skip to content\">Skip to content</a>\n  </div>\n  <div>\n    <ul class=\"menu\">\n      <li class=\"menu-item\"><a href=\"#\">Page</a>\n        <ul class=\"sub-menu\">\n          <li class=\"menu-item\"><a href=\"#\">Third Page</a>\n            <ul class=\"sub-menu\">\n              <li class=\"menu-item\"><a href=\"#\">Fourth Page</a></li>\n            </ul>\n          </li>\n        </ul>\n      </li>\n      <li class=\"menu-item\"><a href=\"#\">Second Page</a></li>\n    </ul>\n  </div>\n</nav>\n";});
-}});
-
-window.require.define({"views/templates/blocks/searchform": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div class=\"columns searchform\">\n  <form method=\"get\" id=\"searchform\" action=\"";
-    foundHelper = helpers.home_url;
-    stack1 = foundHelper || depth0.home_url;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "home_url", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" role=\"search\">\n    <label for=\"s\" class=\"assistive-text\">Search</label>\n    <input type=\"text\" class=\"field\" name=\"s\" id=\"s\" placeholder=\"Search &hellip;\" />\n    <input type=\"submit\" class=\"submit\" name=\"submit\" id=\"searchsubmit\" value=\"Search\" />\n  </form>\n</div>\n";
     return buffer;});
 }});
 

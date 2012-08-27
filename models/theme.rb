@@ -17,6 +17,8 @@ class Theme
   field :author_uri,  type: String
   field :description, type: String
   field :tags,        type: Array
+  field :regions,     type: Array
+  field :templates,   type: Array
 
   belongs_to :author, :class_name => 'StoreUser'
 
@@ -31,6 +33,40 @@ class Theme
   embeds_many :theme_files
   embeds_many :static_theme_files
 
+  has_attached_file :screenshot,
+    styles: { thumb: '320x240>' },
+    fog_public: true,
+    path: 'themes/:id/screenshot/:style.:filename'
+
+  # Return blocks to insert in the templates
+  def blocks
+    [:header_image, :menu, :search_form].map do |block|
+      {
+        name: block.to_s,
+        template: DefaultTemplates::BLOCKS[block]
+      }
+    end
+  end
+
+  # Return regions including default ones
+  def regions
+    defaults = DefaultTemplates::REGIONS.map do |type, template|
+      Hash[:type, type, :template, template]
+    end
+
+    defaults + self[:regions].map { |r| r.symbolize_keys }
+  end
+
+  # Return templates after converting hash keys to symbols
+  def templates
+    self[:templates].map{ |t| t.symbolize_keys }
+  end
+
+  # Get template content from name
+  def template_content(name)
+    templates.select { |t| t[:name] = name || 'index' }.first[:template]
+  end
+
   def as_json(options={})
     {
       :_id => self._id,
@@ -40,12 +76,6 @@ class Theme
       :screenshot_uri => self.screenshot.url
     }
   end
-
-  has_attached_file :screenshot,
-    styles: { thumb: '320x240>' },
-    fog_public: true,
-    path: 'themes/:id/screenshot/:style.:filename'
-
 
   def self.create_from_zip(zip_file, attributes = {})
     theme = Theme.new(attributes)

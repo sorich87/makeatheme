@@ -41,7 +41,7 @@ module.exports = Backbone.Router.extend({
       .append(app.createView("download_button").render().$el)
 
     // Render page and append editor to it
-      .appendTo(app.createView("site").render().$el);
+      .appendTo($("body"));
 
     // Setup drag and drop and resize
     app.createView("layout").render();

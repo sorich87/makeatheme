@@ -26,6 +26,7 @@ require 'store_user'
 
 # Classes
 require 'customization_parser'
+require 'default_templates'
 
 helpers do
   # Render handlebars template
@@ -66,6 +67,12 @@ helpers do
       total_results: model.total_count
     }
   end
+
+  # Insert editor scripts into a template file, before </head>
+  def insert_editor_assets(template)
+    scripts = File.read('views/editor/assets.hbs');
+    template.gsub('</head>', "#{scripts}</head>");
+  end
 end
 
 # Set default content type to JSON
@@ -80,50 +87,34 @@ end
 # Render a theme template with regions replaced
 # and dummy content inserted
 # Double render because regions contain tags
-get '/editor/:id' do
+get '/editor/:theme/?:template?' do
   content_type :html
 
-  theme = Theme.find(params[:id])
+  theme = Theme.find(params[:theme])
 
+  # Return 404 if no theme found.
   status 404 and return unless theme
 
-  content = {
-    site_title: "Theme Preview",
-    site_description: "Just another WordPress site",
-    search_form: "",
-    header_image: "",
-    menu: ""
-  }
+  # Build hash of sample content, blocks and regions to replace
+  # in the template
+  content = DefaultTemplates::CONTENT
 
-  # TODO: this should come from the database
-  regions = [
-    {
-      type: 'header',
-      template: File.read('public/editor/header.html')
-    },
-    {
-      type: 'content',
-      template: File.read('public/editor/content.html')
-    },
-    {
-      type: 'sidebar',
-      template: File.read('public/editor/sidebar.html')
-    },
-    {
-      type: 'footer',
-      template: File.read('public/editor/footer.html')
-    },
-  ]
-
-  locals = regions.inject({}) do |memo, region|
-    memo[region[:type]] = region[:template]
-    memo
+  theme.blocks.each do |block|
+    content[block[:name]] = hbs(block[:template], locals: content)
   end
-  locals.merge!(content)
-  locals[:theme] = hbs_safe(theme.to_json)
 
-  html = hbs :editor, locals: locals
-  hbs html, locals: locals
+  theme.regions.each do |region|
+    content[region[:type]] = hbs(region[:template], locals: content)
+  end
+
+  template = theme.template_content(params[:template])
+  template = hbs(template, locals: content)
+
+  locals = {
+   theme: theme.to_json,
+   template: template
+  }
+  erb :editor, locals: locals
 end
 
 get '/themes.json' do

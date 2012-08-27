@@ -1,9 +1,13 @@
 // Display list of blocks to insert
-var View = require("views/base/view");
+var View = require("views/base/view")
+  , Blocks = require("collections/blocks")
+  , app = require("application");
 
 module.exports = View.extend({
     el: $("<div id='x-block-insert'><h4>Blocks</h4>\
           <p>Drag and drop to insert</p><ul></ul></div>")
+
+  , collection: new Blocks(app.data.blocks)
 
   , initialize: function () {
     this.bindEvents();
