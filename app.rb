@@ -131,8 +131,12 @@ get '/editor/:theme/?:template?' do
   # Return 404 if no theme found.
   status 404 and return unless theme
 
+  blocks_and_regions = theme_blocks_and_regions(theme)
+
   locals = {
    theme: theme.to_json,
+   regions: blocks_and_regions[:regions].to_json,
+   blocks: blocks_and_regions[:blocks].to_json,
    template: theme_template(theme, params[:template]),
    static_files_dir: theme.static_files_dir
   }
