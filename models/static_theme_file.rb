@@ -11,7 +11,7 @@ class StaticThemeFile
 
   embedded_in :theme
 
-  validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif']
+  validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif', 'text/x-c']
 
   def as_json(options={})
     {

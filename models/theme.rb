@@ -1,6 +1,5 @@
 require 'paperclip'
 require 'fog'
-#require 'theme_file'
 require 'static_theme_file'
 require 'theme_parser'
 
@@ -30,7 +29,6 @@ class Theme
 
   validates_presence_of [:name, :author, :author_uri, :description]
 
-  #embeds_many :theme_files
   embeds_many :static_theme_files
 
   has_attached_file :screenshot,
@@ -97,6 +95,7 @@ class Theme
           :file => static_file[:tempfile]
         )
       end
+
       theme.save
     ensure
       parser.static_files.each do |static_file|

@@ -11,7 +11,6 @@ class ThemeParser
     @zip_file = zip_file
     @templates = []
     @regions = []
-
     @static_files = []
 
     Zip::ZipFile.foreach(zip_file) { |entry| parse_entry(entry) if entry.file? }
@@ -22,8 +21,6 @@ class ThemeParser
     filename = zip_file.to_s
     if filename =~ /.html\z/
       add_stored_file(zip_file)
-    elsif filename =~ /.css\z/
-      add_css_file(zip_file)
     else
       add_static_file(zip_file)
     end
@@ -40,7 +37,6 @@ class ThemeParser
           :name => template_name,
           :template => file_content
         }
-        puts "Added #{filename} to @templates"
       else
         @regions << {
           :id => template_name,
@@ -48,7 +44,6 @@ class ThemeParser
           :template => file_content,
           :type => get_region_type(template_name)
         }
-        puts "Added #{filename} to @regions, type: #{get_region_type(template_name)}"
       end
     end
   end
@@ -66,12 +61,6 @@ class ThemeParser
       :filename => filename,
       :tempfile => tempfile
     }
-  end
-
-  def add_css_file(entry)
-    entry.get_input_stream do |entry_file|
-      @css << entry_file.read
-    end
   end
 
   def regions
