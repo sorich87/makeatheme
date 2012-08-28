@@ -1,6 +1,7 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'models'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'classes'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'helpers'))
 
 require 'sinatra'
 require 'sinatra/session'
@@ -41,88 +42,13 @@ require 'store_user'
 require 'customization_parser'
 require 'default_templates'
 
-helpers do
-  # Render handlebars template
-  def hbs(*args)
-    render(:hbs, *args)
-  end
+# Helpers
+require 'application_helper'
+require 'handlebars_helper'
+require 'session_helper'
+require 'theme_helper'
 
-  # Mark a local to be returned as non escaped by handlebars
-  def hbs_safe(local)
-    proc { Handlebars::SafeString.new(local) }
-  end
-
-  def require_auth!
-    unless session?
-      # Meh this is stupid.
-      redirect "/login", 403
-    end
-  end
-
-  def authenticate_user!(user)
-    session_start!
-    session[:user_id] = user.id
-  end
-
-  def current_user
-    @current_user ||= StoreUser.find(session[:user_id]) if session[:user_id]
-  end
-
-  def load_index
-    content_type :html
-    themes = Theme.order_by([:name, :desc]).page(params[:page])
-    erb :index, :locals => {:themes => themes}
-  end
-
-  def json_pagination_for(model)
-    {
-      per_page: model.default_per_page,
-      total_results: model.total_count
-    }
-  end
-
-  # Return theme blocks and regions with Handlebars tags replaced
-  def theme_blocks_and_regions(theme)
-    templates = Hash[:blocks, [], :regions, []]
-
-    locals = DefaultTemplates::CONTENT
-
-    theme.blocks.each do |block|
-      block[:template] = hbs(block[:template], locals: locals)
-      templates[:blocks] << block
-
-      # Add to locals for regions replacement
-      locals[block[:name]] = block[:template]
-    end
-
-    theme.regions.each do |region|
-      region[:template] = hbs(region[:template], locals: locals)
-      templates[:regions] << region
-    end
-
-    templates
-  end
-
-  # Return a theme template with Handlebars tags replaced
-  def theme_template(theme, template)
-    locals = DefaultTemplates::CONTENT
-
-    blocks_and_regions = theme_blocks_and_regions(theme)
-
-    blocks_and_regions[:blocks].each do |block|
-      locals[block[:name]] = block[:template]
-    end
-
-    blocks_and_regions[:regions].each do |region|
-      key = region[:type]
-      key += region[:name] if region[:name]
-      locals[key] = region[:template]
-    end
-
-    template = theme.template_content(template)
-    hbs(template, locals: locals)
-  end
-end
+helpers ApplicationHelper, HandlebarsHelper, SessionHelper, ThemeHelper
 
 # Set default content type to JSON
 before do
