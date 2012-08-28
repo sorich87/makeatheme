@@ -26,7 +26,7 @@ class CustomizationParser
     @files = []
 
     @input_folder = File.join('public', 'editor')
-    @output_folder = File.join('classes', 'theme') # Temporary.
+    @output_folder = Dir.mktmpdir # Temporary.
 
     merge_constants
     compile_regions
