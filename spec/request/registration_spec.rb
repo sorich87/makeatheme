@@ -33,6 +33,15 @@ describe "registration" do
       get '/restricted'
       last_response.status.should == 201
     end
+
+    it 'should send a confirmation email' do
+      Pony.should_receive(:mail) do |params|
+        params[:to] == @user_attributes[:email]
+        params[:subject].should include("Thank you for registering")
+        params[:body].should include(@user_attributes[:first_name])
+        params[:body].should include(@user_attributes[:last_name])
+      end
+    end
   end
 
   describe "with invalid attributes" do
