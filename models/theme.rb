@@ -29,7 +29,7 @@ class Theme
 
   validates_presence_of [:name, :author, :author_uri, :description]
 
-  embeds_many :static_theme_files
+  embeds_many :static_theme_files, cascade_callbacks: true
 
   has_attached_file :screenshot,
     styles: { thumb: '320x240>' },
