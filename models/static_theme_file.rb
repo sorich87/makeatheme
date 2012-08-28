@@ -27,8 +27,7 @@ class StaticThemeFile
     url: 'themes/:theme_id/:processed_filename'
 
   Paperclip.interpolates :processed_filename do |attachment, style|
-    regex = /(^[\w-]+\.[jpg|png|css|jpeg|gif]+)/
-    regex.match(attachment.original_filename)[1]
+    attachment.instance.file_name
   end
 
   Paperclip.interpolates :theme_id do |attachment, style|

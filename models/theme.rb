@@ -91,7 +91,7 @@ class Theme
 
       parser.static_files.each do |static_file|
         theme.static_theme_files.build(
-          :file_name => static_file[:file_name],
+          :file_name => static_file[:filename],
           :file => static_file[:tempfile]
         )
       end

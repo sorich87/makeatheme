@@ -14,6 +14,8 @@ class ThemeParser
     @static_files = []
 
     Zip::ZipFile.foreach(zip_file) { |entry| parse_entry(entry) if entry.file? }
+
+    fix_static_filenames
   end
 
 
@@ -30,6 +32,14 @@ class ThemeParser
   def add_stored_file(entry)
     entry.get_input_stream do |html_file|
       filename = File.basename(entry.to_s)
+
+      if filename == "index.html"
+        # themename/index.html
+        # We want to ignore the themename/ later when
+        # saving the static files
+        @zip_folder = entry.to_s.split("index.html")[0]
+      end
+
       template_name = File.basename(entry.to_s, '.*')
       file_content = html_file.read
 
@@ -59,7 +69,7 @@ class ThemeParser
     end
 
     @static_files << {
-      :filename => filename,
+      :filename => entry.to_s,
       :tempfile => tempfile
     }
   end
@@ -78,8 +88,16 @@ class ThemeParser
 
   def get_region_type(filename)
     match = /\A(sidebar|header|footer|content)/.match(filename)
-    if match
-      match[1]
+    match[1] if match
+  end
+
+  # Remove eg theme/ from theme/style.css,
+  # but not theme/images/ from theme/images/logo.png
+  def fix_static_filenames
+    @static_files.each_with_index do |file, index|
+      filename = file[:filename]
+      filename = filename.split(@zip_folder).last
+      @static_files[index][:filename] = filename
     end
   end
 end
