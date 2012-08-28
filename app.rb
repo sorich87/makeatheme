@@ -7,6 +7,7 @@ require 'sinatra/session'
 require 'mongoid'
 require 'kaminari'
 require 'base64'
+require 'pony'
 
 Mongoid.load!("config/mongoid.yml")
 
@@ -214,6 +215,12 @@ post '/user.json' do
   if user.valid?
     user.save
     authenticate_user!(user)
+
+    Pony.mail :to => user.email,
+              :subject => "Thank you for registering at push.ly, #{user.to_fullname}",
+              :from => 'no-reply@push.ly',
+              :body => erb(:user_registration_email, :locals => {:user => user})
+
     status 201
     body user.to_json
   else

@@ -10,9 +10,7 @@ describe "registration" do
 
   before(:each) do
     user = StoreUser.where(:email => @user_attributes[:email]).first
-    if user
-      user.destroy
-    end
+    user.destroy if user
   end
 
   describe "with valid attributes" do
@@ -33,15 +31,17 @@ describe "registration" do
       get '/restricted'
       last_response.status.should == 201
     end
+  end
 
-    it 'should send a confirmation email' do
-      Pony.should_receive(:mail) do |params|
-        params[:to] == @user_attributes[:email]
-        params[:subject].should include("Thank you for registering")
-        params[:body].should include(@user_attributes[:first_name])
-        params[:body].should include(@user_attributes[:last_name])
-      end
+  it 'should send a confirmation email' do
+    Pony.should_receive(:mail) do |params|
+      params[:to] == @user_attributes[:email]
+      params[:subject].should include("Thank you for registering")
+      params[:body].should include(@user_attributes[:first_name])
+      params[:body].should include(@user_attributes[:last_name])
     end
+
+    post '/user.json', @user_attributes.to_json
   end
 
   describe "with invalid attributes" do
