@@ -10,6 +10,8 @@ def app
   Sinatra::Application
 end
 
+Fog.mock!
+
 # Sample restricted path as we don't have one :]
 get '/restricted' do
   require_auth!
