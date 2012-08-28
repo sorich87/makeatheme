@@ -18,10 +18,11 @@ class ThemeParser
 
 
   def parse_entry(zip_file)
-    filename = zip_file.to_s
-    if filename =~ /.html\z/
+    filename = File.basename(zip_file.to_s)
+
+    if filename =~ /\A[\w-]+\.html\z/
       add_stored_file(zip_file)
-    else
+    elsif filename =~ /\A[^\.]+/ # Ignore dotted files or __MACOSX files & such
       add_static_file(zip_file)
     end
   end
