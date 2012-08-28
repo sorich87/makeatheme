@@ -1,0 +1,3 @@
+Pony.options = {
+  :from => 'localhost'
+}

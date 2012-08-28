@@ -17,6 +17,18 @@ Dir["config/initializers/*.rb"].each {|file| require file }
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 
+configure :development do
+  require 'config/environments/development'
+end
+
+configure :production do
+  require 'config/environments/production'
+end
+
+configure :test do
+  require 'config/environments/test'
+end
+
 # Handlebars template engine
 require 'handlebars_template'
 Tilt.register HandlebarsTemplate, :hbs
