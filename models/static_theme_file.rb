@@ -23,6 +23,15 @@ class StaticThemeFile
 
   has_attached_file :file,
     fog_public: true, # For now
-    path: 'themes/:id/:filename',
-    url: 'themes/:id/:filename'
+    path: 'themes/:theme_id/:processed_filename',
+    url: 'themes/:theme_id/:processed_filename'
+
+  Paperclip.interpolates :processed_filename do |attachment, style|
+    regex = /(^[\w-]+\.[jpg|png|css|jpeg|gif]+)/
+    regex.match(attachment.original_filename)[1]
+  end
+
+  Paperclip.interpolates :theme_id do |attachment, style|
+    attachment.instance.theme.id
+  end
 end
