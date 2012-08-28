@@ -77,6 +77,8 @@ class ThemeParser
 
   def get_region_type(filename)
     match = /\A(sidebar|header|footer|content)/.match(filename)
-    match[1]
+    if match
+      match[1]
+    end
   end
 end
