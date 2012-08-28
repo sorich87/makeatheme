@@ -17,7 +17,7 @@ describe "registration" do
 
   describe "with valid attributes" do
     before do
-      post '/user.json', {:user => @user_attributes}.to_json
+      post '/user.json', @user_attributes.to_json
     end
 
     it 'should be successful' do
@@ -38,7 +38,7 @@ describe "registration" do
   describe "with invalid attributes" do
     before do
       invalid_attributes = @user_attributes.merge(:email => nil)
-      post '/user.json', {:user => invalid_attributes}.to_json
+      post '/user.json', invalid_attributes.to_json
     end
 
     it 'should return status 400' do
