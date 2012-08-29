@@ -1,5 +1,6 @@
 // Tests for RegisterView class.
-var RegisterView = require("views/register");
+var RegisterView = require("views/register")
+  , app = require("application");
 
 beforeEach(function () {
   this.user = {
@@ -75,5 +76,21 @@ describe("RegisterView", function () {
 
     this.registerView.render().$(".submit").click();
     expect(this.registerView.el.innerHTML).to.contain("is not valid");
+  });
+
+  it("will trigger a notification on success", function () {
+    var spy = sinon.spy()
+      , user = this.user;
+
+    app.on("notification", spy);
+
+    sinon.stub(user, "save", function (attrs, options) {
+      options.success(user);
+    });
+
+    this.registerView.render().$(".submit").click();
+
+    expect(spy).to.have.been.calledOnce;
+    expect(spy).to.have.been.calledWith("success", "Your registration was successful. You are now logged in.");
   });
 });

@@ -1,5 +1,6 @@
 // Tests for LoginView class.
-var LoginView = require("views/login");
+var LoginView = require("views/login")
+  , app = require("application");
 
 beforeEach(function () {
   this.loginView = new LoginView({
@@ -110,5 +111,27 @@ describe ("LoginView", function () {
     expect(spy).to.have.been.calledWith("hide");
 
     window.jQuery.ajax.restore();
+  });
+
+  it("will trigger a notification on success", function () {
+    var spy = sinon.spy();
+
+    app.on("notification", spy);
+
+    sinon.stub(window.jQuery, "ajax", function (options) {
+      options.complete({responseText: "{\"id\": \"1\"}"}, "success");
+    });
+
+    sinon.stub(this.loginView.model, "get", function () {
+      return "Test";
+    });
+
+    this.loginView.render().$("input").each(function (i, element) {
+      element.value = "test";
+    });
+    this.loginView.$("button[type=submit]").click();
+
+    expect(spy).to.have.been.calledOnce;
+    expect(spy).to.have.been.calledWith("success", "Welcome back, Test.");
   });
 });
