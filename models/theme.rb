@@ -1,7 +1,8 @@
 require 'paperclip'
 require 'fog'
-require 'static_theme_file'
+require 'theme_file_group'
 require 'theme_parser'
+require 'static_theme_file'
 
 class Theme
   include Mongoid::Document
@@ -19,6 +20,7 @@ class Theme
   field :templates,   type: Array
 
   belongs_to :author, :class_name => 'StoreUser'
+  belongs_to :parent, :class_name => 'Theme'
 
   # Fields used by Paperclip
   field :screenshot_file_name
@@ -32,7 +34,8 @@ class Theme
 
   validates_presence_of [:name, :author, :description]
 
-  embeds_many :static_theme_files, cascade_callbacks: true
+  belongs_to :theme_file_group
+  has_many :static_theme_files
 
   has_attached_file :screenshot,
     styles: { thumb: '320x240>' },
@@ -79,8 +82,9 @@ class Theme
 
   # Return path to where static files are stored on AWS
   def static_files_dir
-    s = self.static_theme_files.first
-    s.file.url.split(s.file_name).first[0..-2]
+    self.theme_file_groups.map do |group|
+      group.static_files_dir
+    end
   end
 
   def as_json(options={})
@@ -92,6 +96,7 @@ class Theme
     }
   end
 
+  # TODO: Add validations & error handling
   def self.create_from_zip(zip_file, attributes = {})
     theme = Theme.new(attributes)
 
@@ -105,13 +110,17 @@ class Theme
       theme.templates = parser.templates
       theme.regions = parser.regions
 
+      group = theme.build_theme_file_group
+
       parser.static_files.each do |static_file|
-        theme.static_theme_files.build(
+        group.static_theme_files.build(
           :file_name => static_file[:filename],
-          :file => static_file[:tempfile]
-        )
+          :file => static_file[:tempfile],
+          :theme_id => theme.id
+        ).save
       end
 
+      group.save
       theme.save
     ensure
       parser.static_files.each do |static_file|

@@ -9,7 +9,8 @@ class StaticThemeFile
   field :file_file_size,    :type => Integer
   field :file_updated_at,   :type => DateTime
 
-  embedded_in :theme
+  belongs_to :theme_file_group
+  belongs_to :theme
 
   validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif', 'text/x-c']
 
@@ -20,17 +21,21 @@ class StaticThemeFile
     }
   end
 
+  def group
+    self.theme_file_group
+  end
+
 
   has_attached_file :file,
     fog_public: true, # For now
-    path: 'themes/:theme_id/static_files/:processed_filename',
-    url: 'themes/:theme_id/static_files/:processed_filename'
+    path: 'themes/:group_id/:processed_filename',
+    url: 'themes/:group_id/:processed_filename'
 
   Paperclip.interpolates :processed_filename do |attachment, style|
     attachment.instance.file_name
   end
 
-  Paperclip.interpolates :theme_id do |attachment, style|
-    attachment.instance.theme.id
+  Paperclip.interpolates :group_id do |attachment, style|
+    attachment.instance.group.id
   end
 end

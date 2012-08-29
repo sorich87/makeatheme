@@ -17,7 +17,7 @@ describe Theme do
   it { should validate_presence_of(:description) }
 
   it { should belong_to(:author) }
-  it { should embed_many(:static_theme_files) }
+  it { should have_and_belong_to_many(:theme_file_groups) }
 
   it { should validate_attachment_presence(:archive) }
   it { should validate_attachment_content_type(:archive).allowing('application/zip') }
@@ -41,8 +41,22 @@ describe Theme do
       @theme.regions.count.should > 0
     end
 
-    it 'should create embedded static theme files' do
-      @theme.static_theme_files.count.should > 0
+    context 'theme file group' do
+      it 'should create a theme file group' do
+        @theme.theme_file_group.should_not be_nil
+      end
+
+      it 'should build that group correctly so that it has static files' do
+        @theme.theme_file_group.static_theme_files.count.should > 0
+      end
+
+      it 'should reference itself in the group' do
+        @theme.theme_file_group.theme_ids.should include(@theme.id)
+      end
+
+      it 'should be references in the static files' do
+        @theme.theme_file_group.static_theme_files.first.theme.should == @theme
+      end
     end
   end
 end
