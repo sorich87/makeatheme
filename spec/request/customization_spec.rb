@@ -8,14 +8,34 @@ describe "Theme customization" do
     }
 
     @theme = Theme.find_or_create_by(@theme_attributes)
+
+    @json = File.read('./spec/request/customization_request.json')
+
+    @user_attributes = {
+      email: "test_user@example.com",
+      password: "test_password",
+      first_name: "Test",
+      last_name: "User"
+    }
+
+    @user = StoreUser.find_or_create_by(@user_attributes)
   end
 
-  it 'should work lol' do
-    json = File.read('./spec/request/customization_request.json')
-    post "/themes/#{@theme.id}/customize.json", json
-    (2+3).should == 4
-    # This is barely a test, it's mostly to send the request and find exceptions.
-    # It needs to be tested somehow, but at this point (without theme uploads)
-    # I'm not sure if we need to focus on that.
+  it 'should require authentication' do
+    post "/themes/#{@theme.id}/customize.json", @json
+    last_response.status.should == 403
+  end
+
+  context "as an authenticated user" do
+    before do
+      post '/session.json', @user_attributes.to_json
+    end
+
+    # TODO: Think of a way to test the .zip
+    # returned in the JSON response
+    it 'should be successful (status 200)' do
+      post "/themes/#{@theme.id}/customize.json", @json
+      last_response.status.should == 200
+    end
   end
 end

@@ -20,6 +20,8 @@ get '/themes/:id.json' do
 end
 
 post '/themes/:id/customize.json' do
+  require_auth!
+
   json = JSON.parse(request.body.read)
 
   # Adding template strings to templates here, should be in JSON or implemented
