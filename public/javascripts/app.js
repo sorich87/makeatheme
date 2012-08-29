@@ -440,7 +440,7 @@ window.require.define({"models/theme": function(exports, require, module) {
     , defaults: {
         name: ""
       , author: ""
-      , author_uri: ""
+      , screenshot_uri: ""
     }
   });
   
@@ -1226,17 +1226,17 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     stack1 = foundHelper || depth0._id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "_id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><img src=\"editor/screenshot.png\" alt=\"\"></a>\n    <div class=\"caption\">\n      <h4>";
+    buffer += escapeExpression(stack1) + "\"><img src=\"";
+    foundHelper = helpers.screenshot_uri;
+    stack1 = foundHelper || depth0.screenshot_uri;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "screenshot_uri", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" alt=\"\"></a>\n    <div class=\"caption\">\n      <h4>";
     foundHelper = helpers.name;
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</h4>\n      <p>by <a href=\"";
-    foundHelper = helpers.author_uri;
-    stack1 = foundHelper || depth0.author_uri;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "author_uri", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
+    buffer += escapeExpression(stack1) + "</h4>\n      <p>by <a href=\"#\">";
     foundHelper = helpers.author;
     stack1 = foundHelper || depth0.author;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }

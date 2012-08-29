@@ -7,19 +7,19 @@ describe ("Theme", function () {
 
     expect(theme.get("name")).to.equal("");
     expect(theme.get("author")).to.equal("");
-    expect(theme.get("author_uri")).to.equal("");
+    expect(theme.get("screenshot_uri")).to.equal("");
   });
 
   it ("will set passed attributes on the model instance when created", function () {
     var theme = new Theme({
         name: "Theme"
       , author: "Designer"
-      , author_uri: "http://thememy.com/"
+      , screenshot_uri: "/test/screenshot.png"
     });
 
     expect(theme.get("name")).to.equal("Theme");
     expect(theme.get("author")).to.equal("Designer");
-    expect(theme.get("author_uri")).to.equal("http://thememy.com/");
+    expect(theme.get("screenshot_uri")).to.equal("/test/screenshot.png");
   });
 
   it ("will set the id attribute on the model instance when created", function () {

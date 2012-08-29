@@ -13,7 +13,6 @@ class Theme
   field :name,        type: String
   field :uri,         type: String
   field :version,     type: String
-  field :author_uri,  type: String
   field :description, type: String
   field :tags,        type: Array
   field :regions,     type: Array
@@ -27,7 +26,7 @@ class Theme
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
 
-  validates_presence_of [:name, :author, :author_uri, :description]
+  validates_presence_of [:name, :author, :description]
 
   embeds_many :static_theme_files, cascade_callbacks: true
 
@@ -75,7 +74,6 @@ class Theme
       :_id => self._id,
       :name => self.name,
       :author => self.author.to_fullname,
-      :author_uri => self.author_uri,
       :screenshot_uri => self.screenshot.url
     }
   end

@@ -47,8 +47,7 @@ post '/themes.json' do
   end
 
   attributes = {
-    author: current_user,
-    author_uri: 'http//not.implemented.example.com'
+    author: current_user
   }.merge(params.slice('name', 'description', 'tags'))
 
   theme = Theme.create_from_zip(file[:tempfile], attributes)

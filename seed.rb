@@ -22,7 +22,6 @@ attrs = [
   {
     name: "Easel",
     author: author,
-    author_uri: "http://profiles.wordpress.org/frumph",
     description: "Just some theme I threw together ;-)"
   }
 ]

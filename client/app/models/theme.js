@@ -7,6 +7,6 @@ module.exports = Model.extend({
   , defaults: {
       name: ""
     , author: ""
-    , author_uri: ""
+    , screenshot_uri: ""
   }
 });

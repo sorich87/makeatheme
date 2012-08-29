@@ -5,7 +5,6 @@ describe Theme do
       :name => "Some name",
       :description => "Description of some theme",
       :author => StoreUser.first,
-      :author_uri => "http://localhost"
     }
   end
 
@@ -15,7 +14,6 @@ describe Theme do
 
   it { should validate_presence_of(:name) }
   it { should validate_presence_of(:author) }
-  it { should validate_presence_of(:author_uri) }
   it { should validate_presence_of(:description) }
 
   it { should belong_to(:author) }

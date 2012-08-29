@@ -10,7 +10,7 @@ describe ("Themes", function () {
     themes.add({
         name: "Some Theme"
       , author: "Some Author"
-      , author_uri: "http://someauthor.com/"
+      , screenshot_uri: "/test/screenshot1.png"
     });
 
     expect(themes.length).to.equal(1);
@@ -19,12 +19,12 @@ describe ("Themes", function () {
       {
           name: "Another Theme"
         , author: "Another Author"
-        , author_uri: "http://anotherauthor.com/"
+        , screenshot_uri: "/test/screenshot2.png"
       }
       , {
           name: "A Last Theme"
         , author: "A Last Author"
-        , author_uri: "http://alastauthor.com/"
+        , screenshot_uri: "/test/screenshot3.png"
       }
     ]);
 

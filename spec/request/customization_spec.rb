@@ -5,7 +5,6 @@ describe "Theme customization" do
     @theme_attributes = {
       name: "Some theme",
       author: "Test User",
-      author_uri: "http://example.com/testuser"
     }
 
     @theme = Theme.find_or_create_by(@theme_attributes)
