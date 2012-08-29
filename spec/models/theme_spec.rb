@@ -28,6 +28,7 @@ describe Theme do
   end
   it { should respond_to(:fork!) }
   it { should respond_to(:needed_theme_files) }
+  it { should respond_to(:forks) }
 
   describe '.create_from_zip' do
     before do
@@ -93,6 +94,10 @@ describe Theme do
 
     it 'should have the same templates' do
       @fork.templates.should == @theme.templates
+    end
+
+    it "should make the new fork available in the original theme's list of forks" do
+      @theme.forks.should include(@fork)
     end
 
     describe 'static theme files' do

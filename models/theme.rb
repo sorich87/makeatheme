@@ -135,6 +135,10 @@ class Theme
     Theme.new(self.attributes.merge(:parent => self))
   end
 
+  def forks
+    Theme.where(:parent => self)
+  end
+
   # Return what files are needed to build this customization
   # (original theme files + ones added when customizing)
   def needed_theme_files
