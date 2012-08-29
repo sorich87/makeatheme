@@ -139,6 +139,10 @@ class Theme
     Theme.where(:parent => self)
   end
 
+  def fork?
+    !self.parent.nil?
+  end
+
   # Return what files are needed to build this customization
   # (original theme files + ones added when customizing)
   def needed_theme_files

@@ -29,6 +29,7 @@ describe Theme do
   it { should respond_to(:fork!) }
   it { should respond_to(:needed_theme_files) }
   it { should respond_to(:forks) }
+  it { should respond_to(:fork?) }
 
   describe '.create_from_zip' do
     before do
@@ -38,6 +39,10 @@ describe Theme do
 
     it 'should work given a valid .zip file' do
       @theme.should be_persisted
+    end
+
+    it 'should not be a fork' do
+      @theme.fork?.should be_false
     end
 
     it 'should create embedded theme templates' do
@@ -82,6 +87,10 @@ describe Theme do
 
     it 'should have its parent set properly' do
       @fork.parent.should == @theme
+    end
+
+    it 'should be a fork' do
+      @fork.fork?.should be_true
     end
 
     it 'should have the same file group' do
