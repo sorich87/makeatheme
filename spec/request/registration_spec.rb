@@ -36,9 +36,9 @@ describe "registration" do
   it 'should send a confirmation email' do
     Pony.should_receive(:mail) do |params|
       params[:to] == @user_attributes[:email]
-      params[:subject].should include("Thank you for registering")
+      params[:subject].should include('Welcome aboard')
       params[:body].should include(@user_attributes[:first_name])
-      params[:body].should include(@user_attributes[:last_name])
+      params[:body].should include('http://thememy.com/')
     end
 
     post '/user.json', @user_attributes.to_json

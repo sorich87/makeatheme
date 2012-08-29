@@ -8,9 +8,9 @@ post '/user.json' do
     authenticate_user!(user)
 
     Pony.mail :to => user.email,
-              :subject => "Thank you for registering at push.ly, #{user.to_fullname}",
-              :from => 'no-reply@push.ly',
-              :body => erb(:user_registration_email, :locals => {:user => user})
+              :subject => 'Welcome aboard',
+              :from => 'ulrich@thememy.com',
+              :body => erb(:'emails/user_registration', :locals => {:user => user})
 
     status 201
     body user.to_json
