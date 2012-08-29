@@ -105,8 +105,7 @@ describe Theme do
       end
 
       it 'should have the same needed files as its parent' do
-        #@fork.needed_theme_files.should == @theme.static_theme_files
-        @fork.needed_theme_files.count.should > 0
+        @fork.needed_theme_files.should == @theme.static_theme_files
       end
     end
   end
