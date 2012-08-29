@@ -42,6 +42,7 @@ exports.config =
           # Bootstrap from Twitter
           'vendor/scripts/bootstrap/bootstrap-collapse.js',
           'vendor/scripts/bootstrap/bootstrap-modal.js'
+          'vendor/scripts/bootstrap/bootstrap-alert.js'
         ]
         after: ['vendor/scripts/handlebars.js']
 

@@ -7,6 +7,8 @@ _.extend(Application, {
     var Router = require("router")
       , User = require("models/user");
 
+    this.handleNotifications();
+
     // Initialize current user model instance
     this.currentUser = new User(this.data.currentUser);
 
@@ -48,6 +50,13 @@ _.extend(Application, {
     views[name] = new View(options);
     this.views = views;
     return views[name];
+  }
+
+  , handleNotifications: function () {
+    this.on("notification", function (type, text) {
+      this.createView("notification", {type: type, text: text})
+        .render().$el.appendTo($("body"));
+    }.bind(this));
   }
 }, Backbone.Events);
 

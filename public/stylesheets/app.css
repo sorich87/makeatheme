@@ -4974,6 +4974,13 @@ body {
     margin-right: -585px;
   }
 }
+/* Notification */
+.notification {
+  left: 10px;
+  top: 60px;
+  position: fixed;
+  width: 300px;
+}
 /* Theme page */
 body.theme {
   padding-top: 40px;

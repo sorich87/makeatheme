@@ -84,6 +84,8 @@ window.require.define({"application": function(exports, require, module) {
       var Router = require("router")
         , User = require("models/user");
 
+      this.handleNotifications();
+
       // Initialize current user model instance
       this.currentUser = new User(this.data.currentUser);
 
@@ -125,6 +127,13 @@ window.require.define({"application": function(exports, require, module) {
       views[name] = new View(options);
       this.views = views;
       return views[name];
+    }
+
+    , handleNotifications: function () {
+      this.on("notification", function (type, text) {
+        this.createView("notification", {type: type, text: text})
+          .render().$el.appendTo($("body"));
+      }.bind(this));
     }
   }, Backbone.Events);
 
@@ -648,178 +657,192 @@ window.require.define({"views/layout": function(exports, require, module) {
     return rowWidth <= totalColumnsWidth(dropElement, dragElement);
   };
 
+
   module.exports = View.extend({
-      el: $("body")
+      el: $(window.document)
 
     , currentAction: null
 
-    , events: {
-        // Highlight columns.
-        "hover .columns": "highlightColumns"
-
-        // Links in columns shouldn't be clickable.
-      , "click .columns a": "preventDefault"
-
-        // Links and images in columns shoulnd't be draggable
-      , "mousedown .columns a, .columns img": "preventDefault"
-
-        // Drag
-      , "draginit .columns": "dragInit"
-      , "dragend .columns": "dragEnd"
-
-        // Drop
-      , "dropover .row": "dropOver"
-      , "dropout .row": "dropOut"
-      , "dropon .row": "dropOn"
-
-        // Resize
-      , "draginit .x-resize": "resizeInit"
-      , "dragmove .x-resize": "resizeMove"
-      , "dragend .x-resize": "resizeEnd"
-
-        // Remove column
-      , "click .x-remove": "removeColumn"
+    , render: function () {
+      this.highlightColumns();
+      this.setupDrag();
+      this.setupDrop();
+      this.setupResize();
+      this.setupRemove();
     }
 
-    , preventDefault: function (e) {
-      e.preventDefault();
-    }
-
-    , highlightColumns: function (e) {
-      if (this.currentAction !== null) {
-        return;
-      }
-
-      var $column = $(e.target);
-
-      this.$(".columns.x-current").removeClass("x-current");
-      $column.addClass("x-current")
-
-      if ($column.children(".x-resize").length === 0) {
-        $column.html(function (i, html) {
-          return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
-        });
-      }
-
-      if ($column.children(".x-remove").length === 0) {
-        $column.html(function (i, html) {
-          return html + "<div class='x-remove' title='Remove element'>&times;</div>";
-        });
-      }
-
-    }
-
-    , dragInit: function (e, drag) {
-      this.currentAction = "drag";
-
-      // Limit drag to first container
-      drag.limit($("body").children()).revert();
-    }
-
-    , dragEnd: function (e, drag) {
-      // Reset position
-      $(drag.element).css({
-        top: drag.startPosition.top() + "px",
-        left: drag.startPosition.left() + "px"
-      });
-
-      this.currentAction = null;
-    }
-
-    , dropOver: function (e, drop, drag) {
-      // Mark the row as full or not
-      if (isRowFull(e.target, drag.element)) {
-        $(e.target).addClass("x-full");
-      } else {
-        $(e.target).addClass("x-not-full");
-      }
-    }
-
-    , dropOut: function (e, drop, drag) {
-      // Remove x-full or x-not-full class if previously added
-      $(e.target).removeClass("x-full x-not-full");
-    }
-
-    , dropOn: function (e, drop, drag) {
-      var row, $drag, $dragParent, $dragGrandParent;
-
-      $drag = $(drag.element);
-
-      // Save original parent
-      $dragParent = $drag.parent();
-
-      // Add column to row. If the row is full, add to a new one
-      if (isRowFull(this, $drag)) {
-        row = $("<div class='row'></div>").insertAfter(this);
-      } else {
-        row = this;
-      }
-      $drag.appendTo(row);
-
-      $(e.target).removeClass("x-empty");
-
-      // If original parent doesn't have any more children
-      // and is not a <header> or <footer> and has no id attribute, remove it
-      if ($dragParent.children().length === 0 ) {
-        $dragGrandParent = $dragParent.parent();
-
-        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
-            || $dragParent.attr("id") !== undefined) {
-          $dragParent.addClass("x-empty");
-        } else {
-          $dragParent.remove();
+    , highlightColumns: function () {
+      this.$el.on("hover", ".columns", $.proxy(function (e) {
+        if (this.currentAction !== null) {
+          return;
         }
-      }
 
-      // Remove x-full and x-not-full classes if one was previously added
-      $(e.target).removeClass("x-full x-not-full");
+        var $column = $(e.currentTarget);
+
+        $(".columns.x-current").removeClass("x-current");
+        $column.addClass("x-current")
+
+        if ($column.children(".x-resize").length === 0) {
+          $column.html(function (i, html) {
+            return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+          });
+        }
+
+        if ($column.children(".x-remove").length === 0) {
+          $column.html(function (i, html) {
+            return html + "<div class='x-remove' title='Remove element'>&times;</div>";
+          });
+        }
+
+      }, this));
     }
 
-    , resizeInit: function (e, drag) {
-      this.currentAction = "resize";
+    , setupDrag: function () {
+      var preventDefault;
 
-      // Resize is done horizontally and doesn't notify drops
-      drag.horizontal().only();
+      preventDefault = function (e) {
+        if (!this.isContentEditable) {
+          e.preventDefault();
+        }
+      };
+
+      // Links in draggable areas shouldn't be clickable
+      this.$el.on("click", ".columns a", preventDefault);
+
+      // Links and images in draggable areas shoulnd't be draggable
+      this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
+
+      this.$el.on({
+        draginit: $.proxy(function (e, drag) {
+          this.currentAction = "drag";
+
+          var $dragElement = $(drag.element);
+
+          // Limit drag to first container
+          drag.limit($("body").children()).revert();
+        }, this)
+
+        , dragdown: function (e, drag) {
+        }
+
+        , dragend: $.proxy(function (e, drag) {
+          // Reset position
+          $(drag.element).css({
+            top: drag.startPosition.top() + "px",
+            left: drag.startPosition.left() + "px"
+          });
+
+          this.currentAction = null;
+        }, this)
+      }, ".columns");
     }
 
-    , resizeMove: function (e, drag) {
-      var $drag = $(drag.element)
-      , $column = $drag.parent()
-      , $row = $column.parent();
+    , setupDrop: function () {
+      this.$el.on({
+        dropover: function (e, drop, drag) {
+          // Mark the row as full or not
+          if (isRowFull(this, drag.element)) {
+            $(this).addClass("x-full");
+          } else {
+            $(this).addClass("x-not-full");
+          }
+        }
 
-      width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+        , dropout: function (e, drop, drag) {
+          // Remove x-full or x-not-full class if previously added
+          $(this).removeClass("x-full x-not-full");
+        }
 
-      // Sum of column widths should never be larger than row
-      if (width >= $row.width()) {
-        width = $row.width();
-        e.preventDefault();
-      } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
-        width = $row.width() - totalColumnsWidth($row, $column);
-        // When width is a float, calculation is incorrect because browsers use integers
-        // The following line fixes that. Replace as soon as you find a cleaner solution
-        width = width - 1
-        e.preventDefault();
-      }
+        , dropon: function (e, drop, drag) {
+          var row, $drag, $dragParent, $dragGrandParent;
 
-      $column.width(width);
-      drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
+          $drag = $(drag.element);
+
+          // Save original parent
+          $dragParent = $drag.parent();
+
+          // Add column to row. If the row is full, add to a new one
+          if (isRowFull(this, $drag)) {
+            row = $("<div class='row'></div>").insertAfter(this);
+          } else {
+            row = this;
+          }
+          $drag.appendTo(row);
+
+          $(this).removeClass("x-empty");
+
+          // If original parent doesn't have any more children
+          // and is not a <header> or <footer> and has no id attribute, remove it
+          if ($dragParent.children().length === 0 ) {
+            $dragGrandParent = $dragParent.parent();
+
+            if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
+                || $dragParent.attr("id") !== undefined) {
+              $dragParent.addClass("x-empty");
+            } else {
+              $dragParent.remove();
+            }
+          }
+
+          // Remove x-full and x-not-full classes if one was previously added
+          $(this).removeClass("x-full x-not-full");
+        }
+      }, ".row");
     }
 
-    , resizeEnd: function (e, drag) {
-      // Reset position
-      $(drag.element).css({
-        position: "absolute"
-        , right: "-12px"
-        , left: "auto"
+    , setupResize: function () {
+      this.$el.on({
+        draginit: $.proxy(function (e, drag) {
+          this.currentAction = "resize";
+
+          var $dragElement = $(drag.element);
+
+          // Resize is done horizontally and doesn't notify drops
+          drag.horizontal().only();
+        }, this)
+
+        , dragmove: function (e, drag) {
+          var $column = $(this).parent()
+            , $row = $column.parent()
+            , $drag = $(drag.element);
+
+          width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+
+          // Sum of column widths should never be larger than row
+          if (width >= $row.width()) {
+            width = $row.width();
+            e.preventDefault();
+          } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
+            width = $row.width() - totalColumnsWidth($row, $column);
+            // When width is a float, calculation is incorrect because browsers use integers
+            // The following line fixes that. Replace as soon as you find a cleaner solution
+            width = width - 1
+            e.preventDefault();
+          }
+
+          $column.width(width);
+          drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
+        }
+
+        , dragend: $.proxy(function (e, drag) {
+          // Reset position
+          $(drag.element).css({
+              position: "absolute"
+            , right: "-12px"
+            , left: "auto"
+          });
+
+          this.currentAction = null;
+        }, this)
+      }, ".x-resize");
+    }
+
+    , setupRemove: function () {
+      this.$el.on("click", ".x-remove", function () {
+        if (confirm("Are you sure you want to remove this element?")) {
+          $(this).parent().remove();
+        }
       });
-
-      this.currentAction = null;
-    }
-
-    , removeColumn: function (e) {
-      if (confirm("Are you sure you want to remove this element?")) {
-        $(e.target).parent().remove();
-      }
     }
   });
   
@@ -886,6 +909,8 @@ window.require.define({"views/login": function(exports, require, module) {
               this.model.set(response);
 
               this.$el.modal("hide");
+
+              app.trigger("notification", "success", "Welcome back, " + this.model.get("first_name") + ".");
             break;
 
             case "error":
@@ -909,6 +934,23 @@ window.require.define({"views/not_found": function(exports, require, module) {
   module.exports = View.extend({
       id: "not-found"
     , template: "not_found"
+  });
+  
+}});
+
+window.require.define({"views/notification": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/notification");
+
+  module.exports = View.extend({
+      className: "alert notification"
+
+    , render: function () {
+      this.$el.append(template({text: this.options.text}))
+        .addClass("alert-" + this.options.type);
+
+      return this;
+    }
   });
   
 }});
@@ -946,6 +988,8 @@ window.require.define({"views/register": function(exports, require, module) {
       user.save(attrs, {
         success: function (model, res) {
           model.set(res);
+
+          app.trigger("notification", "success", "Your registration was successful. You are now logged in.");
 
           this.$el.modal("hide");
         }.bind(this)
@@ -1110,6 +1154,21 @@ window.require.define({"views/templates/not_found": function(exports, require, m
 
 
     return "<h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n<p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n<p>Go back to <a href=\"/\" title=\"thememy.com\">homepage</a> or contact us about a problem.</p>\n";});
+}});
+
+window.require.define({"views/templates/notification": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<button class=\"close\" data-dismiss=\"alert\">×</button> ";
+    foundHelper = helpers.text;
+    stack1 = foundHelper || depth0.text;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "text", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/register": function(exports, require, module) {

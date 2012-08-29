@@ -58,6 +58,8 @@ module.exports = View.extend({
             this.model.set(response);
 
             this.$el.modal("hide");
+
+            app.trigger("notification", "success", "Welcome back, " + this.model.get("first_name") + ".");
           break;
 
           case "error":

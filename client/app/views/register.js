@@ -31,6 +31,8 @@ module.exports = View.extend({
       success: function (model, res) {
         model.set(res);
 
+        app.trigger("notification", "success", "Your registration was successful. You are now logged in.");
+
         this.$el.modal("hide");
       }.bind(this)
 
