@@ -3,7 +3,10 @@ var LoginView = require("views/login");
 
 beforeEach(function () {
   this.loginView = new LoginView({
-    model: {set: function () {}}
+    model: {
+        set: function () {}
+      , get: function () {}
+    }
   });
 });
 
