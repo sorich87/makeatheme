@@ -3,6 +3,7 @@ require 'fog'
 require 'theme_file_group'
 require 'theme_parser'
 require 'static_theme_file'
+require 'set'
 
 class Theme
   include Mongoid::Document
@@ -130,6 +131,16 @@ class Theme
     end
 
     return theme
+  end
+
+  def fork!
+    Theme.new(self.attributes.merge(:parent => self))
+  end
+
+  # Return what files are needed to build this customization
+  # (original theme files + ones added when customizing)
+  def needed_theme_files
+    (self.static_theme_files + self.theme_file_group.original_files).uniq
   end
 end
 

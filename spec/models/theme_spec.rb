@@ -26,6 +26,9 @@ describe Theme do
   it 'should respond to create_from_zip' do
     Theme.should respond_to(:create_from_zip)
   end
+  it { should respond_to(:fork!) }
+  it { should respond_to(:needed_theme_files) }
+
   describe '.create_from_zip' do
     before do
       @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
@@ -59,6 +62,51 @@ describe Theme do
 
       it 'should be references in the static files' do
         @theme.theme_file_group.static_theme_files.first.theme.should == @theme
+      end
+    end
+  end
+
+  context 'forking' do
+    before do
+      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme.save
+
+      @fork = @theme.fork!
+    end
+
+    it 'should create a new valid theme' do
+      @fork.author = StoreUser.first
+      @fork.should be_valid
+    end
+
+    it 'should have its parent set properly' do
+      @fork.parent.should == @theme
+    end
+
+    it 'should have the same file group' do
+      @fork.theme_file_group.should == @theme.theme_file_group
+    end
+
+    it 'should have the same regions' do
+      @fork.regions.should == @theme.regions
+    end
+
+    it 'should have the same templates' do
+      @fork.templates.should == @theme.templates
+    end
+
+    describe 'static theme files' do
+      it 'should have the same static files' do
+        @fork.static_theme_file_ids == @theme.static_theme_file_ids
+      end
+
+      it 'should not have any static files' do
+        @fork.static_theme_files.should be_empty
+      end
+
+      it 'should have the same needed files as its parent' do
+        #@fork.needed_theme_files.should == @theme.static_theme_files
+        @fork.needed_theme_files.count.should > 0
       end
     end
   end
