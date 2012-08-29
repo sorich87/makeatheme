@@ -17,12 +17,15 @@ describe Theme do
   it { should validate_presence_of(:description) }
 
   it { should belong_to(:author) }
-  it { should have_and_belong_to_many(:theme_file_groups) }
+  it { should belong_to(:theme_file_group) }
 
   it { should validate_attachment_presence(:archive) }
   it { should validate_attachment_content_type(:archive).allowing('application/zip') }
   it { should validate_attachment_size(:archive).less_than(1.megabyte) }
 
+  it 'should respond to create_from_zip' do
+    Theme.should respond_to(:create_from_zip)
+  end
   describe '.create_from_zip' do
     before do
       @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
