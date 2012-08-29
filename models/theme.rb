@@ -25,6 +25,10 @@ class Theme
   field :screenshot_content_type
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
+  field :archive_file_name
+  field :archive_content_type
+  field :archive_file_size,    :type => Integer
+  field :archive_updated_at,   :type => DateTime
 
   validates_presence_of [:name, :author, :description]
 
@@ -34,6 +38,15 @@ class Theme
     styles: { thumb: '320x240>' },
     fog_public: true,
     path: 'themes/:id/screenshot/:style.:filename'
+
+  has_attached_file :archive,
+    fog_public: false,
+    path: 'themes/:id/archives/:filename'
+
+  validates_attachment :archive,
+    :presence => true,
+    :content_type => { :content_type => 'application/zip' },
+    :size => { :less_than => 1.megabyte }
 
   # Return blocks to insert in the templates
   def blocks
@@ -80,6 +93,10 @@ class Theme
 
   def self.create_from_zip(zip_file, attributes = {})
     theme = Theme.new(attributes)
+
+    File.open(zip_file) do |f|
+      theme.archive = f
+    end
 
     begin
       parser = ThemeParser.parse(zip_file)

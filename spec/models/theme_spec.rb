@@ -17,6 +17,10 @@ describe Theme do
   it { should validate_presence_of(:description) }
 
   it { should belong_to(:author) }
+  it { should embed_many(:static_theme_files) }
+
+  it { should validate_attachment_presence(:archive) }
+  it { should validate_attachment_content_type(:archive).allowing('application/zip') }
 
   describe '.create_from_zip' do
     before do

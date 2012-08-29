@@ -1,6 +1,7 @@
 require 'rspec'
 require 'rack/test'
 require 'mongoid-rspec'
+require 'paperclip/matchers'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -26,6 +27,7 @@ end
 RSpec.configure do |conf|
   conf.include Rack::Test::Methods
   conf.include Mongoid::Matchers
+  conf.include Paperclip::Shoulda::Matchers
   conf.mock_with :rspec
 
   conf.before(:each) do
