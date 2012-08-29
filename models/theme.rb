@@ -83,9 +83,7 @@ class Theme
 
   # Return path to where static files are stored on AWS
   def static_files_dir
-    self.theme_file_groups.map do |group|
-      group.static_files_dir
-    end
+    self.theme_file_group.static_files_dir
   end
 
   def as_json(options={})
