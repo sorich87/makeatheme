@@ -80,7 +80,7 @@ class Theme
   # Return path to where static files are stored on AWS
   def static_files_dir
     s = self.static_theme_files.first
-    s.file.url.split(s.file_name).first
+    s.file.url.split(s.file_name).first[0..-2]
   end
 
   def as_json(options={})
