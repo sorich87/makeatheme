@@ -22,191 +22,177 @@ isRowFull = function (dropElement, dragElement) {
   return rowWidth <= totalColumnsWidth(dropElement, dragElement);
 };
 
-
 module.exports = View.extend({
-    el: $(window.document)
+    el: $("body")
 
   , currentAction: null
 
-  , render: function () {
-    this.highlightColumns();
-    this.setupDrag();
-    this.setupDrop();
-    this.setupResize();
-    this.setupRemove();
+  , events: {
+      // Highlight columns.
+      "hover .columns": "highlightColumns"
+
+      // Links in columns shouldn't be clickable.
+    , "click .columns a": "preventDefault"
+
+      // Links and images in columns shoulnd't be draggable
+    , "mousedown .columns a, .columns img": "preventDefault"
+
+      // Drag
+    , "draginit .columns": "dragInit"
+    , "dragend .columns": "dragEnd"
+
+      // Drop
+    , "dropover .row": "dropOver"
+    , "dropout .row": "dropOut"
+    , "dropon .row": "dropOn"
+
+      // Resize
+    , "draginit .x-resize": "resizeInit"
+    , "dragmove .x-resize": "resizeMove"
+    , "dragend .x-resize": "resizeEnd"
+
+      // Remove column
+    , "click .x-remove": "removeColumn"
   }
 
-  , highlightColumns: function () {
-    this.$el.on("hover", ".columns", $.proxy(function (e) {
-      if (this.currentAction !== null) {
-        return;
-      }
-
-      var $column = $(e.currentTarget);
-
-      $(".columns.x-current").removeClass("x-current");
-      $column.addClass("x-current")
-
-      if ($column.children(".x-resize").length === 0) {
-        $column.html(function (i, html) {
-          return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
-        });
-      }
-
-      if ($column.children(".x-remove").length === 0) {
-        $column.html(function (i, html) {
-          return html + "<div class='x-remove' title='Remove element'>&times;</div>";
-        });
-      }
-
-    }, this));
+  , preventDefault: function (e) {
+    e.preventDefault();
   }
 
-  , setupDrag: function () {
-    var preventDefault;
+  , highlightColumns: function (e) {
+    if (this.currentAction !== null) {
+      return;
+    }
 
-    preventDefault = function (e) {
-      if (!this.isContentEditable) {
-        e.preventDefault();
-      }
-    };
+    var $column = $(e.target);
 
-    // Links in draggable areas shouldn't be clickable
-    this.$el.on("click", ".columns a", preventDefault);
+    this.$(".columns.x-current").removeClass("x-current");
+    $column.addClass("x-current")
 
-    // Links and images in draggable areas shoulnd't be draggable
-    this.$el.on("mousedown", ".columns a, .columns img", preventDefault);
+    if ($column.children(".x-resize").length === 0) {
+      $column.html(function (i, html) {
+        return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+      });
+    }
 
-    this.$el.on({
-      draginit: $.proxy(function (e, drag) {
-        this.currentAction = "drag";
+    if ($column.children(".x-remove").length === 0) {
+      $column.html(function (i, html) {
+        return html + "<div class='x-remove' title='Remove element'>&times;</div>";
+      });
+    }
 
-        var $dragElement = $(drag.element);
-
-        // Limit drag to first container
-        drag.limit($("body").children()).revert();
-      }, this)
-
-      , dragdown: function (e, drag) {
-      }
-
-      , dragend: $.proxy(function (e, drag) {
-        // Reset position
-        $(drag.element).css({
-          top: drag.startPosition.top() + "px",
-          left: drag.startPosition.left() + "px"
-        });
-
-        this.currentAction = null;
-      }, this)
-    }, ".columns");
   }
 
-  , setupDrop: function () {
-    this.$el.on({
-      dropover: function (e, drop, drag) {
-        // Mark the row as full or not
-        if (isRowFull(this, drag.element)) {
-          $(this).addClass("x-full");
-        } else {
-          $(this).addClass("x-not-full");
-        }
-      }
+  , dragInit: function (e, drag) {
+    this.currentAction = "drag";
 
-      , dropout: function (e, drop, drag) {
-        // Remove x-full or x-not-full class if previously added
-        $(this).removeClass("x-full x-not-full");
-      }
-
-      , dropon: function (e, drop, drag) {
-        var row, $drag, $dragParent, $dragGrandParent;
-
-        $drag = $(drag.element);
-
-        // Save original parent
-        $dragParent = $drag.parent();
-
-        // Add column to row. If the row is full, add to a new one
-        if (isRowFull(this, $drag)) {
-          row = $("<div class='row'></div>").insertAfter(this);
-        } else {
-          row = this;
-        }
-        $drag.appendTo(row);
-
-        $(this).removeClass("x-empty");
-
-        // If original parent doesn't have any more children
-        // and is not a <header> or <footer> and has no id attribute, remove it
-        if ($dragParent.children().length === 0 ) {
-          $dragGrandParent = $dragParent.parent();
-
-          if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
-              || $dragParent.attr("id") !== undefined) {
-            $dragParent.addClass("x-empty");
-          } else {
-            $dragParent.remove();
-          }
-        }
-
-        // Remove x-full and x-not-full classes if one was previously added
-        $(this).removeClass("x-full x-not-full");
-      }
-    }, ".row");
+    // Limit drag to first container
+    drag.limit($("body").children()).revert();
   }
 
-  , setupResize: function () {
-    this.$el.on({
-      draginit: $.proxy(function (e, drag) {
-        this.currentAction = "resize";
-
-        var $dragElement = $(drag.element);
-
-        // Resize is done horizontally and doesn't notify drops
-        drag.horizontal().only();
-      }, this)
-
-      , dragmove: function (e, drag) {
-        var $column = $(this).parent()
-          , $row = $column.parent()
-          , $drag = $(drag.element);
-
-        width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
-
-        // Sum of column widths should never be larger than row
-        if (width >= $row.width()) {
-          width = $row.width();
-          e.preventDefault();
-        } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
-          width = $row.width() - totalColumnsWidth($row, $column);
-          // When width is a float, calculation is incorrect because browsers use integers
-          // The following line fixes that. Replace as soon as you find a cleaner solution
-          width = width - 1
-          e.preventDefault();
-        }
-
-        $column.width(width);
-        drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
-      }
-
-      , dragend: $.proxy(function (e, drag) {
-        // Reset position
-        $(drag.element).css({
-            position: "absolute"
-          , right: "-12px"
-          , left: "auto"
-        });
-
-        this.currentAction = null;
-      }, this)
-    }, ".x-resize");
-  }
-
-  , setupRemove: function () {
-    this.$el.on("click", ".x-remove", function () {
-      if (confirm("Are you sure you want to remove this element?")) {
-        $(this).parent().remove();
-      }
+  , dragEnd: function (e, drag) {
+    // Reset position
+    $(drag.element).css({
+      top: drag.startPosition.top() + "px",
+      left: drag.startPosition.left() + "px"
     });
+
+    this.currentAction = null;
+  }
+
+  , dropOver: function (e, drop, drag) {
+    // Mark the row as full or not
+    if (isRowFull(e.target, drag.element)) {
+      $(e.target).addClass("x-full");
+    } else {
+      $(e.target).addClass("x-not-full");
+    }
+  }
+
+  , dropOut: function (e, drop, drag) {
+    // Remove x-full or x-not-full class if previously added
+    $(e.target).removeClass("x-full x-not-full");
+  }
+
+  , dropOn: function (e, drop, drag) {
+    var row, $drag, $dragParent, $dragGrandParent;
+
+    $drag = $(drag.element);
+
+    // Save original parent
+    $dragParent = $drag.parent();
+
+    // Add column to row. If the row is full, add to a new one
+    if (isRowFull(this, $drag)) {
+      row = $("<div class='row'></div>").insertAfter(this);
+    } else {
+      row = this;
+    }
+    $drag.appendTo(row);
+
+    $(e.target).removeClass("x-empty");
+
+    // If original parent doesn't have any more children
+    // and is not a <header> or <footer> and has no id attribute, remove it
+    if ($dragParent.children().length === 0 ) {
+      $dragGrandParent = $dragParent.parent();
+
+      if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
+          || $dragParent.attr("id") !== undefined) {
+        $dragParent.addClass("x-empty");
+      } else {
+        $dragParent.remove();
+      }
+    }
+
+    // Remove x-full and x-not-full classes if one was previously added
+    $(e.target).removeClass("x-full x-not-full");
+  }
+
+  , resizeInit: function (e, drag) {
+    this.currentAction = "resize";
+
+    // Resize is done horizontally and doesn't notify drops
+    drag.horizontal().only();
+  }
+
+  , resizeMove: function (e, drag) {
+    var $drag = $(drag.element)
+    , $column = $drag.parent()
+    , $row = $column.parent();
+
+    width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+
+    // Sum of column widths should never be larger than row
+    if (width >= $row.width()) {
+      width = $row.width();
+      e.preventDefault();
+    } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
+      width = $row.width() - totalColumnsWidth($row, $column);
+      // When width is a float, calculation is incorrect because browsers use integers
+      // The following line fixes that. Replace as soon as you find a cleaner solution
+      width = width - 1
+      e.preventDefault();
+    }
+
+    $column.width(width);
+    drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
+  }
+
+  , resizeEnd: function (e, drag) {
+    // Reset position
+    $(drag.element).css({
+      position: "absolute"
+      , right: "-12px"
+      , left: "auto"
+    });
+
+    this.currentAction = null;
+  }
+
+  , removeColumn: function (e) {
+    if (confirm("Are you sure you want to remove this element?")) {
+      $(e.target).parent().remove();
+    }
   }
 });
