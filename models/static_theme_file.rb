@@ -23,8 +23,8 @@ class StaticThemeFile
 
   has_attached_file :file,
     fog_public: true, # For now
-    path: 'themes/:theme_id/:processed_filename',
-    url: 'themes/:theme_id/:processed_filename'
+    path: 'themes/:theme_id/static_files/:processed_filename',
+    url: 'themes/:theme_id/static_files/:processed_filename'
 
   Paperclip.interpolates :processed_filename do |attachment, style|
     attachment.instance.file_name
