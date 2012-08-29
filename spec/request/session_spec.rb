@@ -54,7 +54,7 @@ describe :session do
     it "should not be able to visit restricted areas" do
       delete '/session.json'
       get '/restricted'
-      last_response.status.should == 403
+      last_response.status.should == 401
     end
   end
 end

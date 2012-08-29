@@ -23,7 +23,7 @@ describe "Theme customization" do
 
   it 'should require authentication' do
     post "/themes/#{@theme.id}/customize.json", @json
-    last_response.status.should == 403
+    last_response.status.should == 401
   end
 
   context "as an authenticated user" do
