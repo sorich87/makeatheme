@@ -1,12 +1,4 @@
 module SessionHelper
-
-  def require_auth!
-    unless session?
-      # Meh this is stupid.
-      redirect "/login", 403
-    end
-  end
-
   def authenticate_user!(user)
     session_start!
     session[:user_id] = user.id
@@ -16,4 +8,11 @@ module SessionHelper
     @current_user ||= StoreUser.find(session[:user_id]) if session[:user_id]
   end
 
+  def forbid
+    status 403
+  end
+
+  def authenticated?
+    session?
+  end
 end

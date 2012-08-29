@@ -39,7 +39,7 @@ post '/themes/:id/customize.json' do
 end
 
 post '/themes.json' do
-  require_auth!
+  forbid and return unless authenticated?
 
   file = params[:file]
   if file.nil?
