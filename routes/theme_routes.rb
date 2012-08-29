@@ -20,7 +20,7 @@ get '/themes/:id.json' do
 end
 
 post '/themes/:id/customize.json' do
-  require_auth!
+  forbid and return unless authenticated?
 
   json = JSON.parse(request.body.read)
 
