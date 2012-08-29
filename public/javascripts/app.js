@@ -81,13 +81,8 @@ window.require.define({"application": function(exports, require, module) {
 
   _.extend(Application, {
     initialize: function() {
-      var defaults = require("lib/defaults")
-        , Router = require("lib/router")
+      var Router = require("router")
         , User = require("models/user");
-
-      // merge data from server with default values
-      // get data set in the page, or parent frame if in iframe
-      this.data = _.defaults(this.data, defaults);
 
       // Initialize current user model instance
       this.currentUser = new User(this.data.currentUser);
@@ -233,140 +228,6 @@ window.require.define({"initialize": function(exports, require, module) {
   
 }});
 
-window.require.define({"lib/defaults": function(exports, require, module) {
-  module.exports = {
-    regions: [
-        {
-          type: "header"
-        , name: "Default Header"
-      }
-      , {
-          type: "footer"
-        , name: "Default Footer"
-      }
-      , {
-          type: "content"
-        , name: "Default Content"
-      }
-      , {
-          type: "sidebar"
-        , name: "Primary Sidebar"
-      }
-    ]
-    , blocks: [
-        {
-          id: "header_image"
-        , name: "Header Image"
-        , filename: "headerimage"
-      }
-      , {
-          id: "menu"
-        , name: "Menu"
-        , filename: "menu"
-      }
-      , {
-          id: "search_form"
-        , name: "Search Form"
-        , filename: "searchform"
-      }
-    ]
-    , templates: [
-        {
-          filename: "index"
-        , name: "Default"
-      }
-      , {
-          filename: "page"
-        , name: "Page"
-      }
-    ]
-  };
-  
-}});
-
-window.require.define({"lib/router": function(exports, require, module) {
-  var app = require("application");
-
-  module.exports = Backbone.Router.extend({
-    routes: {
-        "": "index"
-      , "themes/:id": "theme"
-      , "editor/:file": "editor"
-      , "login": "login"
-      , "register": "register"
-      , "upload": "upload"
-      , "*actions": "notFound"
-    }
-
-    , index: function () {
-      $("#main").empty()
-        .append(app.reuseView("faq").render().$el)
-        .append(app.reuseView("theme_list").render().$el);
-    }
-
-    , theme: function (id) {
-      var themeView = app.createView("theme", {themeID: id});
-
-      $("#main").empty().append(themeView.render().$el);
-
-      // Add theme class to body
-      $("body").addClass("theme");
-
-      // Remove body class when navigating away from this route
-      Backbone.history.on("route", function (e, name) {
-        if (name !== "theme") {
-          $("body").removeClass("theme");
-        }
-      });
-    }
-
-    , editor: function (id) {
-      // Setup editor box
-      app.createView("editor").render().$el
-        .append(app.createView("template_select").render().$el)
-        .append(app.createView("block_insert").render().$el)
-        .append(app.createView("style_edit").render().$el)
-        .append(app.createView("download_button").render().$el)
-
-      // Render page and append editor to it
-        .appendTo($("body"));
-
-      // Setup drag and drop and resize
-      app.createView("layout").render();
-    }
-
-    , login: function () {
-      // Remove all modals and show the 'login' one
-      // We could use modal("hide") here but it would trigger
-      // events which we don't want
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.reuseView("login").render().$el.modal("show"));
-    }
-
-    , register: function () {
-      // Remove all modals and show the 'register' one
-      // We could use modal("hide") here but it would trigger
-      // events which we don't want
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.reuseView("register").render().$el.modal("show"));
-    }
-
-    , upload: function () {
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.reuseView("theme_upload").render().$el.modal("show"));
-    }
-
-    , notFound: function () {
-      $("#main").empty()
-        .append(app.reuseView("not_found").render().$el);
-    }
-  });
-  
-}});
-
 window.require.define({"models/base/model": function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
@@ -483,6 +344,89 @@ window.require.define({"models/user": function(exports, require, module) {
       , password_confirmation: {
         equalTo: "password"
       }
+    }
+  });
+  
+}});
+
+window.require.define({"router": function(exports, require, module) {
+  var app = require("application");
+
+  module.exports = Backbone.Router.extend({
+    routes: {
+        "": "index"
+      , "themes/:id": "theme"
+      , "editor/:file": "editor"
+      , "login": "login"
+      , "register": "register"
+      , "upload": "upload"
+      , "*actions": "notFound"
+    }
+
+    , index: function () {
+      $("#main").empty()
+        .append(app.reuseView("faq").render().$el)
+        .append(app.reuseView("theme_list").render().$el);
+    }
+
+    , theme: function (id) {
+      var themeView = app.createView("theme", {themeID: id});
+
+      $("#main").empty().append(themeView.render().$el);
+
+      // Add theme class to body
+      $("body").addClass("theme");
+
+      // Remove body class when navigating away from this route
+      Backbone.history.on("route", function (e, name) {
+        if (name !== "theme") {
+          $("body").removeClass("theme");
+        }
+      });
+    }
+
+    , editor: function (id) {
+      // Setup editor box
+      app.createView("editor").render().$el
+        .append(app.createView("template_select").render().$el)
+        .append(app.createView("block_insert").render().$el)
+        .append(app.createView("style_edit").render().$el)
+        .append(app.createView("download_button").render().$el)
+
+      // Render page and append editor to it
+        .appendTo($("body"));
+
+      // Setup drag and drop and resize
+      app.createView("layout").render();
+    }
+
+    , login: function () {
+      // Remove all modals and show the 'login' one
+      // We could use modal("hide") here but it would trigger
+      // events which we don't want
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.reuseView("login").render().$el.modal("show"));
+    }
+
+    , register: function () {
+      // Remove all modals and show the 'register' one
+      // We could use modal("hide") here but it would trigger
+      // events which we don't want
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.reuseView("register").render().$el.modal("show"));
+    }
+
+    , upload: function () {
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.reuseView("theme_upload").render().$el.modal("show"));
+    }
+
+    , notFound: function () {
+      $("#main").empty()
+        .append(app.reuseView("not_found").render().$el);
     }
   });
   

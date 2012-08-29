@@ -4,13 +4,8 @@ Application = window.Application || {};
 
 _.extend(Application, {
   initialize: function() {
-    var defaults = require("lib/defaults")
-      , Router = require("lib/router")
+    var Router = require("router")
       , User = require("models/user");
-
-    // merge data from server with default values
-    // get data set in the page, or parent frame if in iframe
-    this.data = _.defaults(this.data, defaults);
 
     // Initialize current user model instance
     this.currentUser = new User(this.data.currentUser);
