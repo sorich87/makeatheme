@@ -4975,7 +4975,7 @@ body {
   }
 }
 /* Notification */
-.notification {
+#notifications {
   left: 10px;
   top: 60px;
   position: fixed;

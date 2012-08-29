@@ -43,6 +43,7 @@ exports.config =
           'vendor/scripts/bootstrap/bootstrap-collapse.js',
           'vendor/scripts/bootstrap/bootstrap-modal.js'
           'vendor/scripts/bootstrap/bootstrap-alert.js'
+          'vendor/scripts/bootstrap/bootstrap-transition.js'
         ]
         after: ['vendor/scripts/handlebars.js']
 

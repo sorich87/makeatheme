@@ -84,7 +84,10 @@ window.require.define({"application": function(exports, require, module) {
       var Router = require("router")
         , User = require("models/user");
 
-      this.handleNotifications();
+      // Setup notifications handling
+      // Append to top window in case document is in an iframe
+      this.createView("notifications").render()
+        .$el.appendTo($("body", window.top.document));
 
       // Initialize current user model instance
       this.currentUser = new User(this.data.currentUser);
@@ -127,13 +130,6 @@ window.require.define({"application": function(exports, require, module) {
       views[name] = new View(options);
       this.views = views;
       return views[name];
-    }
-
-    , handleNotifications: function () {
-      this.on("notification", function (type, text) {
-        this.createView("notification", {type: type, text: text})
-          .render().$el.appendTo($("body"));
-      }.bind(this));
     }
   }, Backbone.Events);
 
@@ -938,16 +934,32 @@ window.require.define({"views/not_found": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/notification": function(exports, require, module) {
-  var View = require("views/base/view")
+window.require.define({"views/notifications": function(exports, require, module) {
+  // Notifications view
+  // Show all notifications in an ul
+  // Listen to notification events to render a notification and append it to the ul
+  // Hide the notification after 4s
+  var app = require("application")
+    , View = require("views/base/view")
     , template = require("views/templates/notification");
 
   module.exports = View.extend({
-      className: "alert notification"
+      tagName: "ul"
+    , id: "notifications"
+    , className: "unstyled"
 
-    , render: function () {
-      this.$el.append(template({text: this.options.text}))
-        .addClass("alert-" + this.options.type);
+    , initialize: function () {
+      _.bindAll(this, "showNotification");
+
+      app.on("notification", this.showNotification);
+    }
+
+    , showNotification: function (type, text) {
+      var $li = $(template({type: type, text: text})).appendTo(this.$el);
+
+      setTimeout(function () {
+        $li.alert("close");
+      }, 4000);
 
       return this;
     }
@@ -1162,12 +1174,17 @@ window.require.define({"views/templates/notification": function(exports, require
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<button class=\"close\" data-dismiss=\"alert\">×</button> ";
+    buffer += "<li class=\"alert alert-";
+    foundHelper = helpers.type;
+    stack1 = foundHelper || depth0.type;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "type", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " fade in\"><button class=\"close\" data-dismiss=\"alert\">×</button> ";
     foundHelper = helpers.text;
     stack1 = foundHelper || depth0.text;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "text", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n";
+    buffer += escapeExpression(stack1) + "</li>\n";
     return buffer;});
 }});
 
