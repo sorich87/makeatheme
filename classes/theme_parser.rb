@@ -45,7 +45,7 @@ class ThemeParser
 
       if @@templates.include?(filename)
         @templates << {
-          :name => template_name,
+          :filename => template_name,
           :template => file_content
         }
       else
