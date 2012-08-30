@@ -131,4 +131,33 @@ describe Theme do
       end
     end
   end
+
+  describe 'destroy' do
+    before do
+      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme.save
+    end
+
+    describe 'file group destroying itself' do
+      before do
+        @group = @theme.theme_file_group
+      end
+
+      it 'should only have one theme' do
+        @theme.destroy
+        @group.reload.themes.should be_empty
+      end
+
+      it 'should destroy itself' do
+        @theme.destroy
+        @group.reload.should be_destroyed
+      end
+
+      it 'should not remove itself if there are many themes' do
+        @theme.fork!.save!
+        @theme.destroy
+        @group.reload.should_not be_destroyed
+      end
+    end
+  end
 end
