@@ -91,7 +91,8 @@ class Theme
       :_id => self._id,
       :name => self.name,
       :author => self.author.to_fullname,
-      :screenshot_uri => self.screenshot.url
+      :screenshot_uri => self.screenshot.url,
+      :archive => self.archive.url
     }
   end
 
