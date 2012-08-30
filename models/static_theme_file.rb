@@ -12,7 +12,7 @@ class StaticThemeFile
   belongs_to :theme_file_group
   belongs_to :theme
 
-  validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif', 'text/x-c']
+  validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif', 'text/css']
 
   def as_json(options={})
     {

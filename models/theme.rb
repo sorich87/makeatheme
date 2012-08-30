@@ -124,7 +124,7 @@ class Theme
     ensure
       parser.static_files.each do |static_file|
         static_file[:tempfile].close
-        static_file[:tempfile].unlink
+        File.unlink(static_file[:tempfile])
       end
     end
 

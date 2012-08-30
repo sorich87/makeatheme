@@ -61,7 +61,8 @@ class ThemeParser
 
   def add_static_file(entry)
     filename = File.basename(entry.to_s)
-    tempfile = Tempfile.new(filename)
+
+    tempfile = File.open(File.join(Dir.mktmpdir, filename), 'w+')
 
     entry.get_input_stream do |entry_file|
       tempfile.write(entry_file.read)
