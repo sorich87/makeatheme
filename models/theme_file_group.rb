@@ -9,6 +9,7 @@ class ThemeFileGroup
   has_many :themes
 
   before_create :add_original_files
+  before_destroy :check_theme_amount
 
   def static_files_dir
     s = self.static_theme_files.first
@@ -22,5 +23,11 @@ class ThemeFileGroup
   private
   def add_original_files
     self.original_file_ids = self.static_theme_file_ids
+  end
+
+  # Check how many themes exist, if there is only one we can remove ourselves.
+  # If not the group needs to stay.
+  def check_theme_amount
+    return false if self.themes.count > 1
   end
 end

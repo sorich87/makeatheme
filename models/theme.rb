@@ -35,7 +35,7 @@ class Theme
 
   validates_presence_of [:name, :author, :description]
 
-  belongs_to :theme_file_group
+  belongs_to :theme_file_group, :dependent => :destroy
   has_many :static_theme_files
 
   has_attached_file :screenshot,
