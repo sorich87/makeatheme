@@ -173,7 +173,14 @@ window.require.define({"collections/templates": function(exports, require, modul
     , Template = require("models/template");
 
   module.exports = Collection.extend({
-    model: Template
+      model: Template
+
+    // Get a template by its name
+    , getTemplate: function (name) {
+      return this.find(function (template) {
+        return template.get("name") === name;
+      });
+    }
   });
   
 }});
@@ -393,15 +400,8 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , editor: function (id) {
-      // Setup editor box
-      app.createView("editor").render().$el
-        .append(app.createView("template_select").render().$el)
-        .append(app.createView("block_insert").render().$el)
-        .append(app.createView("style_edit").render().$el)
-        .append(app.createView("download_button").render().$el)
-
-      // Render template and append editor to it
-        .appendTo($("body"));
+      // Initialize editor view
+      app.createView("editor").render();
 
       // Setup drag and drop and resize
       app.createView("layout").render();
@@ -599,22 +599,50 @@ window.require.define({"views/editor": function(exports, require, module) {
     , View = require("views/base/view");
 
   module.exports = View.extend({
-    el: $("<div id='x-layout-editor'>\
+    el: "<div id='x-layout-editor'>\
         <div class='x-handle'>&Dagger;</div>\
-        </div>")
+        </div>"
+
+    , events: {
+        "draginit #x-layout-editor .x-handle": "dragInit"
+      , "dragmove #x-layout-editor .x-handle": "dragMove"
+    }
 
     , initialize: function () {
-      $(window.document).on({
-        draginit: function (e, drag) {
-          var mouse = drag.mouseElementPosition;
+      app.createView("templates").render();
 
-          drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
-        }
+      _.bindAll(this, "render");
 
-        , dragmove: function (e, drag) {
-          $(drag.element).parent().css("zIndex", 9999);
-        }
-      }, "#x-layout-editor .x-handle");
+      app.on("templateLoaded", this.render);
+    }
+
+    // Show editor when "templateLoaded" event is triggered
+    , render: function () {
+      var templatesView = app.reuseView("templates");
+
+      this.$el
+        .append(templatesView.$el)
+        .append(app.reuseView("block_insert").render().$el)
+        .append(app.reuseView("style_edit").render().$el)
+        .append(app.reuseView("download_button").render().$el)
+        .appendTo($("body"));
+
+      // Reset template select events
+      templatesView.delegateEvents();
+
+      return this;
+    }
+
+    // Drag the editor box
+    , dragInit: function (e, drag) {
+      var mouse = drag.mouseElementPosition;
+
+      drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+    }
+
+    // Keep the editor box above other elements when moving
+    , dragMove: function (e, drag) {
+      $(drag.element).parent().css("zIndex", 9999);
     }
   });
   
@@ -1032,7 +1060,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/template_select": function(exports, require, module) {
+window.require.define({"views/templates": function(exports, require, module) {
   var View = require("views/base/view")
     , Templates = require("collections/templates")
     , app = require("application");
@@ -1043,58 +1071,41 @@ window.require.define({"views/template_select": function(exports, require, modul
 
     , collection: new Templates(app.data.theme_pieces.templates)
 
+    , events: {
+      "change": "switchTemplate"
+    }
+
     , initialize: function (options) {
-      this.bindEvents();
+      this.collection.on("add", this.addOne, this);
+      this.collection.on("reset", this.addAll, this);
     }
 
     , render: function () {
       this.collection.reset(this.collection.models);
 
+      // Load index template
+      $("body").append(this.collection.getTemplate("index").get("build"));
+      app.trigger("templateLoaded", "index");
+
       return this;
     }
 
-    , bindEvents: function () {
-      this.collection.on("add", this.addOne, this);
-      this.collection.on("reset", this.addAll, this);
-
-      $(window.document).on("change", this.$el, $.proxy(this.switchTemplate, this));
-    }
-
     , addOne: function (template) {
-      var selected = "";
-
-      if (template.get("current")) {
-        // Load selected attribute
-        selected = " selected='selected'";
-
-        // Save current template
-        this.currentTemplate = template;
-      }
-
-      this.$("select").append("<option value='" + template.cid + "'" + selected + ">"
+      this.$("select").append("<option value='" + template.cid + "'>"
                       + template.get("name") + "</option>");
     }
 
     , addAll: function () {
-      this.$("select").empty();
-
       _.each(this.collection.models, function (template) {
         this.addOne(template);
       }, this);
     }
 
     , switchTemplate: function (e) {
-      var modelCid = $(e.target).val()
-        , template = this.collection.getByCid(modelCid);
+      var template = this.collection.getByCid(this.$("select").val());
 
-      // Reset current template
-      if (this.currentTemplate) {
-        this.currentTemplate.set("current", false);
-      }
-      template.set("current", true);
-
-      // Load template file
-      window.location.href = template.get("filename") + ".html";
+      $("body").empty().append(template.get("build"));
+      app.trigger("templateLoaded", template.get("name"));
     }
   });
   

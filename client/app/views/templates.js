@@ -1,0 +1,47 @@
+var View = require("views/base/view")
+  , Templates = require("collections/templates")
+  , app = require("application");
+
+module.exports = View.extend({
+    el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
+          <form><select></select></form></div>")
+
+  , collection: new Templates(app.data.theme_pieces.templates)
+
+  , events: {
+    "change": "switchTemplate"
+  }
+
+  , initialize: function (options) {
+    this.collection.on("add", this.addOne, this);
+    this.collection.on("reset", this.addAll, this);
+  }
+
+  , render: function () {
+    this.collection.reset(this.collection.models);
+
+    // Load index template
+    $("body").append(this.collection.getTemplate("index").get("build"));
+    app.trigger("templateLoaded", "index");
+
+    return this;
+  }
+
+  , addOne: function (template) {
+    this.$("select").append("<option value='" + template.cid + "'>"
+                    + template.get("name") + "</option>");
+  }
+
+  , addAll: function () {
+    _.each(this.collection.models, function (template) {
+      this.addOne(template);
+    }, this);
+  }
+
+  , switchTemplate: function (e) {
+    var template = this.collection.getByCid(this.$("select").val());
+
+    $("body").empty().append(template.get("build"));
+    app.trigger("templateLoaded", template.get("name"));
+  }
+});

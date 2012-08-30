@@ -34,15 +34,8 @@ module.exports = Backbone.Router.extend({
   }
 
   , editor: function (id) {
-    // Setup editor box
-    app.createView("editor").render().$el
-      .append(app.createView("template_select").render().$el)
-      .append(app.createView("block_insert").render().$el)
-      .append(app.createView("style_edit").render().$el)
-      .append(app.createView("download_button").render().$el)
-
-    // Render template and append editor to it
-      .appendTo($("body"));
+    // Initialize editor view
+    app.createView("editor").render();
 
     // Setup drag and drop and resize
     app.createView("layout").render();
