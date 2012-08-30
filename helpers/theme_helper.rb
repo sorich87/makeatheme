@@ -8,7 +8,9 @@ module ThemeHelper
 
     [:blocks, :regions, :templates].each do |type|
       theme.send(type).each do |piece|
-        locals[piece[:name]] = piece[:build] = hbs(piece[:template], locals: locals)
+        local_name = if type == :regions then piece[:type] else piece[:name] end
+
+        locals[local_name] = piece[:build] = hbs(piece[:template], locals: locals)
         pieces[type] << piece
       end
     end
