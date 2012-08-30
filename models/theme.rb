@@ -148,5 +148,33 @@ class Theme
   def needed_theme_files
     (self.static_theme_files + self.theme_file_group.original_files).uniq
   end
+
+  # Replace templates that exist with new ones and add
+  # those that do not exist.
+  def replace_and_add_templates(templates)
+    templates.each do |new_template|
+      index = self.templates.index {|t| t[:filename] == new_template[:filename]}
+      if index
+        puts "Replacing template: #{new_template[:filename]}"
+        self[:templates][index] = new_template
+      else
+        puts "Adding template: #{new_template[:filename]}"
+        self[:templates] << new_template
+      end
+    end
+  end
+
+  def replace_and_add_regions(regions)
+    regions.each do |new_region|
+      index = self.regions.index {|r| r[:name] == new_region[:name]}
+      if index
+        puts "Replacing region: #{new_region[:name]}"
+        self[:regions][index] = new_region
+      else
+        puts "Adding region: #{new_region[:name]}"
+        self[:regions] << new_region
+      end
+    end
+  end
 end
 
