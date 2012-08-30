@@ -9,7 +9,7 @@ describe "Theme customization" do
     }
 
     @theme = Theme.where(@theme_attributes.merge(:archive => nil)).first
-    unless @theme.nil?
+    if @theme.nil?
       zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
       @theme = Theme.create_from_zip(zip, @theme_attributes)
     end
