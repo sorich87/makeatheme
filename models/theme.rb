@@ -17,8 +17,8 @@ class Theme
   field :version,     type: String
   field :description, type: String
   field :tags,        type: Array
-  field :regions,     type: Array
-  field :templates,   type: Array
+  field :regions,     type: Array, :default => []
+  field :templates,   type: Array, :default => []
 
   belongs_to :author, :class_name => 'StoreUser'
   belongs_to :parent, :class_name => 'Theme'
