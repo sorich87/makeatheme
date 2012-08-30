@@ -19,9 +19,8 @@
     Application = {
         editor: true
       , data: {
-          theme: <%= theme %>
-        , regions: <%= regions %>
-        , blocks: <%= blocks %>
+          theme_meta: <%= theme %>
+        , theme_pieces: <%= pieces %>
       }
     };
     require('initialize');
@@ -30,7 +29,5 @@
   <link rel="stylesheet" href="<%= static_files_dir %>/style.css">
   <link rel="stylesheet" href="/stylesheets/editor.css">
 </head>
-<body class="page">
-  <%= template %>
-</body>
+<body></body>
 </html>

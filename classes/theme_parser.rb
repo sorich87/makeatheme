@@ -45,13 +45,13 @@ class ThemeParser
 
       if @@templates.include?(filename)
         @templates << {
-          :filename => template_name,
+          :name => template_name,
           :template => file_content
         }
       else
         @regions << {
           :id => template_name,
-          :filename => template_name,
+          :name => template_name,
           :template => file_content,
           :type => get_region_type(template_name)
         }

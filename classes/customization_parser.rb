@@ -59,11 +59,11 @@ class CustomizationParser
       #template["compiled_template"] = @handlebars.compile(template["template"]).call(@base)
 
       # Read the file from public/editor/<file>.html for now
-      input_file = File.join('public', 'editor', "#{template[:filename]}.html")
+      input_file = File.join('public', 'editor', "#{template[:name]}.html")
       input_html = File.read(input_file)
       compiled_template = @handlebars.compile(input_html).call(@base)
 
-      php_filename = File.join(@output_folder, "#{template[:filename]}.php")
+      php_filename = File.join(@output_folder, "#{template[:name]}.php")
 
       File.open(php_filename, 'w') do |f|
         puts "Writing template to: #{php_filename}"

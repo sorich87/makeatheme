@@ -6,16 +6,19 @@ describe ("Template", function () {
     var template = new Template();
 
     expect(template.get("name")).to.equal("");
-    expect(template.get("filename")).to.equal("");
+    expect(template.get("template")).to.equal("");
+    expect(template.get("build")).to.equal("");
   });
 
   it ("will set passed attributes on the model instance when created", function () {
     var template = new Template({
-        name: "Some Template"
-      , filename: "some-template"
+        name: "some-template"
+      , template: "<div>{{test}}</div>"
+      , build: "<div>test</div>"
     });
 
-    expect(template.get("name")).to.equal("Some Template");
-    expect(template.get("filename")).to.equal("some-template");
+    expect(template.get("name")).to.equal("some-template");
+    expect(template.get("template")).to.equal("<div>{{test}}</div>");
+    expect(template.get("build")).to.equal("<div>test</div>");
   });
 });

@@ -6,7 +6,7 @@ module.exports = View.extend({
     el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
           <form><select></select></form></div>")
 
-  , collection: new Templates(app.data.templates)
+  , collection: new Templates(app.data.theme_pieces.templates)
 
   , initialize: function (options) {
     this.bindEvents();

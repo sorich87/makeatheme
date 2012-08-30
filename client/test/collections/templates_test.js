@@ -8,21 +8,21 @@ describe ("Templates", function () {
     expect(templates.length).to.equal(0);
 
     templates.add({
-        name: "Some Template"
-      , filename: "sometemplate"
+        label: "Some Template"
+      , name: "sometemplate"
     });
 
     expect(templates.length).to.equal(1);
 
     templates.add([
       {
-          name: "Another Template"
-        , filename: "anothertemplate"
+          label: "Another Template"
+        , name: "anothertemplate"
         , current: true
       }
       , {
-          name: "A Last Template"
-        , filename: "alasttemplate"
+          label: "A Last Template"
+        , name: "alasttemplate"
       }
     ]);
 

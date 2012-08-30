@@ -154,12 +154,12 @@ class Theme
   # those that do not exist.
   def replace_and_add_templates(templates)
     templates.each do |new_template|
-      index = self.templates.index {|t| t[:filename] == new_template[:filename]}
+      index = self.templates.index {|t| t[:name] == new_template[:name]}
       if index
-        puts "Replacing template: #{new_template[:filename]}"
+        puts "Replacing template: #{new_template[:name]}"
         self[:templates][index] = new_template
       else
-        puts "Adding template: #{new_template[:filename]}"
+        puts "Adding template: #{new_template[:name]}"
         self[:templates] << new_template
       end
     end

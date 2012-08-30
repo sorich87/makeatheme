@@ -41,7 +41,7 @@ post '/themes/:id/customize.json' do
   # Adding template strings to templates here, should be in JSON or implemented
   # some other way in reality.
   json[:templates].each_with_index do |template, index|
-    name = template[:filename]
+    name = template[:name]
     template_string = fork.template_content(name)
     json[:templates][index][:template] = template_string
   end
@@ -96,14 +96,10 @@ get '/editor/:theme/?:template?' do
   # Return 404 if no theme found.
   status 404 and return unless theme
 
-  blocks_and_regions = theme_blocks_and_regions(theme)
-
   locals = {
-   theme: theme.to_json,
-   regions: blocks_and_regions[:regions].to_json,
-   blocks: blocks_and_regions[:blocks].to_json,
-   template: theme_template(theme, params[:template]),
-   static_files_dir: theme.static_files_dir
+    theme: theme.to_json,
+    pieces: theme_pieces(theme).to_json,
+    static_files_dir: theme.static_files_dir
   }
   erb :editor, locals: locals
 end

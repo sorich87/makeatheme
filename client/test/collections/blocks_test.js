@@ -8,20 +8,20 @@ describe ("Blocks", function () {
     expect(blocks.length).to.equal(0);
 
     blocks.add({
-        name: "Some Block"
-      , filename: "somefile"
+        label: "Some Block"
+      , name: "somefile"
     });
 
     expect(blocks.length).to.equal(1);
 
     blocks.add([
       {
-          name: "Another Block"
-        , filename: "anotherfile"
+          label: "Another Block"
+        , name: "anotherfile"
       }
       , {
-          name: "A Last Block"
-        , filename: "alastfile"
+          label: "A Last Block"
+        , name: "alastfile"
       }
     ]);
 
