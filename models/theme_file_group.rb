@@ -12,7 +12,7 @@ class ThemeFileGroup
 
   def static_files_dir
     s = self.static_theme_files.first
-    s.file.url.split(s.file_name).first[0..-2]
+    s.file.send(:directory).files.get_https_url(s.file.path, nil).split(s.file_name).first[0..-2]
   end
 
   def original_files
