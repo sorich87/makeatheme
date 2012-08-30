@@ -36,6 +36,6 @@ class StaticThemeFile
   end
 
   Paperclip.interpolates :group_id do |attachment, style|
-    attachment.instance.group.id
+    attachment.instance.theme_file_group_id
   end
 end
