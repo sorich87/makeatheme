@@ -7,10 +7,15 @@ module.exports = View.extend({
     el: $("<div id='x-block-insert'><h4>Blocks</h4>\
           <p>Drag and drop to insert</p><ul></ul></div>")
 
-  , collection: new Blocks(app.data.blocks)
+  , collection: new Blocks(app.data.theme_pieces.blocks)
+
+  , events: {
+      "draginit #x-block-insert a": "dragInit"
+    , "dragend #x-block-insert a": "dragEnd"
+  }
 
   , initialize: function () {
-    this.bindEvents();
+    this.collection.on("reset", this.addAll, this);
   }
 
   , render: function () {
@@ -19,38 +24,26 @@ module.exports = View.extend({
     return this;
   }
 
-  , bindEvents: function () {
-    this.collection.on("reset", this.addAll, this);
-
-    $(window.document).on("draginit", "#x-block-insert a", this.draginit);
-    $(window.document).on("dragend", "#x-block-insert a", $.proxy(this.dragend, this));
-  }
-
   , addOne: function (block) {
-    var name = block.get("name")
-    , id = block.get("id");
-
-    this.$("ul").append("<li><a href='#' data-id='" + id + "'>\
-                        <span>&Dagger;</span> " + name + "</a></li>");
+    this.$("ul").append("<li><a href='#' data-cid='" + block.cid + "'>\
+                        <span>&Dagger;</span> " + block.get("name") + "</a></li>");
   }
 
   , addAll: function () {
-    this.$("ul").empty();
-
     _.each(this.collection.models, function (block) {
       this.addOne(block);
     }, this);
   }
 
   // Replace the drag element by its clone
-  , draginit: function (e, drag) {
+  , dragInit: function (e, drag) {
     drag.element = drag.ghost();
   }
 
   // Load the actual template chuck to insert
-  , dragend: function (e, drag) {
-    var block = this.collection.get(drag.element.data("id"));
+  , dragEnd: function (e, drag) {
+    var block = this.collection.getByCid(drag.element.data("cid"));
 
-    drag.element[0].outerHTML = require("views/templates/blocks/" + block.get("filename"))();
+    drag.element[0].outerHTML = block.get("build");
   }
 });

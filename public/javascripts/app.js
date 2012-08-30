@@ -508,10 +508,15 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       el: $("<div id='x-block-insert'><h4>Blocks</h4>\
             <p>Drag and drop to insert</p><ul></ul></div>")
 
-    , collection: new Blocks(app.data.blocks)
+    , collection: new Blocks(app.data.theme_pieces.blocks)
+
+    , events: {
+        "draginit #x-block-insert a": "dragInit"
+      , "dragend #x-block-insert a": "dragEnd"
+    }
 
     , initialize: function () {
-      this.bindEvents();
+      this.collection.on("reset", this.addAll, this);
     }
 
     , render: function () {
@@ -520,39 +525,27 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       return this;
     }
 
-    , bindEvents: function () {
-      this.collection.on("reset", this.addAll, this);
-
-      $(window.document).on("draginit", "#x-block-insert a", this.draginit);
-      $(window.document).on("dragend", "#x-block-insert a", $.proxy(this.dragend, this));
-    }
-
     , addOne: function (block) {
-      var name = block.get("name")
-      , id = block.get("id");
-
-      this.$("ul").append("<li><a href='#' data-id='" + id + "'>\
-                          <span>&Dagger;</span> " + name + "</a></li>");
+      this.$("ul").append("<li><a href='#' data-cid='" + block.cid + "'>\
+                          <span>&Dagger;</span> " + block.get("name") + "</a></li>");
     }
 
     , addAll: function () {
-      this.$("ul").empty();
-
       _.each(this.collection.models, function (block) {
         this.addOne(block);
       }, this);
     }
 
     // Replace the drag element by its clone
-    , draginit: function (e, drag) {
+    , dragInit: function (e, drag) {
       drag.element = drag.ghost();
     }
 
     // Load the actual template chuck to insert
-    , dragend: function (e, drag) {
-      var block = this.collection.get(drag.element.data("id"));
+    , dragEnd: function (e, drag) {
+      var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = require("views/templates/blocks/" + block.get("filename"))();
+      drag.element[0].outerHTML = block.get("build");
     }
   });
   
@@ -720,12 +713,14 @@ window.require.define({"views/layout": function(exports, require, module) {
       e.preventDefault();
     }
 
+    // Remove .x-current from previously highlighted column and add to current one.
+    // Add resize and delete handles to the column if they weren't there already.
     , highlightColumns: function (e) {
       if (this.currentAction !== null) {
         return;
       }
 
-      var $column = $(e.target);
+      var $column = $(e.currentTarget);
 
       this.$(".columns.x-current").removeClass("x-current");
       $column.addClass("x-current")
@@ -744,15 +739,16 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     }
 
+    // Start drag and limit it to direct children of body.
+    // If released, revert to original position.
     , dragInit: function (e, drag) {
       this.currentAction = "drag";
 
-      // Limit drag to first container
-      drag.limit($("body").children()).revert();
+      drag.limit(this.$el.children()).revert();
     }
 
+    // Reset position of dragged element.
     , dragEnd: function (e, drag) {
-      // Reset position
       $(drag.element).css({
         top: drag.startPosition.top() + "px",
         left: drag.startPosition.left() + "px"
@@ -761,40 +757,43 @@ window.require.define({"views/layout": function(exports, require, module) {
       this.currentAction = null;
     }
 
+    // Mark the row as full or not.
     , dropOver: function (e, drop, drag) {
-      // Mark the row as full or not
-      if (isRowFull(e.target, drag.element)) {
-        $(e.target).addClass("x-full");
-      } else {
-        $(e.target).addClass("x-not-full");
-      }
+      $(drop.element).addClass(function () {
+        if (isRowFull(this, drag.element)) {
+          $(this).addClass("x-full");
+        } else {
+          $(this).addClass("x-not-full");
+        }
+      });
     }
 
+    // Remove x-full or x-not-full class if previously added.
     , dropOut: function (e, drop, drag) {
-      // Remove x-full or x-not-full class if previously added
-      $(e.target).removeClass("x-full x-not-full");
+      $(drop.element).removeClass("x-full x-not-full");
     }
 
+    // Add column to row. If the row is full, add a new row.
+    // If original parent row doesn't have any more children
+    // and is not a <header> or <footer> and has no id attribute, remove it.
+    // Remove x-full and x-not-full classes if one was previously added.
     , dropOn: function (e, drop, drag) {
       var row, $drag, $dragParent, $dragGrandParent;
 
       $drag = $(drag.element);
+      $drop = $(drop.element);
 
-      // Save original parent
       $dragParent = $drag.parent();
 
-      // Add column to row. If the row is full, add to a new one
-      if (isRowFull(this, $drag)) {
-        row = $("<div class='row'></div>").insertAfter(this);
+      if (isRowFull($drop, $drag)) {
+        $row = $("<div class='row'></div>").insertAfter($drop);
       } else {
-        row = this;
+        $row = $drop;
       }
-      $drag.appendTo(row);
+      $drag.appendTo($row);
 
-      $(e.target).removeClass("x-empty");
+      $drop.removeClass("x-empty");
 
-      // If original parent doesn't have any more children
-      // and is not a <header> or <footer> and has no id attribute, remove it
       if ($dragParent.children().length === 0 ) {
         $dragGrandParent = $dragParent.parent();
 
@@ -806,17 +805,18 @@ window.require.define({"views/layout": function(exports, require, module) {
         }
       }
 
-      // Remove x-full and x-not-full classes if one was previously added
-      $(e.target).removeClass("x-full x-not-full");
+      $drop.removeClass("x-full x-not-full");
     }
 
+    // Init drag of resize handle horizontally and don't notify drops.
     , resizeInit: function (e, drag) {
       this.currentAction = "resize";
 
-      // Resize is done horizontally and doesn't notify drops
       drag.horizontal().only();
     }
 
+    // Resize the column.
+    // Sum of column widths in the row should never be larger than row.
     , resizeMove: function (e, drag) {
       var $drag = $(drag.element)
       , $column = $drag.parent()
@@ -824,7 +824,6 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
 
-      // Sum of column widths should never be larger than row
       if (width >= $row.width()) {
         width = $row.width();
         e.preventDefault();
@@ -840,8 +839,8 @@ window.require.define({"views/layout": function(exports, require, module) {
       drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
     }
 
+    // Reset position of resize handle
     , resizeEnd: function (e, drag) {
-      // Reset position
       $(drag.element).css({
         position: "absolute"
         , right: "-12px"
@@ -851,9 +850,10 @@ window.require.define({"views/layout": function(exports, require, module) {
       this.currentAction = null;
     }
 
+    // Remove column if confirmed.
     , removeColumn: function (e) {
       if (confirm("Are you sure you want to remove this element?")) {
-        $(e.target).parent().remove();
+        $(e.currentTarget).parent().remove();
       }
     }
   });
