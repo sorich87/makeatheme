@@ -131,8 +131,8 @@ class Theme
     return theme
   end
 
-  def fork!
-    Theme.new(self.attributes.merge(:parent => self))
+  def fork!(attributes={})
+    Theme.new(self.attributes.merge(:parent => self).merge(attributes))
   end
 
   def forks
