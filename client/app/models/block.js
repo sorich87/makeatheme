@@ -7,4 +7,9 @@ module.exports = Model.extend({
     , template: ""
     , build: ""
   }
+
+  , label: function () {
+    return this.get("name").replace("_", " ")
+      .replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); });
+  }
 });

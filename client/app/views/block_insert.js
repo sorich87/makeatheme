@@ -26,7 +26,7 @@ module.exports = View.extend({
 
   , addOne: function (block) {
     this.$("ul").append("<li><a href='#' data-cid='" + block.cid + "'>\
-                        <span>&Dagger;</span> " + block.get("name") + "</a></li>");
+                        <span>&Dagger;</span> " + block.label() + "</a></li>");
   }
 
   , addAll: function () {

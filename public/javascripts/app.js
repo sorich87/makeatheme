@@ -257,6 +257,11 @@ window.require.define({"models/block": function(exports, require, module) {
       , template: ""
       , build: ""
     }
+
+    , label: function () {
+      return this.get("name").replace("_", " ")
+        .replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); });
+    }
   });
   
 }});
@@ -527,7 +532,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
     , addOne: function (block) {
       this.$("ul").append("<li><a href='#' data-cid='" + block.cid + "'>\
-                          <span>&Dagger;</span> " + block.get("name") + "</a></li>");
+                          <span>&Dagger;</span> " + block.label() + "</a></li>");
     }
 
     , addAll: function () {
