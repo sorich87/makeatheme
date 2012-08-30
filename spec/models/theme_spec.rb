@@ -41,6 +41,14 @@ describe Theme do
       @theme.should be_persisted
     end
 
+    it 'should have templates' do
+      @theme.templates.count.should > 0
+    end
+
+    it 'should have regions' do
+      @theme.regions.count.should > 0
+    end
+
     it 'should not be a fork' do
       @theme.fork?.should be_false
     end

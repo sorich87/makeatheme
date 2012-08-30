@@ -22,20 +22,41 @@ end
 post '/themes/:id/customize.json' do
   forbid and return unless authenticated?
 
-  json = JSON.parse(request.body.read)
+  theme = Theme.where(:id => params[:id]).first
+  if theme.nil?
+    status 404
+    body "Derp"
+    return
+  end
+
+  json = JSON.parse(request.body.read, :symbolize_names => true)
+
+  fork = theme.fork!({
+    :author => current_user
+  })
+
+  fork.replace_and_add_templates(json[:templates])
+  fork.replace_and_add_regions(json[:regions])
 
   # Adding template strings to templates here, should be in JSON or implemented
   # some other way in reality.
-  json["templates"].each_with_index do |template, index|
-    filename = File.join('public/editor/', "#{template['filename']}.html")
-    template_string = File.read(filename)
-    json["templates"][index]["template"] = template_string
+  json[:templates].each_with_index do |template, index|
+    name = template[:filename]
+    template_string = fork.template_content(name)
+    json[:templates][index][:template] = template_string
   end
 
   cs = CustomizationParser.parse(json)
-  zipfile_path = cs.zipfile_path
 
-  response.write(Base64.encode64(File.read(zipfile_path)))
+  fork.archive = File.new(cs.zipfile_path)
+  if fork.valid?
+    fork.save
+    body fork.to_json
+    status 201
+  else
+    status 400
+    body fork.errors.to_json
+  end
 end
 
 post '/themes.json' do

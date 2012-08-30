@@ -4,10 +4,15 @@ describe "Theme customization" do
   before do
     @theme_attributes = {
       name: "Some theme",
-      author: "Test User",
+      author: StoreUser.first.id,
+      description: "Some theme."
     }
 
-    @theme = Theme.find_or_create_by(@theme_attributes)
+    @theme = Theme.where(@theme_attributes.merge(:archive => nil)).first
+    unless @theme.nil?
+      zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
+      @theme = Theme.create_from_zip(zip, @theme_attributes)
+    end
 
     @json = File.read('./spec/request/customization_request.json')
 
@@ -29,13 +34,16 @@ describe "Theme customization" do
   context "as an authenticated user" do
     before do
       post '/session.json', @user_attributes.to_json
+      post "/themes/#{@theme.id}/customize.json", @json
+      @theme.reload
     end
 
-    # TODO: Think of a way to test the .zip
-    # returned in the JSON response
-    it 'should be successful (status 200)' do
-      post "/themes/#{@theme.id}/customize.json", @json
-      last_response.status.should == 200
+    it 'should be successful (status 201)' do
+      last_response.status.should == 201
+    end
+
+    it 'should create a fork' do
+      @theme.forks.count.should > 0
     end
   end
 end
