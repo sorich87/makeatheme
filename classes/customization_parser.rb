@@ -55,15 +55,15 @@ class CustomizationParser
   def compile_templates
     @templates ||= []
 
-    @json["templates"].each do |template|
+    @json[:templates].each do |template|
       #template["compiled_template"] = @handlebars.compile(template["template"]).call(@base)
 
       # Read the file from public/editor/<file>.html for now
-      input_file = File.join('public', 'editor', "#{template['filename']}.html")
+      input_file = File.join('public', 'editor', "#{template[:filename]}.html")
       input_html = File.read(input_file)
       compiled_template = @handlebars.compile(input_html).call(@base)
 
-      php_filename = File.join(@output_folder, "#{template['filename']}.php")
+      php_filename = File.join(@output_folder, "#{template[:filename]}.php")
 
       File.open(php_filename, 'w') do |f|
         puts "Writing template to: #{php_filename}"
@@ -90,9 +90,9 @@ class CustomizationParser
   def compile_regions
     @regions ||= []
 
-    @json["regions"].each do |region|
-      region_id = region["id"]
-      region_type = region["type"]
+    @json[:regions].each do |region|
+      region_id = region[:id]
+      region_type = region[:type]
 
       region_identifier = region_type
       region_identifier << "-#{region_id}" unless region_id.nil?
@@ -100,7 +100,7 @@ class CustomizationParser
       filename = "#{region_identifier}.php"
       output_path = File.join(@output_folder, filename)
 
-      template = region["template"]
+      template = region[:template]
       compiled_template = @handlebars.compile(template).call(@base)
 
       File.open(output_path, 'w') do |f|
