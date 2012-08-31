@@ -34,6 +34,8 @@ module.exports = View.extend({
         .append(app.reuseView("style_edit").render().$el)
         .append(app.reuseView("download_button").render().$el)
         .append(app.reuseView("share_link").render().$el);
+
+      app.reuseView("mutations");
     }
 
     this.$el.appendTo($("body"));
