@@ -65,7 +65,7 @@ class Theme
   # Return regions including default ones
   def regions
     defaults = DefaultTemplates::REGIONS.map do |type, template|
-      Hash[:type, type, :template, template]
+      Hash[:type, type, :template, template, :name, 'default']
     end
 
     defaults + self[:regions].map { |r| r.symbolize_keys }
