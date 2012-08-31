@@ -99,7 +99,8 @@ get '/editor/:theme/?:template?' do
   locals = {
     theme: theme.to_json,
     pieces: theme_pieces(theme).to_json,
-    static_files_dir: theme.static_files_dir
+    static_files_dir: theme.static_files_dir,
+    preview_only: theme.private?
   }
   erb :editor, locals: locals
 end

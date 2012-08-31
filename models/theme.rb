@@ -144,6 +144,13 @@ class Theme
     !self.parent.nil?
   end
 
+  # For now all fork are private which means they can be edited by the owner only.
+  # Very soon we will need to add permissions to selected users,
+  # and public forks which can be forked by anyone.
+  def private?
+    fork?
+  end
+
   # Return what files are needed to build this customization
   # (original theme files + ones added when customizing)
   def needed_theme_files

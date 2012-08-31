@@ -20,6 +20,7 @@
       data: {
           theme: <%= theme %>
         , theme_pieces: <%= pieces %>
+        <% if preview_only %>, preview_only: true<% end %>
       }
     };
     require('initialize');

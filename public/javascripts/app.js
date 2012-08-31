@@ -494,7 +494,7 @@ window.require.define({"views/base/view": function(exports, require, module) {
     render: function () {
       // If template attribute is set, render the template
       if (this.template) {
-        this.$el.empty().append(require("views/templates/" + this.template)());
+        this.$el.empty().append(require("views/templates/" + this.template)(this.data));
       }
 
       return this;
@@ -626,15 +626,20 @@ window.require.define({"views/editor": function(exports, require, module) {
     , render: function () {
       var templatesView = app.reuseView("templates");
 
-      this.$el
-        .append(templatesView.$el)
-        .append(app.reuseView("block_insert").render().$el)
-        .append(app.reuseView("style_edit").render().$el)
-        .append(app.reuseView("download_button").render().$el)
-        .appendTo($("body"));
+      this.$el.append(templatesView.$el);
 
       // Reset template select events
       templatesView.delegateEvents();
+
+      if (app.data.preview_only !== true) {
+        this.$el
+          .append(app.reuseView("block_insert").render().$el)
+          .append(app.reuseView("style_edit").render().$el)
+          .append(app.reuseView("download_button").render().$el)
+          .append(app.reuseView("share_link").render().$el);
+      }
+
+      this.$el.appendTo($("body"));
 
       return this;
     }
@@ -1057,6 +1062,20 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/share_link": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+      id: "x-share-link"
+    , template: "share_link"
+    , data: {
+      theme: app.data.theme._id
+    }
+  });
+  
+}});
+
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit");
@@ -1207,6 +1226,21 @@ window.require.define({"views/templates/register": function(exports, require, mo
 
 
     return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create an account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n  </ul>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/share_link": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<h4>Share</h4>\n<p>http://thememy.com/themes/";
+    foundHelper = helpers.theme;
+    stack1 = foundHelper || depth0.theme;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</p>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {

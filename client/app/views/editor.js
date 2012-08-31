@@ -23,15 +23,20 @@ module.exports = View.extend({
   , render: function () {
     var templatesView = app.reuseView("templates");
 
-    this.$el
-      .append(templatesView.$el)
-      .append(app.reuseView("block_insert").render().$el)
-      .append(app.reuseView("style_edit").render().$el)
-      .append(app.reuseView("download_button").render().$el)
-      .appendTo($("body"));
+    this.$el.append(templatesView.$el);
 
     // Reset template select events
     templatesView.delegateEvents();
+
+    if (app.data.preview_only !== true) {
+      this.$el
+        .append(app.reuseView("block_insert").render().$el)
+        .append(app.reuseView("style_edit").render().$el)
+        .append(app.reuseView("download_button").render().$el)
+        .append(app.reuseView("share_link").render().$el);
+    }
+
+    this.$el.appendTo($("body"));
 
     return this;
   }
