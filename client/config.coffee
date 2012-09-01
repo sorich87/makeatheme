@@ -28,6 +28,7 @@ exports.config =
           'vendor/scripts/backbone-validation.js',
           'vendor/scripts/backbone-validation-bootstrap.coffee',
           'vendor/scripts/mutation-summary.js',
+          'vendor/scripts/domparser-polyfill.js',
 
           # jQuery++
           'vendor/scripts/jquerypp/jquery.compare.js',

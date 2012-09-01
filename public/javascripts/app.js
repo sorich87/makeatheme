@@ -172,7 +172,18 @@ window.require.define({"collections/regions": function(exports, require, module)
     , Region = require("models/region");
 
   module.exports = Collection.extend({
-    model: Region
+      model: Region
+
+    // Get region by type and name. Use "default" if name not specified.
+    , getByTypeAndName: function (type, name) {
+      if (name === void 0) {
+        name = "default";
+      }
+
+      return this.find(function (region) {
+        return region.get("type") === type && region.get("name") === name;
+      });
+    }
   });
   
 }});
@@ -186,7 +197,7 @@ window.require.define({"collections/templates": function(exports, require, modul
       model: Template
 
     // Get a template by its name
-    , getTemplate: function (name) {
+    , getByName: function (name) {
       return this.find(function (template) {
         return template.get("name") === name;
       });
@@ -978,7 +989,9 @@ window.require.define({"views/login": function(exports, require, module) {
 }});
 
 window.require.define({"views/mutations": function(exports, require, module) {
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , app = require("application")
+    , idIncrement = 1; // For temporary ids when inserting rows.
 
   module.exports = View.extend({
     initialize: function () {
@@ -1028,6 +1041,59 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , addNode: function (node) {
+      var grandParentNode, region, template, copy, row, sandbox, blockText, sibling;
+
+      // copy of the node that will be inserted
+      copy = node.cloneNode(true);
+
+      grandParentNode = node.parentNode.parentNode;
+
+      // If grandparent is header or footer,
+      // make addition in corresponding region template
+      if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
+        region = app.regions.getByTypeAndName(grandParentNode.tagName.toLowerCase());
+
+        sandbox = (new DOMParser).parseFromString(region.get("template"), "text/html");
+
+        // Get destination row.
+        row = sandbox.getElementById(node.parentNode.id);
+
+        // If the destination node doesn't exist in the template, add it.
+        if (!row) {
+          row = sandbox.createElement("div");
+          row.className = "row";
+          row.id = "y-" + idIncrement;
+          idIncrement++;
+
+          if (node.parentNode.nextElementSibling) {
+            nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
+            nextRow.parentNode.insertBefore(row, nextRow);
+          } else {
+            sandbox.getElementById(grandParentNode.id).appendChild(row);
+          }
+        }
+
+        // Chooose Handlebars tag to insert
+        if (node.className.indexOf("site-navigation") !== -1) {
+          blockText = "{{{ menu }}}";
+        } else if (node.className.indexOf("header-image") !== -1) {
+          blockText = "{{{ header_image }}}";
+        } else if (node.className.indexOf("searchform") !== -1) {
+          blockText = "{{{ search_form }}}";
+        }
+
+        blockText = document.createTextNode(blockText);
+
+        // Insert the tag
+        if (node.nextElementSibling) {
+          sibling = sandbox.getElementById(node.nextElementSibling.id);
+          row.insertBefore(blockText, sibling);
+        } else {
+          row.appendChild(blockText);
+        }
+
+        region.set("template", sandbox.body.innerHTML);
+      }
     }
 
     , removeNode: function (node, oldParentNode) {
@@ -1199,7 +1265,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.collection.reset(this.collection.models);
 
       // Load index template
-      this.loadTemplate(this.collection.getTemplate("index"));
+      this.loadTemplate(this.collection.getByName("index"));
 
       return this;
     }
