@@ -551,6 +551,8 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , addAll: function () {
+      this.$("ul").empty();
+
       _.each(this.collection.models, function (block) {
         this.addOne(block);
       }, this);
@@ -1208,6 +1210,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , addAll: function () {
+      this.$("select").empty();
+
       _.each(this.collection.models, function (template) {
         this.addOne(template);
       }, this);

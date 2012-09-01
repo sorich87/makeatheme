@@ -31,6 +31,8 @@ module.exports = View.extend({
   }
 
   , addAll: function () {
+    this.$("select").empty();
+
     _.each(this.collection.models, function (template) {
       this.addOne(template);
     }, this);

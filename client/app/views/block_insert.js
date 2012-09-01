@@ -30,6 +30,8 @@ module.exports = View.extend({
   }
 
   , addAll: function () {
+    this.$("ul").empty();
+
     _.each(this.collection.models, function (block) {
       this.addOne(block);
     }, this);
