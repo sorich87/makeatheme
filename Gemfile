@@ -14,6 +14,7 @@ gem 'fog', '~> 1.5.0'
 gem 'handlebars', '~> 0.3.1'
 gem "rubyzip", "~> 0.9.9"
 gem "pony", "~> 1.4"
+gem 'nokogiri', '~> 1.5.0'
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'

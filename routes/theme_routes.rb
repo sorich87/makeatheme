@@ -96,11 +96,15 @@ get '/editor/:theme/?:template?' do
   # Return 404 if no theme found.
   status 404 and return unless theme
 
+  preview_only = theme.private?
+
+  ensure_id = if preview_only then false else true end
+
   locals = {
     theme: theme.to_json,
-    pieces: theme_pieces(theme).to_json,
+    pieces: theme_pieces(theme, ensure_id).to_json,
     static_files_dir: theme.static_files_dir,
-    preview_only: theme.private?
+    preview_only: preview_only
   }
   erb :editor, locals: locals
 end

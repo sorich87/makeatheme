@@ -10,6 +10,7 @@ require 'mongoid'
 require 'kaminari'
 require 'base64'
 require 'pony'
+require 'nokogiri'
 
 Mongoid.load!("config/mongoid.yml")
 
