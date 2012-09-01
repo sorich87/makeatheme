@@ -11,8 +11,8 @@ module ThemeHelper
       theme.send(type).each do |piece|
         local_name = if type == :regions then piece[:type] else piece[:name] end
 
-        if ensure_id
-          # Add id attribute to elements without one, for use in the editor
+        # Add id attribute to regions and templates without one, for use in the editor
+        if ensure_id and type != :blocks
           template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
           template.css('.row, .columns, .column').each do |node|
             if node['id'].nil?
