@@ -20,7 +20,7 @@ module.exports = View.extend({
     this.collection.reset(this.collection.models);
 
     // Load index template
-    this.loadTemplate(this.collection.getTemplate("index"));
+    this.loadTemplate(this.collection.getByName("index"));
 
     return this;
   }
