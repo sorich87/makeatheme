@@ -13,7 +13,7 @@ module ThemeHelper
 
         if ensure_id
           # Add id attribute to elements without one, for use in the editor
-          template = Nokogiri::HTML(piece[:template])
+          template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
           template.css('.row, .columns, .column').each do |node|
             if node['id'].nil?
               node['id'] = "x-#{xid}"
