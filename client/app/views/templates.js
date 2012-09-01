@@ -21,8 +21,7 @@ module.exports = View.extend({
     this.collection.reset(this.collection.models);
 
     // Load index template
-    $("body").append(this.collection.getTemplate("index").get("build"));
-    app.trigger("templateLoaded", "index");
+    this.loadTemplate(this.collection.getTemplate("index"));
 
     return this;
   }
@@ -39,8 +38,10 @@ module.exports = View.extend({
   }
 
   , switchTemplate: function (e) {
-    var template = this.collection.getByCid(this.$("select").val());
+    this.loadTemplate(this.collection.getByCid(this.$("select").val()));
+  }
 
+  , loadTemplate: function (template) {
     $("body").empty().append(template.get("build"));
     app.trigger("templateLoaded", template.get("name"));
   }

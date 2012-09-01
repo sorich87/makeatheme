@@ -1183,8 +1183,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.collection.reset(this.collection.models);
 
       // Load index template
-      $("body").append(this.collection.getTemplate("index").get("build"));
-      app.trigger("templateLoaded", "index");
+      this.loadTemplate(this.collection.getTemplate("index"));
 
       return this;
     }
@@ -1201,8 +1200,10 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , switchTemplate: function (e) {
-      var template = this.collection.getByCid(this.$("select").val());
+      this.loadTemplate(this.collection.getByCid(this.$("select").val()));
+    }
 
+    , loadTemplate: function (template) {
       $("body").empty().append(template.get("build"));
       app.trigger("templateLoaded", template.get("name"));
     }
