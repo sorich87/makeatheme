@@ -82,7 +82,10 @@ window.require.define({"application": function(exports, require, module) {
   _.extend(Application, {
     initialize: function() {
       var Router = require("router")
-        , User = require("models/user");
+        , User = require("models/user")
+        , Templates = require("collections/templates")
+        , Regions = require("collections/regions")
+        , Blocks = require("collections/blocks");
 
       // Setup notifications handling
       // Append to top window in case document is in an iframe
@@ -91,6 +94,13 @@ window.require.define({"application": function(exports, require, module) {
 
       // Initialize current user model instance
       this.currentUser = new User(this.data.currentUser);
+
+      // Load default collections models
+      if (this.data.theme_pieces) {
+        this.templates = new Templates(this.data.theme_pieces.templates);
+        this.regions = new Regions(this.data.theme_pieces.regions);
+        this.blocks = new Blocks(this.data.theme_pieces.blocks);
+      }
 
       // Initialize router
       this.router = new Router();
@@ -513,7 +523,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       el: $("<div id='x-block-insert'><h4>Blocks</h4>\
             <p>Drag and drop to insert</p><ul></ul></div>")
 
-    , collection: new Blocks(app.data.theme_pieces.blocks)
+    , collection: app.blocks
 
     , events: {
         "draginit #x-block-insert a": "dragInit"
@@ -570,8 +580,8 @@ window.require.define({"views/download_button": function(exports, require, modul
     }
 
     , initialize: function () {
-      this.regions = new Regions(app.data.theme_pieces.regions);
-      this.templates = new Templates(app.data.theme_pieces.templates);
+      this.regions = app.regions;
+      this.templates = app.templates;
     }
 
     , render: function () {
@@ -1161,14 +1171,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
 window.require.define({"views/templates": function(exports, require, module) {
   var View = require("views/base/view")
-    , Templates = require("collections/templates")
     , app = require("application");
 
   module.exports = View.extend({
       el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
             <form><select></select></form></div>")
 
-    , collection: new Templates(app.data.theme_pieces.templates)
+    , collection: app.templates
 
     , events: {
       "change": "switchTemplate"

@@ -7,7 +7,7 @@ module.exports = View.extend({
     el: $("<div id='x-block-insert'><h4>Blocks</h4>\
           <p>Drag and drop to insert</p><ul></ul></div>")
 
-  , collection: new Blocks(app.data.theme_pieces.blocks)
+  , collection: app.blocks
 
   , events: {
       "draginit #x-block-insert a": "dragInit"

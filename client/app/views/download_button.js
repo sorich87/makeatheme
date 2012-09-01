@@ -11,8 +11,8 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    this.regions = new Regions(app.data.theme_pieces.regions);
-    this.templates = new Templates(app.data.theme_pieces.templates);
+    this.regions = app.regions;
+    this.templates = app.templates;
   }
 
   , render: function () {
