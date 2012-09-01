@@ -144,7 +144,7 @@ module.exports = View.extend({
       $dragGrandParent = $dragParent.parent();
 
       if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
-          || $dragParent.attr("id") !== undefined) {
+          && $dragParent.attr("id").indexOf("x-") !== 0) {
         $dragParent.addClass("x-empty");
       } else {
         $dragParent.remove();
