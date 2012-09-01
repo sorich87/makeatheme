@@ -9,8 +9,6 @@ module ThemeHelper
     xid = 0
     [:blocks, :regions, :templates].each do |type|
       theme.send(type).each do |piece|
-        local_name = if type == :regions then piece[:type] else piece[:name] end
-
         # Add id attribute to regions and templates without one, for use in the editor
         if ensure_id and type != :blocks
           template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
@@ -23,7 +21,8 @@ module ThemeHelper
           piece[:template] = template.to_html
         end
 
-        build = hbs(piece[:template], locals: locals)
+        local_name = if type == :regions then piece[:type] else piece[:name] end
+
         locals[local_name] = piece[:build] = hbs(piece[:template], locals: locals)
 
         pieces[type] << piece
