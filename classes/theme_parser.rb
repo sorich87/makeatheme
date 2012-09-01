@@ -49,9 +49,15 @@ class ThemeParser
           :template => file_content
         }
       else
+        if ['header', 'footer', 'content', 'sidebar'].include?(template_name)
+          region_name = 'default'
+        else
+          region_name = template_name
+        end
+
         @regions << {
           :id => template_name,
-          :name => template_name,
+          :name => region_name,
           :template => file_content,
           :type => get_region_type(template_name)
         }
