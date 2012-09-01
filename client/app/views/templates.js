@@ -27,7 +27,7 @@ module.exports = View.extend({
 
   , addOne: function (template) {
     this.$("select").append("<option value='" + template.cid + "'>"
-                    + template.get("name") + "</option>");
+                    + template.label() + "</option>");
   }
 
   , addAll: function () {

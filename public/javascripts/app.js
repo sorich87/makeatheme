@@ -298,16 +298,6 @@ window.require.define({"models/region": function(exports, require, module) {
 
 window.require.define({"models/template": function(exports, require, module) {
   // Template model class.
-  // A template can be one of the following:
-  // name : Label
-  // index : Default
-  // front-page : Front Page
-  // home : Blog
-  // single : Post
-  // page : Page
-  // archive : Archive
-  // search : Search Result
-  // 404 : Error 404
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
@@ -315,6 +305,21 @@ window.require.define({"models/template": function(exports, require, module) {
         name: ""
       , template: ""
       , build: ""
+    }
+
+    , label: function () {
+      var labels = {
+          index: "Default"
+        , "front-page": "Front Page"
+        , home: "Blog"
+        , single: "Article"
+        , page: "Page"
+        , archive: "Archive"
+        , search: "Search Results"
+        , 404: "Error 404"
+      };
+
+      return labels[this.get("name")];
     }
   });
   
@@ -1199,7 +1204,7 @@ window.require.define({"views/templates": function(exports, require, module) {
 
     , addOne: function (template) {
       this.$("select").append("<option value='" + template.cid + "'>"
-                      + template.get("name") + "</option>");
+                      + template.label() + "</option>");
     }
 
     , addAll: function () {
