@@ -1097,6 +1097,30 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , removeNode: function (node, oldParentNode) {
+      var oldGrandParentNode, parentNode;
+
+      oldGrandParentNode = oldParentNode.parentNode;
+
+      // If grandparent is header or footer, remove from corresponding region template.
+      // If not, remove from template
+      if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
+        piece = app.regions.getByTypeAndName(oldGrandParentNode.tagName.toLowerCase());
+      } else {
+      }
+
+      sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
+
+      parentNode = sandbox.getElementById(oldParentNode.id);
+
+      // If parent node doesn't have anymore children, remove it
+      // If not, simply remove the node
+      if (oldParentNode.children.length === 0) {
+        parentNode.parentNode.removeChild(parentNode);
+      } else {
+        parentNode.removeChild(sandbox.getElementById(node.id));
+      }
+
+      piece.set("template", sandbox.body.innerHTML);
     }
 
     , reparentNode: function (node, oldParentNode) {
