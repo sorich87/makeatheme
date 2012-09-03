@@ -46,6 +46,6 @@ module.exports = View.extend({
   , dragEnd: function (e, drag) {
     var block = this.collection.getByCid(drag.element.data("cid"));
 
-    drag.element[0].outerHTML = block.get("build");
+    drag.element[0].outerHTML = "<div class='columns " + block.className() + "'>" + block.get("build") + "</div>";
   }
 });

@@ -83,9 +83,9 @@ module.exports = View.extend({
       }
 
       // Chooose Handlebars tag to insert
-      if (node.className.indexOf("site-navigation") !== -1) {
+      if (node.className.indexOf("menu") !== -1) {
         blockText = "{{{ menu }}}";
-      } else if (node.className.indexOf("header-image") !== -1) {
+      } else if (node.className.indexOf("headerimage") !== -1) {
         blockText = "{{{ header_image }}}";
       } else if (node.className.indexOf("searchform") !== -1) {
         blockText = "{{{ search_form }}}";
@@ -115,6 +115,7 @@ module.exports = View.extend({
     if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
       piece = app.regions.getByTypeAndName(oldGrandParentNode.tagName.toLowerCase());
     } else {
+      piece = app.templates.getCurrent();
     }
 
     sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");

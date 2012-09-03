@@ -11,4 +11,21 @@ module.exports = Collection.extend({
       return template.get("name") === name;
     });
   }
+
+  // Get template being edited
+  , getCurrent: function () {
+    return this.find(function (template) {
+      return template.get("current") === true;
+    });
+  }
+
+  // Save template being edited
+  , setCurrent: function (template) {
+    var oldCurrent;
+    if (oldCurrent = this.getCurrent()) {
+      oldCurrent.set("current", false);
+    }
+
+    template.set("current", true);
+  }
 });

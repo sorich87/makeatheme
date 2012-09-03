@@ -202,6 +202,23 @@ window.require.define({"collections/templates": function(exports, require, modul
         return template.get("name") === name;
       });
     }
+
+    // Get template being edited
+    , getCurrent: function () {
+      return this.find(function (template) {
+        return template.get("current") === true;
+      });
+    }
+
+    // Save template being edited
+    , setCurrent: function (template) {
+      var oldCurrent;
+      if (oldCurrent = this.getCurrent()) {
+        oldCurrent.set("current", false);
+      }
+
+      template.set("current", true);
+    }
   });
   
 }});
@@ -282,6 +299,10 @@ window.require.define({"models/block": function(exports, require, module) {
     , label: function () {
       return this.get("name").replace("_", " ")
         .replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); });
+    }
+
+    , className: function () {
+      return this.get("name").replace("_", "");
     }
   });
   
@@ -578,7 +599,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     , dragEnd: function (e, drag) {
       var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = block.get("build");
+      drag.element[0].outerHTML = "<div class='columns " + block.className() + "'>" + block.get("build") + "</div>";
     }
   });
   
@@ -1074,9 +1095,9 @@ window.require.define({"views/mutations": function(exports, require, module) {
         }
 
         // Chooose Handlebars tag to insert
-        if (node.className.indexOf("site-navigation") !== -1) {
+        if (node.className.indexOf("menu") !== -1) {
           blockText = "{{{ menu }}}";
-        } else if (node.className.indexOf("header-image") !== -1) {
+        } else if (node.className.indexOf("headerimage") !== -1) {
           blockText = "{{{ header_image }}}";
         } else if (node.className.indexOf("searchform") !== -1) {
           blockText = "{{{ search_form }}}";
@@ -1106,6 +1127,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
       if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
         piece = app.regions.getByTypeAndName(oldGrandParentNode.tagName.toLowerCase());
       } else {
+        piece = app.templates.getCurrent();
       }
 
       sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
@@ -1307,12 +1329,18 @@ window.require.define({"views/templates": function(exports, require, module) {
       }, this);
     }
 
-    , switchTemplate: function (e) {
-      this.loadTemplate(this.collection.getByCid(this.$("select").val()));
+    , switchTemplate: function () {
+      var template = this.collection.getByCid(this.$("select").val());
+
+      this.loadTemplate(template);
     }
 
+    // Save current template, display it and trigger templateLoaded event
     , loadTemplate: function (template) {
+      this.collection.setCurrent(template);
+
       $("body").empty().append(template.get("build"));
+
       app.trigger("templateLoaded", template.get("name"));
     }
   });

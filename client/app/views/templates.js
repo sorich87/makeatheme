@@ -38,12 +38,18 @@ module.exports = View.extend({
     }, this);
   }
 
-  , switchTemplate: function (e) {
-    this.loadTemplate(this.collection.getByCid(this.$("select").val()));
+  , switchTemplate: function () {
+    var template = this.collection.getByCid(this.$("select").val());
+
+    this.loadTemplate(template);
   }
 
+  // Save current template, display it and trigger templateLoaded event
   , loadTemplate: function (template) {
+    this.collection.setCurrent(template);
+
     $("body").empty().append(template.get("build"));
+
     app.trigger("templateLoaded", template.get("name"));
   }
 });

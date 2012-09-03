@@ -12,4 +12,8 @@ module.exports = Model.extend({
     return this.get("name").replace("_", " ")
       .replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); });
   }
+
+  , className: function () {
+    return this.get("name").replace("_", "");
+  }
 });
