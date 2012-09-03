@@ -1062,7 +1062,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , addNode: function (node) {
-      var grandParentNode, region, template, copy, row, sandbox, blockText, sibling;
+      var grandParentNode, region, template, row, sandbox, blockText, sibling;
 
       // copy of the node that will be inserted
       copy = node.cloneNode(true);
@@ -1096,21 +1096,19 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
         // Chooose Handlebars tag to insert
         if (node.className.indexOf("menu") !== -1) {
-          blockText = "{{{ menu }}}";
+          copy.innerHTML = "{{{ menu }}}";
         } else if (node.className.indexOf("headerimage") !== -1) {
-          blockText = "{{{ header_image }}}";
+          copy.innerHTML = "{{{ header_image }}}";
         } else if (node.className.indexOf("searchform") !== -1) {
-          blockText = "{{{ search_form }}}";
+          copy.innerHTML = "{{{ search_form }}}";
         }
-
-        blockText = document.createTextNode(blockText);
 
         // Insert the tag
         if (node.nextElementSibling) {
           sibling = sandbox.getElementById(node.nextElementSibling.id);
-          row.insertBefore(blockText, sibling);
+          row.insertBefore(copy, sibling);
         } else {
-          row.appendChild(blockText);
+          row.appendChild(copy);
         }
 
         region.set("template", sandbox.body.innerHTML);
