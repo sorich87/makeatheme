@@ -1144,8 +1144,11 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , reparentNode: function (node, oldParentNode) {
-      this.addNode(node, oldParentNode);
-      this.removeNode(node, oldParentNode);
+      this.addNode(node);
+      // Remove node if it was in a different region
+      if (oldParentNode.parentNode !== null) {
+        this.removeNode(node, oldParentNode);
+      }
     }
 
     , reorderNode: function (node, oldPreviousSibling) {
