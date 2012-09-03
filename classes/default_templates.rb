@@ -7,44 +7,34 @@ module DefaultTemplates
 
   BLOCKS = {
     header_image: %q(
-      <div class="columns header-image">
-        <a href="{{site_url}}">
-          <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />
-        </a>
-      </div>
+      <a href="{{site_url}}">
+        <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />
+      </a>
     ),
 
     menu: %q(
-      <nav class="columns site-navigation main-navigation" role="navigation">
-        <h1 class="assistive-text">Menu</h1>
-        <div class="skip-link assistive-text">
-          <a href="#content" title="Skip to content">Skip to content</a>
-        </div>
-        <div>
-          <ul class="menu">
-            <li class="menu-item"><a href="#">Page</a>
-              <ul class="sub-menu">
-                <li class="menu-item"><a href="#">Third Page</a>
-                  <ul class="sub-menu">
-                    <li class="menu-item"><a href="#">Fourth Page</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-            <li class="menu-item"><a href="#">Second Page</a></li>
-          </ul>
-        </div>
+      <nav role="navigation">
+        <ul class="menu">
+          <li class="menu-item"><a href="#">Page</a>
+            <ul class="sub-menu">
+              <li class="menu-item"><a href="#">Third Page</a>
+                <ul class="sub-menu">
+                  <li class="menu-item"><a href="#">Fourth Page</a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li class="menu-item"><a href="#">Second Page</a></li>
+        </ul>
       </nav>
     ),
 
     search_form: %q(
-      <div class="columns searchform">
-        <form method="get" id="searchform" action="{{home_url}}" role="search">
-          <label for="s" class="assistive-text">Search</label>
-          <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
-          <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
-        </form>
-      </div>
+      <form method="get" id="searchform" action="{{home_url}}" role="search">
+        <label for="s" class="assistive-text">Search</label>
+        <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
+        <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+      </form>
     )
   }
 
