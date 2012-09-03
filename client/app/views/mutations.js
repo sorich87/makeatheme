@@ -132,6 +132,8 @@ module.exports = View.extend({
   }
 
   , reparentNode: function (node, oldParentNode) {
+    this.addNode(node, oldParentNode);
+    this.removeNode(node, oldParentNode);
   }
 
   , reorderNode: function (node, oldPreviousSibling) {
