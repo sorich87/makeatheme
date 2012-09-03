@@ -1149,6 +1149,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , reorderNode: function (node, oldPreviousSibling) {
+      this.addNode(node);
     }
   });
   

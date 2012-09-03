@@ -137,5 +137,6 @@ module.exports = View.extend({
   }
 
   , reorderNode: function (node, oldPreviousSibling) {
+    this.addNode(node);
   }
 });
