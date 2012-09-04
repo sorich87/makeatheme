@@ -50,4 +50,6 @@ module CustomizationConstants
       <?php wp_nav_menu( array( 'theme_location' => 'primary' ) ); ?>
     </nav>'
   )
+
+  CONSTANTS[:sidebar] = "<?php get_sidebar(); ?>"
 end
