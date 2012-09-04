@@ -80,6 +80,9 @@ module.exports = View.extend({
         } else {
           sandbox.getElementById(grandParentNode.id).appendChild(row);
         }
+
+        // Set the ID of the row the user sees
+        node.parentNode.id = row.id
       }
 
       // Chooose Handlebars tag to insert
