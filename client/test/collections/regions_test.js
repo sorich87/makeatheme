@@ -9,7 +9,7 @@ describe ("Regions", function () {
 
     regions.add({
         name: "Some Region"
-      , type: "sidebar"
+      , type: "header"
     });
 
     expect(regions.length).to.equal(1);

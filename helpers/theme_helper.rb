@@ -32,8 +32,4 @@ module ThemeHelper
     pieces
   end
 
-  def theme_ensure_id_attribute(html)
-
-  end
-
 end

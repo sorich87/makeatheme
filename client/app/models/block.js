@@ -14,6 +14,11 @@ module.exports = Model.extend({
   }
 
   , className: function () {
-    return this.get("name").replace("_", "");
+    return this.get("name").replace("_", "-");
+  }
+
+  // Return block Handlebars tag
+  , tag: function () {
+    return "{{{ " + this.get("name") + " }}}";
   }
 });

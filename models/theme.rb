@@ -54,21 +54,17 @@ class Theme
 
   # Return blocks to insert in the templates
   def blocks
-    [:header_image, :menu, :search_form].map do |block|
+    DefaultTemplates::BLOCKS.map do |name, template|
       {
-        name: block.to_s,
-        template: DefaultTemplates::BLOCKS[block]
+        name: name.to_s,
+        template: template
       }
     end
   end
 
-  # Return regions including default ones
+  # Return regions after converting hash keys to symbols
   def regions
-    defaults = DefaultTemplates::REGIONS.map do |type, template|
-      Hash[:type, type, :template, template, :name, 'default']
-    end
-
-    defaults + self[:regions].map { |r| r.symbolize_keys }
+    self[:regions].map { |r| r.symbolize_keys }
   end
 
   # Return templates after converting hash keys to symbols

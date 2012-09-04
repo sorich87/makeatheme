@@ -6,7 +6,7 @@ describe ("Region", function () {
     var region = new Region();
 
     expect(region.get("name")).to.equal("");
-    expect(region.get("type")).to.equal("sidebar");
+    expect(region.get("type")).to.equal("");
   });
 
   it ("will set passed attributes on the model instance when created", function () {
@@ -28,6 +28,6 @@ describe ("Region", function () {
     region.set({type: "incorrect type"});
 
     expect(spy).to.have.been.calledOnce;
-    expect(spy).to.have.been.calledWith(region, "Region type must be header, footer, content or sidebar.");
+    expect(spy).to.have.been.calledWith(region, "Region type must be header or footer.");
   });
 });

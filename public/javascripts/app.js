@@ -302,7 +302,12 @@ window.require.define({"models/block": function(exports, require, module) {
     }
 
     , className: function () {
-      return this.get("name").replace("_", "");
+      return this.get("name").replace("_", "-");
+    }
+
+    // Return block Handlebars tag
+    , tag: function () {
+      return "{{{ " + this.get("name") + " }}}";
     }
   });
   
@@ -314,14 +319,14 @@ window.require.define({"models/region": function(exports, require, module) {
 
   module.exports = Model.extend({
     defaults: {
-        type: "sidebar"
+        type: ""
       , name: ""
       , template: ""
     }
 
     , validate: function (attrs) {
-      if (["header", "footer", "content", "sidebar"].indexOf(attrs.type) < 0) {
-        return "Region type must be header, footer, content or sidebar.";
+      if (["header", "footer"].indexOf(attrs.type) < 0) {
+        return "Region type must be header or footer.";
       }
     }
   });
@@ -1066,7 +1071,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , addNode: function (node) {
-      var grandParentNode, region, template, row, sandbox, blockText, sibling;
+      var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling;
 
       // copy of the node that will be inserted
       copy = node.cloneNode(true);
@@ -1101,14 +1106,11 @@ window.require.define({"views/mutations": function(exports, require, module) {
           node.parentNode.id = row.id
         }
 
-        // Chooose Handlebars tag to insert
-        if (node.className.indexOf("menu") !== -1) {
-          copy.innerHTML = "{{{ menu }}}";
-        } else if (node.className.indexOf("headerimage") !== -1) {
-          copy.innerHTML = "{{{ header_image }}}";
-        } else if (node.className.indexOf("searchform") !== -1) {
-          copy.innerHTML = "{{{ search_form }}}";
-        }
+        // Replace node innerHTML by Handlebars tag
+        block = _(app.blocks.models).find(function (model) {
+          return node.className.indexOf(model.className()) !== -1;
+        });
+        copy.innerHTML = block.tag();
 
         // Insert the tag
         if (node.nextElementSibling) {

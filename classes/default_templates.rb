@@ -12,7 +12,7 @@ module DefaultTemplates
       </a>
     ),
 
-    menu: %q(
+    navigation: %q(
       <nav role="navigation">
         <ul class="menu">
           <li class="menu-item"><a href="#">Page</a>
@@ -35,11 +35,9 @@ module DefaultTemplates
         <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
         <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
       </form>
-    )
-  }
+    ),
 
-  REGIONS = {
-    content: %q(
+    article: %q(
       <article class="page hentry">
         <header class="entry-header">
           <h1 class="entry-title">Sample Page</h1>

@@ -50,7 +50,7 @@ module.exports = View.extend({
   }
 
   , addNode: function (node) {
-    var grandParentNode, region, template, row, sandbox, blockText, sibling;
+    var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling;
 
     // copy of the node that will be inserted
     copy = node.cloneNode(true);
@@ -85,14 +85,11 @@ module.exports = View.extend({
         node.parentNode.id = row.id
       }
 
-      // Chooose Handlebars tag to insert
-      if (node.className.indexOf("menu") !== -1) {
-        copy.innerHTML = "{{{ menu }}}";
-      } else if (node.className.indexOf("headerimage") !== -1) {
-        copy.innerHTML = "{{{ header_image }}}";
-      } else if (node.className.indexOf("searchform") !== -1) {
-        copy.innerHTML = "{{{ search_form }}}";
-      }
+      // Replace node innerHTML by Handlebars tag
+      block = _(app.blocks.models).find(function (model) {
+        return node.className.indexOf(model.className()) !== -1;
+      });
+      copy.innerHTML = block.tag();
 
       // Insert the tag
       if (node.nextElementSibling) {

@@ -7,7 +7,7 @@ module CustomizationConstants
 
   CONSTANTS = {}
 
-  CONSTANTS[:content] = %Q(
+  CONSTANTS[:article] = %Q(
         <?php if ( have_posts() ) : ?>
           <?php _s_content_nav( 'nav-above' ); ?>
 
@@ -51,5 +51,5 @@ module CustomizationConstants
       <?php endif; ?>
   ))
 
-  CONSTANTS[:menu] = 'Menu'
+  CONSTANTS[:navigation] = 'Menu'
 end

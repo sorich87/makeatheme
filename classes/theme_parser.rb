@@ -49,7 +49,7 @@ class ThemeParser
           :template => file_content
         }
       else
-        if ['header', 'footer', 'content', 'sidebar'].include?(template_name)
+        if ['header', 'footer'].include?(template_name)
           region_name = 'default'
         else
           region_name = template_name
@@ -94,7 +94,7 @@ class ThemeParser
   end
 
   def get_region_type(filename)
-    match = /\A(sidebar|header|footer|content)/.match(filename)
+    match = /\A(header|footer)/.match(filename)
     match[1] if match
   end
 

@@ -104,7 +104,7 @@ body {
 #branding hgroup {
 	padding: 0 7.6%;
 }
-.headerimage {
+.header-image {
   width: 100%;
   padding: 0;
 }
@@ -509,8 +509,8 @@ a:hover {
 	clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
 	clip: rect(1px, 1px, 1px, 1px);
 }
-#branding .menu a.assistive-text:active,
-#branding .menu a.assistive-text:focus {
+#branding .navigation a.assistive-text:active,
+#branding .navigation a.assistive-text:focus {
 	background: #eee;
 	border-bottom: 1px solid #ddd;
 	color: #1982d1;
@@ -562,7 +562,7 @@ a:hover {
 /* =Menu
 -------------------------------------------------------------- */
 
-#branding .menu {
+#branding .navigation {
 	background: #222; /* Show a solid color for older browsers */
 	background: -moz-linear-gradient(#252525, #0a0a0a);
 	background: -o-linear-gradient(#252525, #0a0a0a);
@@ -578,24 +578,24 @@ a:hover {
 	width: 100%;
 	padding: 0 7.6%;
 }
-#branding .menu ul {
+#branding .navigation ul {
 	font-size: 13px;
 	list-style: none;
 	margin: 0 0 0 -0.8125em;
 	padding-left: 0;
 }
-#branding .menu li {
+#branding .navigation li {
 	float: left;
 	position: relative;
 }
-#branding .menu a {
+#branding .navigation a {
 	color: #eee;
 	display: block;
 	line-height: 3.333em;
 	padding: 0 1.2125em;
 	text-decoration: none;
 }
-#branding .menu ul ul {
+#branding .navigation ul ul {
 	-moz-box-shadow: 0 3px 3px rgba(0,0,0,0.2);
 	-webkit-box-shadow: 0 3px 3px rgba(0,0,0,0.2);
 	box-shadow: 0 3px 3px rgba(0,0,0,0.2);
@@ -608,11 +608,11 @@ a:hover {
 	width: 188px;
 	z-index: 99999;
 }
-#branding .menu ul ul ul {
+#branding .navigation ul ul ul {
 	left: 100%;
 	top: 0;
 }
-#branding .menu ul ul a {
+#branding .navigation ul ul a {
 	background: #f9f9f9;
 	border-bottom: 1px dotted #ddd;
 	color: #444;
@@ -623,13 +623,13 @@ a:hover {
 	padding: 10px 10px;
 	width: 168px;
 }
-#branding .menu li:hover > a,
-#branding .menu ul ul :hover > a,
-#branding .menu a:focus {
+#branding .navigation li:hover > a,
+#branding .navigation ul ul :hover > a,
+#branding .navigation a:focus {
 	background: #efefef;
 }
-#branding .menu li:hover > a,
-#branding .menu a:focus {
+#branding .navigation li:hover > a,
+#branding .navigation a:focus {
 	background: #f9f9f9; /* Show a solid color for older browsers */
 	background: -moz-linear-gradient(#f9f9f9, #e5e5e5);
 	background: -o-linear-gradient(#f9f9f9, #e5e5e5);
@@ -637,18 +637,18 @@ a:hover {
 	background: -webkit-linear-gradient(#f9f9f9, #e5e5e5);
 	color: #373737;
 }
-#branding .menu ul li:hover > ul {
+#branding .navigation ul li:hover > ul {
 	display: block;
 }
-#branding .menu .current-menu-item > a,
-#branding .menu .current-menu-ancestor > a,
-#branding .menu .current_page_item > a,
-#branding .menu .current_page_ancestor > a {
+#branding .navigation .current-menu-item > a,
+#branding .navigation .current-menu-ancestor > a,
+#branding .navigation .current_page_item > a,
+#branding .navigation .current_page_ancestor > a {
 	font-weight: bold;
 }
 
 /* Search Form */
-#branding .searchform {
+#branding .search-form {
   margin: 3.8em 0;
   width: 33.333%;
 }
@@ -699,7 +699,7 @@ a:hover {
 	bottom: -27px;
 	max-width: 195px;
 }
-#branding .only-search + #branding .menu div {
+#branding .only-search + #branding .navigation div {
 	padding-right: 205px;
 }
 
@@ -2408,13 +2408,13 @@ p.comment-form-comment {
 	#site-description {
 		font-size: 12px;
 	}
-  .searchform {
+  .search-form {
     margin: 0 !important;
   }
-  #branding .menu {
+  #branding .navigation {
     width: 100% !important;
   }
-	#branding .menu ul {
+	#branding .navigation ul {
 		font-size: 12px;
 	}
 	article.intro .entry-content {
@@ -2568,7 +2568,7 @@ p.comment-form-comment {
 	#branding img {
 		display: none;
 	}
-	#branding .menu {
+	#branding .navigation {
 		display: none;
 	}
 	#main {
