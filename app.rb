@@ -11,6 +11,8 @@ require 'kaminari'
 require 'base64'
 require 'pony'
 require 'nokogiri'
+require 'liquid'
+
 
 Mongoid.load!("config/mongoid.yml")
 
@@ -39,19 +41,14 @@ require 'store_user'
 # Classes
 require 'customization_parser'
 require 'default_templates'
-require 'handlebars_template'
 
 # Helpers
 require 'application_helper'
-require 'handlebars_helper'
 require 'session_helper'
 require 'theme_helper'
 
-# Register Handlebars template engine
-Tilt.register HandlebarsTemplate, :hbs
-
 # Register helper classes
-helpers ApplicationHelper, HandlebarsHelper, SessionHelper, ThemeHelper
+helpers ApplicationHelper, SessionHelper, ThemeHelper
 
 # Set default content type to JSON
 before do

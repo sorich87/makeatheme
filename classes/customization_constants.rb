@@ -1,10 +1,4 @@
-require 'handlebars'
-
 module CustomizationConstants
-  def self.proc_safe_string(str)
-    proc { Handlebars::SafeString.new(str) }
-  end
-
   CONSTANTS = {}
 
   CONSTANTS[:article] = %Q(
@@ -32,24 +26,28 @@ module CustomizationConstants
 
         <?php endif; ?>)
 
-  CONSTANTS[:home_url] = proc_safe_string("<?php echo home_url( '/' ); ?>")
-  CONSTANTS[:site_title] = proc_safe_string("<?php bloginfo( 'name' ); ?>")
-  CONSTANTS[:site_description] = proc_safe_string("<?php bloginfo( 'description' ); ?>")
+  CONSTANTS[:home_url] = "<?php echo home_url( '/' ); ?>"
+  CONSTANTS[:site_title] = "<?php bloginfo( 'name' ); ?>"
+  CONSTANTS[:site_description] = "<?php bloginfo( 'description' ); ?>"
 
-  CONSTANTS[:search_form] = proc_safe_string(%Q(
+  CONSTANTS[:search_form] = %Q(
       <form method="get" id="searchform" action="<?php echo esc_url( home_url( '/' ) ); ?>" role="search">
         <label for="s" class="assistive-text"><?php _e( 'Search', '_s' ); ?></label>
         <input type="text" class="field" name="s" id="s" placeholder="<?php esc_attr_e( 'Search &hellip;', '_s' ); ?>" />
         <input type="submit" class="submit" name="submit" id="searchsubmit" value="<?php esc_attr_e( 'Search', '_s' ); ?>" />
       </form>
-  ))
+  )
 
-  CONSTANTS[:header_image] = proc_safe_string(
-      %Q(<?php $header_image = get_header_image();
+  CONSTANTS[:header_image] = %Q(
+      <?php $header_image = get_header_image();
       if ( ! empty( $header_image ) ) : ?>
         <img src="<?php echo esc_url( $header_image ); ?>" class="header-image" width="<?php echo get_custom_header()->width; ?>" height="<?php echo get_custom_header()->height; ?>" alt="" />
       <?php endif; ?>
-  ))
+  )
 
-  CONSTANTS[:navigation] = 'Menu'
+  CONSTANTS[:navigation] = %Q(
+    <nav role="navigation">
+      <?php wp_nav_menu( array( 'theme_location' => 'primary' ) ); ?>
+    </nav>'
+  )
 end

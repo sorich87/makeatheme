@@ -305,9 +305,9 @@ window.require.define({"models/block": function(exports, require, module) {
       return this.get("name").replace("_", "-");
     }
 
-    // Return block Handlebars tag
+    // Return block Liquid tag
     , tag: function () {
-      return "{{{ " + this.get("name") + " }}}";
+      return "{{ " + this.get("name") + " }}";
     }
   });
   

@@ -19,6 +19,6 @@ module.exports = Model.extend({
 
   // Return block Handlebars tag
   , tag: function () {
-    return "{{{ " + this.get("name") + " }}}";
+    return "{{ " + this.get("name") + " }}";
   }
 });

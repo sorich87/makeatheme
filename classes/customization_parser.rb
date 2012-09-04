@@ -1,5 +1,4 @@
 require 'json'
-require 'handlebars'
 require 'zip/zip'
 require 'classes/customization_constants'
 
@@ -21,7 +20,6 @@ class CustomizationParser
       @json = json_string
     end
 
-    @handlebars = Handlebars::Context.new
     @base = {}
     @files = []
 
@@ -56,12 +54,10 @@ class CustomizationParser
     @templates ||= []
 
     @json[:templates].each do |template|
-      #template["compiled_template"] = @handlebars.compile(template["template"]).call(@base)
-
       # Read the file from public/editor/<file>.html for now
       input_file = File.join('public', 'editor', "#{template[:name]}.html")
       input_html = File.read(input_file)
-      compiled_template = @handlebars.compile(input_html).call(@base)
+      compiled_template = render_template(input_html, @base)
 
       php_filename = File.join(@output_folder, "#{template[:name]}.php")
 
@@ -101,7 +97,7 @@ class CustomizationParser
       output_path = File.join(@output_folder, filename)
 
       template = region[:template]
-      compiled_template = @handlebars.compile(template).call(@base)
+      compiled_template = render_template(template, @base)
 
       File.open(output_path, 'w') do |f|
         puts "Writing region to: #{output_path}"
@@ -122,5 +118,14 @@ class CustomizationParser
 
   def get_region_template(region_identifier)
     @regions[region_identifier]
+  end
+
+  private
+
+  def render_template(template, locals)
+    # Hash keys should be strings only
+    locals = locals.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
+
+    Liquid::Template.parse(template).render(locals)
   end
 end

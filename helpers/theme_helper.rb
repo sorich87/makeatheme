@@ -23,7 +23,7 @@ module ThemeHelper
 
         local_name = if type == :regions then piece[:type] else piece[:name] end
 
-        locals[local_name] = piece[:build] = hbs(piece[:template], locals: locals)
+        locals[local_name] = piece[:build] = liquid(piece[:template], locals: locals)
 
         pieces[type] << piece
       end
