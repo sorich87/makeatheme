@@ -28,7 +28,7 @@ module.exports = View.extend({
     };
 
     $.ajax({
-        url: "/themes/" + app.data.theme._id + "/customize.json"
+        url: "/themes/" + app.data.theme._id + ".json"
       , type: "POST"
       , contentType: "application/json; charset=utf-8"
       , data: JSON.stringify(customization)

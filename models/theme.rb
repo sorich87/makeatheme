@@ -128,8 +128,12 @@ class Theme
     return theme
   end
 
-  def fork!(attributes={})
+  def fork(attributes={})
     Theme.new(self.attributes.merge(:parent => self).merge(attributes))
+  end
+
+  def fork!(attributes={})
+    fork(attributes={}).save!
   end
 
   def forks
@@ -179,6 +183,16 @@ class Theme
         self[:regions] << new_region
       end
     end
+  end
+
+  # Is the user author of the theme?
+  def author?(user)
+    author.id == user.id
+  end
+
+  # Can the user only preview the theme or can he edit it
+  def preview_only?(user)
+    !author?(user) && private?
   end
 end
 

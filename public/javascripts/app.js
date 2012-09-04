@@ -305,7 +305,7 @@ window.require.define({"models/block": function(exports, require, module) {
       return this.get("name").replace("_", "-");
     }
 
-    // Return block Liquid tag
+    // Return block Handlebars tag
     , tag: function () {
       return "{{ " + this.get("name") + " }}";
     }
@@ -645,7 +645,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       };
 
       $.ajax({
-          url: "/themes/" + app.data.theme._id + "/customize.json"
+          url: "/themes/" + app.data.theme._id + ".json"
         , type: "POST"
         , contentType: "application/json; charset=utf-8"
         , data: JSON.stringify(customization)

@@ -19,43 +19,42 @@ get '/themes/:id.json' do
   end
 end
 
-post '/themes/:id/customize.json' do
+post '/themes/:id.json' do
   forbid and return unless authenticated?
 
   theme = Theme.where(:id => params[:id]).first
-  if theme.nil?
-    status 404
-    body "Derp"
-    return
-  end
+
+  status 404 and return if theme.nil?
+
+  forbid and return if theme.preview_only?(current_user)
 
   json = JSON.parse(request.body.read, :symbolize_names => true)
 
-  fork = theme.fork!({
+  theme = theme.fork({
     :author => current_user
-  })
+  }) unless theme.author?(current_user)
 
-  fork.replace_and_add_templates(json[:templates])
-  fork.replace_and_add_regions(json[:regions])
+  theme.replace_and_add_templates(json[:templates])
+  theme.replace_and_add_regions(json[:regions])
 
   # Adding template strings to templates here, should be in JSON or implemented
   # some other way in reality.
   json[:templates].each_with_index do |template, index|
     name = template[:name]
-    template_string = fork.template_content(name)
+    template_string = theme.template_content(name)
     json[:templates][index][:template] = template_string
   end
 
   cs = CustomizationParser.parse(json)
 
-  fork.archive = File.new(cs.zipfile_path)
-  if fork.valid?
-    fork.save
-    body fork.to_json
+  theme.archive = File.new(cs.zipfile_path)
+  if theme.valid?
+    theme.save
+    body theme.to_json
     status 201
   else
     status 400
-    body fork.errors.to_json
+    body theme.errors.to_json
   end
 end
 
@@ -96,9 +95,9 @@ get '/editor/:theme/?:template?' do
   # Return 404 if no theme found.
   status 404 and return unless theme
 
-  preview_only = theme.private?
+  preview_only = theme.preview_only?(current_user)
 
-  ensure_id = if preview_only then false else true end
+  ensure_id = !preview_only
 
   locals = {
     theme: theme.to_json,

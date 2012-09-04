@@ -26,6 +26,7 @@ describe Theme do
   it 'should respond to create_from_zip' do
     Theme.should respond_to(:create_from_zip)
   end
+  it { should respond_to(:fork) }
   it { should respond_to(:fork!) }
   it { should respond_to(:needed_theme_files) }
   it { should respond_to(:forks) }
@@ -85,7 +86,7 @@ describe Theme do
       @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save
 
-      @fork = @theme.fork!
+      @fork = @theme.fork
     end
 
     it 'should create a new valid theme' do
@@ -154,7 +155,7 @@ describe Theme do
       end
 
       it 'should not remove itself if there are many themes' do
-        @theme.fork!.save!
+        @theme.fork!
         @theme.destroy
         @group.reload.should_not be_destroyed
       end
