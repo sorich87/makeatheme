@@ -1078,50 +1078,62 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       grandParentNode = node.parentNode.parentNode;
 
-      // If grandparent is header or footer,
-      // make addition in corresponding region template
       if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-        region = app.regions.getByTypeAndName(grandParentNode.tagName.toLowerCase());
-
-        sandbox = (new DOMParser).parseFromString(region.get("template"), "text/html");
-
-        // Get destination row.
-        row = sandbox.getElementById(node.parentNode.id);
-
-        // If the destination node doesn't exist in the template, add it.
-        if (!row) {
-          row = sandbox.createElement("div");
-          row.className = "row";
-          row.id = "y-" + idIncrement;
-          idIncrement++;
-
-          if (node.parentNode.nextElementSibling) {
-            nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
-            nextRow.parentNode.insertBefore(row, nextRow);
-          } else {
-            sandbox.getElementById(grandParentNode.id).appendChild(row);
-          }
-
-          // Set the ID of the row the user sees
-          node.parentNode.id = row.id
-        }
-
-        // Replace node innerHTML by Handlebars tag
-        block = _(app.blocks.models).find(function (model) {
-          return node.className.indexOf(model.className()) !== -1;
-        });
-        copy.innerHTML = block.tag();
-
-        // Insert the tag
-        if (node.nextElementSibling) {
-          sibling = sandbox.getElementById(node.nextElementSibling.id);
-          row.insertBefore(copy, sibling);
-        } else {
-          row.appendChild(copy);
-        }
-
-        region.set("template", sandbox.body.innerHTML);
+        piece = app.regions.getByTypeAndName(grandParentNode.tagName.toLowerCase());
+      } else {
+        piece = app.templates.getCurrent();
       }
+
+      sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
+
+      // Get destination row.
+      row = sandbox.getElementById(node.parentNode.id);
+
+      // If the destination node doesn't exist in the template, create it.
+      if (!row) {
+        row = sandbox.createElement("div");
+        row.className = "row";
+        row.id = "y-" + idIncrement;
+        idIncrement++;
+
+        // Set the ID of the row the user sees
+        node.parentNode.id = row.id
+      }
+
+      // Replace node innerHTML by Handlebars tag
+      block = _(app.blocks.models).find(function (model) {
+        return node.className.indexOf(model.className()) !== -1;
+      });
+      copy.innerHTML = block.tag();
+
+      // Insert the node in the row
+      if (node.nextElementSibling) {
+        sibling = sandbox.getElementById(node.nextElementSibling.id);
+        row.insertBefore(copy, sibling);
+      } else {
+        row.appendChild(copy);
+      }
+
+      // Insert the row in the template
+      // If the next sibling of the node is the header (uh?) or footer region,
+      // insert the row before the corresponding Handlebars tag.
+      if (node.parentNode.nextElementSibling) {
+        if (["HEADER", "FOOTER"].indexOf(node.parentNode.nextElementSibling.tagName) !== -1) {
+          sandbox.body.innerHTML = sandbox.body.innerHTML.replace(/\{\{\{(.+?)\}\}\}/g, function (match, tag) {
+            if (tag.trim().toUpperCase() === node.parentNode.nextElementSibling.tagName) {
+              match = row.outerHTML + match;
+            }
+            return match;
+          });
+        } else {
+          nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
+          nextRow.parentNode.insertBefore(row, nextRow);
+        }
+      } else {
+        sandbox.getElementById(grandParentNode.id).appendChild(row);
+      }
+
+      piece.set("template", sandbox.body.innerHTML);
     }
 
     , removeNode: function (node, oldParentNode) {
