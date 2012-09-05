@@ -27,14 +27,14 @@ describe "Theme customization" do
   end
 
   it 'should require authentication' do
-    post "/themes/#{@theme.id}/customize.json", @json
+    put "/themes/#{@theme.id}", @json
     last_response.status.should == 401
   end
 
   context "as an authenticated user" do
     before do
-      post '/session.json', @user_attributes.to_json
-      post "/themes/#{@theme.id}/customize.json", @json
+      post '/session', @user_attributes.to_json
+      put "/themes/#{@theme.id}", @json
       @theme.reload
     end
 

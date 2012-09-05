@@ -15,7 +15,7 @@ describe "registration" do
 
   describe "with valid attributes" do
     before do
-      post '/user.json', @user_attributes.to_json
+      post '/users', @user_attributes.to_json
     end
 
     it 'should be successful' do
@@ -41,13 +41,13 @@ describe "registration" do
       params[:body].should include('http://thememy.com/')
     end
 
-    post '/user.json', @user_attributes.to_json
+    post '/users', @user_attributes.to_json
   end
 
   describe "with invalid attributes" do
     before do
       invalid_attributes = @user_attributes.merge(:email => nil)
-      post '/user.json', invalid_attributes.to_json
+      post '/users', invalid_attributes.to_json
     end
 
     it 'should return status 400' do
