@@ -4,6 +4,8 @@ require 'theme_file_group'
 require 'theme_parser'
 require 'static_theme_file'
 require 'set'
+require 'region'
+require 'template'
 
 class Theme
   include Mongoid::Document
@@ -17,8 +19,9 @@ class Theme
   field :version,     type: String
   field :description, type: String
   field :tags,        type: Array
-  field :regions,     type: Array, :default => []
-  field :templates,   type: Array, :default => []
+
+  embeds_many :regions
+  embeds_many :templates
 
   belongs_to :author, :class_name => 'StoreUser'
   belongs_to :parent, :class_name => 'Theme'
@@ -60,16 +63,6 @@ class Theme
         template: template
       }
     end
-  end
-
-  # Return regions after converting hash keys to symbols
-  def regions
-    self[:regions].map { |r| r.symbolize_keys }
-  end
-
-  # Return templates after converting hash keys to symbols
-  def templates
-    self[:templates].map{ |t| t.symbolize_keys }
   end
 
   # Get template content from name
