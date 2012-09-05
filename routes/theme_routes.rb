@@ -14,7 +14,7 @@ get '/themes/:id' do
   end
 end
 
-post '/themes/:id' do
+put '/themes/:id' do
   forbid and return unless authenticated?
 
   theme = Theme.where(:id => params[:id]).first

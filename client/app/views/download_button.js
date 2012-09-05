@@ -21,27 +21,25 @@ module.exports = View.extend({
   }
 
   , download: function () {
-    var customization = {
+    var attrs = _.extend(app.data.theme, {
         regions: this.regions.models
       , templates: this.templates.models
-    };
+    });
 
-    $.ajax({
-        url: "/themes/" + app.data.theme._id + ".json"
-      , type: "POST"
-      , contentType: "application/json; charset=utf-8"
-      , data: JSON.stringify(customization)
-      , success: function(theme) {
-        var $iframe = $("#download-iframe");
+    (new Theme).save(attrs, {
+      success: function(theme) {
+        // Add Iframe with archive URL as src to trigger download
+        var $iframe = $("#download-iframe", window.top.document);
+        console.log(theme);
 
         if ($iframe.length === 0) {
-          $iframe = $("<iframe src='" + theme.archive + "'></iframe>")
-            .appendTo($("body"));
+          $iframe = $("<iframe id='#download-iframe' src='" + theme.get("archive") + "'></iframe>")
+            .appendTo($("body", window.top.document));
         } else {
-          $iframe.attr("src", theme.archive);
+          $iframe.attr("src", theme.get("archive"));
         }
 
-        window.top.Backbone.history.navigate("/themes/" + theme._id);
+        window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }
     });
   }
