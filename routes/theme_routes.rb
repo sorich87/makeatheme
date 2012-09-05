@@ -23,27 +23,17 @@ put '/themes/:id' do
 
   forbid and return if theme.preview_only?(current_user)
 
-  json = JSON.parse(request.body.read, :symbolize_names => true)
-
   theme = theme.fork({
     :author => current_user
   }) unless theme.author?(current_user)
 
-  theme.replace_and_add_templates(json[:templates])
-  theme.replace_and_add_regions(json[:regions])
+  params = JSON.parse(request.body.read)
+  theme.regions = params['regions'].map { |region| Region.new(region) }
+  theme.templates = params['templates'].map { |template| Template.new(template) }
 
-  # Adding template strings to templates here, should be in JSON or implemented
-  # some other way in reality.
-  json[:templates].each_with_index do |template, index|
-    name = template[:name]
-    template_string = theme.template_content(name)
-    json[:templates][index][:template] = template_string
-  end
-
-  cs = CustomizationParser.parse(json)
-
-  theme.archive = File.new(cs.zipfile_path)
   if theme.valid?
+    cs = CustomizationParser.parse(theme)
+    theme.archive = File.new(cs.zipfile_path)
     theme.save
     status 201
     respond_with theme

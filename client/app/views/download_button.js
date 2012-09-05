@@ -21,9 +21,19 @@ module.exports = View.extend({
   }
 
   , download: function (e) {
-    var attrs = _.extend(app.data.theme, {
-        regions: this.regions.models
-      , templates: this.templates.models
+    var attrs, regions, templates;
+
+    regions = _.map(this.regions.models, function (region) {
+      return _.pick(region.attributes, "_id", "name", "type", "template");
+    });
+
+    templates = _.map(this.templates.models, function (template) {
+      return _.pick(template.attributes, "_id", "name", "template");
+    });
+
+    attrs = _.extend(app.data.theme, {
+        regions: regions
+      , templates: templates
     });
     e.target.setAttribute("disabled", "true");
     e.target.innerHTML = "Baking... Please wait.";

@@ -1,4 +1,3 @@
-require 'json'
 require 'zip/zip'
 require 'classes/customization_constants'
 
@@ -13,12 +12,8 @@ class CustomizationParser
     self.new(json_string)
   end
 
-  def initialize(json_string)
-    if json_string.is_a? String
-      @json = JSON.parse(json_string)
-    else
-      @json = json_string
-    end
+  def initialize(theme)
+    @theme = theme
 
     @base = {}
     @files = []
@@ -53,11 +48,8 @@ class CustomizationParser
   def compile_templates
     @templates ||= []
 
-    @json[:templates].each do |template|
-      # Read the file from public/editor/<file>.html for now
-      input_file = File.join('public', 'editor', "#{template[:name]}.html")
-      input_html = File.read(input_file)
-      compiled_template = render_template(input_html, @base)
+    @theme.templates.each do |template|
+      compiled_template = render_template(template[:template], @base)
 
       php_filename = File.join(@output_folder, "#{template[:name]}.php")
 
@@ -86,7 +78,7 @@ class CustomizationParser
   def compile_regions
     @regions ||= []
 
-    @json[:regions].each do |region|
+    @theme.regions.each do |region|
       region_id = region[:id]
       region_type = region[:type]
 
