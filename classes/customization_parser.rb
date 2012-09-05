@@ -25,7 +25,7 @@ class CustomizationParser
     compile_regions
     compile_templates
 
-    @zipfile_name = File.expand_path(File.join(@output_folder, './theme.zip'))
+    @zipfile_name = File.expand_path(File.join(@output_folder, "./#{@theme.path}.zip"))
 
     create_zip
   end
@@ -35,7 +35,7 @@ class CustomizationParser
       File.delete(@zipfile_name)
     end
 
-    folder_in_zip = "theme/"
+    folder_in_zip = "#{@theme.path}/"
 
     Zip::ZipFile.open(@zipfile_name, Zip::ZipFile::CREATE) do |zipfile|
       @files.each do |file_path|

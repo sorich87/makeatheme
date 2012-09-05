@@ -152,5 +152,9 @@ class Theme
   def preview_only?(user)
     !author?(user) && private?
   end
+
+  def path
+    self.name.gsub(/[^0-9A-Za-z]/, '').downcase
+  end
 end
 
