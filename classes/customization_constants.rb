@@ -48,7 +48,7 @@ module CustomizationConstants
   CONSTANTS[:navigation] = %Q(
     <nav role="navigation">
       <?php wp_nav_menu( array( 'theme_location' => 'primary' ) ); ?>
-    </nav>'
+    </nav>
   )
 
   CONSTANTS[:sidebar] = "<?php get_sidebar(); ?>"
