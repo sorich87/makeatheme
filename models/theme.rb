@@ -90,10 +90,6 @@ class Theme
   def self.create_from_zip(zip_file, attributes = {})
     theme = Theme.new(attributes)
 
-    File.open(zip_file) do |f|
-      theme.archive = f
-    end
-
     begin
       parser = ThemeParser.parse(zip_file)
 
