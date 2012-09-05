@@ -1,6 +1,5 @@
 var View = require("views/base/view")
-  , Regions = require("collections/regions")
-  , Templates = require("collections/templates")
+  , Theme = require("model/theme")
   , app = require("application");
 
 module.exports = View.extend({
@@ -33,7 +32,16 @@ module.exports = View.extend({
       , contentType: "application/json; charset=utf-8"
       , data: JSON.stringify(customization)
       , success: function(theme) {
-        window.open(theme.archive, "_blank");
+        var $iframe = $("#download-iframe");
+
+        if ($iframe.length === 0) {
+          $iframe = $("<iframe src='" + theme.archive + "'></iframe>")
+            .appendTo($("body"));
+        } else {
+          $iframe.attr("src", theme.archive);
+        }
+
+        window.top.Backbone.history.navigate("/themes/" + theme._id);
       }
     });
   }
