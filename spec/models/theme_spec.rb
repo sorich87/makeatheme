@@ -107,11 +107,11 @@ describe Theme do
     end
 
     it 'should have the same regions' do
-      @fork.regions.should == @theme.regions
+      @fork.regions.length.should == @theme.regions.length
     end
 
     it 'should have the same templates' do
-      @fork.templates.should == @theme.templates
+      @fork.templates.length.should == @theme.templates.length
     end
 
     it "should make the new fork available in the original theme's list of forks" do
