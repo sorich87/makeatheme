@@ -48,7 +48,7 @@ module.exports = View.extend({
         contentType: "application/json;charset=UTF-8"
       , dataType: "json"
       , type: "POST"
-      , url: "/session.json"
+      , url: "/session"
       , data: JSON.stringify(data)
       , complete: function (jqXHR, textStatus) {
         var response = JSON.parse(jqXHR.responseText);

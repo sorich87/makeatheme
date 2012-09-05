@@ -6,12 +6,14 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'routes'))
 
 require 'sinatra'
 require 'sinatra/session'
+require 'sinatra/respond_with'
 require 'mongoid'
 require 'kaminari'
 require 'base64'
 require 'pony'
 require 'nokogiri'
 require 'liquid'
+require 'json'
 
 
 Mongoid.load!("config/mongoid.yml")
@@ -21,6 +23,7 @@ Dir["config/initializers/*.rb"].each {|file| require file }
 
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
+set :json_encoder, JSON
 
 configure :development do
   require 'config/environments/development'
@@ -50,19 +53,31 @@ require 'theme_helper'
 # Register helper classes
 helpers ApplicationHelper, SessionHelper, ThemeHelper
 
-# Set default content type to JSON
-before do
-  content_type :json
+respond_to :html, :json
+
+# Send index content on 404 to html client so that it handles routing
+# Send 404 to other clients
+error 404 do
+  request.accept.each do |type|
+    case type
+    when 'text/html'
+      load_index
+    end
+  end
 end
 
-# Sent index content on 404 so that client app handles routing
-not_found do
-  status 200
-  load_index
+# Don't send 406 to html client
+error 406 do
+  request.accept.each do |type|
+    case type
+    when 'text/html'
+      load_index
+    end
+  end
 end
 
-# Routes
-get '/' do
+# Load index
+get '/', provides: 'html' do
   load_index
 end
 

@@ -391,7 +391,7 @@ window.require.define({"models/user": function(exports, require, module) {
       , password_confirmation: ""
     }
 
-    , url: "/user.json"
+    , url: "users"
 
     , validation: {
       first_name: {
@@ -527,8 +527,9 @@ window.require.define({"views/auth_links": function(exports, require, module) {
     , deleteSession: function () {
       $.ajax({
           contentType: "application/json; charset=UTF-8"
+        , dataType: "json"
         , type: "DELETE"
-        , url: "/session.json"
+        , url: "/session"
         , complete: function (jqXHR, textStatus) {
           if (textStatus === "success") {
             window.location = "/";
@@ -616,7 +617,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
 window.require.define({"views/download_button": function(exports, require, module) {
   var View = require("views/base/view")
-    , Theme = require("model/theme")
+    , Theme = require("models/theme")
     , app = require("application");
 
   module.exports = View.extend({
@@ -997,7 +998,7 @@ window.require.define({"views/login": function(exports, require, module) {
           contentType: "application/json;charset=UTF-8"
         , dataType: "json"
         , type: "POST"
-        , url: "/session.json"
+        , url: "/session"
         , data: JSON.stringify(data)
         , complete: function (jqXHR, textStatus) {
           var response = JSON.parse(jqXHR.responseText);
@@ -1620,7 +1621,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $.ajax({
           type: "POST"
-        , url: "/themes.json"
+        , url: "/themes"
         , data: new FormData(this.$("form")[0])
         , success: function(data, textStatus, jqXHR) {
           console.log(data, textStatus, jqXHR);

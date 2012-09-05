@@ -1,8 +1,7 @@
 
-post '/session.json' do
-  request_body = request.body.read
-  if !request_body.empty?
-    session_params = JSON.parse(request_body)
+post '/session' do
+  session_params = JSON.parse(request.body.read)
+  unless session_params.empty?
     user = StoreUser.authenticate(session_params["email"], session_params["password"])
   else
     user = nil
@@ -11,14 +10,14 @@ post '/session.json' do
   unless user.nil?
     authenticate_user!(user)
     status 201
-    body user.to_json
+    respond_with user
   else
     status 400
-    body( { "error" => "Invalid user or password combination" }.to_json )
+    respond_with "error" => "Invalid user or password combination"
   end
 end
 
-delete '/session.json' do
+delete '/session' do
   session_end!
   status 204
 end

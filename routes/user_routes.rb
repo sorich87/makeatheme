@@ -1,5 +1,5 @@
 
-post '/user.json' do
+post '/users' do
   user_params = JSON.parse(request.body.read)
   user_params.slice!("first_name", "last_name", "email", "password")
   user = StoreUser.new(user_params)

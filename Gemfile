@@ -8,7 +8,7 @@ gem 'activesupport'
 gem 'kaminari'
 gem 'bcrypt-ruby'
 gem 'sinatra-session'
-gem 'sinatra-respond_to'
+gem 'sinatra-contrib'
 gem 'paperclip', '~> 3.1.4'
 gem 'fog', '~> 1.5.0'
 gem "rubyzip", "~> 0.9.9"

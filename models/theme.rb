@@ -187,7 +187,7 @@ class Theme
 
   # Is the user author of the theme?
   def author?(user)
-    author.id == user.id
+    user && author.id == user.id
   end
 
   # Can the user only preview the theme or can he edit it

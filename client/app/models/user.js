@@ -10,7 +10,7 @@ module.exports = Model.extend({
     , password_confirmation: ""
   }
 
-  , url: "/user.json"
+  , url: "users"
 
   , validation: {
     first_name: {

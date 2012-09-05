@@ -2,8 +2,9 @@ module ApplicationHelper
 
   def load_index
     content_type :html
+    status 200
     themes = Theme.order_by([:name, :desc]).page(params[:page])
-    erb :index, :locals => {:themes => themes}
+    respond_with :index, :themes => themes
   end
 
   def json_pagination_for(model)

@@ -1,25 +1,20 @@
 
-get '/themes.json' do
+get '/themes' do
   @themes = Theme.all.order_by([:name, :desc]).page(params[:page])
-  {
-    results: @themes,
-    pagination: json_pagination_for(@themes)
-  }.to_json
+
+  respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-get '/themes/:id.json' do
+get '/themes/:id' do
   theme = Theme.find(params[:id])
   if theme
-    theme.to_json.merge(
-      :templates => theme.theme_files.as_json,
-      :static_files => theme.static_theme_files.as_json
-    )
+    respond_with theme
   else
     status 404
   end
 end
 
-post '/themes/:id.json' do
+post '/themes/:id' do
   forbid and return unless authenticated?
 
   theme = Theme.where(:id => params[:id]).first
@@ -50,21 +45,21 @@ post '/themes/:id.json' do
   theme.archive = File.new(cs.zipfile_path)
   if theme.valid?
     theme.save
-    body theme.to_json
     status 201
+    respond_with theme
   else
     status 400
-    body theme.errors.to_json
+    respond_with theme.errors
   end
 end
 
-post '/themes.json' do
+post '/themes' do
   forbid and return unless authenticated?
 
   file = params[:file]
   if file.nil?
     status 400
-    body( {:error => "Attach a .zip-file and attributes for your theme."}.to_json )
+    respond_with :error => "Attach a .zip-file and attributes for your theme."
     return
   end
 
@@ -77,34 +72,30 @@ post '/themes.json' do
   if theme.valid?
     theme.save
     status 201
-    body theme.to_json
+    respond_with theme
   else
     status 400
-    body theme.errors.to_json
+    respond_with theme.errors
   end
 end
 
 # Render a theme template with regions replaced
 # and dummy content inserted
 # Double render because regions contain tags
-get '/editor/:theme/?:template?' do
-  content_type :html
-
+get '/editor/:theme', provides: 'html' do
   theme = Theme.find(params[:theme])
 
   # Return 404 if no theme found.
-  status 404 and return unless theme
+  halt 404 unless theme
 
   preview_only = theme.preview_only?(current_user)
 
   ensure_id = !preview_only
 
-  locals = {
+  respond_with :editor,
     theme: theme.to_json,
     pieces: theme_pieces(theme, ensure_id).to_json,
     static_files_dir: theme.static_files_dir,
     preview_only: preview_only
-  }
-  erb :editor, locals: locals
 end
 

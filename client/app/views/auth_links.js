@@ -28,8 +28,9 @@ module.exports = View.extend({
   , deleteSession: function () {
     $.ajax({
         contentType: "application/json; charset=UTF-8"
+      , dataType: "json"
       , type: "DELETE"
-      , url: "/session.json"
+      , url: "/session"
       , complete: function (jqXHR, textStatus) {
         if (textStatus === "success") {
           window.location = "/";

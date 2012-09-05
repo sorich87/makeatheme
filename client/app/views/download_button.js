@@ -1,5 +1,5 @@
 var View = require("views/base/view")
-  , Theme = require("model/theme")
+  , Theme = require("models/theme")
   , app = require("application");
 
 module.exports = View.extend({
