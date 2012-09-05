@@ -25,6 +25,7 @@ class Theme
 
   belongs_to :author, :class_name => 'StoreUser'
   belongs_to :parent, :class_name => 'Theme'
+  has_many :forks, :class_name => 'Theme'
 
   # Fields used by Paperclip
   field :screenshot_file_name
@@ -127,10 +128,6 @@ class Theme
 
   def fork!(attributes={})
     fork(attributes={}).save!
-  end
-
-  def forks
-    Theme.where(:parent => self)
   end
 
   def fork?
