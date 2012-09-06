@@ -52,7 +52,6 @@ class Theme
     path: 'themes/:id/archives/:filename'
 
   validates_attachment :archive,
-    :presence => true,
     :content_type => { :content_type => 'application/zip' },
     :size => { :less_than => 1.megabyte }
 
