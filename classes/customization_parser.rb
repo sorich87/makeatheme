@@ -28,6 +28,7 @@ class CustomizationParser
     Zip::ZipFile.open(@zipfile_name, Zip::ZipFile::CREATE) do |zipfile|
       compile_regions(zipfile)
       compile_templates(zipfile)
+      compile_static_files(zipfile)
     end
   end
 
@@ -57,6 +58,14 @@ class CustomizationParser
         template = template + CustomizationConstants::FOOTER if 'footer' == region[:type]
 
         f.puts render_template(template, @base)
+      end
+    end
+  end
+
+  def compile_static_files(zipfile)
+    @theme.needed_theme_files.each do |static_file|
+      zipfile.get_output_stream(static_file.file_name) do |f|
+        f.puts open(static_file.file.url).read
       end
     end
   end
