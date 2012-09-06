@@ -80,10 +80,14 @@ module.exports = View.extend({
     }
 
     // Replace node innerHTML by Handlebars tag
-    block = _(app.blocks.models).find(function (model) {
-      return node.className.indexOf(model.className()) !== -1;
-    });
-    copy.innerHTML = block.tag();
+    for (var i in app.blocks.models) {
+      block = app.blocks.models[i];
+
+      if (node.className.indexOf(block.className()) !== -1) {
+        copy.innerHTML = block.tag();
+        break;
+      }
+    }
 
     // Insert the node in the row
     if (node.nextElementSibling) {
@@ -93,17 +97,12 @@ module.exports = View.extend({
       row.appendChild(copy);
     }
 
-    // Insert the row in the template
-    // If the next sibling of the node is the header (uh?) or footer region,
-    // insert the row before the corresponding Handlebars tag.
+    // Insert the row in the template.
+    // If the next sibling of the node is the footer region,
+    // insert the row at the end.
     if (node.parentNode.nextElementSibling) {
-      if (["HEADER", "FOOTER"].indexOf(node.parentNode.nextElementSibling.tagName) !== -1) {
-        sandbox.body.innerHTML = sandbox.body.innerHTML.replace(/\{\{\{(.+?)\}\}\}/g, function (match, tag) {
-          if (tag.trim().toUpperCase() === node.parentNode.nextElementSibling.tagName) {
-            match = row.outerHTML + match;
-          }
-          return match;
-        });
+      if ("FOOTER" === node.parentNode.nextElementSibling.tagName) {
+        sandbox.body.innerHTML = sandbox.body.innerHTML + row.outerHTML;
       } else {
         nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
         nextRow.parentNode.insertBefore(row, nextRow);

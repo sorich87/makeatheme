@@ -46,9 +46,16 @@ module.exports = View.extend({
 
   // Save current template, display it and trigger templateLoaded event
   , loadTemplate: function (template) {
-    this.collection.setCurrent(template);
+    var header, footer;
 
-    $("body").empty().append(template.get("build"));
+    header = app.regions.getByTypeAndName("header");
+    footer = app.regions.getByTypeAndName("footer");
+
+    build = header.get("build") + template.get("build") + footer.get("build");
+
+    $("#page").empty().append(build);
+
+    this.collection.setCurrent(template);
 
     app.trigger("templateLoaded", template.get("name"));
   }
