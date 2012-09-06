@@ -659,7 +659,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       e.target.innerHTML = "Baking... Please wait.";
 
       (new Theme).save(attrs, {
-        success: function(theme) {
+        success: function (theme) {
           // Add Iframe with archive URL as src to trigger download
           var $iframe = $("#download-iframe", window.top.document);
 
@@ -674,6 +674,12 @@ window.require.define({"views/download_button": function(exports, require, modul
           e.target.innerHTML = "Download Theme";
 
           window.top.Backbone.history.navigate("/themes/" + theme.id, true);
+        }
+        , error: function (theme, response) {
+          app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");
+
+          e.target.removeAttribute("disabled");
+          e.target.innerHTML = "Download Theme";
         }
       });
     }
