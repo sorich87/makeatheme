@@ -19,7 +19,6 @@ describe Theme do
   it { should belong_to(:author) }
   it { should belong_to(:theme_file_group) }
 
-  it { should validate_attachment_presence(:archive) }
   it { should validate_attachment_content_type(:archive).allowing('application/zip') }
   it { should validate_attachment_size(:archive).less_than(1.megabyte) }
 
