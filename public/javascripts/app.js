@@ -604,14 +604,17 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       drag.element = drag.ghost();
     }
 
-    // Load the actual template chuck to insert
+    // If the element is inserted in a row,
+    // load the actual template chuck to insert
     , dragEnd: function (e, drag) {
-      var block = this.collection.getByCid(drag.element.data("cid"));
+      if (drag.element.parent().hasClass("row")) {
+        var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
-        + block.className() + "'>" + block.get("build") + "</div>";
+        drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
+          + block.className() + "'>" + block.get("build") + "</div>";
 
-      idIncrement++;
+        idIncrement++;
+      }
     }
   });
   
