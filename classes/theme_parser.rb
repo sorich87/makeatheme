@@ -1,8 +1,6 @@
 require 'zip/zip'
 
 class ThemeParser
-  @@templates = ['index.html', 'page.html']
-
   def self.parse(zip_file)
     ThemeParser.new(zip_file)
   end
@@ -31,28 +29,21 @@ class ThemeParser
 
   def add_stored_file(entry)
     entry.get_input_stream do |html_file|
-      filename = File.basename(entry.to_s)
+      template_name = File.basename(entry.to_s, '.*')
+      file_content = html_file.read
 
-      if filename == "index.html"
+      if template_name == "index"
         # themename/index.html
         # We want to ignore the themename/ later when
         # saving the static files
         @zip_folder = entry.to_s.split("index.html")[0]
       end
 
-      template_name = File.basename(entry.to_s, '.*')
-      file_content = html_file.read
-
-      if @@templates.include?(filename)
-        @templates << {
-          :name => template_name,
-          :template => file_content
-        }
-      else
+      if match = /\A(header|footer)(-)?(.*)/.match(template_name)
         if ['header', 'footer'].include?(template_name)
           region_name = 'default'
         else
-          region_name = template_name
+          region_name = match[3]
         end
 
         @regions << {
@@ -60,6 +51,11 @@ class ThemeParser
           :name => region_name,
           :template => file_content,
           :type => get_region_type(template_name)
+        }
+      else
+        @templates << {
+          :name => template_name,
+          :template => file_content
         }
       end
     end
@@ -102,9 +98,7 @@ class ThemeParser
   # but not theme/images/ from theme/images/logo.png
   def fix_static_filenames
     @static_files.each_with_index do |file, index|
-      filename = file[:filename]
-      filename = filename.split(@zip_folder).last
-      @static_files[index][:filename] = filename
+      @static_files[index][:filename] = file[:filename].split(@zip_folder).last
     end
   end
 end
