@@ -8,7 +8,7 @@ module DefaultTemplates
   BLOCKS = {
     header_image: %q(
       <a href="{{site_url}}">
-        <img src='images/headers/chessboard.jpg' width='1000' height='288' alt='' />
+        <img src='{{ header_image_url }}' width='1000' height='288' alt='' />
       </a>
     ),
 

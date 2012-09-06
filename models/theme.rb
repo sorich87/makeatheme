@@ -161,5 +161,10 @@ class Theme
   def path
     self.name.gsub(/[^0-9A-Za-z]/, '').downcase
   end
+
+  # Header images
+  def header_images
+    self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+  end
 end
 

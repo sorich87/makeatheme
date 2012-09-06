@@ -6,6 +6,8 @@ module ThemeHelper
 
     locals = DefaultTemplates::CONTENT
 
+    locals[:header_image_url] = theme.header_images.first.file.url
+
     xid = 0
     [:blocks, :regions, :templates].each do |type|
       theme.send(type).each do |piece|
