@@ -34,7 +34,8 @@ class CustomizationParser
   def compile_templates(zipfile)
     @theme.templates.each do |template|
       zipfile.get_output_stream("#{template[:name]}.php") do |f|
-        f.puts render_template(template[:template], @base)
+        template = "<?php get_header(); ?>" + template[:template] + "<?php get_footer(); ?>"
+        f.puts render_template(template, @base)
       end
     end
   end
@@ -45,19 +46,18 @@ class CustomizationParser
 
   def compile_regions(zipfile)
     @theme.regions.each do |region|
-      region_id = region[:id]
-      region_type = region[:type]
-
-      region_identifier = region_type
-      region_identifier << "-#{region_id}" unless region_id.nil?
+      region_identifier = region[:type]
+      region_identifier << "-#{region[:id]}" unless region[:id].nil?
 
       filename = "#{region_identifier}.php"
       zipfile.get_output_stream("#{region_identifier}.php") do |f|
-        f.puts render_template(region[:template], @base)
-      end
+        template = region[:template]
 
-      php_function = "<?php get_#{region_type}(); ?>" # TODO: Add region id if one is given
-      @base[region_identifier] = php_function
+        template = CustomizationConstants::HEADER + template if 'header' == region[:type]
+        template = template + CustomizationConstants::FOOTER if 'footer' == region[:type]
+
+        f.puts render_template(template, @base)
+      end
     end
   end
 
