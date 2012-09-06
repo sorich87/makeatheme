@@ -9,10 +9,14 @@ class StaticThemeFile
   field :file_file_size,    :type => Integer
   field :file_updated_at,   :type => DateTime
 
-  belongs_to :theme_file_group
+  belongs_to :group, class_name: 'ThemeFileGroup'
   belongs_to :theme
 
-  validates_attachment_content_type :file, :content_type=>['image/jpeg', 'image/png', 'image/gif', 'text/css']
+  validates_attachment_content_type :file,
+    :content_type => ['image/jpeg', 'image/png', 'image/gif',
+                      'text/css', 'text/plain',
+                      'application/javascript', 'application/x-javascript', 'text/javascript',
+                      'application/ecmascript', 'text/ecmascript']
 
   def as_json(options={})
     {
@@ -20,11 +24,6 @@ class StaticThemeFile
       :url => self.file.url
     }
   end
-
-  def group
-    self.theme_file_group
-  end
-
 
   has_attached_file :file,
     fog_public: true, # For now
@@ -36,6 +35,6 @@ class StaticThemeFile
   end
 
   Paperclip.interpolates :group_id do |attachment, style|
-    attachment.instance.theme_file_group_id
+    attachment.instance.group_id
   end
 end

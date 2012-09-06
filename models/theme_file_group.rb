@@ -5,7 +5,7 @@ class ThemeFileGroup
 
   field :original_file_ids, type: Array
 
-  has_many :static_theme_files, :dependent => :destroy
+  has_many :static_theme_files, inverse_of: :group, :dependent => :destroy
   has_many :themes
 
   before_create :add_original_files

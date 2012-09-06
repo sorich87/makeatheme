@@ -95,18 +95,24 @@ class Theme
       theme.templates = parser.templates
       theme.regions = parser.regions
 
-      group = theme.build_theme_file_group
+      if theme.valid?
+        group = theme.build_theme_file_group
 
-      parser.static_files.each do |static_file|
-        group.static_theme_files.build(
-          :file_name => static_file[:filename],
-          :file => static_file[:tempfile],
-          :theme_id => theme.id
-        ).save
+        parser.static_files.each do |static_file|
+          static_file = StaticThemeFile.new(
+            :file_name => static_file[:filename],
+            :file => static_file[:tempfile]
+          )
+          # Pass invalid files
+          if static_file.valid?
+            group.static_theme_files << static_file
+            theme.static_theme_files << static_file
+            static_file.save
+          end
+        end
+
+        group.save
       end
-
-      group.save
-      theme.save
     ensure
       parser.static_files.each do |static_file|
         static_file[:tempfile].close
