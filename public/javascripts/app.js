@@ -1180,7 +1180,9 @@ window.require.define({"views/mutations": function(exports, require, module) {
           sandbox.body.innerHTML = sandbox.body.innerHTML + row.outerHTML;
         } else {
           nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
-          nextRow.parentNode.insertBefore(row, nextRow);
+          if (nextRow.parentNode) {
+            nextRow.parentNode.insertBefore(row, nextRow);
+          }
         }
       } else {
         sandbox.getElementById(grandParentNode.id).appendChild(row);
@@ -1215,7 +1217,9 @@ window.require.define({"views/mutations": function(exports, require, module) {
       // If parent node doesn't have anymore children, remove it
       // If not, simply remove the node
       if (oldParentNode.children.length === 0) {
-        parentNode.parentNode.removeChild(parentNode);
+        if (parentNode.parentNode) {
+          parentNode.parentNode.removeChild(parentNode);
+        }
       } else {
         parentNode.removeChild(sandbox.getElementById(node.id));
       }
