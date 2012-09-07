@@ -34,7 +34,7 @@ module.exports = View.extend({
     this.collection.reset(this.collection.models);
 
     // Load index template
-    this.loadTemplate(this.collection.getByName("index"));
+    this.loadTemplate(this.collection.getCurrent());
 
     return this;
   }
@@ -140,7 +140,8 @@ module.exports = View.extend({
 
     template = new Template(attributes);
     this.collection.add(template);
-    this.loadTemplate(template);
+    this.collection.setCurrent(template);
+    this.render();
 
     app.trigger("notification", "success", "The new template was created.");
   }
