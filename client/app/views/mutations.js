@@ -53,7 +53,7 @@ module.exports = View.extend({
   }
 
   , addNode: function (node) {
-    var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling;
+    var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling, templateClone;
 
     // copy of the node that will be inserted
     copy = node.cloneNode(true);
@@ -62,8 +62,14 @@ module.exports = View.extend({
 
     if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
       piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
+
+      piece.set("build", grandParentNode.outerHTML);
     } else {
       piece = app.templates.getCurrent();
+
+      templateClone = window.document.getElementById("page").cloneNode(true);
+      $(templateClone).children("header, footer").remove();
+      piece.set("build", templateClone.innerHTML);
     }
 
     sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
@@ -126,8 +132,14 @@ module.exports = View.extend({
     // If not, remove from template
     if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
       piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
+
+      piece.set("build", oldGrandParentNode.outerHTML);
     } else {
       piece = app.templates.getCurrent();
+
+      templateClone = window.document.getElementById("page").cloneNode(true);
+      $(templateClone).children("header, footer").remove();
+      piece.set("build", templateClone.innerHTML);
     }
 
     sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
