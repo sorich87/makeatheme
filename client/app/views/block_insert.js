@@ -11,8 +11,8 @@ module.exports = View.extend({
   , collection: app.blocks
 
   , events: {
-      "draginit #x-block-insert a": "dragInit"
-    , "dragend #x-block-insert a": "dragEnd"
+      "draginit #x-block-insert .x-drag": "dragInit"
+    , "dragend #x-block-insert .x-drag": "dragEnd"
   }
 
   , initialize: function () {
@@ -26,8 +26,8 @@ module.exports = View.extend({
   }
 
   , addOne: function (block) {
-    this.$("ul").append("<li><a href='#' data-cid='" + block.cid + "'>\
-                        <span>&Dagger;</span> " + block.label() + "</a></li>");
+    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>\
+                        <span>&Dagger;</span> " + block.label() + "</span></li>");
   }
 
   , addAll: function () {
