@@ -174,14 +174,14 @@ window.require.define({"collections/regions": function(exports, require, module)
   module.exports = Collection.extend({
       model: Region
 
-    // Get region by type and name. Use "default" if name not specified.
-    , getByTypeAndName: function (type, name) {
-      if (name === void 0) {
-        name = "default";
+    // Get region by name. Use "default" if slug not specified.
+    , getByName: function (name, slug) {
+      if (slug === void 0) {
+        slug = "default";
       }
 
       return this.find(function (region) {
-        return region.get("type") === type && region.get("name") === name;
+        return region.get("slug") === slug && region.get("name") === name;
       });
     }
   });
@@ -320,14 +320,14 @@ window.require.define({"models/region": function(exports, require, module) {
 
   module.exports = Model.extend({
     defaults: {
-        type: ""
+        slug: ""
       , name: ""
       , template: ""
     }
 
     , validate: function (attrs) {
-      if (["header", "footer"].indexOf(attrs.type) < 0) {
-        return "Region type must be header or footer.";
+      if (["header", "footer"].indexOf(attrs.name) < 0) {
+        return "Region must be header or footer.";
       }
     }
   });
@@ -647,7 +647,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       var attrs, regions, templates;
 
       regions = _.map(this.regions.models, function (region) {
-        return _.pick(region.attributes, "_id", "name", "type", "template");
+        return _.pick(region.attributes, "_id", "name", "slug", "template");
       });
 
       templates = _.map(this.templates.models, function (template) {
@@ -1111,7 +1111,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
       grandParentNode = node.parentNode.parentNode;
 
       if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-        piece = app.regions.getByTypeAndName(grandParentNode.tagName.toLowerCase());
+        piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
       } else {
         piece = app.templates.getCurrent();
       }
@@ -1175,7 +1175,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
       // If grandparent is header or footer, remove from corresponding region template.
       // If not, remove from template
       if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-        piece = app.regions.getByTypeAndName(oldGrandParentNode.tagName.toLowerCase());
+        piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
       } else {
         piece = app.templates.getCurrent();
       }
@@ -1395,8 +1395,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     , loadTemplate: function (template) {
       var header, footer;
 
-      header = app.regions.getByTypeAndName("header");
-      footer = app.regions.getByTypeAndName("footer");
+      header = app.regions.getByName("header");
+      footer = app.regions.getByName("footer");
 
       build = header.get("build") + template.get("build") + footer.get("build");
 

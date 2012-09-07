@@ -48,8 +48,8 @@ module.exports = View.extend({
   , loadTemplate: function (template) {
     var header, footer;
 
-    header = app.regions.getByTypeAndName("header");
-    footer = app.regions.getByTypeAndName("footer");
+    header = app.regions.getByName("header");
+    footer = app.regions.getByName("footer");
 
     build = header.get("build") + template.get("build") + footer.get("build");
 

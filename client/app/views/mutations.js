@@ -58,7 +58,7 @@ module.exports = View.extend({
     grandParentNode = node.parentNode.parentNode;
 
     if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-      piece = app.regions.getByTypeAndName(grandParentNode.tagName.toLowerCase());
+      piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
     } else {
       piece = app.templates.getCurrent();
     }
@@ -122,7 +122,7 @@ module.exports = View.extend({
     // If grandparent is header or footer, remove from corresponding region template.
     // If not, remove from template
     if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-      piece = app.regions.getByTypeAndName(oldGrandParentNode.tagName.toLowerCase());
+      piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
     } else {
       piece = app.templates.getCurrent();
     }

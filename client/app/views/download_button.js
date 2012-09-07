@@ -24,7 +24,7 @@ module.exports = View.extend({
     var attrs, regions, templates;
 
     regions = _.map(this.regions.models, function (region) {
-      return _.pick(region.attributes, "_id", "name", "type", "template");
+      return _.pick(region.attributes, "_id", "name", "slug", "template");
     });
 
     templates = _.map(this.templates.models, function (template) {

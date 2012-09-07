@@ -5,14 +5,14 @@ var Collection = require("collections/base/collection")
 module.exports = Collection.extend({
     model: Region
 
-  // Get region by type and name. Use "default" if name not specified.
-  , getByTypeAndName: function (type, name) {
-    if (name === void 0) {
-      name = "default";
+  // Get region by name. Use "default" if slug not specified.
+  , getByName: function (name, slug) {
+    if (slug === void 0) {
+      slug = "default";
     }
 
     return this.find(function (region) {
-      return region.get("type") === type && region.get("name") === name;
+      return region.get("slug") === slug && region.get("name") === name;
     });
   }
 });

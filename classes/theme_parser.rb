@@ -41,16 +41,15 @@ class ThemeParser
 
       if match = /\A(header|footer)(-)?(.*)/.match(template_name)
         if ['header', 'footer'].include?(template_name)
-          region_name = 'default'
+          region_slug = 'default'
         else
-          region_name = match[3]
+          region_slug = match[3]
         end
 
         @regions << {
-          :id => template_name,
-          :name => region_name,
+          :slug => region_slug,
           :template => file_content,
-          :type => get_region_type(template_name)
+          :name => get_region_name(template_name)
         }
       else
         @templates << {
@@ -89,7 +88,7 @@ class ThemeParser
     @static_files
   end
 
-  def get_region_type(filename)
+  def get_region_name(filename)
     match = /\A(header|footer)/.match(filename)
     match[1] if match
   end

@@ -47,15 +47,11 @@ class CustomizationParser
 
   def compile_regions(zipfile)
     @theme.regions.each do |region|
-      region_identifier = region[:type]
-      region_identifier << "-#{region[:id]}" unless region[:id].nil?
-
-      filename = "#{region_identifier}.php"
-      zipfile.get_output_stream("#{region_identifier}.php") do |f|
+      zipfile.get_output_stream(region.filename) do |f|
         template = region[:template]
 
-        template = CustomizationConstants::HEADER + template if 'header' == region[:type]
-        template = template + CustomizationConstants::FOOTER if 'footer' == region[:type]
+        template = CustomizationConstants::HEADER + template if 'header' == region[:name]
+        template = template + CustomizationConstants::FOOTER if 'footer' == region[:name]
 
         f.puts render_template(template, @base)
       end

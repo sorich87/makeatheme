@@ -23,7 +23,7 @@ module ThemeHelper
           piece[:template] = template.to_html
         end
 
-        local_name = if type == :regions then piece[:type] else piece[:name] end
+        local_name = piece[:name]
 
         locals[local_name] = piece[:build] = liquid(piece[:template], locals: locals)
 

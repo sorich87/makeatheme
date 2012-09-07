@@ -3,14 +3,14 @@ var Model = require("models/base/model");
 
 module.exports = Model.extend({
   defaults: {
-      type: ""
+      slug: ""
     , name: ""
     , template: ""
   }
 
   , validate: function (attrs) {
-    if (["header", "footer"].indexOf(attrs.type) < 0) {
-      return "Region type must be header or footer.";
+    if (["header", "footer"].indexOf(attrs.name) < 0) {
+      return "Region must be header or footer.";
     }
   }
 });
