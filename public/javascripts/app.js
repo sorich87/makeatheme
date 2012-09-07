@@ -1072,10 +1072,13 @@ window.require.define({"views/mutations": function(exports, require, module) {
     initialize: function () {
       _.bindAll(this, "observeMutations", "propagateMutations");
       window.addEventListener("DOMContentLoaded", this.observeMutations);
+
+      app.on("templateLoad", function () { this.observer.disconnect() }.bind(this));
+      app.on("templateLoaded", function () { this.observer.reconnect() }.bind(this));
     }
 
     , observeMutations: function () {
-      var observer = new MutationSummary({
+      this.observer = new MutationSummary({
           rootNode: $("body")[0]
         , queries: [{all: true}]
         , callback: this.propagateMutations
@@ -1408,6 +1411,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     , loadTemplate: function (template) {
       var header, footer;
 
+      app.trigger("templateLoad", template);
+
       header = app.regions.getByName("header");
       footer = app.regions.getByName("footer");
 
@@ -1417,7 +1422,7 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       this.collection.setCurrent(template);
 
-      app.trigger("templateLoaded", template.get("name"));
+      app.trigger("templateLoaded", template);
     }
   });
   

@@ -6,10 +6,13 @@ module.exports = View.extend({
   initialize: function () {
     _.bindAll(this, "observeMutations", "propagateMutations");
     window.addEventListener("DOMContentLoaded", this.observeMutations);
+
+    app.on("templateLoad", function () { this.observer.disconnect() }.bind(this));
+    app.on("templateLoaded", function () { this.observer.reconnect() }.bind(this));
   }
 
   , observeMutations: function () {
-    var observer = new MutationSummary({
+    this.observer = new MutationSummary({
         rootNode: $("body")[0]
       , queries: [{all: true}]
       , callback: this.propagateMutations
