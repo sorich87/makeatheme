@@ -1,19 +1,22 @@
 var View = require("views/base/view")
-  , app = require("application");
+  , app = require("application")
+  , Template = require("models/template")
+  , template = require("views/templates/templates");
 
 module.exports = View.extend({
-    el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
-          <p>Click to change</p>\
-          <ul></ul></div>")
+    id: "x-templates-select"
 
   , collection: app.templates
 
   , events: {
-      "change": "switchTemplate"
+      "change ul input": "switchTemplate"
     , "focus ul input": "highlightSelection"
     , "blur ul input": "highlightSelection"
     , "change ul input": "highlightSelection"
     , "click .x-remove": "removeTemplate"
+    , "click .x-new-template": "showForm"
+    , "change .x-new-template-select select": "selectTemplate"
+    , "click .x-new-template-add": "addTemplate"
   }
 
   , initialize: function (options) {
@@ -23,6 +26,12 @@ module.exports = View.extend({
   }
 
   , render: function () {
+    var standards = _.reject((new Template).standards, function (standard) {
+      return !!this.collection.getByName(standard.name);
+    }.bind(this));
+
+    this.$el.empty().append(template({standards: standards}));
+
     this.collection.reset(this.collection.models);
 
     // Load index template
@@ -34,7 +43,7 @@ module.exports = View.extend({
   , addOne: function (template) {
     var checked = current = "";
 
-    if (template.get("name") === "index") {
+    if (template.cid === this.collection.getCurrent().cid) {
       checked = " checked='checked'";
       current = " class='x-current'";
     }
@@ -91,5 +100,51 @@ module.exports = View.extend({
       var cid = $(e.currentTarget).parent().find("input").val();
       this.collection.remove(cid);
     }
+  }
+
+  , showForm: function (e) {
+    var $div = this.$(".x-new-template-select");
+
+    if ($div.is(":hidden")) {
+      $div.show("normal");
+    } else {
+      $div.hide("normal");
+    }
+  }
+
+  , selectTemplate: function (e) {
+    if ($(e.currentTarget).val() === "") {
+      this.$(".x-new-template-name").show();
+    } else {
+      this.$(".x-new-template-name").hide();
+    }
+  }
+
+  , addTemplate: function () {
+    var name, label, attributes, selection, template;
+
+    attributes = this.collection.getByName("index").attributes;
+    attributes = {
+        template: attributes.template
+      , build: attributes.build
+    };
+
+    if (selection = this.$(".x-new-template-select select").val()) {
+      attributes.name = selection;
+    } else {
+      attributes.label = this.$(".x-new-template-name").val();
+      attributes.name = attributes.label.toLowerCase().replace(/[^0-9A-Za-z]/, "-");
+    }
+
+    if (!attributes.name) {
+      app.trigger("notification", "error", "Please, enter a template name.");
+      return;
+    }
+
+    template = new Template(attributes);
+    this.collection.add(template);
+    this.loadTemplate(template);
+
+    app.trigger("notification", "success", "The new template was created.");
   }
 });

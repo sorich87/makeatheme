@@ -205,9 +205,15 @@ window.require.define({"collections/templates": function(exports, require, modul
 
     // Get template being edited
     , getCurrent: function () {
-      return this.find(function (template) {
+      var current = this.find(function (template) {
         return template.get("current") === true;
       });
+
+      if (! current) {
+        current = this.getByName("index");
+      }
+
+      return current;
     }
 
     // Save template being edited
@@ -346,19 +352,53 @@ window.require.define({"models/template": function(exports, require, module) {
     }
 
     , label: function () {
-      var labels = {
-          index: "Default"
-        , "front-page": "Front Page"
-        , home: "Blog"
-        , single: "Article"
-        , page: "Page"
-        , archive: "Archive"
-        , search: "Search Results"
-        , 404: "Error 404"
-      };
+      var label = this.get("label");
 
-      return labels[this.get("name")];
+      if (label = this.get("label")) {
+        return label;
+      }
+
+      for (i in this.standards) {
+        if (this.get("name") === this.standards[i].name) {
+          return this.standards[i].label;
+        }
+      }
     }
+
+    , standards: [
+        {
+          name: "index"
+        , label: "Default"
+      }
+      , {
+          name: "front-page"
+        , label: "Front Page"
+      }
+      , {
+          name: "home"
+        , label: "Blog"
+      }
+      , {
+          name: "single"
+        , label: "Article"
+      }
+      , {
+          name: "page"
+        , label: "Page"
+      }
+      , {
+          name: "archive"
+        , label: "Archive"
+      }
+      , {
+          name: "search"
+        , label: "Search Results"
+      }
+      , {
+          name: "404"
+        , label: "Error 404"
+      }
+    ]
   });
   
 }});
@@ -1378,21 +1418,24 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
 window.require.define({"views/templates": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application");
+    , app = require("application")
+    , Template = require("models/template")
+    , template = require("views/templates/templates");
 
   module.exports = View.extend({
-      el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
-            <p>Click to change</p>\
-            <ul></ul></div>")
+      id: "x-templates-select"
 
     , collection: app.templates
 
     , events: {
-        "change": "switchTemplate"
+        "change ul input": "switchTemplate"
       , "focus ul input": "highlightSelection"
       , "blur ul input": "highlightSelection"
       , "change ul input": "highlightSelection"
       , "click .x-remove": "removeTemplate"
+      , "click .x-new-template": "showForm"
+      , "change .x-new-template-select select": "selectTemplate"
+      , "click .x-new-template-add": "addTemplate"
     }
 
     , initialize: function (options) {
@@ -1402,6 +1445,12 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , render: function () {
+      var standards = _.reject((new Template).standards, function (standard) {
+        return !!this.collection.getByName(standard.name);
+      }.bind(this));
+
+      this.$el.empty().append(template({standards: standards}));
+
       this.collection.reset(this.collection.models);
 
       // Load index template
@@ -1413,7 +1462,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     , addOne: function (template) {
       var checked = current = "";
 
-      if (template.get("name") === "index") {
+      if (template.cid === this.collection.getCurrent().cid) {
         checked = " checked='checked'";
         current = " class='x-current'";
       }
@@ -1470,6 +1519,52 @@ window.require.define({"views/templates": function(exports, require, module) {
         var cid = $(e.currentTarget).parent().find("input").val();
         this.collection.remove(cid);
       }
+    }
+
+    , showForm: function (e) {
+      var $div = this.$(".x-new-template-select");
+
+      if ($div.is(":hidden")) {
+        $div.show("normal");
+      } else {
+        $div.hide("normal");
+      }
+    }
+
+    , selectTemplate: function (e) {
+      if ($(e.currentTarget).val() === "") {
+        this.$(".x-new-template-name").show();
+      } else {
+        this.$(".x-new-template-name").hide();
+      }
+    }
+
+    , addTemplate: function () {
+      var name, label, attributes, selection, template;
+
+      attributes = this.collection.getByName("index").attributes;
+      attributes = {
+          template: attributes.template
+        , build: attributes.build
+      };
+
+      if (selection = this.$(".x-new-template-select select").val()) {
+        attributes.name = selection;
+      } else {
+        attributes.label = this.$(".x-new-template-name").val();
+        attributes.name = attributes.label.toLowerCase().replace(/[^0-9A-Za-z]/, "-");
+      }
+
+      if (!attributes.name) {
+        app.trigger("notification", "error", "Please, enter a template name.");
+        return;
+      }
+
+      template = new Template(attributes);
+      this.collection.add(template);
+      this.loadTemplate(template);
+
+      app.trigger("notification", "success", "The new template was created.");
     }
   });
   
@@ -1582,6 +1677,41 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 
 
     return "<h4>Style</h4>\n<form>\n  <p class=\"x-choice\">\n    <label>Element</label>\n    <input type=\"text\" value=\"#content\" />\n    <select>\n      <option>whole element</option>\n      <option>paragraphs</option>\n      <option>tables</option>\n      <option>lists</option>\n    </select>\n  </p>\n\n  <div>\n    <h5><span>&darr;</span> Box</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Character</h5>\n\n    <p>\n      <label for=\"x-font-family\">Family</label>\n      <select id=\"x-font-family\">\n        <optgroup label=\"Serif\">\n          <option value='Georgia, serif'>Georgia</option>\n          <option value='\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif'>Palatino Linotype</option>\n          <option value='\"Times New Roman\", Times, serif'>Times New Roman</option>\n        </optgroup>\n        <optgroup label=\"Sans-Serif\">\n          <option value='Arial, sans-serif'>Arial</option>\n          <option value='\"Arial Black\", sans-serif'>Arial Black</option>\n          <option value='\"Comic Sans MS\", sans-serif'>Comic Sans MS</option>\n          <option value='Impact, Charcoal, sans-serif'>Impact</option>\n          <option value='\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif'>Lucida Sans Unicode</option>\n          <option value='Tahoma, Geneva, sans-serif'>Tahoma</option>\n          <option value='\"Trebuchet MS\", Helvetica, sans-serif'>Trebuchet MS</option>\n          <option value='Verdana, Geneva, sans-serif'>Verdana</option>\n        </optgroup>\n        <optgroup label=\"Monospace\">\n          <option value='\"Courier New\", Courier, monospace'>Courier New</option>\n          <option value='\"Lucida Console\", Monaco, monospace'>Lucida Console</option>\n        </optgroup>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-typeface\">Typeface</label>\n      <select id=\"x-font-typeface\">\n        <option value=\"regular\">Regular</option>\n        <option value=\"italic\">Italic</option>\n        <option value=\"bold\">Bold</option>\n        <option value=\"bold italic\">Bold Italic</option>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-size\">Size</label>\n      <input type=\"text\" id=\"x-font-size\" value=\"\" maxlength=\"2\" class=\"x-pixels\" /> px\n    </p>\n\n    <p>\n      <label for=\"x-font-color\">Color</label>\n      # <input type=\"text\" id=\"x-font-color\" value=\"\" maxlength=\"6\" class=\"x-color\" />\n    </p>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Text</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Background</h5>\n  </div>\n</form>\n";});
+}});
+
+window.require.define({"views/templates/templates": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <option value=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n      ";
+    return buffer;}
+
+    buffer += "<h4><label>Current Template</label></h4>\n<p>Click to change</p>\n<ul></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    foundHelper = helpers.standards;
+    stack1 = foundHelper || depth0.standards;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/theme": function(exports, require, module) {

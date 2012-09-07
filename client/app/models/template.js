@@ -9,17 +9,51 @@ module.exports = Model.extend({
   }
 
   , label: function () {
-    var labels = {
-        index: "Default"
-      , "front-page": "Front Page"
-      , home: "Blog"
-      , single: "Article"
-      , page: "Page"
-      , archive: "Archive"
-      , search: "Search Results"
-      , 404: "Error 404"
-    };
+    var label = this.get("label");
 
-    return labels[this.get("name")];
+    if (label = this.get("label")) {
+      return label;
+    }
+
+    for (i in this.standards) {
+      if (this.get("name") === this.standards[i].name) {
+        return this.standards[i].label;
+      }
+    }
   }
+
+  , standards: [
+      {
+        name: "index"
+      , label: "Default"
+    }
+    , {
+        name: "front-page"
+      , label: "Front Page"
+    }
+    , {
+        name: "home"
+      , label: "Blog"
+    }
+    , {
+        name: "single"
+      , label: "Article"
+    }
+    , {
+        name: "page"
+      , label: "Page"
+    }
+    , {
+        name: "archive"
+      , label: "Archive"
+    }
+    , {
+        name: "search"
+      , label: "Search Results"
+    }
+    , {
+        name: "404"
+      , label: "Error 404"
+    }
+  ]
 });

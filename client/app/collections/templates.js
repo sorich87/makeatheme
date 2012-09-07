@@ -14,9 +14,15 @@ module.exports = Collection.extend({
 
   // Get template being edited
   , getCurrent: function () {
-    return this.find(function (template) {
+    var current = this.find(function (template) {
       return template.get("current") === true;
     });
+
+    if (! current) {
+      current = this.getByName("index");
+    }
+
+    return current;
   }
 
   // Save template being edited
