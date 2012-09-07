@@ -6,7 +6,8 @@ module.exports = View.extend({
     id: "x-download-button"
 
   , events: {
-    "click button": "download"
+      "click button.x-download": "download"
+    , "click button.x-login": "login"
   }
 
   , initialize: function () {
@@ -15,9 +16,21 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    this.$el.empty().append("<button class='x-btn x-btn-success'>Download Theme</button>");
+    var button;
+
+    if (app.currentUser.id === void 0) {
+      button = "<button class='x-btn x-btn-success x-login'>Login to Download</button>";
+    } else {
+      button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
+    }
+
+    this.$el.empty().append(button);
 
     return this;
+  }
+
+  , login: function () {
+    window.top.Backbone.history.navigate("/login", true);
   }
 
   , download: function (e) {
