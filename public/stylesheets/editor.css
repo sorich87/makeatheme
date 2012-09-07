@@ -11,26 +11,29 @@
   margin-top: 9px;
   color: #1982d1;
 }
+.x-remove {
+  font-size: 12px;
+  line-height: 12px;
+  width: 12px;
+  height: 12px;
+  text-align: center;
+  color: #f00;
+  background-color: #ffffe0;
+  cursor: pointer;
+  display: block;
+}
 .columns .x-remove {
   position: absolute;
   right: 0;
   top: 0;
   display: none;
-  font-size: 14px;
-  line-height: 14px;
-  width: 16px;
-  height: 16px;
-  text-align: center;
-  color: #f00;
-  background-color: #ffffe0;
 }
 .columns.x-current .x-resize {
   display: block;
   cursor: col-resize;
 }
-.columns.x-current .x-remove {
+.x-current .x-remove {
   display: block;
-  cursor: pointer;
 }
 .columns.x-current a {
   cursor: move;
@@ -129,7 +132,7 @@
   margin: 0;
   padding: 10px;
 }
-#x-layout-editor li label,
+#x-layout-editor li,
 #x-block-insert .x-drag {
   display: block;
   background-color: #1982d1;
@@ -140,8 +143,12 @@
 }
 #x-layout-editor li label {
   cursor: pointer;
+  display: inline-block;
 }
-#x-layout-editor li.current label {
+#x-layout-editor li .x-remove {
+  float: right;
+}
+#x-layout-editor li.x-current {
   background-color: #5bb75b;
 }
 #x-layout-editor li input {

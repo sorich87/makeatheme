@@ -52,7 +52,7 @@ module.exports = View.extend({
     , "dragend .x-resize": "resizeEnd"
 
       // Remove column
-    , "click .x-remove": "removeColumn"
+    , "click .columns .x-remove": "removeColumn"
   }
 
   , preventDefault: function (e) {

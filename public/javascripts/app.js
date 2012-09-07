@@ -829,7 +829,7 @@ window.require.define({"views/layout": function(exports, require, module) {
       , "dragend .x-resize": "resizeEnd"
 
         // Remove column
-      , "click .x-remove": "removeColumn"
+      , "click .columns .x-remove": "removeColumn"
     }
 
     , preventDefault: function (e) {
@@ -1392,11 +1392,13 @@ window.require.define({"views/templates": function(exports, require, module) {
       , "focus ul input": "highlightSelection"
       , "blur ul input": "highlightSelection"
       , "change ul input": "highlightSelection"
+      , "click .x-remove": "removeTemplate"
     }
 
     , initialize: function (options) {
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
+      this.collection.on("remove", this.removeOne, this);
     }
 
     , render: function () {
@@ -1413,12 +1415,12 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       if (template.get("name") === "index") {
         checked = " checked='checked'";
-        current = " class='current'";
+        current = " class='x-current'";
       }
 
       this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
                           + " type='radio' value='" + template.cid + "' />"
-                          + template.label() + "</label></li>");
+                          + template.label() + "</label><span class='x-remove' title='Delete template'>&times;</span></li>");
     }
 
     , addAll: function () {
@@ -1427,6 +1429,10 @@ window.require.define({"views/templates": function(exports, require, module) {
       _.each(this.collection.models, function (template) {
         this.addOne(template);
       }, this);
+    }
+
+    , removeOne: function (template) {
+      this.$("input[value='" + template.cid + "']").closest("li").remove();
     }
 
     , switchTemplate: function () {
@@ -1454,8 +1460,16 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , highlightSelection: function () {
-      this.$("ul li").removeClass("current");
-      this.$("ul input:checked").parents("li").addClass("current");
+      this.$("ul li").removeClass("x-current");
+      this.$("ul input:checked").closest("li").addClass("x-current");
+    }
+
+    // Remove column if confirmed.
+    , removeTemplate: function (e) {
+      if (confirm("Are you sure you want to delete this template?")) {
+        var cid = $(e.currentTarget).parent().find("input").val();
+        this.collection.remove(cid);
+      }
     }
   });
   
