@@ -108,15 +108,13 @@
 #x-layout-editor p {
   margin: 0;
 }
-#x-layout-editor label {
-  font-weight: 500;
-}
-#x-layout-editor select,
-input {
-  width: 100%;
-}
 #x-layout-editor input {
   padding: 0 3px;
+}
+#x-layout-editor ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 #x-layout-editor .x-pixels {
   width: 26px;
@@ -131,11 +129,7 @@ input {
   margin: 0;
   padding: 10px;
 }
-#x-block-insert ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+#x-layout-editor li label,
 #x-block-insert a {
   display: block;
   background-color: #1982d1;
@@ -143,6 +137,17 @@ input {
   text-decoration: none;
   margin: 1px;
   padding: 2px;
+}
+#x-layout-editor li label {
+  cursor: pointer;
+}
+#x-layout-editor li.current label {
+  background-color: #5bb75b;
+}
+#x-layout-editor li input {
+  margin: 0 10px;
+}
+#x-block-insert a {
   cursor: move;
 }
 #x-block-insert a span {

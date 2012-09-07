@@ -1382,12 +1382,16 @@ window.require.define({"views/templates": function(exports, require, module) {
 
   module.exports = View.extend({
       el: $("<div id='x-templates-select'><h4><label>Current Template</label></h4>\
-            <form><select></select></form></div>")
+            <p>Click to change</p>\
+            <ul></ul></div>")
 
     , collection: app.templates
 
     , events: {
-      "change": "switchTemplate"
+        "change": "switchTemplate"
+      , "focus ul input": "highlightSelection"
+      , "blur ul input": "highlightSelection"
+      , "change ul input": "highlightSelection"
     }
 
     , initialize: function (options) {
@@ -1405,12 +1409,20 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , addOne: function (template) {
-      this.$("select").append("<option value='" + template.cid + "'>"
-                      + template.label() + "</option>");
+      var checked = current = "";
+
+      if (template.get("name") === "index") {
+        checked = " checked='checked'";
+        current = " class='current'";
+      }
+
+      this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
+                          + " type='radio' value='" + template.cid + "' />"
+                          + template.label() + "</label></li>");
     }
 
     , addAll: function () {
-      this.$("select").empty();
+      this.$("ul").empty();
 
       _.each(this.collection.models, function (template) {
         this.addOne(template);
@@ -1418,7 +1430,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , switchTemplate: function () {
-      var template = this.collection.getByCid(this.$("select").val());
+      var template = this.collection.getByCid(this.$("ul input:checked").val());
 
       this.loadTemplate(template);
     }
@@ -1439,6 +1451,11 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.collection.setCurrent(template);
 
       app.trigger("templateLoaded", template);
+    }
+
+    , highlightSelection: function () {
+      this.$("ul li").removeClass("current");
+      this.$("ul input:checked").parents("li").addClass("current");
     }
   });
   
