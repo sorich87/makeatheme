@@ -1429,9 +1429,8 @@ window.require.define({"views/templates": function(exports, require, module) {
 
     , events: {
         "change ul input": "switchTemplate"
-      , "focus ul input": "highlightSelection"
-      , "blur ul input": "highlightSelection"
-      , "change ul input": "highlightSelection"
+      , "focus ul input": "switchTemplate"
+      , "blur ul input": "switchTemplate"
       , "click .x-remove": "removeTemplate"
       , "click .x-new-template": "showForm"
       , "change .x-new-template-select select": "selectTemplate"
@@ -1487,6 +1486,9 @@ window.require.define({"views/templates": function(exports, require, module) {
     , switchTemplate: function () {
       var template = this.collection.getByCid(this.$("ul input:checked").val());
 
+      this.$("ul li").removeClass("x-current");
+      this.$("ul input:checked").closest("li").addClass("x-current");
+
       this.loadTemplate(template);
     }
 
@@ -1501,16 +1503,11 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       build = header.get("build") + template.get("build") + footer.get("build");
 
-      $("#page").empty().append(build);
+      $("#page").fadeOut().empty().append(build).fadeIn();
 
       this.collection.setCurrent(template);
 
       app.trigger("templateLoaded", template);
-    }
-
-    , highlightSelection: function () {
-      this.$("ul li").removeClass("x-current");
-      this.$("ul input:checked").closest("li").addClass("x-current");
     }
 
     // Remove column if confirmed.
