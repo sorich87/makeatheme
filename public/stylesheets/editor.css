@@ -78,6 +78,9 @@
   padding: 2px 2px 2px 10px;
   cursor: move;
 }
+#x-layout-editor .x-handle span {
+  margin-left: 10px;
+}
 #x-layout-editor h4 {
   font-weight: bold;
   font-size: 1.1em;

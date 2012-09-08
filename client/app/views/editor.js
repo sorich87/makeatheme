@@ -23,7 +23,11 @@ module.exports = View.extend({
   , render: function () {
     var templatesView = app.reuseView("templates");
 
-    this.$el.append(templatesView.$el);
+    this.$el
+      .children(".x-handle")
+        .append("<span>Theme: " + app.data.theme.name + "</span>")
+        .end()
+      .append(templatesView.$el);
 
     // Reset template select events
     templatesView.delegateEvents();
