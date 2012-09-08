@@ -43,7 +43,6 @@ require 'store_user'
 
 # Classes
 require 'defaults'
-require 'customization_parser'
 
 # Helpers
 require 'application_helper'

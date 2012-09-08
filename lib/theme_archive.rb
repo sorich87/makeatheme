@@ -1,35 +1,35 @@
 require 'zip/zip'
 
-class CustomizationParser
-  def self.parse(json_string)
-    self.new(json_string)
-  end
-
+class ThemeArchive
   def initialize(theme)
     @theme = theme
 
     @base = {}
+    @base.merge!(Defaults::PHP::CONTENT)
 
-    merge_constants
-
-    @zipfile_name = File.expand_path(File.join(Dir.mktmpdir, "./#{@theme.path}.zip"))
+    @path = File.join(Dir.mktmpdir, "./#{@theme.path}.zip")
 
     create_zip
   end
 
   def create_zip
-    if File.exists?(@zipfile_name)
-      File.delete(@zipfile_name)
+    if File.exists?(@path)
+      File.delete(@path)
     end
 
-    folder_in_zip = "#{@theme.path}/"
-
-    Zip::ZipFile.open(@zipfile_name, Zip::ZipFile::CREATE) do |zipfile|
+    Zip::ZipFile.open(@path, Zip::ZipFile::CREATE) do |zipfile|
       compile_regions(zipfile)
       compile_templates(zipfile)
       compile_static_files(zipfile)
     end
   end
+
+  def path
+    @path
+  end
+
+
+  private
 
   def compile_templates(zipfile)
     @theme.templates.each do |template|
@@ -38,10 +38,6 @@ class CustomizationParser
         f.puts render_template(template, @base)
       end
     end
-  end
-
-  def zipfile_path
-    @zipfile_name
   end
 
   def compile_regions(zipfile)
@@ -64,12 +60,6 @@ class CustomizationParser
       end
     end
   end
-
-  def merge_constants
-    @base.merge!(Defaults::PHP::CONTENT)
-  end
-
-  private
 
   def render_template(template, locals)
     # Hash keys should be strings only

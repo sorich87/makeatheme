@@ -32,8 +32,7 @@ put '/themes/:id' do
   theme.templates = params['templates'].map { |template| Template.new(template) }
 
   if theme.valid?
-    cs = CustomizationParser.parse(theme)
-    theme.archive = File.new(cs.zipfile_path)
+    theme.regenerate_archive
     theme.save
     status 201
     respond_with theme

@@ -2,6 +2,7 @@ require 'paperclip'
 require 'fog'
 require 'theme_file_group'
 require 'theme_parser'
+require 'theme_archive'
 require 'static_theme_file'
 require 'set'
 require 'region'
@@ -165,6 +166,10 @@ class Theme
   # Header images
   def header_images
     self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+  end
+
+  def regenerate_archive
+    File.open(ThemeArchive.new(self).path) { |file| archive = file }
   end
 end
 
