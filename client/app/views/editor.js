@@ -24,7 +24,7 @@ module.exports = View.extend({
     var templatesView = app.reuseView("templates");
 
     this.$el
-      .children(".x-handle")
+      .children(".x-handle").empty()
         .append("<span>Theme: " + app.data.theme.name + "</span>")
         .end()
       .append(templatesView.$el);

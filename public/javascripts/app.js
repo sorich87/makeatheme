@@ -775,7 +775,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       var templatesView = app.reuseView("templates");
 
       this.$el
-        .children(".x-handle")
+        .children(".x-handle").empty()
           .append("<span>Theme: " + app.data.theme.name + "</span>")
           .end()
         .append(templatesView.$el);
@@ -1468,16 +1468,20 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , addOne: function (template) {
-      var checked = current = "";
+      var checked = current = remove = "";
 
       if (template.cid === this.collection.getCurrent().cid) {
         checked = " checked='checked'";
         current = " class='x-current'";
       }
 
+      if (template.get("name") != "index") {
+        remove = "<span class='x-remove' title='Delete template'>&times;</span>";
+      }
+
       this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
                           + " type='radio' value='" + template.cid + "' />"
-                          + template.label() + "</label><span class='x-remove' title='Delete template'>&times;</span></li>");
+                          + template.label() + "</label>" + remove + "</li>");
     }
 
     , addAll: function () {

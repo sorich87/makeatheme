@@ -40,16 +40,20 @@ module.exports = View.extend({
   }
 
   , addOne: function (template) {
-    var checked = current = "";
+    var checked = current = remove = "";
 
     if (template.cid === this.collection.getCurrent().cid) {
       checked = " checked='checked'";
       current = " class='x-current'";
     }
 
+    if (template.get("name") != "index") {
+      remove = "<span class='x-remove' title='Delete template'>&times;</span>";
+    }
+
     this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
                         + " type='radio' value='" + template.cid + "' />"
-                        + template.label() + "</label><span class='x-remove' title='Delete template'>&times;</span></li>");
+                        + template.label() + "</label>" + remove + "</li>");
   }
 
   , addAll: function () {
