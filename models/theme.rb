@@ -1,7 +1,7 @@
 require 'paperclip'
 require 'fog'
 require 'theme_file_group'
-require 'theme_parser'
+require 'theme_import'
 require 'theme_archive'
 require 'static_theme_file'
 require 'set'
@@ -13,6 +13,7 @@ class Theme
   include Mongoid::Timestamps
   include Paperclip::Glue
   include ThemeArchive
+  extend ThemeImport
 
   paginates_per 16
 
@@ -85,44 +86,6 @@ class Theme
       :screenshot_uri => self.screenshot.url,
       :archive => if self.archive.file? then self.archive.expiring_url else nil end
     }
-  end
-
-  # TODO: Add validations & error handling
-  def self.create_from_zip(zip_file, attributes = {})
-    theme = Theme.new(attributes)
-
-    begin
-      parser = ThemeParser.parse(zip_file)
-
-      theme.templates = parser.templates
-      theme.regions = parser.regions
-
-      if theme.valid?
-        group = theme.build_theme_file_group
-
-        parser.static_files.each do |static_file|
-          static_file = StaticThemeFile.new(
-            :file_name => static_file[:filename],
-            :file => static_file[:tempfile]
-          )
-          # Pass invalid files
-          if static_file.valid?
-            group.static_theme_files << static_file
-            theme.static_theme_files << static_file
-            static_file.save
-          end
-        end
-
-        group.save
-      end
-    ensure
-      parser.static_files.each do |static_file|
-        static_file[:tempfile].close
-        File.unlink(static_file[:tempfile])
-      end
-    end
-
-    return theme
   end
 
   def fork(attributes={})

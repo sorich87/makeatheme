@@ -30,7 +30,7 @@ Theme.all.each {|t| t.destroy }
 
 attrs.each do |theme_attr|
   next if Theme.where(theme_attr).first
-  t = Theme.create_from_zip(fixture_file, theme_attr)
+  t = Theme.new_from_zip(fixture_file, theme_attr)
 
   if t.valid?
     t.save

@@ -56,7 +56,7 @@ post '/themes' do
     author: current_user
   }.merge(params.slice('name', 'description', 'tags'))
 
-  theme = Theme.create_from_zip(file[:tempfile], attributes)
+  theme = Theme.new_from_zip(file[:tempfile], attributes)
 
   if theme.valid?
     theme.save
