@@ -4,7 +4,7 @@ module ThemeHelper
   def theme_pieces(theme, ensure_id = false)
     pieces = Hash[:blocks, [], :regions, [], :templates, []]
 
-    locals = DefaultTemplates::CONTENT
+    locals = Defaults::HTML::CONTENT
 
     locals[:header_image_url] = theme.header_images.first.file.url
 

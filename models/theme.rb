@@ -57,7 +57,7 @@ class Theme
 
   # Return blocks to insert in the templates
   def blocks
-    DefaultTemplates::BLOCKS.map do |name, template|
+    Defaults::HTML::BLOCKS.map do |name, template|
       {
         name: name.to_s,
         template: template

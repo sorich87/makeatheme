@@ -42,8 +42,8 @@ require 'theme'
 require 'store_user'
 
 # Classes
+require 'defaults'
 require 'customization_parser'
-require 'default_templates'
 
 # Helpers
 require 'application_helper'

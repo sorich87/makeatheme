@@ -1,5 +1,4 @@
 require 'zip/zip'
-require 'classes/customization_constants'
 
 class CustomizationParser
   def self.parse(json_string)
@@ -50,8 +49,8 @@ class CustomizationParser
       zipfile.get_output_stream(region.filename) do |f|
         template = region[:template]
 
-        template = CustomizationConstants::HEADER + template if 'header' == region[:name]
-        template = template + CustomizationConstants::FOOTER if 'footer' == region[:name]
+        template = Defaults::PHP::REGIONS[:header] + template if 'header' == region[:name]
+        template = template + Defaults::PHP::REGIONS[:footer] if 'footer' == region[:name]
 
         f.puts render_template(template, @base)
       end
@@ -67,7 +66,7 @@ class CustomizationParser
   end
 
   def merge_constants
-    @base.merge!(CustomizationConstants::CONSTANTS)
+    @base.merge!(Defaults::PHP::CONTENT)
   end
 
   private
