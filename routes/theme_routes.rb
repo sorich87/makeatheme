@@ -32,7 +32,7 @@ put '/themes/:id' do
   theme.templates = params['templates'].map { |template| Template.new(template) }
 
   if theme.valid?
-    theme.regenerate_archive
+    theme.generate_archive
     theme.save
     status 201
     respond_with theme

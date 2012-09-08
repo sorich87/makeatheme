@@ -12,6 +12,7 @@ class Theme
   include Mongoid::Document
   include Mongoid::Timestamps
   include Paperclip::Glue
+  include ThemeArchive
 
   paginates_per 16
 
@@ -166,10 +167,6 @@ class Theme
   # Header images
   def header_images
     self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
-  end
-
-  def regenerate_archive
-    File.open(ThemeArchive.new(self).path) { |file| archive = file }
   end
 end
 
