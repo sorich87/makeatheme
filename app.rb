@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'classes'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'models'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'helpers'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'routes'))
