@@ -4996,6 +4996,9 @@ body.theme #main iframe {
   width: 100%;
   position: absolute;
 }
+#download-iframe {
+  visibility: hidden;
+}
 /* Not found */
 #not-found {
   text-align: center;

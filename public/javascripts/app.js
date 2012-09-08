@@ -725,7 +725,7 @@ window.require.define({"views/download_button": function(exports, require, modul
           var $iframe = $("#download-iframe", window.top.document);
 
           if ($iframe.length === 0) {
-            $iframe = $("<iframe id='#download-iframe' src='" + theme.get("archive") + "'></iframe>")
+            $iframe = $("<iframe id='download-iframe' width='0' height='0' src='" + theme.get("archive") + "'></iframe>")
               .appendTo($("body", window.top.document));
           } else {
             $iframe.attr("src", theme.get("archive"));
