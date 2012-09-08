@@ -34,6 +34,11 @@ module.exports = Backbone.Router.extend({
   }
 
   , editor: function (id) {
+    if (app.data.theme === void 0) {
+      window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+      return;
+    }
+
     // Initialize editor view
     app.createView("editor").render();
 
