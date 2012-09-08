@@ -3,7 +3,7 @@ require 'zip/zip'
 module ThemeArchive
 
   def generate_archive
-    File.open(Archive.new(self).path) { |file| archive = file }
+    File.open(Archive.new(self).path) { |file| self.archive = file }
   end
 
   class Archive
