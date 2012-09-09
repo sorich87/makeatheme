@@ -57,7 +57,7 @@ module Defaults
 </article>),
 
       sidebar: %q(<aside class="widget widget_search">
-  <form method="get" id="searchform" action="http://localhost.dev/~sorich87/wordpress/">
+  <form method="get" id="searchform">
     <label for="s" class="assistive-text">Search</label>
     <input type="text" class="field" name="s" id="s" placeholder="Search" />
     <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
@@ -66,30 +66,36 @@ module Defaults
 <aside id="recent-posts-2" class="widget widget_recent_entries">
   <h3 class="widget-title">Recent Posts</h3>
   <ul>
-    <li><a href="http://localhost.dev/~sorich87/wordpress/2012/05/hello-world/" title="Hello world!">Hello world!</a></li>
+    <li><a href="" title="Hello world!">Hello world!</a></li>
   </ul>
 </aside>
 <aside class="widget widget_recent_comments">
   <h3 class="widget-title">Recent Comments</h3>
   <ul id="recentcomments">
-    <li class="recentcomments"><a href='http://wordpress.org/' rel='external nofollow' class='url'>Mr WordPress</a> on <a href="http://localhost.dev/~sorich87/wordpress/2012/05/hello-world/#comment-1">Hello world!</a></li></ul></aside><aside id="archives-2" class="widget widget_archive"><h3 class="widget-title">Archives</h3>		<ul>
-    <li><a href='http://localhost.dev/~sorich87/wordpress/2012/05/' title='May 2012'>May 2012</a></li>
+    <li class="recentcomments"><a href='' rel='external nofollow' class='url'>Mr WordPress</a> on <a href="">Hello world!</a></li>
+  </ul>
+</aside>
+<aside id="archives-2" class="widget widget_archive">
+  <h3 class="widget-title">Archives</h3>
+  <ul>
+    <li><a href='' title='May 2012'>May 2012</a></li>
   </ul>
 </aside>
 <aside class="widget widget_categories">
   <h3 class="widget-title">Categories</h3>
   <ul>
-    <li class="cat-item cat-item-1"><a href="http://localhost.dev/~sorich87/wordpress/category/uncategorized/" title="View all posts filed under Uncategorized">Uncategorized</a>
+    <li class="cat-item cat-item-1"><a href="" title="View all posts filed under Uncategorized">Uncategorized</a>
     </li>
   </ul>
 </aside>
 <aside class="widget widget_meta">
   <h3 class="widget-title">Meta</h3>
   <ul>
-    <li><a href="http://localhost.dev/~sorich87/wordpress/wp-admin/">Site Admin</a></li>			<li><a href="http://localhost.dev/~sorich87/wordpress/wp-login.php?action=logout&#038;_wpnonce=ddb0c652c9">Log out</a></li>
-    <li><a href="http://localhost.dev/~sorich87/wordpress/feed/" title="Syndicate this site using RSS 2.0">Entries <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-    <li><a href="http://localhost.dev/~sorich87/wordpress/comments/feed/" title="The latest comments to all posts in RSS">Comments <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-    <li><a href="http://wordpress.org/" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>
+    <li><a href="">Site Admin</a></li>
+    <li><a href="">Log out</a></li>
+    <li><a href="" title="Syndicate this site using RSS 2.0">Entries <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+    <li><a href="" title="The latest comments to all posts in RSS">Comments <abbr title="Really Simple Syndication">RSS</abbr></a></li>
+    <li><a href="" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>
   </ul>
 </aside>)
     }
