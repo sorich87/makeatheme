@@ -36,6 +36,8 @@ module.exports = View.extend({
   , download: function (e) {
     var attrs, regions, templates;
 
+    app.trigger("download:before");
+
     regions = _.map(this.regions.models, function (region) {
       return _.pick(region.attributes, "_id", "name", "slug", "template");
     });
@@ -66,6 +68,8 @@ module.exports = View.extend({
         e.target.removeAttribute("disabled");
         e.target.innerHTML = "Download Theme";
 
+        app.trigger("download:after");
+
         window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }
       , error: function (theme, response) {
@@ -73,6 +77,8 @@ module.exports = View.extend({
 
         e.target.removeAttribute("disabled");
         e.target.innerHTML = "Download Theme";
+
+        app.trigger("download:error");
       }
     });
   }

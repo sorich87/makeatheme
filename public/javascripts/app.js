@@ -704,6 +704,8 @@ window.require.define({"views/download_button": function(exports, require, modul
     , download: function (e) {
       var attrs, regions, templates;
 
+      app.trigger("download:before");
+
       regions = _.map(this.regions.models, function (region) {
         return _.pick(region.attributes, "_id", "name", "slug", "template");
       });
@@ -734,6 +736,8 @@ window.require.define({"views/download_button": function(exports, require, modul
           e.target.removeAttribute("disabled");
           e.target.innerHTML = "Download Theme";
 
+          app.trigger("download:after");
+
           window.top.Backbone.history.navigate("/themes/" + theme.id, true);
         }
         , error: function (theme, response) {
@@ -741,6 +745,8 @@ window.require.define({"views/download_button": function(exports, require, modul
 
           e.target.removeAttribute("disabled");
           e.target.innerHTML = "Download Theme";
+
+          app.trigger("download:error");
         }
       });
     }
@@ -812,7 +818,8 @@ window.require.define({"views/faq": function(exports, require, module) {
 
 window.require.define({"views/layout": function(exports, require, module) {
   var totalColumnsWidth, isRowFull
-    , View = require("views/base/view");
+    , View = require("views/base/view")
+    , app = require("application");
 
   // Return total width of all columns children of a row
   // except the one being dragged
@@ -850,6 +857,9 @@ window.require.define({"views/layout": function(exports, require, module) {
         // Links and images in columns shoulnd't be draggable
       , "mousedown .columns a, .columns img": "preventDefault"
 
+        // Forms shouldn't be submittable
+      , "submit .columns form": "preventDefault"
+
         // Drag
       , "draginit .columns": "dragInit"
       , "dragend .columns": "dragEnd"
@@ -866,6 +876,23 @@ window.require.define({"views/layout": function(exports, require, module) {
 
         // Remove column
       , "click .columns .x-remove": "removeColumn"
+    }
+
+    , initialize: function () {
+      _.bindAll(this, "addDataBypass", "removeDataBypass");
+
+      this.addDataBypass();
+      app.on("download:before", this.removeDataBypass);
+      app.on("download:after", this.addDataBypass);
+      app.on("download:error", this.addDataBypass);
+    }
+
+    , removeDataBypass: function () {
+      this.$(".columns a").removeAttr("data-bypass");
+    }
+
+    , addDataBypass: function () {
+      this.$(".columns a").attr("data-bypass", true);
     }
 
     , preventDefault: function (e) {

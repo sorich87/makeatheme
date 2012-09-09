@@ -1,5 +1,6 @@
 var totalColumnsWidth, isRowFull
-  , View = require("views/base/view");
+  , View = require("views/base/view")
+  , app = require("application");
 
 // Return total width of all columns children of a row
 // except the one being dragged
@@ -37,6 +38,9 @@ module.exports = View.extend({
       // Links and images in columns shoulnd't be draggable
     , "mousedown .columns a, .columns img": "preventDefault"
 
+      // Forms shouldn't be submittable
+    , "submit .columns form": "preventDefault"
+
       // Drag
     , "draginit .columns": "dragInit"
     , "dragend .columns": "dragEnd"
@@ -53,6 +57,23 @@ module.exports = View.extend({
 
       // Remove column
     , "click .columns .x-remove": "removeColumn"
+  }
+
+  , initialize: function () {
+    _.bindAll(this, "addDataBypass", "removeDataBypass");
+
+    this.addDataBypass();
+    app.on("download:before", this.removeDataBypass);
+    app.on("download:after", this.addDataBypass);
+    app.on("download:error", this.addDataBypass);
+  }
+
+  , removeDataBypass: function () {
+    this.$(".columns a").removeAttr("data-bypass");
+  }
+
+  , addDataBypass: function () {
+    this.$(".columns a").attr("data-bypass", true);
   }
 
   , preventDefault: function (e) {
