@@ -1520,6 +1520,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     , loadTemplate: function (template) {
       var header, footer;
 
+      app.trigger("templateLoad", template);
+
       header = app.regions.getByName("header");
       footer = app.regions.getByName("footer");
 
@@ -1528,6 +1530,8 @@ window.require.define({"views/templates": function(exports, require, module) {
       $("#page").fadeOut().empty().append(build).fadeIn();
 
       this.collection.setCurrent(template);
+
+      app.trigger("templateLoaded", template);
     }
 
     // Remove column if confirmed.

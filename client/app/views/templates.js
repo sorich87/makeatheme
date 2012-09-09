@@ -78,6 +78,8 @@ module.exports = View.extend({
   , loadTemplate: function (template) {
     var header, footer;
 
+    app.trigger("templateLoad", template);
+
     header = app.regions.getByName("header");
     footer = app.regions.getByName("footer");
 
@@ -86,6 +88,8 @@ module.exports = View.extend({
     $("#page").fadeOut().empty().append(build).fadeIn();
 
     this.collection.setCurrent(template);
+
+    app.trigger("templateLoaded", template);
   }
 
   // Remove column if confirmed.
