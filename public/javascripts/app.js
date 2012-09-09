@@ -762,26 +762,13 @@ window.require.define({"views/editor": function(exports, require, module) {
       , "dragmove #x-layout-editor .x-handle": "dragMove"
     }
 
-    , initialize: function () {
-      app.createView("templates").render();
-
-      _.bindAll(this, "render");
-
-      app.on("templateLoaded", this.render);
-    }
-
     // Show editor when "templateLoaded" event is triggered
     , render: function () {
-      var templatesView = app.reuseView("templates");
-
       this.$el
         .children(".x-handle").empty()
           .append("<span>Theme: " + app.data.theme.name + "</span>")
           .end()
-        .append(templatesView.$el);
-
-      // Reset template select events
-      templatesView.delegateEvents();
+        .append(app.reuseView("templates").render().$el);
 
       if (app.data.preview_only !== true) {
         this.$el
@@ -1461,9 +1448,6 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       this.collection.reset(this.collection.models);
 
-      // Load index template
-      this.loadTemplate(this.collection.getCurrent());
-
       return this;
     }
 
@@ -1509,8 +1493,6 @@ window.require.define({"views/templates": function(exports, require, module) {
     , loadTemplate: function (template) {
       var header, footer;
 
-      app.trigger("templateLoad", template);
-
       header = app.regions.getByName("header");
       footer = app.regions.getByName("footer");
 
@@ -1519,8 +1501,6 @@ window.require.define({"views/templates": function(exports, require, module) {
       $("#page").fadeOut().empty().append(build).fadeIn();
 
       this.collection.setCurrent(template);
-
-      app.trigger("templateLoaded", template);
     }
 
     // Remove column if confirmed.
