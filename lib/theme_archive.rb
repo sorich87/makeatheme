@@ -43,7 +43,7 @@ module ThemeArchive
           if header == 'default'
             header = '<?php get_header(); ?>'
           else
-            header "<?php get_header('#{template[:regions][:header]}'); ?>"
+            header = "<?php get_header('#{template[:regions][:header]}'); ?>"
           end
 
           if footer == 'default'
