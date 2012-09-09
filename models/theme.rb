@@ -46,9 +46,10 @@ class Theme
   has_many :static_theme_files
 
   has_attached_file :screenshot,
-    styles: { thumb: '320x240>' },
+    styles: { thumb: '300x225#' },
+    :convert_options => { :thumb => '-strip' },
     fog_public: true,
-    path: 'themes/:id/screenshot/:style.:filename'
+    path: 'themes/:id/screenshot/:basename-:style.:extension'
 
   has_attached_file :archive,
     fog_public: false,
@@ -83,7 +84,7 @@ class Theme
       :_id => self._id,
       :name => self.name,
       :author => self.author.to_fullname,
-      :screenshot_uri => self.screenshot.url,
+      :screenshot_uri => self.screenshot.url(:thumb),
       :archive => if self.archive.file? then self.archive.expiring_url else nil end
     }
   end

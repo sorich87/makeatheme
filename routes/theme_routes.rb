@@ -34,6 +34,10 @@ put '/themes/:id' do
   if theme.valid?
     theme.generate_archive
     theme.save
+
+    # Generate screenshot. Should be later moved to a background job.
+    open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+
     status 201
     respond_with theme
   else
@@ -60,6 +64,10 @@ post '/themes' do
 
   if theme.valid?
     theme.save
+
+    # Generate screenshot. Should be later moved to a background job.
+    open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+
     status 201
     respond_with theme
   else
@@ -79,12 +87,47 @@ get '/editor/:theme', provides: 'html' do
 
   preview_only = theme.preview_only?(current_user)
 
-  ensure_id = !preview_only
+  pieces = theme_pieces(theme, !preview_only)
+
+  header = pieces[:regions].select { |r|
+    r[:name] == 'header' && r[:slug] == 'default'
+  }[0]
+
+  footer = pieces[:regions].select { |r|
+    r[:name] == 'footer' && r[:slug] == 'default'
+  }[0]
+
+  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
+  template = header[:build] + index[:build] + footer[:build]
 
   respond_with :editor,
     theme: theme.to_json,
-    pieces: theme_pieces(theme, ensure_id).to_json,
+    pieces: pieces.to_json,
     static_files_dir: theme.static_files_dir,
-    preview_only: preview_only
+    preview_only: preview_only,
+    template: template
+end
+
+get '/screenshot/:theme', provides: 'html' do
+  theme = Theme.find(params[:theme])
+
+  halt 404 unless theme
+
+  script = File.join(settings.root, 'script', 'rasterize.js')
+  url = url("/editor/#{theme.id}")
+  path = File.join(Dir.mktmpdir, 'screenshot.png')
+
+  `phantomjs #{script} #{url} #{path}`
+  if $?.to_i == 0
+    File.open(path) do |file|
+      theme.screenshot = file
+      theme.save
+    end
+    File.delete(path)
+    status 201
+  else
+    status 500
+  end
 end
 
