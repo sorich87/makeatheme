@@ -89,15 +89,15 @@ get '/editor/:theme', provides: 'html' do
 
   pieces = theme_pieces(theme, !preview_only)
 
+  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
   header = pieces[:regions].select { |r|
-    r[:name] == 'header' && r[:slug] == 'default'
+    r[:name] == 'header' && r[:slug] == index[:regions][:header]
   }[0]
 
   footer = pieces[:regions].select { |r|
-    r[:name] == 'footer' && r[:slug] == 'default'
+    r[:name] == 'footer' && r[:slug] == index[:regions][:footer]
   }[0]
-
-  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
   template = header[:build] + index[:build] + footer[:build]
 

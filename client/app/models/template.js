@@ -6,6 +6,7 @@ module.exports = Model.extend({
       name: ""
     , template: ""
     , build: ""
+    , regions: { header: "default", footer: "default" }
   }
 
   , label: function () {

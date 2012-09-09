@@ -76,12 +76,14 @@ module.exports = View.extend({
 
   // Save current template, display it and trigger templateLoaded event
   , loadTemplate: function (template) {
-    var header, footer;
+    var header, footer, regions;
 
     app.trigger("templateLoad", template);
 
-    header = app.regions.getByName("header");
-    footer = app.regions.getByName("footer");
+    regions = template.get("regions");
+
+    header = app.regions.getByName("header", regions.header);
+    footer = app.regions.getByName("footer", regions.footer);
 
     build = header.get("build") + template.get("build") + footer.get("build");
 

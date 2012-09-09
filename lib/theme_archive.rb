@@ -40,7 +40,19 @@ module ThemeArchive
     def compile_templates(zipfile)
       @theme.templates.each do |template|
         zipfile.get_output_stream("#{template[:name]}.php") do |f|
-          template = "<?php get_header(); ?>" + template[:template] + "<?php get_footer(); ?>"
+          if header == 'default'
+            header = '<?php get_header(); ?>'
+          else
+            header "<?php get_header('#{template[:regions][:header]}'); ?>"
+          end
+
+          if footer == 'default'
+            footer = '<?php get_footer(); ?>'
+          else
+            footer = "<?php get_footer('#{template[:regions][:footer]}'); ?>"
+          end
+
+          template = header + template[:template] + footer
           f.puts render_template(template, @base)
         end
       end
