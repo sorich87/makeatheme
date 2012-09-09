@@ -5,7 +5,7 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     id: "x-templates-select"
-
+  , className: "x-section"
   , collection: app.templates
 
   , events: {

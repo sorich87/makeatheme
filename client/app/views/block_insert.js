@@ -5,9 +5,8 @@ var View = require("views/base/view")
   , idIncrement = 1;
 
 module.exports = View.extend({
-    el: $("<div id='x-block-insert'><h4>Blocks</h4>\
-          <p>Drag and drop to insert</p><ul></ul></div>")
-
+    id: "x-block-insert"
+  , className: "x-section"
   , collection: app.blocks
 
   , events: {
@@ -20,6 +19,9 @@ module.exports = View.extend({
   }
 
   , render: function () {
+
+    this.$el.empty().append("<p>Drag and drop to insert</p><ul></ul>");
+
     this.collection.reset(this.collection.models);
 
     return this;

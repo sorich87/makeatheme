@@ -612,9 +612,8 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     , idIncrement = 1;
 
   module.exports = View.extend({
-      el: $("<div id='x-block-insert'><h4>Blocks</h4>\
-            <p>Drag and drop to insert</p><ul></ul></div>")
-
+      id: "x-block-insert"
+    , className: "x-section"
     , collection: app.blocks
 
     , events: {
@@ -627,6 +626,9 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , render: function () {
+
+      this.$el.empty().append("<p>Drag and drop to insert</p><ul></ul>");
+
       this.collection.reset(this.collection.models);
 
       return this;
@@ -761,35 +763,55 @@ window.require.define({"views/editor": function(exports, require, module) {
 
   module.exports = View.extend({
     el: "<div id='x-layout-editor'>\
-        <div class='x-handle'>&Dagger;</div>\
+        <div class='x-handle'></div>\
         </div>"
 
     , events: {
         "draginit #x-layout-editor .x-handle": "dragInit"
       , "dragmove #x-layout-editor .x-handle": "dragMove"
+      , "click h4": "showSection"
     }
 
     // Show editor when "templateLoaded" event is triggered
     , render: function () {
       this.$el
         .children(".x-handle").empty()
-          .append("<span>Theme: " + app.data.theme.name + "</span>")
+          .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
           .end()
+        .append("<h4>Current Template <span>&and;</span></h4>")
         .append(app.reuseView("templates").render().$el);
 
       if (app.data.preview_only !== true) {
         this.$el
+          .append("<h4>Blocks <span>&or;</span></h4>")
           .append(app.reuseView("block_insert").render().$el)
+          .append("<h4>Style <span>&or;</span></h4>")
           .append(app.reuseView("style_edit").render().$el)
-          .append(app.reuseView("download_button").render().$el)
-          .append(app.reuseView("share_link").render().$el);
+          .append("<h4>Share <span>&or;</span></h4>")
+          .append(app.reuseView("share_link").render().$el)
+          .append(app.reuseView("download_button").render().$el);
 
         app.reuseView("mutations");
+
+        this.$(".x-section:not(#x-templates-select)").hide();
       }
 
       this.$el.appendTo($("body"));
 
       return this;
+    }
+
+    , showSection: function (e) {
+      $(e.target).next().slideToggle("slow", function () {
+        var $this = $(this)
+          , $handle = $this.prev().children("span").empty();
+
+        if ($this.is(":hidden")) {
+          $handle.append("&or;");
+        } else {
+          $handle.append("&and;");
+        }
+      });
     }
 
     // Drag the editor box
@@ -1416,6 +1438,7 @@ window.require.define({"views/share_link": function(exports, require, module) {
 
   module.exports = View.extend({
       id: "x-share-link"
+    , className: "x-section"
     , template: "share_link"
     , data: {
       theme: app.data.theme._id
@@ -1429,7 +1452,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , template = require("views/templates/style_edit");
 
   module.exports = View.extend({
-      el: $("<div id='x-style-edit'></div>")
+      id: "x-style-edit"
+    , className: "x-section"
 
     , render: function () {
       this.$el.html(template());
@@ -1448,7 +1472,7 @@ window.require.define({"views/templates": function(exports, require, module) {
 
   module.exports = View.extend({
       id: "x-templates-select"
-
+    , className: "x-section"
     , collection: app.templates
 
     , events: {
@@ -1686,7 +1710,7 @@ window.require.define({"views/templates/share_link": function(exports, require, 
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<h4>Share</h4>\n<p>http://thememy.com/themes/";
+    buffer += "<p>http://thememy.com/themes/";
     foundHelper = helpers.theme;
     stack1 = foundHelper || depth0.theme;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -1701,7 +1725,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     var foundHelper, self=this;
 
 
-    return "<h4>Style</h4>\n<form>\n  <p class=\"x-choice\">\n    <label>Element</label>\n    <input type=\"text\" value=\"#content\" />\n    <select>\n      <option>whole element</option>\n      <option>paragraphs</option>\n      <option>tables</option>\n      <option>lists</option>\n    </select>\n  </p>\n\n  <div>\n    <h5><span>&darr;</span> Box</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Character</h5>\n\n    <p>\n      <label for=\"x-font-family\">Family</label>\n      <select id=\"x-font-family\">\n        <optgroup label=\"Serif\">\n          <option value='Georgia, serif'>Georgia</option>\n          <option value='\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif'>Palatino Linotype</option>\n          <option value='\"Times New Roman\", Times, serif'>Times New Roman</option>\n        </optgroup>\n        <optgroup label=\"Sans-Serif\">\n          <option value='Arial, sans-serif'>Arial</option>\n          <option value='\"Arial Black\", sans-serif'>Arial Black</option>\n          <option value='\"Comic Sans MS\", sans-serif'>Comic Sans MS</option>\n          <option value='Impact, Charcoal, sans-serif'>Impact</option>\n          <option value='\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif'>Lucida Sans Unicode</option>\n          <option value='Tahoma, Geneva, sans-serif'>Tahoma</option>\n          <option value='\"Trebuchet MS\", Helvetica, sans-serif'>Trebuchet MS</option>\n          <option value='Verdana, Geneva, sans-serif'>Verdana</option>\n        </optgroup>\n        <optgroup label=\"Monospace\">\n          <option value='\"Courier New\", Courier, monospace'>Courier New</option>\n          <option value='\"Lucida Console\", Monaco, monospace'>Lucida Console</option>\n        </optgroup>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-typeface\">Typeface</label>\n      <select id=\"x-font-typeface\">\n        <option value=\"regular\">Regular</option>\n        <option value=\"italic\">Italic</option>\n        <option value=\"bold\">Bold</option>\n        <option value=\"bold italic\">Bold Italic</option>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-size\">Size</label>\n      <input type=\"text\" id=\"x-font-size\" value=\"\" maxlength=\"2\" class=\"x-pixels\" /> px\n    </p>\n\n    <p>\n      <label for=\"x-font-color\">Color</label>\n      # <input type=\"text\" id=\"x-font-color\" value=\"\" maxlength=\"6\" class=\"x-color\" />\n    </p>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Text</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Background</h5>\n  </div>\n</form>\n";});
+    return "<form>\n  <p class=\"x-choice\">\n    <label>Element</label>\n    <input type=\"text\" value=\"#content\" />\n    <select>\n      <option>whole element</option>\n      <option>paragraphs</option>\n      <option>tables</option>\n      <option>lists</option>\n    </select>\n  </p>\n\n  <div>\n    <h5><span>&darr;</span> Box</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Character</h5>\n\n    <p>\n      <label for=\"x-font-family\">Family</label>\n      <select id=\"x-font-family\">\n        <optgroup label=\"Serif\">\n          <option value='Georgia, serif'>Georgia</option>\n          <option value='\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif'>Palatino Linotype</option>\n          <option value='\"Times New Roman\", Times, serif'>Times New Roman</option>\n        </optgroup>\n        <optgroup label=\"Sans-Serif\">\n          <option value='Arial, sans-serif'>Arial</option>\n          <option value='\"Arial Black\", sans-serif'>Arial Black</option>\n          <option value='\"Comic Sans MS\", sans-serif'>Comic Sans MS</option>\n          <option value='Impact, Charcoal, sans-serif'>Impact</option>\n          <option value='\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif'>Lucida Sans Unicode</option>\n          <option value='Tahoma, Geneva, sans-serif'>Tahoma</option>\n          <option value='\"Trebuchet MS\", Helvetica, sans-serif'>Trebuchet MS</option>\n          <option value='Verdana, Geneva, sans-serif'>Verdana</option>\n        </optgroup>\n        <optgroup label=\"Monospace\">\n          <option value='\"Courier New\", Courier, monospace'>Courier New</option>\n          <option value='\"Lucida Console\", Monaco, monospace'>Lucida Console</option>\n        </optgroup>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-typeface\">Typeface</label>\n      <select id=\"x-font-typeface\">\n        <option value=\"regular\">Regular</option>\n        <option value=\"italic\">Italic</option>\n        <option value=\"bold\">Bold</option>\n        <option value=\"bold italic\">Bold Italic</option>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-size\">Size</label>\n      <input type=\"text\" id=\"x-font-size\" value=\"\" maxlength=\"2\" class=\"x-pixels\" /> px\n    </p>\n\n    <p>\n      <label for=\"x-font-color\">Color</label>\n      # <input type=\"text\" id=\"x-font-color\" value=\"\" maxlength=\"6\" class=\"x-color\" />\n    </p>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Text</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Background</h5>\n  </div>\n</form>\n";});
 }});
 
 window.require.define({"views/templates/templates": function(exports, require, module) {
@@ -1725,7 +1749,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<h4><label>Current Template</label></h4>\n<p>Click to change</p>\n<ul></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    buffer += "<p>Click to change</p>\n<ul></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;

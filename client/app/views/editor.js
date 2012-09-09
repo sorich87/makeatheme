@@ -3,35 +3,55 @@ var app = require("application")
 
 module.exports = View.extend({
   el: "<div id='x-layout-editor'>\
-      <div class='x-handle'>&Dagger;</div>\
+      <div class='x-handle'></div>\
       </div>"
 
   , events: {
       "draginit #x-layout-editor .x-handle": "dragInit"
     , "dragmove #x-layout-editor .x-handle": "dragMove"
+    , "click h4": "showSection"
   }
 
   // Show editor when "templateLoaded" event is triggered
   , render: function () {
     this.$el
       .children(".x-handle").empty()
-        .append("<span>Theme: " + app.data.theme.name + "</span>")
+        .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
         .end()
+      .append("<h4>Current Template <span>&and;</span></h4>")
       .append(app.reuseView("templates").render().$el);
 
     if (app.data.preview_only !== true) {
       this.$el
+        .append("<h4>Blocks <span>&or;</span></h4>")
         .append(app.reuseView("block_insert").render().$el)
+        .append("<h4>Style <span>&or;</span></h4>")
         .append(app.reuseView("style_edit").render().$el)
-        .append(app.reuseView("download_button").render().$el)
-        .append(app.reuseView("share_link").render().$el);
+        .append("<h4>Share <span>&or;</span></h4>")
+        .append(app.reuseView("share_link").render().$el)
+        .append(app.reuseView("download_button").render().$el);
 
       app.reuseView("mutations");
+
+      this.$(".x-section:not(#x-templates-select)").hide();
     }
 
     this.$el.appendTo($("body"));
 
     return this;
+  }
+
+  , showSection: function (e) {
+    $(e.target).next().slideToggle("slow", function () {
+      var $this = $(this)
+        , $handle = $this.prev().children("span").empty();
+
+      if ($this.is(":hidden")) {
+        $handle.append("&or;");
+      } else {
+        $handle.append("&and;");
+      }
+    });
   }
 
   // Drag the editor box
