@@ -7,11 +7,16 @@ module.exports = Collection.extend({
 
   // Get region by name. Use "default" if slug not specified.
   , getByName: function (name, slug) {
+    var func;
+
     if (slug === void 0) {
       slug = "default";
+      func = "filter";
+    } else {
+      func = "find";
     }
 
-    return this.find(function (region) {
+    return this[func](function (region) {
       return region.get("slug") === slug && region.get("name") === name;
     });
   }

@@ -176,11 +176,16 @@ window.require.define({"collections/regions": function(exports, require, module)
 
     // Get region by name. Use "default" if slug not specified.
     , getByName: function (name, slug) {
+      var func;
+
       if (slug === void 0) {
         slug = "default";
+        func = "filter";
+      } else {
+        func = "find";
       }
 
-      return this.find(function (region) {
+      return this[func](function (region) {
         return region.get("slug") === slug && region.get("name") === name;
       });
     }
@@ -783,6 +788,8 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       if (app.data.preview_only !== true) {
         this.$el
+          .append("<h4>Regions <span>&and;</span></h4>")
+          .append(app.reuseView("regions").render().$el)
           .append("<h4>Blocks <span>&or;</span></h4>")
           .append(app.reuseView("block_insert").render().$el)
           .append("<h4>Style <span>&or;</span></h4>")
@@ -793,7 +800,7 @@ window.require.define({"views/editor": function(exports, require, module) {
 
         app.reuseView("mutations");
 
-        this.$(".x-section:not(#x-templates-select)").hide();
+        this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
       }
 
       this.$el.appendTo($("body"));
@@ -1371,6 +1378,28 @@ window.require.define({"views/notifications": function(exports, require, module)
   
 }});
 
+window.require.define({"views/regions": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/regions")
+    , app = require("application");
+
+  module.exports = View.extend({
+      id: "x-region-select"
+    , className: "x-section"
+    , collection: app.regions
+
+    , render: function () {
+      this.$el.empty().append(template({
+          headers: this.collection.getByName("header").map(function (header) { return header.attributes; })
+        , footers: this.collection.getByName("footer").map(function (footer) { return footer.attributes; })
+      }));
+
+      return this;
+    }
+  });
+  
+}});
+
 window.require.define({"views/register": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application");
@@ -1692,6 +1721,67 @@ window.require.define({"views/templates/notification": function(exports, require
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "text", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</li>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/regions": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <option value=\"";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n  ";
+    return buffer;}
+
+  function program3(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <option value=\"";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n  ";
+    return buffer;}
+
+    buffer += "<label>Header:</label>\n<select>\n  ";
+    foundHelper = helpers.headers;
+    stack1 = foundHelper || depth0.headers;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  <option value=\"\">new header</option>\n</select><br />\n\n<label>Footer:</label>\n<select>\n  ";
+    foundHelper = helpers.footers;
+    stack1 = foundHelper || depth0.footers;
+    stack2 = helpers.each;
+    tmp1 = self.program(3, program3, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  <option value=\"\">new footer</option>\n</select>\n";
     return buffer;});
 }});
 

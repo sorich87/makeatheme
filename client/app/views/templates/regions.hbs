@@ -1,0 +1,15 @@
+<label>Header:</label>
+<select>
+  {{#each headers}}
+  <option value="{{slug}}">{{slug}}</option>
+  {{/each}}
+  <option value="">new header</option>
+</select><br />
+
+<label>Footer:</label>
+<select>
+  {{#each footers}}
+  <option value="{{slug}}">{{slug}}</option>
+  {{/each}}
+  <option value="">new footer</option>
+</select>

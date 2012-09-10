@@ -23,6 +23,8 @@ module.exports = View.extend({
 
     if (app.data.preview_only !== true) {
       this.$el
+        .append("<h4>Regions <span>&and;</span></h4>")
+        .append(app.reuseView("regions").render().$el)
         .append("<h4>Blocks <span>&or;</span></h4>")
         .append(app.reuseView("block_insert").render().$el)
         .append("<h4>Style <span>&or;</span></h4>")
@@ -33,7 +35,7 @@ module.exports = View.extend({
 
       app.reuseView("mutations");
 
-      this.$(".x-section:not(#x-templates-select)").hide();
+      this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
     }
 
     this.$el.appendTo($("body"));
