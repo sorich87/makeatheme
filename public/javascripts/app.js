@@ -436,7 +436,7 @@ window.require.define({"models/user": function(exports, require, module) {
       , password_confirmation: ""
     }
 
-    , url: "users"
+    , url: "/users"
 
     , validation: {
       first_name: {

@@ -6,17 +6,17 @@ describe ("Region", function () {
     var region = new Region();
 
     expect(region.get("name")).to.equal("");
-    expect(region.get("type")).to.equal("");
+    expect(region.get("slug")).to.equal("");
   });
 
   it ("will set passed attributes on the model instance when created", function () {
     var region = new Region({
-        name: "Some Region"
-      , type: "header"
+        name: "header"
+      , slug: "test"
     });
 
-    expect(region.get("name")).to.equal("Some Region");
-    expect(region.get("type")).to.equal("header");
+    expect(region.get("name")).to.equal("header");
+    expect(region.get("slug")).to.equal("test");
   });
 
   it ("will trigger an error event on failed validation.", function () {
@@ -25,9 +25,9 @@ describe ("Region", function () {
 
     region.on("error", spy);
 
-    region.set({type: "incorrect type"});
+    region.set({name: "incorrect name"});
 
     expect(spy).to.have.been.calledOnce;
-    expect(spy).to.have.been.calledWith(region, "Region type must be header or footer.");
+    expect(spy).to.have.been.calledWith(region, "Region must be header or footer.");
   });
 });

@@ -49,7 +49,7 @@ describe("AuthLinksView", function () {
     expect(stub).to.have.been.calledOnce;
     expect(stub.args[0][0]).to.have.property("contentType", "application/json; charset=UTF-8");
     expect(stub.args[0][0]).to.have.property("type", "DELETE");
-    expect(stub.args[0][0]).to.have.property("url", "/session.json");
+    expect(stub.args[0][0]).to.have.property("url", "/session");
 
     window.jQuery.ajax.restore();
   });

@@ -65,7 +65,7 @@ describe ("User", function () {
     stubArgs = stub.args[0];
 
     expect(stub).to.have.been.calledOnce;
-    expect(stubArgs[0].url).to.equal("/user.json");
+    expect(stubArgs[0].url).to.equal("/users");
     expect(stubArgs[0].data).to.equal(JSON.stringify(attrs));
 
     window.jQuery.ajax.restore();

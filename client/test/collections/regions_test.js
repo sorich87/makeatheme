@@ -8,20 +8,20 @@ describe ("Regions", function () {
     expect(regions.length).to.equal(0);
 
     regions.add({
-        name: "Some Region"
-      , type: "header"
+        slug: "test"
+      , name: "header"
     });
 
     expect(regions.length).to.equal(1);
 
     regions.add([
       {
-          name: "Another Region"
-        , type: "header"
+          slug: "test2"
+        , name: "header"
       }
       , {
-          name: "A Last Region"
-        , type: "footer"
+          slug: "test3"
+        , name: "footer"
       }
     ]);
 

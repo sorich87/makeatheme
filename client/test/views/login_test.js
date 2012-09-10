@@ -57,7 +57,7 @@ describe ("LoginView", function () {
     expect(stub.args[0][0]).to.have.property("contentType", "application/json;charset=UTF-8");
     expect(stub.args[0][0]).to.have.property("type", "POST");
     expect(stub.args[0][0]).to.have.property("dataType", "json");
-    expect(stub.args[0][0]).to.have.property("url", "/session.json");
+    expect(stub.args[0][0]).to.have.property("url", "/session");
 
     window.jQuery.ajax.restore();
   });
@@ -133,5 +133,7 @@ describe ("LoginView", function () {
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith("success", "Welcome back, Test.");
+
+    window.jQuery.ajax.restore();
   });
 });
