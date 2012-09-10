@@ -49,7 +49,8 @@ class Theme
     styles: { thumb: '300x225#' },
     :convert_options => { :thumb => '-strip' },
     fog_public: true,
-    path: 'themes/:id/screenshot/:basename-:style.:extension'
+    path: 'themes/:id/screenshot/:basename-:style.:extension',
+    default_url: '/images/screenshot-missing.png'
 
   has_attached_file :archive,
     fog_public: false,
