@@ -353,17 +353,13 @@ window.require.define({"models/template": function(exports, require, module) {
     }
 
     , label: function () {
-      var label = this.get("label");
-
-      if (label = this.get("label")) {
-        return label;
-      }
-
       for (i in this.standards) {
         if (this.get("name") === this.standards[i].name) {
           return this.standards[i].label;
         }
       }
+
+      return this.get("name");
     }
 
     , standards: [
@@ -1617,25 +1613,19 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , addTemplate: function () {
-      var name, label, attributes, selection, template;
+      var name, attributes, template;
 
-      attributes = this.collection.getByName("index").attributes;
-      attributes = {
-          template: attributes.template
-        , build: attributes.build
-      };
+      name = this.$(".x-new-template-select select").val()
+                        || this.$(".x-new-template-name").val();
 
-      if (selection = this.$(".x-new-template-select select").val()) {
-        attributes.name = selection;
-      } else {
-        attributes.label = this.$(".x-new-template-name").val();
-        attributes.name = attributes.label.toLowerCase().replace(/[^0-9A-Za-z]/, "-");
-      }
-
-      if (!attributes.name) {
+      if (!name) {
         app.trigger("notification", "error", "Please, enter a template name.");
         return;
       }
+
+      attributes = _.pick(this.collection.getByName("index").attributes,
+                          "template", "build", "regions");
+      attributes.name = name;
 
       template = new Template(attributes);
       this.collection.add(template);

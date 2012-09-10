@@ -10,4 +10,9 @@ class Template
   def regions
     self[:regions].symbolize_keys
   end
+
+  # PHP filename
+  def filename
+    "#{self[:name].parameterize}.php"
+  end
 end

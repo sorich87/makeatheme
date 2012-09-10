@@ -10,17 +10,13 @@ module.exports = Model.extend({
   }
 
   , label: function () {
-    var label = this.get("label");
-
-    if (label = this.get("label")) {
-      return label;
-    }
-
     for (i in this.standards) {
       if (this.get("name") === this.standards[i].name) {
         return this.standards[i].label;
       }
     }
+
+    return this.get("name");
   }
 
   , standards: [

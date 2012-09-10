@@ -39,7 +39,7 @@ module ThemeArchive
 
     def compile_templates(zipfile)
       @theme.templates.each do |template|
-        zipfile.get_output_stream("#{template[:name]}.php") do |f|
+        zipfile.get_output_stream(template.filename) do |f|
           if template.regions[:header] == 'default'
             header = '<?php get_header(); ?>'
           else

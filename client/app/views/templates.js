@@ -121,25 +121,19 @@ module.exports = View.extend({
   }
 
   , addTemplate: function () {
-    var name, label, attributes, selection, template;
+    var name, attributes, template;
 
-    attributes = this.collection.getByName("index").attributes;
-    attributes = {
-        template: attributes.template
-      , build: attributes.build
-    };
+    name = this.$(".x-new-template-select select").val()
+                      || this.$(".x-new-template-name").val();
 
-    if (selection = this.$(".x-new-template-select select").val()) {
-      attributes.name = selection;
-    } else {
-      attributes.label = this.$(".x-new-template-name").val();
-      attributes.name = attributes.label.toLowerCase().replace(/[^0-9A-Za-z]/, "-");
-    }
-
-    if (!attributes.name) {
+    if (!name) {
       app.trigger("notification", "error", "Please, enter a template name.");
       return;
     }
+
+    attributes = _.pick(this.collection.getByName("index").attributes,
+                        "template", "build", "regions");
+    attributes.name = name;
 
     template = new Template(attributes);
     this.collection.add(template);
