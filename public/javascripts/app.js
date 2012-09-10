@@ -474,6 +474,7 @@ window.require.define({"router": function(exports, require, module) {
   module.exports = Backbone.Router.extend({
     routes: {
         "": "index"
+      , "themes/mine": "index"
       , "themes/:id": "theme"
       , "editor/:file": "editor"
       , "login": "login"
@@ -483,9 +484,13 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
+      var filters = {};
+      if (Backbone.history.fragment === "themes/mine") {
+        filters.author_id = app.currentUser.id;
+      }
       $("#main").empty()
         .append(app.reuseView("faq").render().$el)
-        .append(app.reuseView("theme_list").render().$el);
+        .append(app.reuseView("theme_list").render(filters).$el);
     }
 
     , theme: function (id) {
@@ -1656,7 +1661,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <a href=\"/upload\" class=\"btn\" id=\"upload_theme\">Upload</a>\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
+    return "\n  <a href=\"/themes/mine\" id=\"my_themes\">My themes</a>\n  <a href=\"/upload\" id=\"upload_theme\">Upload</a>\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
 
   function program3(depth0,data) {
     
@@ -1943,8 +1948,12 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       this.bindEvents();
     }
 
-    , render: function () {
-      this.collection.reset(this.collection.models);
+    , render: function (filters) {
+      if (_.isEmpty(filters)) {
+        this.collection.reset(this.collection.models);
+      } else {
+        this.collection.reset(this.collection.where(filters));
+      }
 
       return this;
     }

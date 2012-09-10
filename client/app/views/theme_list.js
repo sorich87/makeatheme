@@ -12,8 +12,12 @@ module.exports = View.extend({
     this.bindEvents();
   }
 
-  , render: function () {
-    this.collection.reset(this.collection.models);
+  , render: function (filters) {
+    if (_.isEmpty(filters)) {
+      this.collection.reset(this.collection.models);
+    } else {
+      this.collection.reset(this.collection.where(filters));
+    }
 
     return this;
   }

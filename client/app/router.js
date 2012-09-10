@@ -3,6 +3,7 @@ var app = require("application");
 module.exports = Backbone.Router.extend({
   routes: {
       "": "index"
+    , "themes/mine": "index"
     , "themes/:id": "theme"
     , "editor/:file": "editor"
     , "login": "login"
@@ -12,9 +13,13 @@ module.exports = Backbone.Router.extend({
   }
 
   , index: function () {
+    var filters = {};
+    if (Backbone.history.fragment === "themes/mine") {
+      filters.author_id = app.currentUser.id;
+    }
     $("#main").empty()
       .append(app.reuseView("faq").render().$el)
-      .append(app.reuseView("theme_list").render().$el);
+      .append(app.reuseView("theme_list").render(filters).$el);
   }
 
   , theme: function (id) {

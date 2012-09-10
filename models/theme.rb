@@ -83,7 +83,8 @@ class Theme
     {
       :_id => self._id,
       :name => self.name,
-      :author => self.author.to_fullname,
+      :author => author.to_fullname,
+      :author_id => self.author_id,
       :screenshot_uri => self.screenshot.url(:thumb),
       :archive => if self.archive.file? then self.archive.expiring_url else nil end
     }
