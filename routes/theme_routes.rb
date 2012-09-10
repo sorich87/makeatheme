@@ -98,11 +98,11 @@ get '/editor/:theme', provides: 'html' do
   index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
   header = pieces[:regions].select { |r|
-    r[:name] == 'header' && r[:slug] == index[:regions][:header]
+    r[:name] == 'header' && r[:slug] == index.regions[:header]
   }[0]
 
   footer = pieces[:regions].select { |r|
-    r[:name] == 'footer' && r[:slug] == index[:regions][:footer]
+    r[:name] == 'footer' && r[:slug] == index.regions[:footer]
   }[0]
 
   template = header[:build] + index[:build] + footer[:build]

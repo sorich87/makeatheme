@@ -6,4 +6,8 @@ class Template
   field :regions, type: Hash, default: {header: 'default', footer: 'default'}
 
   embedded_in :theme
+
+  def regions
+    self[:regions].symbolize_keys
+  end
 end

@@ -40,16 +40,16 @@ module ThemeArchive
     def compile_templates(zipfile)
       @theme.templates.each do |template|
         zipfile.get_output_stream("#{template[:name]}.php") do |f|
-          if template[:regions][:header] == 'default'
+          if template.regions[:header] == 'default'
             header = '<?php get_header(); ?>'
           else
-            header = "<?php get_header('#{template[:regions][:header]}'); ?>"
+            header = "<?php get_header('#{template.regions[:header]}'); ?>"
           end
 
-          if template[:regions][:footer] == 'default'
+          if template.regions[:footer] == 'default'
             footer = '<?php get_footer(); ?>'
           else
-            footer = "<?php get_footer('#{template[:regions][:footer]}'); ?>"
+            footer = "<?php get_footer('#{template.regions[:footer]}'); ?>"
           end
 
           template = header + template[:template] + footer
