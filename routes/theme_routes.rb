@@ -36,7 +36,10 @@ put '/themes/:id' do
     theme.save
 
     # Generate screenshot. Should be later moved to a background job.
-    open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+    begin
+      open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+    rescue
+    end
 
     status 201
     respond_with theme
@@ -66,7 +69,10 @@ post '/themes' do
     theme.save
 
     # Generate screenshot. Should be later moved to a background job.
-    open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+    begin
+      open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
+    rescue
+    end
 
     status 201
     respond_with theme
