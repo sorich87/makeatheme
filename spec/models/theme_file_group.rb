@@ -11,7 +11,7 @@ describe ThemeFileGroup do
         :description => "Description of some theme",
         :author => StoreUser.first,
       }
-      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save
       @group = @theme.theme_file_group
     end

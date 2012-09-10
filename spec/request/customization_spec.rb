@@ -11,7 +11,7 @@ describe "Theme customization" do
     @theme = Theme.where(@theme_attributes.merge(:archive => nil)).first
     if @theme.nil?
       zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
-      @theme = Theme.create_from_zip(zip, @theme_attributes)
+      @theme = Theme.new_from_zip(zip, @theme_attributes)
     end
 
     @json = File.read('./spec/request/customization_request.json')

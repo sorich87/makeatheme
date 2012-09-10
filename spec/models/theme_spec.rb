@@ -22,8 +22,8 @@ describe Theme do
   it { should validate_attachment_content_type(:archive).allowing('application/zip') }
   it { should validate_attachment_size(:archive).less_than(1.megabyte) }
 
-  it 'should respond to create_from_zip' do
-    Theme.should respond_to(:create_from_zip)
+  it 'should respond to new_from_zip' do
+    Theme.should respond_to(:new_from_zip)
   end
   it { should respond_to(:fork) }
   it { should respond_to(:fork!) }
@@ -31,9 +31,9 @@ describe Theme do
   it { should respond_to(:forks) }
   it { should respond_to(:fork?) }
 
-  describe '.create_from_zip' do
+  describe '.new_from_zip' do
     before do
-      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save
     end
 
@@ -82,7 +82,7 @@ describe Theme do
 
   context 'forking' do
     before do
-      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save
 
       @fork = @theme.fork
@@ -134,7 +134,7 @@ describe Theme do
 
   describe 'destroy' do
     before do
-      @theme = Theme.create_from_zip(@valid_theme_zip, @valid_attributes)
+      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save
     end
 
