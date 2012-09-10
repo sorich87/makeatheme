@@ -3,6 +3,9 @@ require 'rack/test'
 require 'mongoid-rspec'
 require 'paperclip/matchers'
 require 'database_cleaner'
+require 'simplecov'
+
+SimpleCov.start
 
 ENV['RACK_ENV'] = 'test'
 

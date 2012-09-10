@@ -22,6 +22,7 @@ group :test, :development do
   gem 'shotgun'
   gem 'mongoid-rspec'
   gem 'database_cleaner'
+  gem 'simplecov', :require => false
 end
 
 group :production do

@@ -28,3 +28,6 @@ tmp/
 # Brunch files needed for testing.
 public/index.html
 public/test/*
+
+# SimpleCov coverage report
+coverage
