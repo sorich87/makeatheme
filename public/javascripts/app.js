@@ -176,16 +176,11 @@ window.require.define({"collections/regions": function(exports, require, module)
 
     // Get region by name. Use "default" if slug not specified.
     , getByName: function (name, slug) {
-      var func;
-
       if (slug === void 0) {
         slug = "default";
-        func = "filter";
-      } else {
-        func = "find";
       }
 
-      return this[func](function (region) {
+      return this.find(function (region) {
         return region.get("slug") === slug && region.get("name") === name;
       });
     }
@@ -1395,8 +1390,8 @@ window.require.define({"views/regions": function(exports, require, module) {
 
     , render: function () {
       this.$el.empty().append(template({
-          headers: this.collection.getByName("header").map(function (header) { return header.attributes; })
-        , footers: this.collection.getByName("footer").map(function (footer) { return footer.attributes; })
+          headers: this.collection.where({name: "header"}).map(function (header) { return header.attributes; })
+        , footers: this.collection.where({name: "footer"}).map(function (footer) { return footer.attributes; })
       }));
 
       return this;

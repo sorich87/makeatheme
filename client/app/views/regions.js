@@ -9,8 +9,8 @@ module.exports = View.extend({
 
   , render: function () {
     this.$el.empty().append(template({
-        headers: this.collection.getByName("header").map(function (header) { return header.attributes; })
-      , footers: this.collection.getByName("footer").map(function (footer) { return footer.attributes; })
+        headers: this.collection.where({name: "header"}).map(function (header) { return header.attributes; })
+      , footers: this.collection.where({name: "footer"}).map(function (footer) { return footer.attributes; })
     }));
 
     return this;
