@@ -12,7 +12,7 @@ class Region
     filename = self[:name]
 
     unless self[:slug].nil? || self[:slug] == 'default'
-      filename << "-#{self[:slug]}"
+      filename += "-#{self[:slug]}"
     end
 
     "#{filename}.php"
