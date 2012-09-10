@@ -790,9 +790,9 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       if (app.data.preview_only !== true) {
         this.$el
-          .append("<h4>Regions <span>&and;</span></h4>")
+          .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
           .append(app.reuseView("regions").render().$el)
-          .append("<h4>Blocks <span>&or;</span></h4>")
+          .append("<h4>Page Elements <span>&or;</span></h4>")
           .append(app.reuseView("block_insert").render().$el)
           .append("<h4>Style <span>&or;</span></h4>")
           .append(app.reuseView("style_edit").render().$el)
@@ -1467,7 +1467,7 @@ window.require.define({"views/regions": function(exports, require, module) {
 
       $(e.currentTarget).parent().hide("slow");
 
-      app.trigger("notification", "success", "The new " + name + " was created.");
+      app.trigger("notification", "success", "The new " + name + " was created. It's a copy of the default one.");
     }
 
     , addOne: function (region) {
@@ -1724,7 +1724,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.collection.setCurrent(template);
       this.render();
 
-      app.trigger("notification", "success", "The new template was created.");
+      app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
     }
   });
   

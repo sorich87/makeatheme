@@ -140,6 +140,6 @@ module.exports = View.extend({
     this.collection.setCurrent(template);
     this.render();
 
-    app.trigger("notification", "success", "The new template was created.");
+    app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
   }
 });

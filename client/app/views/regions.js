@@ -73,7 +73,7 @@ module.exports = View.extend({
 
     $(e.currentTarget).parent().hide("slow");
 
-    app.trigger("notification", "success", "The new " + name + " was created.");
+    app.trigger("notification", "success", "The new " + name + " was created. It's a copy of the default one.");
   }
 
   , addOne: function (region) {

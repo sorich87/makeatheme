@@ -23,9 +23,9 @@ module.exports = View.extend({
 
     if (app.data.preview_only !== true) {
       this.$el
-        .append("<h4>Regions <span>&and;</span></h4>")
+        .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
         .append(app.reuseView("regions").render().$el)
-        .append("<h4>Blocks <span>&or;</span></h4>")
+        .append("<h4>Page Elements <span>&or;</span></h4>")
         .append(app.reuseView("block_insert").render().$el)
         .append("<h4>Style <span>&or;</span></h4>")
         .append(app.reuseView("style_edit").render().$el)
