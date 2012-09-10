@@ -2,6 +2,7 @@ require 'rspec'
 require 'rack/test'
 require 'mongoid-rspec'
 require 'paperclip/matchers'
+require 'database_cleaner'
 
 ENV['RACK_ENV'] = 'test'
 
@@ -30,7 +31,12 @@ RSpec.configure do |conf|
   conf.include Paperclip::Shoulda::Matchers
   conf.mock_with :rspec
 
+  conf.before(:suite) do
+    DatabaseCleaner[:mongoid].strategy = :truncation
+  end
+
   conf.before(:each) do
+    DatabaseCleaner.clean
     do_not_send_email
     header 'Accept', 'application/json'
   end

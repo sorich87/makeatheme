@@ -21,6 +21,7 @@ group :test, :development do
   # Automatic reload when editing files
   gem 'shotgun'
   gem 'mongoid-rspec'
+  gem 'database_cleaner'
 end
 
 group :production do
