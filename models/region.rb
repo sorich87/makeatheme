@@ -11,7 +11,7 @@ class Region
   def filename
     filename = self[:name]
 
-    unless self[:slug].nil? or self[:slug] == 'default'
+    unless self[:slug].nil? || self[:slug] == 'default'
       filename << "-#{self[:slug]}"
     end
 
