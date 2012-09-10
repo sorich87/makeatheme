@@ -1,15 +1,23 @@
 <label>Header:</label>
-<select>
+<select class="x-header-select">
   {{#each headers}}
   <option value="{{slug}}">{{slug}}</option>
   {{/each}}
   <option value="">new header</option>
-</select><br />
+</select>
+<div class="x-header-new">
+  <input type="text" value="" placeholder="Enter header name" />
+  <button class="x-header-add">Add</button>
+</div>
 
 <label>Footer:</label>
-<select>
+<select class="x-footer-select">
   {{#each footers}}
   <option value="{{slug}}">{{slug}}</option>
   {{/each}}
   <option value="">new footer</option>
 </select>
+<div class="x-footer-new">
+  <input type="text" value="" placeholder="Enter footer name" />
+  <button class="x-footer-add">Add</button>
+</div>

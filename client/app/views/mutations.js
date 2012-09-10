@@ -4,11 +4,22 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
   initialize: function () {
-    _.bindAll(this, "observeMutations", "propagateMutations");
+    _.bindAll(this);
     window.addEventListener("DOMContentLoaded", this.observeMutations);
 
-    app.on("templateLoad", function () { this.observer.disconnect() }.bind(this));
-    app.on("templateLoaded", function () { this.observer.reconnect() }.bind(this));
+    app.on("templateLoad", this.stopObserving);
+    app.on("templateLoaded", this.restartObserving);
+
+    app.on("regionLoad", this.stopObserving);
+    app.on("regionLoaded", this.restartObserving);
+  }
+
+  , stopObserving: function () {
+    this.observer.disconnect();
+  }
+
+  , restartObserving: function () {
+    this.observer.reconnect();
   }
 
   , observeMutations: function () {

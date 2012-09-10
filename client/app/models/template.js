@@ -19,6 +19,12 @@ module.exports = Model.extend({
     return this.get("name");
   }
 
+  , setRegion: function (name, slug) {
+    var regions = this.get("regions");
+    regions[name] = slug;
+    this.set("regions", regions);
+  }
+
   , standards: [
       {
         name: "index"
