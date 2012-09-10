@@ -1,10 +1,17 @@
 describe Theme do
   before do
+    @user = StoreUser.new(
+      email: "test_user@example.com",
+      password: "test_password",
+      first_name: "Test",
+      last_name: "User"
+    )
+
     @valid_theme_zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
     @valid_attributes = {
       :name => "Some name",
       :description => "Description of some theme",
-      :author => StoreUser.first,
+      :author => @user
     }
   end
 
@@ -89,7 +96,7 @@ describe Theme do
     end
 
     it 'should create a new valid theme' do
-      @fork.author = StoreUser.first
+      @fork.author = @user
       @fork.should be_valid
     end
 
