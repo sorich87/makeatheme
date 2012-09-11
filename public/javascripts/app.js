@@ -487,9 +487,19 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
-      var collection = new Themes(app.data.themes);
+      var collection = new Themes(app.data.themes)
+        , alert = "";
+
+      if (window.MutationSummary === void 0) {
+        alert = "<div class='alert alert-error'>\
+          Although the themes built with our online editor work in any browser,\
+          the editor itself has been tested with the latest versions of\
+          <a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> only.\
+          Support for other browsers is coming soon.</div>";
+      }
 
       $("#main").empty()
+        .append(alert)
         .append(app.reuseView("faq").render().$el)
         .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
