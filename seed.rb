@@ -22,7 +22,8 @@ attrs = [
   {
     name: "Easel",
     author: author,
-    description: "Just some theme I threw together ;-)"
+    description: "Just some theme I threw together ;-)",
+    listed: true
   }
 ]
 

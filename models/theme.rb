@@ -22,6 +22,9 @@ class Theme
   field :version,     type: String
   field :description, type: String
   field :tags,        type: Array
+  field :listed,      type: Boolean,    default: false
+
+  default_scope where(listed: true)
 
   embeds_many :regions
   embeds_many :templates
