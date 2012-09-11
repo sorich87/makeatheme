@@ -18,6 +18,7 @@ put '/themes/:id' do
   forbid and return unless authenticated?
 
   theme = Theme.where(:id => params[:id]).first
+  theme = Theme.unscoped.where(:id => params[:id]).first
 
   status 404 and return if theme.nil?
 
