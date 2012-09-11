@@ -74,6 +74,14 @@ module ThemeArchive
     def compile_static_files(zipfile)
       @theme.needed_theme_files.each do |static_file|
         zipfile.get_output_stream(static_file.file_name) do |f|
+          if static_file.file_name == "style.css"
+            # Insert wordpress headers
+            f.puts "/*"
+            @theme.wordpress_headers.each do |key, value|
+              f.puts "#{key}: #{value}"
+            end
+            f.puts "*/"
+          end
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
         end

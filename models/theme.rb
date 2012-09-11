@@ -21,7 +21,7 @@ class Theme
   field :uri,         type: String
   field :version,     type: String
   field :description, type: String
-  field :tags,        type: Array
+  field :tags,        type: Array,      default: []
   field :listed,      type: Boolean,    default: false
 
   default_scope where(listed: true)
@@ -137,6 +137,21 @@ class Theme
   # Header images
   def header_images
     self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+  end
+
+  # Headers needed for Wordpress CSS
+  def wordpress_headers
+    {
+      'Theme Name' => self.name,
+      'Description' => self.description,
+      'Theme URI' => "http://thememy.com/themes/#{self.id}", # TODO: Fix this
+      'Author' => self.author.to_fullname,
+      'Author URI' => "http://thememy.com/users/#{self.author_id}", # TODO: Fix this
+      'Version' => self.version,
+      'Tags' => self.tags.join(', '),
+      'License' => '', # TODO: Fix this
+      'License URI' => ''
+    }
   end
 end
 
