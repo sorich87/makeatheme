@@ -10,13 +10,17 @@ module.exports = View.extend({
 
   , initialize: function () {
     this.bindEvents();
+    // Use this so we can re-render the view
+    // using another collection such as
+    // the user's themes.
+    this.allThemes = _.clone(this.collection);
   }
 
-  , render: function (filters) {
-    if (_.isEmpty(filters)) {
-      this.collection.reset(this.collection.models);
+  , render: function (collection) {
+    if (_.isEmpty(collection)) {
+      this.collection.reset(this.allThemes.models);
     } else {
-      this.collection.reset(this.collection.where(filters));
+      this.collection.reset(collection);
     }
 
     return this;

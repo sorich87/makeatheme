@@ -1,5 +1,6 @@
 // User model class.
-var Model = require("models/base/model");
+var Model = require("models/base/model")
+  , Themes = require("collections/themes");
 
 module.exports = Model.extend({
     defaults: {
@@ -8,6 +9,11 @@ module.exports = Model.extend({
     , email: ""
     , password: ""
     , password_confirmation: ""
+    , themes: []
+  }
+
+  , initialize: function() {
+    var collection = new Themes(this.attributes.themes);
   }
 
   , url: "/users"

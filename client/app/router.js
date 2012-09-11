@@ -13,13 +13,13 @@ module.exports = Backbone.Router.extend({
   }
 
   , index: function () {
-    var filters = {};
+    var collection = [];
     if (Backbone.history.fragment === "themes/mine") {
-      filters.author_id = app.currentUser.id;
+      collection = app.currentUser.attributes.themes;
     }
     $("#main").empty()
       .append(app.reuseView("faq").render().$el)
-      .append(app.reuseView("theme_list").render(filters).$el);
+      .append(app.reuseView("theme_list").render(collection).$el);
   }
 
   , theme: function (id) {

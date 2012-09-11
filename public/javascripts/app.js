@@ -424,7 +424,8 @@ window.require.define({"models/theme": function(exports, require, module) {
 
 window.require.define({"models/user": function(exports, require, module) {
   // User model class.
-  var Model = require("models/base/model");
+  var Model = require("models/base/model")
+    , Themes = require("collections/themes");
 
   module.exports = Model.extend({
       defaults: {
@@ -433,6 +434,11 @@ window.require.define({"models/user": function(exports, require, module) {
       , email: ""
       , password: ""
       , password_confirmation: ""
+      , themes: []
+    }
+
+    , initialize: function() {
+      var collection = new Themes(this.attributes.themes);
     }
 
     , url: "/users"
@@ -480,13 +486,13 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
-      var filters = {};
+      var collection = [];
       if (Backbone.history.fragment === "themes/mine") {
-        filters.author_id = app.currentUser.id;
+        collection = app.currentUser.attributes.themes;
       }
       $("#main").empty()
         .append(app.reuseView("faq").render().$el)
-        .append(app.reuseView("theme_list").render(filters).$el);
+        .append(app.reuseView("theme_list").render(collection).$el);
     }
 
     , theme: function (id) {
@@ -2040,13 +2046,17 @@ window.require.define({"views/theme_list": function(exports, require, module) {
 
     , initialize: function () {
       this.bindEvents();
+      // Use this so we can re-render the view
+      // using another collection such as
+      // the user's themes.
+      this.allThemes = _.clone(this.collection);
     }
 
-    , render: function (filters) {
-      if (_.isEmpty(filters)) {
-        this.collection.reset(this.collection.models);
+    , render: function (collection) {
+      if (_.isEmpty(collection)) {
+        this.collection.reset(this.allThemes.models);
       } else {
-        this.collection.reset(this.collection.where(filters));
+        this.collection.reset(collection);
       }
 
       return this;
