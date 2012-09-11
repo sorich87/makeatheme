@@ -4,7 +4,7 @@ var app = require("application")
 module.exports = Backbone.Router.extend({
   routes: {
       "": "index"
-    , "themes/mine": "index"
+    , "me/themes": "your_themes"
     , "themes/:id": "theme"
     , "editor/:file": "editor"
     , "login": "login"
@@ -14,15 +14,18 @@ module.exports = Backbone.Router.extend({
   }
 
   , index: function () {
-    var collection;
+    var collection = new Themes(app.data.themes);
 
-    if (Backbone.history.fragment === "themes/mine") {
-      collection = new Themes(app.currentUser.get("themes"));
-    } else {
-      collection = new Themes(app.data.themes);
-    }
     $("#main").empty()
       .append(app.reuseView("faq").render().$el)
+      .append(app.createView("theme_list", {collection: collection}).render().$el);
+  }
+
+  , your_themes: function () {
+    var collection = new Themes(app.currentUser.get("themes"));
+
+    $("#main").empty()
+      .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
       .append(app.createView("theme_list", {collection: collection}).render().$el);
   }
 

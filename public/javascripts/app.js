@@ -477,7 +477,7 @@ window.require.define({"router": function(exports, require, module) {
   module.exports = Backbone.Router.extend({
     routes: {
         "": "index"
-      , "themes/mine": "index"
+      , "me/themes": "your_themes"
       , "themes/:id": "theme"
       , "editor/:file": "editor"
       , "login": "login"
@@ -487,15 +487,18 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
-      var collection;
+      var collection = new Themes(app.data.themes);
 
-      if (Backbone.history.fragment === "themes/mine") {
-        collection = new Themes(app.currentUser.get("themes"));
-      } else {
-        collection = new Themes(app.data.themes);
-      }
       $("#main").empty()
         .append(app.reuseView("faq").render().$el)
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
+    }
+
+    , your_themes: function () {
+      var collection = new Themes(app.currentUser.get("themes"));
+
+      $("#main").empty()
+        .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
         .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
 
@@ -1765,7 +1768,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <a href=\"/themes/mine\" id=\"my_themes\">My themes</a>\n  <a href=\"/upload\" id=\"upload_theme\">Upload</a>\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
+    return "\n  <ul class=\"nav\">\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><a href=\"/upload\" id=\"upload_theme\">Upload</a></li>\n  </ul>\n  <button class=\"btn\" id=\"logout\">Log out</button>\n";}
 
   function program3(depth0,data) {
     
