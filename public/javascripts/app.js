@@ -304,8 +304,7 @@ window.require.define({"models/block": function(exports, require, module) {
     }
 
     , label: function () {
-      return this.get("name").replace("_", " ")
-        .replace(/(?:^|\s)\S/g, function (c) { return c.toUpperCase(); });
+      return _.str.humanize(this.get("name"));
     }
 
     , className: function () {
@@ -1473,7 +1472,7 @@ window.require.define({"views/regions": function(exports, require, module) {
         name = "footer";
       }
 
-      slug = this.$(".x-" + name + "-new input").val();
+      slug = _.str.slugify(this.$(".x-" + name + "-new input").val());
 
       if (!slug) {
         app.trigger("notification", "error", "Please, enter a " + name + " name.");

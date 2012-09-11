@@ -79,7 +79,7 @@ module.exports = View.extend({
       name = "footer";
     }
 
-    slug = this.$(".x-" + name + "-new input").val();
+    slug = _.str.slugify(this.$(".x-" + name + "-new input").val());
 
     if (!slug) {
       app.trigger("notification", "error", "Please, enter a " + name + " name.");
