@@ -20,7 +20,7 @@ describe "Theme customization" do
     if @theme.nil?
       zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
       @theme = Theme.new_from_zip(zip, @theme_attributes)
-      @theme.save
+      @theme.save!
     end
 
     @json = File.read('./spec/request/customization_request.json')
@@ -33,6 +33,8 @@ describe "Theme customization" do
 
   context "as an authenticated user" do
     before do
+      Kernel.stub!(:open)
+
       post '/session', @user_attributes.to_json
       put "/themes/#{@theme.id}", @json
       @theme.reload
