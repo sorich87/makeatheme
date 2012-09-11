@@ -37,12 +37,13 @@ class StoreUser
 
   def as_json(options={})
     {
-      id: id,
-      first_name: first_name,
-      last_name: last_name,
-      email: email,
-      created_at: created_at,
-      updated_at: updated_at
+      id: self.id,
+      first_name: self.first_name,
+      last_name: self.last_name,
+      email: self.email,
+      created_at: self.created_at,
+      updated_at: self.updated_at,
+      themes: self.themes.unscoped.as_json
     }
   end
 
