@@ -1403,7 +1403,7 @@ window.require.define({"views/regions": function(exports, require, module) {
     , collection: app.regions
 
     , events: {
-        "change .x-header-select, .x-footer-select": "showForm"
+        "change .x-header-select, .x-footer-select": "switchRegion"
       , "click .x-header-new button, .x-footer-new button": "addRegion"
     }
 
@@ -1424,24 +1424,48 @@ window.require.define({"views/regions": function(exports, require, module) {
       return this;
     }
 
-    , showForm: function (e) {
-      var region, $form;
+    , switchRegion: function (e) {
+      var name, slug, region;
 
       if (e.target.className.indexOf("header") != -1) {
-        region = "header";
+        name = "header";
       } else {
-        region = "footer";
+        name = "footer";
       }
 
-      if ($(e.target).val() === "") {
-        this.$(".x-" + region + "-new").show("slow");
-      } else {
-        this.$(".x-" + region + "-new").hide("slow");
+      slug = $(e.target).val();
+
+      this.toggleForm(name, slug);
+
+      if (slug) {
+        this.loadRegion(this.collection.getByName(name, slug));
       }
     }
 
+    , toggleForm: function (name, slug) {
+      if (slug) {
+        this.$(".x-" + name + "-new").hide("slow");
+      } else {
+        this.$(".x-" + name + "-new").show("slow");
+      }
+    }
+
+    , loadRegion: function (region) {
+      var name = region.get("name")
+        , slug = region.get("slug");
+
+      app.trigger("regionLoad", region);
+
+      this.template.setRegion(name, slug);
+
+      $("#page").children(name)[0].outerHTML = region.get("build");
+      $("#page").children(name).fadeOut().fadeIn();
+
+      app.trigger("regionLoaded", region);
+    }
+
     , addRegion: function (e) {
-      var name, slug, region;
+      var name, slug, region, $element;
 
       if (e.currentTarget.className.indexOf("header") != -1) {
         name = "header";
@@ -1461,9 +1485,7 @@ window.require.define({"views/regions": function(exports, require, module) {
 
       region = new Region(attributes);
       this.collection.add(region);
-      this.template.setRegion(name, slug);
-
-      $("#page").children(name)[0].outerHTML = attributes.build;
+      this.loadRegion(region);
 
       $(e.currentTarget).parent().hide("slow");
 
@@ -1473,16 +1495,12 @@ window.require.define({"views/regions": function(exports, require, module) {
     , addOne: function (region) {
       var slug;
 
-      app.trigger("regionLoad", region);
-
       slug = region.get("slug");
 
       this.$(".x-" + region.get("name") + "-select")
         .children(":selected").removeAttr("selected").end()
         .children("[value='']")
           .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
-
-      app.trigger("regionLoaded", region);
     }
   });
   
