@@ -6,22 +6,12 @@ var View = require("views/base/view")
 module.exports = View.extend({
     el: $("<ul class='thumbnails'></ul>")
 
-  , collection: new Themes(app.data.themes)
-
   , initialize: function () {
     this.bindEvents();
-    // Use this so we can re-render the view
-    // using another collection such as
-    // the user's themes.
-    this.allThemes = _.clone(this.collection);
   }
 
-  , render: function (collection) {
-    if (_.isEmpty(collection)) {
-      this.collection.reset(this.allThemes.models);
-    } else {
-      this.collection.reset(collection);
-    }
+  , render: function () {
+    this.collection.reset(this.collection.models);
 
     return this;
   }

@@ -471,7 +471,8 @@ window.require.define({"models/user": function(exports, require, module) {
 }});
 
 window.require.define({"router": function(exports, require, module) {
-  var app = require("application");
+  var app = require("application")
+    , Themes = require("collections/themes");
 
   module.exports = Backbone.Router.extend({
     routes: {
@@ -486,13 +487,16 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
-      var collection = [];
+      var collection;
+
       if (Backbone.history.fragment === "themes/mine") {
-        collection = app.currentUser.attributes.themes;
+        collection = new Themes(app.currentUser.get("themes"));
+      } else {
+        collection = new Themes(app.data.themes);
       }
       $("#main").empty()
         .append(app.reuseView("faq").render().$el)
-        .append(app.reuseView("theme_list").render(collection).$el);
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
 
     , theme: function (id) {
@@ -2042,22 +2046,12 @@ window.require.define({"views/theme_list": function(exports, require, module) {
   module.exports = View.extend({
       el: $("<ul class='thumbnails'></ul>")
 
-    , collection: new Themes(app.data.themes)
-
     , initialize: function () {
       this.bindEvents();
-      // Use this so we can re-render the view
-      // using another collection such as
-      // the user's themes.
-      this.allThemes = _.clone(this.collection);
     }
 
-    , render: function (collection) {
-      if (_.isEmpty(collection)) {
-        this.collection.reset(this.allThemes.models);
-      } else {
-        this.collection.reset(collection);
-      }
+    , render: function () {
+      this.collection.reset(this.collection.models);
 
       return this;
     }
