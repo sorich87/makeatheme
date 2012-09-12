@@ -11,7 +11,7 @@ unless author
   )
 end
 
-fixture_file = File.join('.', 'seed/basic_valid_theme.zip')
+fixture_file = File.join(File.dirname(__FILE__), 'themes', 'twentyelevenx.zip')
 unless File.exists?(fixture_file)
   puts "Fixture file not present... exiting. (#{fixture_file})"
   exit
@@ -20,9 +20,9 @@ end
 # Add more samples if you want
 attrs = [
   {
-    name: "Easel",
+    name: "Twenty Eleven X",
     author: author,
-    description: "Just some theme I threw together ;-)",
+    description: "The 2011 WordPress theme adapted to ThemeMy online theme editor.",
     listed: true
   }
 ]

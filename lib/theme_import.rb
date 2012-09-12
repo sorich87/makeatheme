@@ -56,7 +56,7 @@ module ThemeImport
     def parse_entry(zip_file)
       filename = File.basename(zip_file.to_s)
 
-      if filename =~ /\A[\w-]+\.html\z/
+      if filename =~ /\A[\w-]+\.liquid\z/
         add_stored_file(zip_file)
       elsif filename =~ /\A[^\.]+/ # Ignore dotted files or __MACOSX files & such
         add_static_file(zip_file)
@@ -72,7 +72,7 @@ module ThemeImport
           # themename/index.html
           # We want to ignore the themename/ later when
           # saving the static files
-          @zip_folder = entry.to_s.split("index.html")[0]
+          @zip_folder = entry.to_s.split("index.liquid")[0]
         end
 
         if match = /\A(header|footer)(-)?(.*)/.match(template_name)
