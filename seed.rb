@@ -11,7 +11,7 @@ unless author
   )
 end
 
-fixture_file = File.join('.', 'spec/fixtures/themes/basic_valid_theme.zip')
+fixture_file = File.join('.', 'seed/basic_valid_theme.zip')
 unless File.exists?(fixture_file)
   puts "Fixture file not present... exiting. (#{fixture_file})"
   exit
