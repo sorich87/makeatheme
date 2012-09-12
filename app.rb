@@ -1,8 +1,10 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'lib'))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'models'))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'helpers'))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'routes'))
+APP_ROOT = File.dirname(__FILE__)
+
+$LOAD_PATH.unshift(APP_ROOT)
+$LOAD_PATH.unshift(File.join(APP_ROOT, 'lib'))
+$LOAD_PATH.unshift(File.join(APP_ROOT, 'models'))
+$LOAD_PATH.unshift(File.join(APP_ROOT, 'helpers'))
+$LOAD_PATH.unshift(File.join(APP_ROOT, 'routes'))
 
 require 'sinatra'
 require 'sinatra/session'
