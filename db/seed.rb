@@ -1,5 +1,3 @@
-require './app'
-
 author = StoreUser.first
 
 unless author
@@ -11,9 +9,9 @@ unless author
   )
 end
 
-fixture_file = File.join(File.dirname(__FILE__), 'themes', 'twentyelevenx.zip')
-unless File.exists?(fixture_file)
-  puts "Fixture file not present... exiting. (#{fixture_file})"
+theme_file = File.join(File.dirname(__FILE__), 'themes', 'twentyelevenx.zip')
+unless File.exists?(theme_file)
+  puts "Theme file not present... exiting. (#{theme_file})"
   exit
 end
 
@@ -27,11 +25,9 @@ attrs = [
   }
 ]
 
-Theme.all.each {|t| t.destroy }
-
 attrs.each do |theme_attr|
   next if Theme.where(theme_attr).first
-  t = Theme.new_from_zip(fixture_file, theme_attr)
+  t = Theme.new_from_zip(theme_file, theme_attr)
 
   if t.valid?
     t.save
