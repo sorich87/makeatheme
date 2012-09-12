@@ -24,6 +24,7 @@ Dir["config/initializers/*.rb"].each {|file| require file }
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 set :json_encoder, JSON
+set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/33
 
 configure :development do
   require 'config/environments/development'
