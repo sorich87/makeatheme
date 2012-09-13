@@ -1,4 +1,6 @@
 require 'zip/zip'
+require 'pathname'
+require 'erb'
 
 module ThemeArchive
 
@@ -27,6 +29,7 @@ module ThemeArchive
         compile_regions(zipfile)
         compile_templates(zipfile)
         compile_static_files(zipfile)
+        compile_php_files(zipfile)
       end
     end
 
@@ -84,6 +87,24 @@ module ThemeArchive
           end
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
+        end
+      end
+    end
+
+    def compile_php_files(zipfile)
+      # Find all PHP files in views/themes and get their path relative
+      # to our APP_ROOT so we know which folder they'll go in.
+      view_root = Pathname.new(File.join(APP_ROOT, 'views', 'themes'))
+      Dir[File.join(APP_ROOT, 'views', 'themes', '**/*.php.erb')].each do |erb_file|
+        file_path = Pathname.new(erb_file)
+        zip_path = file_path.relative_path_from(view_root).to_s.split('.erb').first
+
+        # Just compile the .erb files for now
+        template = ERB.new(File.read(file_path))
+
+        # Add it to the zipfile
+        zipfile.get_output_stream(zip_path) do |f|
+          f.puts template.result
         end
       end
     end
