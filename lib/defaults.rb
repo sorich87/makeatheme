@@ -26,11 +26,7 @@ module Defaults
   </ul>
 </nav>),
 
-      search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
-  <label for="s" class="assistive-text">Search</label>
-  <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
-  <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
-</form>),
+      search_form: "<?php get_search_form(); ?>",
 
       article: %q(<article class="page hentry">
   <header class="entry-header">
