@@ -130,7 +130,7 @@ class Theme
     !author?(user) && private?
   end
 
-  def path
+  def slug
     self.name.gsub(/[^0-9A-Za-z]/, '').downcase
   end
 

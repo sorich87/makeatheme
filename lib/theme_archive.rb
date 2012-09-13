@@ -15,7 +15,7 @@ module ThemeArchive
       @base = {}
       @base.merge!(Defaults::PHP::CONTENT)
 
-      @path = File.join(Dir.mktmpdir, "./#{@theme.path}.zip")
+      @path = File.join(Dir.mktmpdir, "./#{@theme.slug}.zip")
 
       create_zip
     end
