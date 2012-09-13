@@ -1,12 +1,11 @@
-APP_ROOT = File.dirname(__FILE__)
-
-$LOAD_PATH.unshift(APP_ROOT)
-$LOAD_PATH.unshift(File.join(APP_ROOT, 'lib'))
-$LOAD_PATH.unshift(File.join(APP_ROOT, 'models'))
-$LOAD_PATH.unshift(File.join(APP_ROOT, 'helpers'))
-$LOAD_PATH.unshift(File.join(APP_ROOT, 'routes'))
-
 require 'sinatra'
+
+$LOAD_PATH.unshift(settings.root)
+$LOAD_PATH.unshift(File.join(settings.root, 'lib'))
+$LOAD_PATH.unshift(File.join(settings.root, 'models'))
+$LOAD_PATH.unshift(File.join(settings.root, 'helpers'))
+$LOAD_PATH.unshift(File.join(settings.root, 'routes'))
+
 require 'sinatra/session'
 require 'sinatra/respond_with'
 require 'mongoid'
