@@ -6,7 +6,12 @@ get '/themes' do
 end
 
 get '/themes/:id' do
-  theme = Theme.find(params[:id])
+  theme = Theme.unscoped.find(params[:id])
+
+  halt 404 unless theme
+
+  forbid and return if theme.preview_only?(current_user)
+
   if theme
     respond_with theme
   else
@@ -78,10 +83,12 @@ end
 # and dummy content inserted
 # Double render because regions contain tags
 get '/editor/:theme', provides: 'html' do
-  theme = Theme.find(params[:theme])
+  theme = Theme.unscoped.find(params[:theme])
 
   # Return 404 if no theme found.
   halt 404 unless theme
+
+  forbid and return if theme.preview_only?(current_user)
 
   preview_only = theme.preview_only?(current_user)
 
