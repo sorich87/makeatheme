@@ -6,7 +6,9 @@ module ThemeHelper
 
     locals = Defaults::HTML::CONTENT
 
-    locals[:header_image_url] = theme.header_images.first.file.url
+    unless theme.header_images.empty?
+      locals[:header_image_url] = theme.header_images.first.file.url
+    end
 
     xid = 0
     [:blocks, :regions, :templates].each do |type|
