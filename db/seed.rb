@@ -18,9 +18,7 @@ end
 # Add more samples if you want
 attrs = [
   {
-    name: "Twenty Eleven X",
     author: author,
-    description: "The 2011 WordPress theme adapted to ThemeMy online theme editor.",
     listed: true
   }
 ]
