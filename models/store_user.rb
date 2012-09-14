@@ -1,4 +1,5 @@
 require 'bcrypt'
+require 'active_support'
 
 class StoreUser
   include Mongoid::Document
@@ -9,6 +10,7 @@ class StoreUser
   field :email, :type => String
   field :password_hash, :type => String
   field :password_salt, :type => String
+  field :password_reset_token, :type => String
 
   attr_accessor :password
 
@@ -46,6 +48,12 @@ class StoreUser
       themes: self.themes.unscoped.as_json
     }
   end
+
+  def generate_password_reset_token!
+    self.password_reset_token = SecureRandom.hex(40)
+    self.save
+  end
+
 
   private
   def generate_password_hash
