@@ -1538,7 +1538,7 @@ window.require.define({"views/register": function(exports, require, module) {
     , model: app.currentUser
 
     , events: {
-      "click .submit": "createUser"
+      "submit form": "createUser"
     }
 
     , initialize: function () {
