@@ -156,16 +156,12 @@ class Theme
   end
 
   def set_import_attributes(attributes)
-    # alias_attribute seems to be broken.
-    aliases = {:theme_name => :name}
-
-    [:theme_name, :description, :tags].each do |attr|
+    [:name, :description, :tags].each do |attr|
       if attr == :tags
         val = attributes[attr].is_a?(String) ? CSV.parse_line(attributes[attr]) : attributes[attr]
         self.tags = val
       else
-        self_attr = aliases[attr] ? aliases[attr] : attr
-        self[self_attr] = attributes[attr]
+        self[attr] = attributes[attr]
       end
     end
   end
