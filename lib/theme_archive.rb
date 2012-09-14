@@ -8,6 +8,11 @@ module ThemeArchive
     File.open(Archive.new(self).path) { |file| self.archive = file }
   end
 
+  def generate_archive!
+    self.generate_archive
+    self.save
+  end
+
   class Archive
     def initialize(theme)
       @theme = theme
@@ -30,6 +35,7 @@ module ThemeArchive
         compile_templates(zipfile)
         compile_static_files(zipfile)
         compile_php_files(zipfile)
+        compile_screenshot(zipfile)
       end
     end
 
@@ -106,6 +112,15 @@ module ThemeArchive
         zipfile.get_output_stream(zip_path) do |f|
           f.puts template.result
         end
+      end
+    end
+
+    # Include screenshot file in archive
+    # Sometimes the screenshot may not be up to date,
+    # we will bother about that when screenshot generation is moved to a background job
+    def compile_screenshot(zipfile)
+      zipfile.get_output_stream('screenshot.png') do |f|
+        f.puts open(@theme.screenshot.url(:thumb)).read if @theme.screenshot.file?
       end
     end
 

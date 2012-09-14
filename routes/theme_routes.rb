@@ -31,15 +31,14 @@ put '/themes/:id' do
   theme.regions = params['regions'].map { |region| Region.new(region) }
   theme.templates = params['templates'].map { |template| Template.new(template) }
 
-  if theme.valid?
-    theme.generate_archive
-    theme.save
-
+  if theme.save
     # Generate screenshot. Should be later moved to a background job.
     begin
       open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
     rescue
     end
+
+    theme.generate_archive!
 
     status 201
     respond_with theme
@@ -119,6 +118,9 @@ get '/screenshot/:theme', provides: 'html' do
   theme = Theme.find(params[:theme])
 
   halt 404 unless theme
+
+  # Don't do anything, if screenshot was updated less than 30s ago
+  halt 200 if theme.screenshot_updated_at > Time.now - 30
 
   script = File.join(settings.root, 'script', 'rasterize.js')
   url = url("/editor/#{theme.id}")
