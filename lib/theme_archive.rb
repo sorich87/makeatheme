@@ -36,6 +36,7 @@ module ThemeArchive
         compile_static_files(zipfile)
         compile_php_files(zipfile)
         compile_screenshot(zipfile)
+        #add_theme_info(zipfile)
       end
     end
 
@@ -121,6 +122,18 @@ module ThemeArchive
     def compile_screenshot(zipfile)
       zipfile.get_output_stream('screenshot.png') do |f|
         f.puts open(@theme.screenshot.url(:thumb)).read if @theme.screenshot.file?
+      end
+    end
+
+    # This one can just sit here in case we need it.
+    def add_theme_info(zipfile)
+      zipfile.get_output_stream('theme.info') do |f|
+        # The conversion from Mongoid::BSON::Document is a bit sad
+        info = {
+          }.merge(
+        @theme.attributes.symbolize_keys.slice(:name, :description, :tags).
+           to_hash.stringify_keys
+        YAML.dump(info, f)
       end
     end
 
