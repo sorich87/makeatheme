@@ -1110,7 +1110,7 @@ window.require.define({"views/login": function(exports, require, module) {
     , model: app.currentUser
 
     , events: {
-      "click button[type=submit]": "loginUser"
+      "submit form": "loginUser"
     }
 
     , loginUser: function (e) {

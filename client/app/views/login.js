@@ -7,7 +7,7 @@ module.exports = View.extend({
   , model: app.currentUser
 
   , events: {
-    "click button[type=submit]": "loginUser"
+    "submit form": "loginUser"
   }
 
   , loginUser: function (e) {
