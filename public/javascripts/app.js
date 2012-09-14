@@ -2170,7 +2170,7 @@ window.require.define({"views/templates/theme_upload": function(exports, require
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"name\">Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"name\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"description\">Description</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"description\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\"></label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Submit theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\"></label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Submit theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
 }});
 
 window.require.define({"views/theme": function(exports, require, module) {
@@ -2228,7 +2228,8 @@ window.require.define({"views/theme_list": function(exports, require, module) {
 }});
 
 window.require.define({"views/theme_upload": function(exports, require, module) {
-  var View = require("views/base/view");
+  var View = require("views/base/view")
+    , app = require("application");;
 
   module.exports = View.extend({
       className: "modal"
@@ -2243,14 +2244,21 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $.ajax({
           type: "POST"
+        , contentType: "application/json;charset=UTF-8"
         , url: "/themes"
         , data: new FormData(this.$("form")[0])
         , success: function(data, textStatus, jqXHR) {
-          console.log(data, textStatus, jqXHR);
-        }
+          this.$el.modal("hide");
+          app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
+          // TODO: This is so wrong I want to cry.
+          window.location = "/themes/" + data._id;
+        }.bind(this)
+
         , error: function(jqXHR, textStatus, errorThrown) {
-          console.log(jqXHR, textStatus, errorThrown);
-        }
+          this.$el.modal("hide");
+          app.trigger("notification", "error", "The theme you provided was not valid.");
+        }.bind(this)
+
         , cache: false
         , contentType: false
         , processData: false
