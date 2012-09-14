@@ -48,7 +48,7 @@ put '/themes/:id' do
   end
 end
 
-post '/themes' do
+post '/themes', provides: 'json' do
   forbid and return unless authenticated?
 
   file = params[:file]

@@ -13,6 +13,7 @@ module.exports = View.extend({
 
     $.ajax({
         type: "POST"
+      , contentType: "application/json;charset=UTF-8"
       , url: "/themes"
       , data: new FormData(this.$("form")[0])
       , success: function(data, textStatus, jqXHR) {
