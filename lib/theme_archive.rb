@@ -135,7 +135,7 @@ module ThemeArchive
         # The conversion from Mongoid::BSON::Document is a bit sad
         info = {
           }.merge(
-        @theme.attributes.symbolize_keys.slice(:name, :description, :tags).
+        @theme.attributes.symbolize_keys.slice(:name, :description, :tags)).
            to_hash.stringify_keys
         YAML.dump(info, f)
       end
