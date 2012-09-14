@@ -65,9 +65,8 @@ module ThemeArchive
           # convert 'article' tag to 'article-slug' for index, single and page templates
           content = template[:template]
           if %w(index single page).include?(template.name)
-            content.gsub!(/\{\{(.+?)\}\}/) do |match|
-              tag = $1.strip
-              if tag == 'article' then "{{#{tag}-#{template.slug}}}" else match end
+            content.gsub!(/\{\{\s?(.+?)\s?\}\}/) do |match|
+              if $1 == 'article' then "{{#{$1}-#{template.slug}}}" else match end
             end
           end
 
