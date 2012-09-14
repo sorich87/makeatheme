@@ -149,8 +149,8 @@ class Theme
       'Author URI' => "http://thememy.com/users/#{self.author_id}", # TODO: Fix this
       'Version' => self.version,
       'Tags' => self.tags.join(', '),
-      'License' => '', # TODO: Fix this
-      'License URI' => ''
+      'License' => 'GNU General Public License v2',
+      'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
     }
   end
 end
