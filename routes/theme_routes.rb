@@ -48,21 +48,14 @@ put '/themes/:id' do
   end
 end
 
-post '/themes', provides: 'json' do
+post '/themes' do
   forbid and return unless authenticated?
 
   file = params[:file]
-  if file.nil?
-    status 400
-    respond_with :error => "Attach a .zip-file and attributes for your theme."
-    return
-  end
 
-  attributes = {
-    author: current_user
-  }.merge(params.slice('name', 'description', 'tags'))
+  status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
 
-  theme = Theme.new_from_zip(file[:tempfile], attributes)
+  theme = Theme.new_from_zip(file[:tempfile], author: current_user)
 
   if theme.valid?
     theme.save
