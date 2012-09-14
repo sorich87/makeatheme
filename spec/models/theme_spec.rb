@@ -9,8 +9,6 @@ describe Theme do
 
     @valid_theme_zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
     @valid_attributes = {
-      :name => "Some name",
-      :description => "Description of some theme",
       :author => @user
     }
   end
