@@ -88,7 +88,7 @@ describe Theme do
   context 'forking' do
     before do
       @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
-      @theme.save
+      @theme.save!
 
       @fork = @theme.fork
     end
