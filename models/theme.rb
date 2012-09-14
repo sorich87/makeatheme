@@ -13,7 +13,7 @@ class Theme
   include Mongoid::Timestamps
   include Paperclip::Glue
   include ThemeArchive
-  extend ThemeImport
+  include ThemeImport
 
   paginates_per 16
 
@@ -44,6 +44,7 @@ class Theme
   field :archive_updated_at,   :type => DateTime
 
   validates_presence_of [:name, :author, :description]
+  validates_with ThemeValidator
 
   belongs_to :theme_file_group, :dependent => :destroy
   has_many :static_theme_files

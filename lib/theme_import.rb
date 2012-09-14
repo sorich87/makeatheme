@@ -1,49 +1,54 @@
 require 'zip/zip'
 require 'yaml'
 require 'csv'
+require 'nokogiri'
 
 module ThemeImport
-
-  # TODO: Add validations & error handling
-  def new_from_zip(zip_file, attributes = {})
-    theme = self.new(attributes)
-
-    begin
-      import = Import.new(zip_file)
-
-      theme.templates = import.templates
-      theme.regions = import.regions
-      theme.write_attributes(import.attributes)
-
-      if theme.valid?
-        group = theme.build_theme_file_group
-
-        import.static_files.each do |static_file|
-          static_file = StaticThemeFile.new(
-            :file_name => static_file[:filename],
-            :file => static_file[:tempfile]
-          )
-          # Pass invalid files
-          if static_file.valid?
-            group.static_theme_files << static_file
-            theme.static_theme_files << static_file
-            static_file.save
-          end
-        end
-
-        group.save
-      end
-    ensure
-      import.static_files.each do |static_file|
-        static_file[:tempfile].close
-        File.unlink(static_file[:tempfile])
-      end
-    end
-
-    theme
+  def self.included receiver
+    receiver.extend ClassMethods
   end
 
-  class Import
+  module ClassMethods
+    def new_from_zip(zip_file, attributes = {})
+      theme = self.new(attributes)
+
+      begin
+        import = ThemeImport.new(zip_file)
+
+        theme.templates = import.templates
+        theme.regions = import.regions
+        theme.write_attributes(import.attributes)
+
+        if theme.valid?
+          group = theme.build_theme_file_group
+
+          import.static_files.each do |static_file|
+            static_file = StaticThemeFile.new(
+              :file_name => static_file[:filename],
+              :file => static_file[:tempfile]
+            )
+            # Pass invalid files
+            if static_file.valid?
+              group.static_theme_files << static_file
+              theme.static_theme_files << static_file
+              static_file.save
+            end
+          end
+
+          group.save
+        end
+      ensure
+        import.static_files.each do |static_file|
+          static_file[:tempfile].close
+          File.unlink(static_file[:tempfile])
+        end
+      end
+
+      theme
+    end
+  end
+
+  class ThemeImport
     def initialize(zip_file)
       @zip_file = zip_file
       @templates = []
@@ -167,6 +172,36 @@ module ThemeImport
     def fix_static_filenames
       @static_files.each_with_index do |file, index|
         @static_files[index][:filename] = file[:filename].split(@zip_folder).last
+      end
+    end
+  end
+
+  class ThemeValidator < ::ActiveModel::Validator
+    def validate(record)
+      require_index(record)
+      validate_regions(record)
+    end
+
+    private
+
+    def require_index(record)
+      index_found = false
+
+      record.templates.each do |template|
+        index_found = true and break if template.name == 'index'
+      end
+
+      record.errors[:base] = 'Index template is required' unless index_found
+    end
+
+    def validate_regions(record)
+      record.regions.each do |region|
+        doc = Nokogiri::HTML::DocumentFragment.parse(region.template)
+        top_tags = doc.children.select { |node| node.is_a?(Nokogiri::XML::Element) }
+
+        unless top_tags.length == 1 && top_tags.first.name.downcase == region.name
+          record.errors[:base] = "#{region.name} should be the only top level tag in #{region.name}-#{region.slug}"
+        end
       end
     end
   end
