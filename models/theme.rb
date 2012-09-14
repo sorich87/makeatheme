@@ -161,7 +161,7 @@ class Theme
 
     [:theme_name, :description, :tags].each do |attr|
       if attr == :tags
-        val = CSV.parse_line(attributes[attr])
+        val = attributes[attr].is_a?(String) ? CSV.parse_line(attributes[attr]) : attributes[attr]
         self.tags = val
       else
         self_attr = aliases[attr] ? aliases[attr] : attr
