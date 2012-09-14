@@ -482,6 +482,7 @@ window.require.define({"router": function(exports, require, module) {
       , "editor/:file": "editor"
       , "login": "login"
       , "register": "register"
+      , "reset_password": "reset_password"
       , "upload": "upload"
       , "*actions": "notFound"
     }
@@ -557,6 +558,15 @@ window.require.define({"router": function(exports, require, module) {
       $("body").removeClass("modal-open")
         .find(".modal, .modal-backdrop").remove().end()
         .append(app.reuseView("register").render().$el.modal("show"));
+    }
+
+    , reset_password: function () {
+      // Remove all modals and show the 'reset_password' one
+      // We could use modal("hide") here but it would trigger
+      // events which we don't want
+      $("body").removeClass("modal-open")
+        .find(".modal, .modal-backdrop").remove().end()
+        .append(app.reuseView("reset_password").render().$el.modal("show"));
     }
 
     , upload: function () {
@@ -1589,6 +1599,126 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/reset_password": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+      className: "modal"
+    , template: "reset_password"
+    , model: app.currentUser
+
+    , events: {
+      "submit form#password_reset_step1": "initiatePasswordReset",
+      "submit form#password_reset_step2": "createPasswordReset"
+    }
+
+    , initiatePasswordReset: function (e) {
+      e.preventDefault();
+
+      if (this.validateStepOneInputs()) {
+        this.initiateReset();
+      }
+    }
+
+    , createPasswordReset: function (e) {
+      e.preventDefault();
+
+      if (this.validateStepTwoInputs()) {
+        this.createReset();
+      }
+    }
+
+    , validateStepOneInputs: function () {
+      var valid = true;
+
+      this.$("form#password_reset_step1 input").each(function (i, element) {
+        var attr = element.getAttribute("name");
+
+        if (element.value === "") {
+          var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " can't be blank";
+          Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
+
+          valid = false;
+        }
+      }.bind(this));
+
+      return valid;
+    }
+
+    , validateStepTwoInputs: function () {
+      var valid = true;
+
+      this.$("form#password_reset_step2 input").each(function (i, element) {
+        var attr = element.getAttribute("name");
+
+        if (element.value === "") {
+          var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " can't be blank";
+          Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
+
+          valid = false;
+        }
+      }.bind(this));
+
+      return valid;
+    }
+
+    , initiateReset: function () {
+      var email = this.$("input[name=email]")[0].value;
+
+      $.ajax({
+          contentType: "application/json;charset=UTF-8"
+        , dataType: "json"
+        , type: "PUT"
+        , url: "/users/"+email+"/initiate_password_reset"
+       , complete: function (jqXHR, textStatus) {
+          switch (jqXHR.status) {
+            case 204:
+            this.initiateStepTwo();
+            break;
+
+            case 404:
+              window.location = "/404"
+            break;
+          }
+        }.bind(this)
+      });
+    }
+
+    , initiateStepTwo: function () {
+      this.$("form#password_reset_step1").addClass("hidden");
+      this.$("form#password_reset_step2").removeClass("hidden");
+    }
+
+    , createReset: function () {
+      var token = this.$("input[name=reset_token]")[0].value;
+
+      $.ajax({
+          contentType: "application/json;charset=UTF-8"
+        , dataType: "json"
+        , type: "PUT"
+        , url: "/users/"+token+"/reset_password"
+       , complete: function (jqXHR, textStatus) {
+          switch (jqXHR.status) {
+            case 200:
+              var response = JSON.parse(jqXHR.responseText);
+              this.model.set(response);
+              this.$el.modal("hide");
+              app.trigger("notification", "success", "You have been logged in, please change your password.");
+            break;
+
+            case 404:
+              window.location = "/404"
+            break;
+          }
+        }.bind(this)
+      });
+    }
+
+  });
+  
+}});
+
 window.require.define({"views/share_link": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application");
@@ -1814,7 +1944,7 @@ window.require.define({"views/templates/login": function(exports, require, modul
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"\" data-replace=\"true\">Reset</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"/reset_password\" data-replace=\"true\">Reset password</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -1914,6 +2044,15 @@ window.require.define({"views/templates/register": function(exports, require, mo
 
 
     return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create an account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n  </ul>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/reset_password": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset_step1\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <form class=\"form-horizontal hidden\" id=\"password_reset_step2\">\n    <fieldset>\n      <p>A token to reset your password has been sent to your email. Please insert it\n         into the field below.</p>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"reset_token\">Password Reset Token</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"reset_token\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Reset password</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Log in <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/share_link": function(exports, require, module) {

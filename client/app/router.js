@@ -9,6 +9,7 @@ module.exports = Backbone.Router.extend({
     , "editor/:file": "editor"
     , "login": "login"
     , "register": "register"
+    , "reset_password": "reset_password"
     , "upload": "upload"
     , "*actions": "notFound"
   }
@@ -84,6 +85,15 @@ module.exports = Backbone.Router.extend({
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
       .append(app.reuseView("register").render().$el.modal("show"));
+  }
+
+  , reset_password: function () {
+    // Remove all modals and show the 'reset_password' one
+    // We could use modal("hide") here but it would trigger
+    // events which we don't want
+    $("body").removeClass("modal-open")
+      .find(".modal, .modal-backdrop").remove().end()
+      .append(app.reuseView("reset_password").render().$el.modal("show"));
   }
 
   , upload: function () {
