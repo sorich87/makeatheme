@@ -1,4 +1,5 @@
 require 'zip/zip'
+require 'yaml'
 
 module ThemeImport
 
@@ -11,6 +12,7 @@ module ThemeImport
 
       theme.templates = import.templates
       theme.regions = import.regions
+      theme.set_import_attributes(import.attributes)
 
       if theme.valid?
         group = theme.build_theme_file_group
@@ -46,6 +48,7 @@ module ThemeImport
       @templates = []
       @regions = []
       @static_files = []
+      @attributes = {}
 
       Zip::ZipFile.foreach(zip_file) { |entry| parse_entry(entry) if entry.file? }
 
@@ -58,6 +61,8 @@ module ThemeImport
 
       if filename =~ /\A[\w-]+\.liquid\z/
         add_stored_file(zip_file)
+      elsif filename =~ /\Atheme\.info\z/
+        read_theme_info_file(zip_file)
       elsif filename =~ /\A[^\.]+/ # Ignore dotted files or __MACOSX files & such
         add_static_file(zip_file)
       end
@@ -112,6 +117,12 @@ module ThemeImport
       }
     end
 
+    def read_theme_info_file(entry)
+      entry.get_input_stream do |entry_file|
+        @attributes = YAML::load(entry_file.read).symbolize_keys
+      end
+    end
+
     def regions
       @regions
     end
@@ -122,6 +133,10 @@ module ThemeImport
 
     def static_files
       @static_files
+    end
+
+    def attributes
+      @attributes
     end
 
     def get_region_name(filename)

@@ -7,6 +7,7 @@ require 'static_theme_file'
 require 'set'
 require 'region'
 require 'template'
+require 'csv'
 
 class Theme
   include Mongoid::Document
@@ -152,6 +153,21 @@ class Theme
       'License' => '', # TODO: Fix this
       'License URI' => ''
     }
+  end
+
+  def set_import_attributes(attributes)
+    # alias_attribute seems to be broken.
+    aliases = {:theme_name => :name}
+
+    [:theme_name, :description, :tags].each do |attr|
+      if attr == :tags
+        val = CSV.parse_line(attributes[attr])
+        self.tags = val
+      else
+        self_attr = aliases[attr] ? aliases[attr] : attr
+        self[self_attr] = attributes[attr]
+      end
+    end
   end
 end
 
