@@ -2240,9 +2240,13 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
     }
 
     , sendFormData: function (e) {
-      var $form = this.$("form");
+      var $form = this.$("form")
+        , button = this.$("button[type=submit]")[0];
 
       e.preventDefault();
+
+      button.setAttribute("disabled", "true");
+      button.innerHTML = "Uploading... Please wait.";
 
       $form.children(".alert-error").remove();
 
@@ -2251,11 +2255,13 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
         , url: "/themes"
         , data: new FormData($form[0])
         , success: function (data, textStatus, jqXHR) {
-          this.$el.modal("hide");
+          // Remove modal without evant
+          $("body").removeClass("modal-open")
+            .find(".modal, .modal-backdrop").remove();
 
           app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
-          // TODO: This is so wrong I want to cry.
-          window.location = "/themes/" + data._id;
+
+          Backbone.history.navigate("/themes/" + data._id, true);
         }.bind(this)
 
         , error: function (jqXHR, textStatus, errorThrown) {
@@ -2264,6 +2270,9 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
           for (i in response) {
             $form.prepend("<p class='alert alert-error'>" + response[i] + "</p>");
           }
+
+          button.removeAttribute("disabled");
+          button.innerHTML = "Upload Theme";
         }
 
         , cache: false
