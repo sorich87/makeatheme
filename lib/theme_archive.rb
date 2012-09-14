@@ -62,9 +62,15 @@ module ThemeArchive
             footer = "<?php get_footer('#{template.regions[:footer]}'); ?>"
           end
 
+          # convert 'article' tag to 'article-slug' for index, single and page templates
           content = template[:template]
           if %w(index single page).include?(template.name)
             content.gsub!(/\{\{(.+?)\}\}/) { "{{#{$1.strip}-#{template.slug}}}" }
+          end
+
+          # Add template name comment before header if template is not a default one.
+          unless Defaults::WP::TEMPLATES.include?(template.name)
+            header = "/**\n * Template Name: #{template.name}\n */\n" + header
           end
 
           f.puts render_template(header + content + footer, @base)

@@ -233,4 +233,10 @@ if ( ! empty( $header_image ) ) : ?>
 </html>)
     }
   end
+
+  module WP
+    TEMPLATES = %w(home front-page image video audio text plain text_plain
+                   attachment single-attachment single page category tag
+                   taxonomy author date archive search 404 index)
+  end
 end
