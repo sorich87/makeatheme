@@ -1,5 +1,6 @@
 require 'zip/zip'
 require 'yaml'
+require 'csv'
 
 module ThemeImport
 
@@ -12,7 +13,7 @@ module ThemeImport
 
       theme.templates = import.templates
       theme.regions = import.regions
-      theme.set_import_attributes(import.attributes)
+      theme.write_attributes(import.attributes)
 
       if theme.valid?
         group = theme.build_theme_file_group
@@ -119,7 +120,7 @@ module ThemeImport
 
     def read_theme_info_file(entry)
       entry.get_input_stream do |entry_file|
-        @attributes = YAML::load(entry_file.read).symbolize_keys
+        @attributes = filter_attributes(YAML::load(entry_file.read).symbolize_keys)
       end
     end
 
@@ -137,6 +138,23 @@ module ThemeImport
 
     def attributes
       @attributes
+    end
+
+    private
+
+    def filter_attributes(attributes)
+      attrs = {}
+
+      [:name, :description, :tags].each do |attr|
+        if attr == :tags
+          val = attributes[attr].is_a?(String) ? CSV.parse_line(attributes[attr]) : attributes[attr]
+          attrs[:tags] = val
+        else
+          attrs[attr] = attributes[attr]
+        end
+      end
+
+      attrs
     end
 
     def get_region_name(filename)

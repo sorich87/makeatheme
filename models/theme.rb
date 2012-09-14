@@ -7,7 +7,6 @@ require 'static_theme_file'
 require 'set'
 require 'region'
 require 'template'
-require 'csv'
 
 class Theme
   include Mongoid::Document
@@ -153,17 +152,6 @@ class Theme
       'License' => '', # TODO: Fix this
       'License URI' => ''
     }
-  end
-
-  def set_import_attributes(attributes)
-    [:name, :description, :tags].each do |attr|
-      if attr == :tags
-        val = attributes[attr].is_a?(String) ? CSV.parse_line(attributes[attr]) : attributes[attr]
-        self.tags = val
-      else
-        self[attr] = attributes[attr]
-      end
-    end
   end
 end
 
