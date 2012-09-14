@@ -114,7 +114,7 @@ module ThemeArchive
       # Find all PHP files in views/themes and get their path relative
       # to our APP_ROOT so we know which folder they'll go in.
       view_root = Pathname.new(File.join(settings.root, 'views', 'themes'))
-      Dir[File.join(settings.root, 'views', 'themes', '**/*.php.erb')].each do |erb_file|
+      Dir[File.join(settings.root, 'views', 'themes', '**/*.erb')].each do |erb_file|
         file_path = Pathname.new(erb_file)
         zip_path = file_path.relative_path_from(view_root).to_s.split('.erb').first
 
