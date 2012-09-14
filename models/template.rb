@@ -11,8 +11,12 @@ class Template
     self[:regions].symbolize_keys
   end
 
+  def slug
+    self[:name].parameterize
+  end
+
   # PHP filename
   def filename
-    "#{self[:name].parameterize}.php"
+    "#{self.slug}.php"
   end
 end

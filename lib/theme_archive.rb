@@ -62,8 +62,12 @@ module ThemeArchive
             footer = "<?php get_footer('#{template.regions[:footer]}'); ?>"
           end
 
-          template = header + template[:template] + footer
-          f.puts render_template(template, @base)
+          content = template[:template]
+          if %w(index single page).include?(template.name)
+            content.gsub!(/\{\{(.+?)\}\}/) { "{{#{$1.strip}-#{template.slug}}}" }
+          end
+
+          f.puts render_template(header + content + footer, @base)
         end
       end
     end

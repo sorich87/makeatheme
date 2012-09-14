@@ -107,7 +107,7 @@ module Defaults
       site_title: "<?php bloginfo( 'name' ); ?>",
       site_description: "<?php bloginfo( 'description' ); ?>",
 
-      article: %q(<?php if ( have_posts() ) : ?>
+      "article-index" => %q(<?php if ( have_posts() ) : ?>
 <?php _s_content_nav( 'nav-above' ); ?>
 
 <?php /* Start the Loop */ ?>
@@ -128,6 +128,49 @@ module Defaults
 <?php elseif ( current_user_can( 'edit_posts' ) ) : ?>
 
 <?php get_template_part( 'no-results', 'index' ); ?>
+
+<?php endif; ?>),
+
+      "article-single" => %q(<?php while ( have_posts() ) : the_post(); ?>
+
+  <?php _s_content_nav( 'nav-above' ); ?>
+
+  <?php get_template_part( 'content', 'single' ); ?>
+
+  <?php _s_content_nav( 'nav-below' ); ?>
+
+  <?php
+    // If comments are open or we have at least one comment, load up the comment template
+    if ( comments_open() || '0' != get_comments_number() )
+      comments_template( '', true );
+  ?>
+
+<?php endwhile; // end of the loop. ?>),
+
+      "article-page" => %q(<?php while ( have_posts() ) : the_post(); ?>
+
+  <?php get_template_part( 'content', 'page' ); ?>
+
+  <?php comments_template( '', true ); ?>
+
+<?php endwhile; // end of the loop. ?>),
+
+      article: %q(<?php if ( have_posts() ) : ?>
+
+  <?php _s_content_nav( 'nav-above' ); ?>
+
+  <?php /* Start the Loop */ ?>
+  <?php while ( have_posts() ) : the_post(); ?>
+
+    <?php get_template_part( 'content' ); ?>
+
+  <?php endwhile; ?>
+
+  <?php _s_content_nav( 'nav-below' ); ?>
+
+<?php else : ?>
+
+  <?php get_template_part( 'no-results' ); ?>
 
 <?php endif; ?>),
 
