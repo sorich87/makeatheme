@@ -13,6 +13,21 @@ module ThemeArchive
     self.save
   end
 
+  # Headers needed for Wordpress CSS
+  def wordpress_headers
+    {
+      'Theme Name' => self.name,
+      'Description' => self.description,
+      'Theme URI' => "http://thememy.com/themes/#{self.id}",
+      'Author' => self.author.to_fullname,
+      'Author URI' => "http://thememy.com/users/#{self.author_id}",
+      'Version' => self.version,
+      'Tags' => self.tags.join(', '),
+      'License' => 'GNU General Public License v2',
+      'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
+    }
+  end
+
   class Archive
     def initialize(theme)
       @theme = theme
