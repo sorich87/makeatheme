@@ -47,7 +47,6 @@ exports.config =
           'vendor/scripts/bootstrap/bootstrap-alert.js'
           'vendor/scripts/bootstrap/bootstrap-transition.js'
         ]
-        after: ['vendor/scripts/handlebars.js']
 
     stylesheets:
       defaultExtension: 'styl'
