@@ -1,6 +1,6 @@
 module ThemeHelper
 
-  # Return theme blocks and regions with Handlebars tags replaced
+  # Return theme blocks and regions with Liquid tags replaced
   def theme_pieces(theme, ensure_id = false)
     pieces = Hash[:blocks, [], :regions, [], :templates, []]
 

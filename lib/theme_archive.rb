@@ -13,27 +13,12 @@ module ThemeArchive
     self.save
   end
 
-  # Headers needed for Wordpress CSS
-  def wordpress_headers
-    {
-      'Theme Name' => self.name,
-      'Description' => self.description,
-      'Theme URI' => "http://thememy.com/themes/#{self.id}",
-      'Author' => self.author.to_fullname,
-      'Author URI' => "http://thememy.com/users/#{self.author_id}",
-      'Version' => self.version,
-      'Tags' => self.tags.join(', '),
-      'License' => 'GNU General Public License v2',
-      'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
-    }
-  end
-
   class Archive
     def initialize(theme)
       @theme = theme
 
-      @base = {}
-      @base.merge!(Defaults::PHP::CONTENT)
+      @locals = {}
+      @locals.merge!(Defaults::PHP::CONTENT)
 
       @path = File.join(Dir.mktmpdir, "./#{@theme.slug}.zip")
 
@@ -51,7 +36,6 @@ module ThemeArchive
         compile_static_files(zipfile)
         compile_php_files(zipfile)
         compile_screenshot(zipfile)
-        #add_theme_info(zipfile)
       end
     end
 
@@ -65,17 +49,8 @@ module ThemeArchive
     def compile_templates(zipfile)
       @theme.templates.each do |template|
         zipfile.get_output_stream(template.filename) do |f|
-          if template.regions[:header] == 'default'
-            header = '<?php get_header(); ?>'
-          else
-            header = "<?php get_header('#{template.regions[:header]}'); ?>"
-          end
-
-          if template.regions[:footer] == 'default'
-            footer = '<?php get_footer(); ?>'
-          else
-            footer = "<?php get_footer('#{template.regions[:footer]}'); ?>"
-          end
+          header = get_header_tag(template)
+          footer = get_footer_tag(template)
 
           # convert 'article' tag to 'article-slug' for index, single and page templates
           content = template[:template]
@@ -90,8 +65,24 @@ module ThemeArchive
             header = "/**\n * Template Name: #{template.name}\n */\n" + header
           end
 
-          f.puts render_template(header + content + footer, @base)
+          f.puts render_template(header + content + footer, @locals)
         end
+      end
+    end
+
+    def get_header_tag(template)
+      if template.regions[:header] == 'default'
+        '<?php get_header(); ?>'
+      else
+        "<?php get_header('#{template.regions[:header]}'); ?>"
+      end
+    end
+
+    def get_footer_tag(template)
+      if template.regions[:footer] == 'default'
+        '<?php get_footer(); ?>'
+      else
+        "<?php get_footer('#{template.regions[:footer]}'); ?>"
       end
     end
 
@@ -103,7 +94,7 @@ module ThemeArchive
           template = Defaults::PHP::REGIONS[:header] + template if 'header' == region[:name]
           template = template + Defaults::PHP::REGIONS[:footer] if 'footer' == region[:name]
 
-          f.puts render_template(template, @base)
+          f.puts render_template(template, @locals)
         end
       end
     end
@@ -114,7 +105,7 @@ module ThemeArchive
           if static_file.file_name == "style.css"
             # Insert wordpress headers
             f.puts "/*"
-            @theme.wordpress_headers.each do |key, value|
+            wordpress_headers(@theme).each do |key, value|
               f.puts "#{key}: #{value}"
             end
             f.puts "*/"
@@ -123,6 +114,21 @@ module ThemeArchive
           f.puts file_io.read unless file_io.nil?
         end
       end
+    end
+
+    # Headers needed for Wordpress CSS
+    def wordpress_headers(theme)
+      {
+        'Theme Name' => theme.name,
+        'Description' => theme.description,
+        'Theme URI' => "http://thememy.com/themes/#{theme.id}",
+        'Author' => theme.author.to_fullname,
+        'Author URI' => "http://thememy.com/users/#{theme.author_id}",
+        'Version' => theme.version,
+        'Tags' => theme.tags.join(', '),
+        'License' => 'GNU General Public License v2',
+        'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
+      }
     end
 
     def compile_php_files(zipfile)
