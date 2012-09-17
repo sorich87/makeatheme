@@ -28,7 +28,7 @@ post '/users/reset_password' do
     user.initiate_password_reset!(params[:password])
     locals = {
       user: user,
-      reset_url: url("/users/#{user.password_reset_token}/reset_password")
+      reset_url: url("/users/#{user.id}/reset_password/#{user.password_reset_token}")
     }
 
     Pony.mail :to => user.email,
@@ -40,8 +40,8 @@ post '/users/reset_password' do
   halt 204
 end
 
-get '/users/:token/reset_password' do
-  user = StoreUser.where(:password_reset_token => params[:token]).first
+get '/users/:user_id/reset_password/:reset_token' do
+  user = StoreUser.where(:id => params[:user_id], :password_reset_token => params[:reset_token]).first
 
   halt 404 unless user
 

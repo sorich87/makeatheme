@@ -28,7 +28,7 @@ describe :password_reset do
   describe 'creation' do
     before do
       @user.reload
-      get "/users/#{@user.password_reset_token}/reset_password"
+      get "/users/#{@user.id}/reset_password/#{@user.password_reset_token}"
     end
 
     it 'should redirect the user to the index page' do
