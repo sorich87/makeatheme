@@ -20,38 +20,36 @@ post '/users' do
   end
 end
 
-get '/users/:user_id/reset_password/:reset_token' do
-  user = StoreUser.where(:id => params[:user_id], :password_reset_token => params[:reset_token])
-
-  erb :reset_password
-end
-
-put '/users/:email/initiate_password_reset', provides: [:json] do
+post '/users/reset_password' do
+  params = JSON.parse(request.body.read, symbolize_names: true)
   user = StoreUser.where(:email => params[:email]).first
 
   if user
-    user.generate_password_reset_token!
+    user.initiate_password_reset!(params[:password])
+    locals = {
+      user: user,
+      reset_url: url("/users/#{user.password_reset_token}/reset_password")
+    }
 
     Pony.mail :to => user.email,
-              :subject => 'Password reset',
-              :from => 'ulrich@thememy.com',
-              :body => erb(:'emails/password_reset', :locals => {:user => user})
-
-    status 204
-  else
-    status 404
+              :subject => 'ThemeMy Password Reset',
+              :from => 'no-reply@thememy.com',
+              :body => erb(:'emails/password_reset', locals: locals)
   end
+
+  halt 204
 end
 
-put '/users/:token/reset_password', provides: [:json] do
+get '/users/:token/reset_password' do
   user = StoreUser.where(:password_reset_token => params[:token]).first
 
-  if user
-    authenticate_user!(user)
+  halt 404 unless user
 
-    status 200
-    body user.to_json
+  if user.reset_password!
+    authenticate_user!(user)
+    redirect to '/'
   else
-    status 404
+    status 403
+    respond_with error: "Password reset token expired"
   end
 end

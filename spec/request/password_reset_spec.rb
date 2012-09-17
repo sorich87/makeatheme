@@ -8,12 +8,12 @@ describe :password_reset do
     }
 
     @user = StoreUser.find_or_create_by(@user_attributes)
-    @user.generate_password_reset_token!
+    @user.initiate_password_reset!(12345)
   end
 
   describe 'initiation' do
     before do
-      put "/users/#{@user.email}/initiate_password_reset"
+      post '/users/reset_password', @user_attributes.to_json
     end
 
     it "should be successful" do
@@ -28,15 +28,12 @@ describe :password_reset do
   describe 'creation' do
     before do
       @user.reload
-      put "/users/#{@user.password_reset_token}/reset_password"
+      get "/users/#{@user.password_reset_token}/reset_password"
     end
 
-    it 'should be successful' do
-      last_response.status.should == 200
-    end
-
-    it 'should return the user as JSON' do
-      last_response.body.should == @user.to_json
+    it 'should redirect the user to the index page' do
+      last_response.should be_redirect
+      last_response.location.should include '/'
     end
 
     it 'should log the user in' do

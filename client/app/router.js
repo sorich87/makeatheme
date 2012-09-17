@@ -75,7 +75,7 @@ module.exports = Backbone.Router.extend({
     // events which we don't want
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.reuseView("login").render().$el.modal("show"));
+      .append(app.createView("login").render().$el.modal("show"));
   }
 
   , register: function () {
@@ -84,7 +84,7 @@ module.exports = Backbone.Router.extend({
     // events which we don't want
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.reuseView("register").render().$el.modal("show"));
+      .append(app.createView("register").render().$el.modal("show"));
   }
 
   , reset_password: function () {
@@ -93,13 +93,13 @@ module.exports = Backbone.Router.extend({
     // events which we don't want
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.reuseView("reset_password").render().$el.modal("show"));
+      .append(app.createView("password_reset").render().$el.modal("show"));
   }
 
   , upload: function () {
     $("body").removeClass("modal-open")
       .find(".modal, .modal-backdrop").remove().end()
-      .append(app.reuseView("theme_upload").render().$el.modal("show"));
+      .append(app.createView("theme_upload").render().$el.modal("show"));
   }
 
   , notFound: function () {

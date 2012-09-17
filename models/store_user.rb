@@ -11,6 +11,9 @@ class StoreUser
   field :password_hash, :type => String
   field :password_salt, :type => String
   field :password_reset_token, :type => String
+  field :password_reset_hash, :type => String
+  field :password_reset_salt, :type => String
+  field :password_reset_sent_at, :type => Time
 
   attr_accessor :password
 
@@ -49,11 +52,25 @@ class StoreUser
     }
   end
 
-  def generate_password_reset_token!
+  def initiate_password_reset!(password)
     self.password_reset_token = SecureRandom.hex(40)
+    self.password_reset_salt = BCrypt::Engine.generate_salt
+    self.password_reset_hash = BCrypt::Engine.hash_secret(password, self.password_reset_salt)
+    self.password_reset_sent_at = Time.now
     self.save
   end
 
+  def reset_password!
+    return false if self.password_reset_sent_at < Time.now - 3600
+
+    self.password_salt = self.password_reset_salt
+    self.password_hash = self.password_reset_hash
+    self.password_reset_token = ''
+    self.password_reset_salt = ''
+    self.password_reset_hash = ''
+    self.password_reset_sent_at = nil
+    self.save
+  end
 
   private
   def generate_password_hash
