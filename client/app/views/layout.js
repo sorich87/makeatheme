@@ -153,8 +153,7 @@ module.exports = View.extend({
     $dragParent = $drag.parent();
 
     if (isRowFull($drop, $drag)) {
-      $row = $("<div class='row' id='y-" + app.editor.idIncrement + "'></div>").insertAfter($drop);
-      app.editor.idIncrement++;
+      $row = $("<div class='row'></div>").insertAfter($drop);
     } else {
       $row = $drop;
     }

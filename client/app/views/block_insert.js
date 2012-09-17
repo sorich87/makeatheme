@@ -1,7 +1,8 @@
 // Display list of blocks to insert
 var View = require("views/base/view")
   , Blocks = require("collections/blocks")
-  , app = require("application");
+  , app = require("application")
+  , idIncrement = 1;
 
 module.exports = View.extend({
     id: "x-block-insert"
@@ -50,10 +51,10 @@ module.exports = View.extend({
     if (drag.element.parent().hasClass("row")) {
       var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = "<div id='y-" + app.editor.idIncrement + "' class='columns "
+      drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
         + block.className() + "'>" + block.get("build") + "</div>";
 
-      app.editor.idIncrement += 1;
+      idIncrement++;
     }
   }
 });

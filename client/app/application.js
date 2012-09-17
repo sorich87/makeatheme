@@ -25,11 +25,6 @@ _.extend(Application, {
       this.blocks = new Blocks(this.data.theme_pieces.blocks);
     }
 
-    // Used to generate unique IDs for elements
-    this.editor = {
-      idIncrement: 0
-    };
-
     // Initialize router
     this.router = new Router();
 
