@@ -1,6 +1,5 @@
 var View = require("views/base/view")
-  , app = require("application")
-  , idIncrement = 1; // For temporary ids when inserting rows.
+  , app = require("application"); // For temporary ids when inserting rows.
 
 module.exports = View.extend({
   initialize: function () {
@@ -92,8 +91,8 @@ module.exports = View.extend({
     if (!row) {
       row = sandbox.createElement("div");
       row.className = "row";
-      row.id = "y-" + idIncrement;
-      idIncrement++;
+      row.id = "y-" + app.editor.idIncrement;
+      app.editor.idIncrement++;
 
       // Set the ID of the row the user sees
       node.parentNode.id = row.id

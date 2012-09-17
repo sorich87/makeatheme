@@ -102,6 +102,11 @@ window.require.define({"application": function(exports, require, module) {
         this.blocks = new Blocks(this.data.theme_pieces.blocks);
       }
 
+      // Used to generate unique IDs for elements
+      this.editor = {
+        idIncrement: 0
+      };
+
       // Initialize router
       this.router = new Router();
 
@@ -647,8 +652,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
   // Display list of blocks to insert
   var View = require("views/base/view")
     , Blocks = require("collections/blocks")
-    , app = require("application")
-    , idIncrement = 1;
+    , app = require("application");
 
   module.exports = View.extend({
       id: "x-block-insert"
@@ -697,10 +701,10 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       if (drag.element.parent().hasClass("row")) {
         var block = this.collection.getByCid(drag.element.data("cid"));
 
-        drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
+        drag.element[0].outerHTML = "<div id='y-" + app.editor.idIncrement + "' class='columns "
           + block.className() + "'>" + block.get("build") + "</div>";
 
-        idIncrement++;
+        app.editor.idIncrement += 1;
       }
     }
   });
@@ -1036,7 +1040,8 @@ window.require.define({"views/layout": function(exports, require, module) {
       $dragParent = $drag.parent();
 
       if (isRowFull($drop, $drag)) {
-        $row = $("<div class='row'></div>").insertAfter($drop);
+        $row = $("<div class='row' id='y-" + app.editor.idIncrement + "'></div>").insertAfter($drop);
+        app.editor.idIncrement++;
       } else {
         $row = $drop;
       }
@@ -1192,8 +1197,7 @@ window.require.define({"views/login": function(exports, require, module) {
 
 window.require.define({"views/mutations": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application")
-    , idIncrement = 1; // For temporary ids when inserting rows.
+    , app = require("application"); // For temporary ids when inserting rows.
 
   module.exports = View.extend({
     initialize: function () {
@@ -1285,8 +1289,8 @@ window.require.define({"views/mutations": function(exports, require, module) {
       if (!row) {
         row = sandbox.createElement("div");
         row.className = "row";
-        row.id = "y-" + idIncrement;
-        idIncrement++;
+        row.id = "y-" + app.editor.idIncrement;
+        app.editor.idIncrement++;
 
         // Set the ID of the row the user sees
         node.parentNode.id = row.id
@@ -1662,79 +1666,6 @@ window.require.define({"views/register": function(exports, require, module) {
         var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
         Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
       }.bind(this));
-    }
-  });
-  
-}});
-
-window.require.define({"views/reset_password": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application");
-
-  module.exports = View.extend({
-      className: "modal"
-    , template: "password_reset"
-    , model: app.currentUser
-
-    , events: {
-      "submit form": "initiatePasswordReset"
-    }
-
-    , initiatePasswordReset: function (e) {
-      e.preventDefault();
-
-      if (this.validateInputs()) {
-        this.initiateReset();
-      }
-    }
-
-    , validateInputs: function () {
-      var valid = true;
-
-      this.$("form input").each(function (i, element) {
-        var attr = element.getAttribute("name");
-
-        if (element.value === "") {
-          var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " can't be blank";
-          Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
-
-          valid = false;
-        }
-      }.bind(this));
-
-      return valid;
-    }
-
-    , initiateReset: function () {
-      var data = {
-          email: this.$("input[name=email]")[0].value
-        , password: this.$("input[name=password]")[0].value
-      };
-
-      $.ajax({
-          contentType: "application/json;charset=UTF-8"
-        , dataType: "json"
-        , type: "POST"
-        , url: "/users/reset_password"
-        , data: JSON.stringify(data)
-        , complete: function (jqXHR, textStatus) {
-          switch (textStatus) {
-            case "success":
-              this.$el.modal("hide");
-
-              app.trigger("notification", "success", "We have sent you an email with a link to confirm your new password.");
-            break;
-
-            case "error":
-              var form = this.$("form");
-
-              if (form.children(".alert-error").length === 0) {
-                form.prepend("<p class='alert alert-error'>We are unable to process the request. Please try again.</p>");
-              }
-            break;
-          }
-        }.bind(this)
-      });
     }
   });
   
