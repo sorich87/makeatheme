@@ -285,6 +285,55 @@ window.require.define({"initialize": function(exports, require, module) {
   
 }});
 
+window.require.define({"lib/custom_css": function(exports, require, module) {
+  // Manage custom css in the document <head>
+  // and a 'rules' hash for easy access
+
+  var CustomCSS = function () {
+    var node = document.createElement("style");
+
+    node.type = "text/css";
+    node.rel = "alternate stylesheet";
+
+    document.head.appendChild(node);
+
+    this.node = node;
+    this.sheet = node.sheet;
+    this.rules = {};
+  };
+
+  CustomCSS.prototype.insertRule = function (selector, property, value) {
+    var index = this.sheet.cssRules.length;
+
+    this.deleteRule(selector, property);
+
+    this.sheet.insertRule(selector + "{" + property + ": " + value + "}", index);
+
+    this.rules[selector] = this.rules[selector] || {};
+    this.rules[selector][property] = {
+        value: value
+      , index: index
+    };
+  };
+
+  CustomCSS.prototype.getRule = function (selector, property) {
+    if (this.rules[selector] && this.rules[selector][property]) {
+      return this.rules[selector][property].value;
+    }
+  };
+
+  CustomCSS.prototype.deleteRule = function (selector, property) {
+    if (this.rules[selector] && this.rules[selector][property]) {
+      this.sheet.deleteRule(this.rules[selector][property].index);
+
+      delete this.rules[selector][property];
+    }
+  };
+
+  module.exports = CustomCSS;
+  
+}});
+
 window.require.define({"models/base/model": function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
@@ -1684,7 +1733,8 @@ window.require.define({"views/share_link": function(exports, require, module) {
 
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
-    , template = require("views/templates/style_edit");
+    , template = require("views/templates/style_edit")
+    , CustomCSS = require("lib/custom_css");
 
   module.exports = View.extend({
       id: "x-style-edit"
