@@ -15,9 +15,12 @@ require 'pony'
 require 'nokogiri'
 require 'liquid'
 require 'json'
-
+require 'resque'
 
 Mongoid.load!("config/mongoid.yml")
+
+# Load jobs
+Dir["lib/jobs/*.rb"].each {|file| require file }
 
 # Load initializers
 Dir["config/initializers/*.rb"].each {|file| require file }

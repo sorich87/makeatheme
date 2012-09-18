@@ -1,3 +1,9 @@
+# The reason we use this here is that url() (sinatra helper methods)
+# in my opinion does not belong in models, and we need to pass the
+# url to phantomjs.
+def generate_theme_screenshot(theme)
+  Resque.enqueue(Screenshot, theme.id, url("/editor/#{theme.id}"))
+end
 
 get '/themes' do
   @themes = Theme.all.order_by([:name, :desc]).page(params[:page])
@@ -37,12 +43,7 @@ put '/themes/:id' do
   theme.templates = params['templates'].map { |template| Template.new(template) }
 
   if theme.save
-    # Generate screenshot. Should be later moved to a background job.
-    begin
-      open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
-    rescue
-    end
-
+    generate_theme_screenshot(theme.reload)
     theme.generate_archive!
 
     status 201
@@ -65,11 +66,7 @@ post '/themes' do
   if theme.valid?
     theme.save
 
-    # Generate screenshot. Should be later moved to a background job.
-    begin
-      open(url("/screenshot/#{theme.id}"), read_timeout: 0.001)
-    rescue
-    end
+    generate_theme_screenshot(theme)
 
     status 201
     respond_with theme
