@@ -1,4 +1,5 @@
 require './app'
+require 'resque/tasks'
 
 namespace :db do
 
@@ -16,4 +17,9 @@ namespace :db do
   desc "Delete data and seed"
   task :reseed => [ "db:purge", "db:seed" ]
 
+end
+
+task "resque:setup" do
+  ENV['QUEUE'] ='*'
+  ENV['TERM_CHILD']='1'
 end
