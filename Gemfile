@@ -15,6 +15,7 @@ gem "rubyzip", "~> 0.9.9"
 gem "pony", "~> 1.4"
 gem 'nokogiri', '~> 1.5.0'
 gem 'liquid'
+gem 'resque', '~> 1.22.0'
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'
