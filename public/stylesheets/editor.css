@@ -88,6 +88,7 @@
   cursor: pointer;
   border-bottom: 1px solid #1982d1;
   color: #1982d1;
+  margin: 0;
 }
 #x-layout-editor h4 span {
   float: right;
@@ -110,6 +111,8 @@
   text-decoration: none;
   padding: 0 0 2px;
   height: 27px;
+  margin: 0;
+  font-size: 1em;
 }
 #x-style-edit div h5 span {
   padding: 0 5px 0 10px;
