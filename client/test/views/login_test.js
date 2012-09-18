@@ -25,7 +25,7 @@ describe ("LoginView", function () {
   it("will display an error when the fields are not filled in", function () {
     sinon.stub(window.jQuery, "ajax");
 
-    this.loginView.render().$("button[type=submit]").click();
+    this.loginView.render().$("form").submit();
 
     expect(this.loginView.el.innerHTML).to.contain("can't be blank");
 
@@ -38,7 +38,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(this.loginView.el.innerHTML).to.not.contain("can't be blank");
 
@@ -51,7 +51,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(stub).to.have.been.calledOnce;
     expect(stub.args[0][0]).to.have.property("contentType", "application/json;charset=UTF-8");
@@ -70,7 +70,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(this.loginView.el.innerHTML).to.contain("alert-error");
 
@@ -87,7 +87,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith({id: "1"});
@@ -105,7 +105,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith("hide");
@@ -129,7 +129,7 @@ describe ("LoginView", function () {
     this.loginView.render().$("input").each(function (i, element) {
       element.value = "test";
     });
-    this.loginView.$("button[type=submit]").click();
+    this.loginView.$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith("success", "Welcome back, Test.");

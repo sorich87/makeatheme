@@ -35,7 +35,7 @@ describe("RegisterView", function () {
     var spy = sinon.spy(this.user, "save");
 
     this.registerView.render().$("input")[0].value = "test";
-    this.registerView.$(".submit").click();
+    this.registerView.$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy.args[0][0].first_name).to.equal("test");
@@ -49,7 +49,7 @@ describe("RegisterView", function () {
       options.success(user, {id: "1"});
     });
 
-    this.registerView.render().$(".submit").click();
+    this.registerView.render().$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith({id: "1"});
@@ -63,7 +63,7 @@ describe("RegisterView", function () {
       options.success(user);
     });
 
-    this.registerView.render().$(".submit").click();
+    this.registerView.render().$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith("hide");
@@ -74,7 +74,7 @@ describe("RegisterView", function () {
       options.error(this.user, {responseText: '{"first_name": ["is not valid"]}'});
     });
 
-    this.registerView.render().$(".submit").click();
+    this.registerView.render().$("form").submit();
     expect(this.registerView.el.innerHTML).to.contain("is not valid");
   });
 
@@ -88,7 +88,7 @@ describe("RegisterView", function () {
       options.success(user);
     });
 
-    this.registerView.render().$(".submit").click();
+    this.registerView.render().$("form").submit();
 
     expect(spy).to.have.been.calledOnce;
     expect(spy).to.have.been.calledWith("success", "Your registration was successful. You are now logged in.");

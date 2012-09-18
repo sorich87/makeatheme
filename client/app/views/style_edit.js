@@ -1,5 +1,6 @@
 var View = require("views/base/view")
-  , template = require("views/templates/style_edit");
+  , template = require("views/templates/style_edit")
+  , CustomCSS = require("lib/custom_css");
 
 module.exports = View.extend({
     id: "x-style-edit"

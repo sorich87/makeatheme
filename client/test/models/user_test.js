@@ -59,6 +59,7 @@ describe ("User", function () {
       , email: "john.doe@thememy.com"
       , password: "12345"
       , password_confirmation: "12345"
+      , themes: []
     };
     user.save(attrs);
 
