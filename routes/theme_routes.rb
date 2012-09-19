@@ -103,29 +103,3 @@ get '/editor/:theme', provides: 'html' do
     preview_only: preview_only,
     template: template
 end
-
-get '/screenshot/:theme', provides: 'html' do
-  theme = Theme.find(params[:theme])
-
-  halt 404 unless theme
-
-  # Don't do anything, if screenshot was updated less than 30s ago
-  halt 200 if theme.screenshot_updated_at > Time.now - 30
-
-  script = File.join(settings.root, 'script', 'rasterize.js')
-  url = url("/editor/#{theme.id}")
-  path = File.join(Dir.mktmpdir, 'screenshot.png')
-
-  `phantomjs #{script} #{url} #{path}`
-  if $?.to_i == 0
-    File.open(path) do |file|
-      theme.screenshot = file
-      theme.save
-    end
-    File.delete(path)
-    status 201
-  else
-    status 500
-  end
-end
-
