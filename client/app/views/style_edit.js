@@ -6,33 +6,41 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-style-edit"
   , className: "x-section"
+  , customCSS: new CustomCSS()
 
   , events: {
-    "click button": "addInputs"
+      "click button": "addInputs"
+    , "keyup input[name=value]": "addStyle"
+    , "blur input[name=value]": "addStyle"
+    , "change input[name=value]": "addStyle"
   }
 
   , initialize: function () {
-    _.bindAll(this, "setColumn");
+    _.bindAll(this, "setSelector");
 
-    app.on("editor:columnHighlight", this.setColumn);
+    app.on("editor:columnHighlight", this.setSelector);
   }
 
-  , setColumn: function (column) {
-    this.column = "#" + column.id;
+  , setSelector: function (element) {
+    this.selector = "#" + element.id;
     this.render();
   }
 
   , render: function () {
-    var rules
-      , customCSS = new CustomCSS;
+    var rules;
 
-    rules = _.map(customCSS.rules[this.column], function (rule, selector) {
-      rule.selector = selector;
+    if (!this.selector) {
+      this.$el.html("Click on an element in the design to customize it.");
+      return this;
+    }
+
+    rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+      rule.property = property;
       return rule;
     });
 
     this.$el.html(template({
-        element: this.column
+        selector: this.selector
       , rules: rules
     }));
 
@@ -42,7 +50,17 @@ module.exports = View.extend({
   , addInputs: function (e) {
     e.preventDefault();
 
-    this.$("ul").append("<li><input value='' placeholder='property' />: \
-                        <input value='' placeholder='value' /></li>");
+    this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
+                        <input name='value' value='' placeholder='value' /></li>");
+  }
+
+  , addStyle: function (e) {
+    var property, value;
+
+    value = e.target.value;
+
+    property  = $(e.target).siblings("input[name=property]").val();
+
+    this.customCSS.insertRule(this.selector, property, value);
   }
 });

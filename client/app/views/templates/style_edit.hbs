@@ -1,11 +1,11 @@
 <form>
   <p class="x-choice">
     <label>Current Element:</label>
-    <b>{{ element }}</b>
+    <b>{{selector}}</b>
   </p>
   <ul class="x-rules">
     {{#each rules}}
-    <li><input value="{{selector}}" />: <input value="{{value}}" /></li>
+    <li><input name="property" value="{{property}}" />: <input name="value" value="{{value}}" /></li>
     {{/each}}
   </ul>
   <button>Add custom style</button>

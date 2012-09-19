@@ -15,31 +15,59 @@ var CustomCSS = function () {
 };
 
 CustomCSS.prototype.insertRule = function (selector, property, value) {
-  var index = this.sheet.cssRules.length;
+  var oldRule, index;
 
-  this.deleteRule(selector, property);
+  if (!selector || !property || !value) {
+    return false;
+  }
 
-  this.sheet.insertRule(selector + "{" + property + ": " + value + "}", index);
+  if (oldRule = this.getRule(selector, property)) {
+    index = oldRule.index;
+  } else {
+    index = this.sheet.cssRules.length;
+  }
+
+  try {
+    this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+  } catch (e) {
+    return false;
+  }
 
   this.rules[selector] = this.rules[selector] || {};
   this.rules[selector][property] = {
       value: value
     , index: index
   };
+
+  return true;
 };
 
 CustomCSS.prototype.getRule = function (selector, property) {
-  if (this.rules[selector] && this.rules[selector][property]) {
-    return this.rules[selector][property].value;
+  if (!selector || !property) {
+    return;
   }
+
+  if (!this.rules[selector] || !this.rules[selector][property]) {
+    return;
+  }
+
+  return this.rules[selector][property].value;
 };
 
 CustomCSS.prototype.deleteRule = function (selector, property) {
-  if (this.rules[selector] && this.rules[selector][property]) {
-    this.sheet.deleteRule(this.rules[selector][property].index);
-
-    delete this.rules[selector][property];
+  if (!selector || !property) {
+    return false;
   }
+
+  if (!this.rules[selector] || !this.rules[selector][property]) {
+    return false;
+  }
+
+  this.sheet.deleteRule(this.rules[selector][property].index);
+
+  delete this.rules[selector][property];
+
+  return true;
 };
 
 module.exports = CustomCSS;

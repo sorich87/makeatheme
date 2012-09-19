@@ -303,31 +303,59 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   CustomCSS.prototype.insertRule = function (selector, property, value) {
-    var index = this.sheet.cssRules.length;
+    var oldRule, index;
 
-    this.deleteRule(selector, property);
+    if (!selector || !property || !value) {
+      return false;
+    }
 
-    this.sheet.insertRule(selector + "{" + property + ": " + value + "}", index);
+    if (oldRule = this.getRule(selector, property)) {
+      index = oldRule.index;
+    } else {
+      index = this.sheet.cssRules.length;
+    }
+
+    try {
+      this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+    } catch (e) {
+      return false;
+    }
 
     this.rules[selector] = this.rules[selector] || {};
     this.rules[selector][property] = {
         value: value
       , index: index
     };
+
+    return true;
   };
 
   CustomCSS.prototype.getRule = function (selector, property) {
-    if (this.rules[selector] && this.rules[selector][property]) {
-      return this.rules[selector][property].value;
+    if (!selector || !property) {
+      return;
     }
+
+    if (!this.rules[selector] || !this.rules[selector][property]) {
+      return;
+    }
+
+    return this.rules[selector][property].value;
   };
 
   CustomCSS.prototype.deleteRule = function (selector, property) {
-    if (this.rules[selector] && this.rules[selector][property]) {
-      this.sheet.deleteRule(this.rules[selector][property].index);
-
-      delete this.rules[selector][property];
+    if (!selector || !property) {
+      return false;
     }
+
+    if (!this.rules[selector] || !this.rules[selector][property]) {
+      return false;
+    }
+
+    this.sheet.deleteRule(this.rules[selector][property].index);
+
+    delete this.rules[selector][property];
+
+    return true;
   };
 
   module.exports = CustomCSS;
@@ -1742,33 +1770,41 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-style-edit"
     , className: "x-section"
+    , customCSS: new CustomCSS()
 
     , events: {
-      "click button": "addInputs"
+        "click button": "addInputs"
+      , "keyup input[name=value]": "addStyle"
+      , "blur input[name=value]": "addStyle"
+      , "change input[name=value]": "addStyle"
     }
 
     , initialize: function () {
-      _.bindAll(this, "setColumn");
+      _.bindAll(this, "setSelector");
 
-      app.on("editor:columnHighlight", this.setColumn);
+      app.on("editor:columnHighlight", this.setSelector);
     }
 
-    , setColumn: function (column) {
-      this.column = "#" + column.id;
+    , setSelector: function (element) {
+      this.selector = "#" + element.id;
       this.render();
     }
 
     , render: function () {
-      var rules
-        , customCSS = new CustomCSS;
+      var rules;
 
-      rules = _.map(customCSS.rules[this.column], function (rule, selector) {
-        rule.selector = selector;
+      if (!this.selector) {
+        this.$el.html("Click on an element in the design to customize it.");
+        return this;
+      }
+
+      rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+        rule.property = property;
         return rule;
       });
 
       this.$el.html(template({
-          element: this.column
+          selector: this.selector
         , rules: rules
       }));
 
@@ -1778,8 +1814,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , addInputs: function (e) {
       e.preventDefault();
 
-      this.$("ul").append("<li><input value='' placeholder='property' />: \
-                          <input value='' placeholder='value' /></li>");
+      this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
+                          <input name='value' value='' placeholder='value' /></li>");
+    }
+
+    , addStyle: function (e) {
+      var property, value;
+
+      value = e.target.value;
+
+      property  = $(e.target).siblings("input[name=property]").val();
+
+      this.customCSS.insertRule(this.selector, property, value);
     }
   });
   
@@ -2112,12 +2158,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n    <li><input value=\"";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth0.selector;
+    buffer += "\n    <li><input name=\"property\" value=\"";
+    foundHelper = helpers.property;
+    stack1 = foundHelper || depth0.property;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />: <input value=\"";
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />: <input name=\"value\" value=\"";
     foundHelper = helpers.value;
     stack1 = foundHelper || depth0.value;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -2126,10 +2172,10 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     return buffer;}
 
     buffer += "<form>\n  <p class=\"x-choice\">\n    <label>Current Element:</label>\n    <b>";
-    foundHelper = helpers.element;
-    stack1 = foundHelper || depth0.element;
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "element", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</b>\n  </p>\n  <ul class=\"x-rules\">\n    ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
