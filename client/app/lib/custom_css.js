@@ -15,17 +15,15 @@ var CustomCSS = function () {
 };
 
 CustomCSS.prototype.insertRule = function (selector, property, value) {
-  var oldRule, index;
+  var index;
 
   if (!selector || !property || !value) {
     return false;
   }
 
-  if (oldRule = this.getRule(selector, property)) {
-    index = oldRule.index;
-  } else {
-    index = this.sheet.cssRules.length;
-  }
+  this.deleteRule(selector, property);
+
+  index = this.sheet.cssRules.length;
 
   try {
     this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
