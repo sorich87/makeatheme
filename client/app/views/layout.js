@@ -30,7 +30,7 @@ module.exports = View.extend({
 
   , events: {
       // Highlight columns.
-      "hover .columns": "highlightColumns"
+      "click .columns": "highlightColumns"
 
       // Links in columns shouldn't be clickable.
     , "click .columns a": "preventDefault"
@@ -86,6 +86,8 @@ module.exports = View.extend({
     if (this.currentAction !== null) {
       return;
     }
+
+    app.trigger("editor:columnHighlight", e.currentTarget);
 
     var $column = $(e.currentTarget);
 

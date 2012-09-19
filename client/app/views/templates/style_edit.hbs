@@ -1,73 +1,12 @@
 <form>
   <p class="x-choice">
-    <label>Element</label>
-    <input type="text" value="#content" />
-    <select>
-      <option>whole element</option>
-      <option>paragraphs</option>
-      <option>tables</option>
-      <option>lists</option>
-    </select>
+    <label>Current Element:</label>
+    <b>{{ element }}</b>
   </p>
-
-  <div>
-    <h5><span>&darr;</span> Box</h5>
-  </div>
-
-  <div>
-    <h5><span>&darr;</span> Character</h5>
-
-    <p>
-      <label for="x-font-family">Family</label>
-      <select id="x-font-family">
-        <optgroup label="Serif">
-          <option value='Georgia, serif'>Georgia</option>
-          <option value='"Palatino Linotype", "Book Antiqua", Palatino, serif'>Palatino Linotype</option>
-          <option value='"Times New Roman", Times, serif'>Times New Roman</option>
-        </optgroup>
-        <optgroup label="Sans-Serif">
-          <option value='Arial, sans-serif'>Arial</option>
-          <option value='"Arial Black", sans-serif'>Arial Black</option>
-          <option value='"Comic Sans MS", sans-serif'>Comic Sans MS</option>
-          <option value='Impact, Charcoal, sans-serif'>Impact</option>
-          <option value='"Lucida Sans Unicode", "Lucida Grande", sans-serif'>Lucida Sans Unicode</option>
-          <option value='Tahoma, Geneva, sans-serif'>Tahoma</option>
-          <option value='"Trebuchet MS", Helvetica, sans-serif'>Trebuchet MS</option>
-          <option value='Verdana, Geneva, sans-serif'>Verdana</option>
-        </optgroup>
-        <optgroup label="Monospace">
-          <option value='"Courier New", Courier, monospace'>Courier New</option>
-          <option value='"Lucida Console", Monaco, monospace'>Lucida Console</option>
-        </optgroup>
-      </select>
-    </p>
-
-    <p>
-      <label for="x-font-typeface">Typeface</label>
-      <select id="x-font-typeface">
-        <option value="regular">Regular</option>
-        <option value="italic">Italic</option>
-        <option value="bold">Bold</option>
-        <option value="bold italic">Bold Italic</option>
-      </select>
-    </p>
-
-    <p>
-      <label for="x-font-size">Size</label>
-      <input type="text" id="x-font-size" value="" maxlength="2" class="x-pixels" /> px
-    </p>
-
-    <p>
-      <label for="x-font-color">Color</label>
-      # <input type="text" id="x-font-color" value="" maxlength="6" class="x-color" />
-    </p>
-  </div>
-
-  <div>
-    <h5><span>&darr;</span> Text</h5>
-  </div>
-
-  <div>
-    <h5><span>&darr;</span> Background</h5>
-  </div>
+  <ul class="x-rules">
+    {{#each rules}}
+    <li><input value="{{selector}}" />: <input value="{{value}}" /></li>
+    {{/each}}
+  </ul>
+  <button>Add custom style</button>
 </form>

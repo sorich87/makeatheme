@@ -20,7 +20,7 @@ module.exports = View.extend({
 
   , render: function () {
 
-    this.$el.empty().append("<p>Drag and drop to insert</p><ul></ul>");
+    this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
 
     this.collection.reset(this.collection.models);
 

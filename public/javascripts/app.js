@@ -715,7 +715,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
     , render: function () {
 
-      this.$el.empty().append("<p>Drag and drop to insert</p><ul></ul>");
+      this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
 
       this.collection.reset(this.collection.models);
 
@@ -962,7 +962,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , events: {
         // Highlight columns.
-        "hover .columns": "highlightColumns"
+        "click .columns": "highlightColumns"
 
         // Links in columns shouldn't be clickable.
       , "click .columns a": "preventDefault"
@@ -1018,6 +1018,8 @@ window.require.define({"views/layout": function(exports, require, module) {
       if (this.currentAction !== null) {
         return;
       }
+
+      app.trigger("editor:columnHighlight", e.currentTarget);
 
       var $column = $(e.currentTarget);
 
@@ -1734,16 +1736,50 @@ window.require.define({"views/share_link": function(exports, require, module) {
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
+    , app = require("application")
     , CustomCSS = require("lib/custom_css");
 
   module.exports = View.extend({
       id: "x-style-edit"
     , className: "x-section"
 
+    , events: {
+      "click button": "addInputs"
+    }
+
+    , initialize: function () {
+      _.bindAll(this, "setColumn");
+
+      app.on("editor:columnHighlight", this.setColumn);
+    }
+
+    , setColumn: function (column) {
+      this.column = "#" + column.id;
+      this.render();
+    }
+
     , render: function () {
-      this.$el.html(template());
+      var rules
+        , customCSS = new CustomCSS;
+
+      rules = _.map(customCSS.rules[this.column], function (rule, selector) {
+        rule.selector = selector;
+        return rule;
+      });
+
+      this.$el.html(template({
+          element: this.column
+        , rules: rules
+      }));
 
       return this;
+    }
+
+    , addInputs: function (e) {
+      e.preventDefault();
+
+      this.$("ul").append("<li><input value='' placeholder='property' />: \
+                          <input value='' placeholder='value' /></li>");
     }
   });
   
@@ -2071,10 +2107,41 @@ window.require.define({"views/templates/share_link": function(exports, require, 
 window.require.define({"views/templates/style_edit": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n    <li><input value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />: <input value=\"";
+    foundHelper = helpers.value;
+    stack1 = foundHelper || depth0.value;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" /></li>\n    ";
+    return buffer;}
 
-    return "<form>\n  <p class=\"x-choice\">\n    <label>Element</label>\n    <input type=\"text\" value=\"#content\" />\n    <select>\n      <option>whole element</option>\n      <option>paragraphs</option>\n      <option>tables</option>\n      <option>lists</option>\n    </select>\n  </p>\n\n  <div>\n    <h5><span>&darr;</span> Box</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Character</h5>\n\n    <p>\n      <label for=\"x-font-family\">Family</label>\n      <select id=\"x-font-family\">\n        <optgroup label=\"Serif\">\n          <option value='Georgia, serif'>Georgia</option>\n          <option value='\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif'>Palatino Linotype</option>\n          <option value='\"Times New Roman\", Times, serif'>Times New Roman</option>\n        </optgroup>\n        <optgroup label=\"Sans-Serif\">\n          <option value='Arial, sans-serif'>Arial</option>\n          <option value='\"Arial Black\", sans-serif'>Arial Black</option>\n          <option value='\"Comic Sans MS\", sans-serif'>Comic Sans MS</option>\n          <option value='Impact, Charcoal, sans-serif'>Impact</option>\n          <option value='\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif'>Lucida Sans Unicode</option>\n          <option value='Tahoma, Geneva, sans-serif'>Tahoma</option>\n          <option value='\"Trebuchet MS\", Helvetica, sans-serif'>Trebuchet MS</option>\n          <option value='Verdana, Geneva, sans-serif'>Verdana</option>\n        </optgroup>\n        <optgroup label=\"Monospace\">\n          <option value='\"Courier New\", Courier, monospace'>Courier New</option>\n          <option value='\"Lucida Console\", Monaco, monospace'>Lucida Console</option>\n        </optgroup>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-typeface\">Typeface</label>\n      <select id=\"x-font-typeface\">\n        <option value=\"regular\">Regular</option>\n        <option value=\"italic\">Italic</option>\n        <option value=\"bold\">Bold</option>\n        <option value=\"bold italic\">Bold Italic</option>\n      </select>\n    </p>\n\n    <p>\n      <label for=\"x-font-size\">Size</label>\n      <input type=\"text\" id=\"x-font-size\" value=\"\" maxlength=\"2\" class=\"x-pixels\" /> px\n    </p>\n\n    <p>\n      <label for=\"x-font-color\">Color</label>\n      # <input type=\"text\" id=\"x-font-color\" value=\"\" maxlength=\"6\" class=\"x-color\" />\n    </p>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Text</h5>\n  </div>\n\n  <div>\n    <h5><span>&darr;</span> Background</h5>\n  </div>\n</form>\n";});
+    buffer += "<form>\n  <p class=\"x-choice\">\n    <label>Current Element:</label>\n    <b>";
+    foundHelper = helpers.element;
+    stack1 = foundHelper || depth0.element;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "element", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</b>\n  </p>\n  <ul class=\"x-rules\">\n    ";
+    foundHelper = helpers.rules;
+    stack1 = foundHelper || depth0.rules;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </ul>\n  <button>Add custom style</button>\n</form>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/templates": function(exports, require, module) {
@@ -2098,7 +2165,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;

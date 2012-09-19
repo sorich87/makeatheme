@@ -117,20 +117,11 @@
 #x-style-edit div h5 span {
   padding: 0 5px 0 10px;
 }
-#x-style-edit .x-choice {
-  padding-bottom: 10px;
-  border-bottom: 1px solid #1982d1;
-}
 #x-layout-editor p {
   margin: 0;
 }
 #x-layout-editor input {
   padding: 0 3px;
-}
-#x-layout-editor ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 #x-layout-editor .x-pixels {
   width: 26px;
@@ -142,29 +133,37 @@
   margin: 0;
   padding: 0 10px;
 }
-#x-layout-editor li {
-  background-color: #1982d1;
-  color: #fff;
-  margin: 1px;
-  padding: 2px;
-}
 #x-layout-editor .x-drag {
   display: block;
   background-color: #1982d1;
   color: #fff;
 }
-#x-layout-editor li label {
+#x-layout-editor ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#x-layout-editor ul.x-rects li {
+  background-color: #1982d1;
+  color: #fff;
+  margin: 1px;
+  padding: 2px;
+}
+#x-layout-editor ul.x-rects li label {
   cursor: pointer;
   display: inline-block;
 }
-#x-layout-editor li .x-remove {
+#x-layout-editor ul.x-rects li .x-remove {
   float: right;
 }
-#x-layout-editor li.x-current {
+#x-layout-editor ul.x-rects li.x-current {
   background-color: #5bb75b;
 }
-#x-layout-editor li input {
+#x-layout-editor ul.x-rects li input {
   margin: 0 10px;
+}
+#x-layout-editor ul.x-rules li input {
+  width: 45%;
 }
 #x-block-insert .x-drag {
   cursor: move;
