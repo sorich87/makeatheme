@@ -1,10 +1,3 @@
-# The reason we use this here is that url() (sinatra helper methods)
-# in my opinion does not belong in models, and we need to pass the
-# url to phantomjs.
-def generate_theme_screenshot(theme)
-  Resque.enqueue(Screenshot, theme.id, url("/editor/#{theme.id}"))
-end
-
 get '/themes' do
   @themes = Theme.all.order_by([:name, :desc]).page(params[:page])
 

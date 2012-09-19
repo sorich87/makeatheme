@@ -36,4 +36,7 @@ module ThemeHelper
     pieces
   end
 
+  def generate_theme_screenshot(theme)
+    Resque.enqueue(Screenshot, theme.id, url("/editor/#{theme.id}"))
+  end
 end
