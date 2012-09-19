@@ -356,6 +356,26 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     return true;
   };
 
+  CustomCSS.prototype.toString = function () {
+    var string = "";
+
+    if (!this.rules || this.rules.length === 0) {
+      return "";
+    }
+
+    for (selector in this.rules) {
+      string += selector + " {\n";
+
+      for (property in this.rules[selector]) {
+        string += property + ": " + this.rules[selector][property].value + ";\n";
+      }
+
+      string += "}\n";
+    }
+
+    return string;
+  };
+
   module.exports = CustomCSS;
   
 }});
