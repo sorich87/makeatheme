@@ -306,18 +306,12 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     var index;
 
     if (!selector || !property || !value) {
-      return false;
+      return;
     }
 
     this.deleteRule(selector, property);
 
     index = this.sheet.cssRules.length;
-
-    try {
-      this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
-    } catch (e) {
-      return false;
-    }
 
     this.rules[selector] = this.rules[selector] || {};
     this.rules[selector][property] = {
@@ -325,7 +319,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       , index: index
     };
 
-    return true;
+    return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
   };
 
   CustomCSS.prototype.getRule = function (selector, property) {
@@ -342,25 +336,23 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
   CustomCSS.prototype.deleteRule = function (selector, property) {
     if (!selector || !property) {
-      return false;
+      return;
     }
 
     if (!this.rules[selector] || !this.rules[selector][property]) {
-      return false;
+      return;
     }
 
     this.sheet.deleteRule(this.rules[selector][property].index);
 
-    delete this.rules[selector][property];
-
-    return true;
+    return delete this.rules[selector][property];
   };
 
   CustomCSS.prototype.toString = function () {
     var string = "";
 
     if (!this.rules || this.rules.length === 0) {
-      return "";
+      return;
     }
 
     for (selector in this.rules) {
