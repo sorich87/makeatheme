@@ -102,33 +102,52 @@ module ThemeArchive
     def compile_static_files(zipfile)
       @theme.needed_theme_files.each do |static_file|
         zipfile.get_output_stream(static_file.file_name) do |f|
-          if static_file.file_name == "style.css"
-            # Insert wordpress headers
-            f.puts "/*"
-            wordpress_headers(@theme).each do |key, value|
-              f.puts "#{key}: #{value}"
-            end
-            f.puts "*/"
-          end
+          insert_wordpress_headers(f) if static_file.file_name == "style.css"
+
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
+
+          insert_custom_style(f) if static_file.file_name == "style.css"
         end
       end
     end
 
+    # Insert wordpress headers at the top of stylesheet
+    def insert_wordpress_headers(f)
+      f.puts "/*"
+      wordpress_headers.each do |key, value|
+        f.puts "#{key}: #{value}"
+      end
+      f.puts "*/\n"
+    end
+
     # Headers needed for Wordpress CSS
-    def wordpress_headers(theme)
+    def wordpress_headers
       {
-        'Theme Name' => theme.name,
-        'Description' => theme.description,
-        'Theme URI' => "http://thememy.com/themes/#{theme.id}",
-        'Author' => theme.author.to_fullname,
-        'Author URI' => "http://thememy.com/users/#{theme.author_id}",
-        'Version' => theme.version,
-        'Tags' => theme.tags.join(', '),
+        'Theme Name' => @theme.name,
+        'Description' => @theme.description,
+        'Theme URI' => "http://thememy.com/themes/#{@theme.id}",
+        'Author' => @theme.author.to_fullname,
+        'Author URI' => "http://thememy.com/users/#{@theme.author_id}",
+        'Version' => @theme.version,
+        'Tags' => @theme.tags.join(', '),
         'License' => 'GNU General Public License v2',
         'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
       }
+    end
+
+    # Insert custom style at the bottom of stylesheet
+    def insert_custom_style(f)
+      f.puts "\n/* Custom Style */\n"
+      @theme.style.each do |selector, rules|
+        f.puts "#{selector} {\n"
+
+        rules.each do |property, rule|
+          f.puts "\t#{property}: #{rule['value']};\n"
+        end
+
+        f.puts "}\n";
+      end
     end
 
     def compile_php_files(zipfile)
