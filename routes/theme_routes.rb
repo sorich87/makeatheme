@@ -34,6 +34,7 @@ put '/themes/:id' do
   params = JSON.parse(request.body.read)
   theme.regions = params['regions'].map { |region| Region.new(region) }
   theme.templates = params['templates'].map { |template| Template.new(template) }
+  theme.style = params['style']
 
   if theme.save
     generate_theme_screenshot(theme.reload)
@@ -98,6 +99,7 @@ get '/editor/:theme', provides: 'html' do
 
   respond_with :editor,
     theme: theme.to_json,
+    style: theme.style.to_json,
     pieces: pieces.to_json,
     static_files_dir: theme.static_files_dir,
     preview_only: preview_only,

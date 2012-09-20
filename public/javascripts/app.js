@@ -289,7 +289,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   // Manage custom css in the document <head>
   // and a 'rules' hash for easy access
 
-  var CustomCSS = function () {
+  var CustomCSS = function (rules) {
     var node = document.createElement("style");
 
     node.type = "text/css";
@@ -299,7 +299,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
     this.node = node;
     this.sheet = node.sheet;
-    this.rules = {};
+
+    this.insertRules(rules);
   };
 
   CustomCSS.prototype.insertRule = function (selector, property, value) {
@@ -320,6 +321,21 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     };
 
     return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+  };
+
+  CustomCSS.prototype.insertRules = function (rules) {
+    var rule
+      , rules = rules || {};
+
+    for (selector in rules) {
+      for (property in rules[selector]) {
+        rule = rules[selector][property];
+
+        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
+      }
+    }
+
+    this.rules = rules;
   };
 
   CustomCSS.prototype.getRule = function (selector, property) {
@@ -1780,7 +1796,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-style-edit"
     , className: "x-section"
-    , customCSS: new CustomCSS()
 
     , events: {
         "click button": "addInputs"
@@ -1794,6 +1809,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       app.on("editor:columnHighlight", this.setSelector);
       app.on("download:before", this.buildDownload);
+
+      this.customCSS = new CustomCSS(app.data.style);
     }
 
     , setSelector: function (element) {
@@ -1840,7 +1857,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , buildDownload: function (attributes) {
-      attributes.style = this.customCSS.toString();
+      attributes.style = this.customCSS.rules;
     }
   });
   

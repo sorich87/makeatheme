@@ -6,7 +6,6 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-style-edit"
   , className: "x-section"
-  , customCSS: new CustomCSS()
 
   , events: {
       "click button": "addInputs"
@@ -20,6 +19,8 @@ module.exports = View.extend({
 
     app.on("editor:columnHighlight", this.setSelector);
     app.on("download:before", this.buildDownload);
+
+    this.customCSS = new CustomCSS(app.data.style);
   }
 
   , setSelector: function (element) {
@@ -66,6 +67,6 @@ module.exports = View.extend({
   }
 
   , buildDownload: function (attributes) {
-    attributes.style = this.customCSS.toString();
+    attributes.style = this.customCSS.rules;
   }
 });

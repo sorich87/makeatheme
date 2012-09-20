@@ -19,6 +19,7 @@
     Application = {
       data: {
           theme: <%= theme %>
+        , style: <%= style %>
         , theme_pieces: <%= pieces %>
         <% if preview_only %>, preview_only: true<% end %>
         <% unless current_user.nil? %>, currentUser: <%= current_user.to_json %><% end %>

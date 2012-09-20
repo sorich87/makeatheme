@@ -1,7 +1,7 @@
 // Manage custom css in the document <head>
 // and a 'rules' hash for easy access
 
-var CustomCSS = function () {
+var CustomCSS = function (rules) {
   var node = document.createElement("style");
 
   node.type = "text/css";
@@ -11,7 +11,8 @@ var CustomCSS = function () {
 
   this.node = node;
   this.sheet = node.sheet;
-  this.rules = {};
+
+  this.insertRules(rules);
 };
 
 CustomCSS.prototype.insertRule = function (selector, property, value) {
@@ -32,6 +33,21 @@ CustomCSS.prototype.insertRule = function (selector, property, value) {
   };
 
   return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+};
+
+CustomCSS.prototype.insertRules = function (rules) {
+  var rule
+    , rules = rules || {};
+
+  for (selector in rules) {
+    for (property in rules[selector]) {
+      rule = rules[selector][property];
+
+      this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
+    }
+  }
+
+  this.rules = rules;
 };
 
 CustomCSS.prototype.getRule = function (selector, property) {
