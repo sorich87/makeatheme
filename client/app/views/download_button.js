@@ -36,8 +36,6 @@ module.exports = View.extend({
   , download: function (e) {
     var attrs, regions, templates;
 
-    app.trigger("download:before");
-
     regions = _.map(this.regions.models, function (region) {
       return _.pick(region.attributes, "_id", "name", "slug", "template");
     });
@@ -52,6 +50,8 @@ module.exports = View.extend({
     });
     e.target.setAttribute("disabled", "true");
     e.target.innerHTML = "Baking... Please wait.";
+
+    app.trigger("download:before", attrs);
 
     (new Theme).save(attrs, {
       success: function (theme) {

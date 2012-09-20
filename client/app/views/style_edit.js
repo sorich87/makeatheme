@@ -16,9 +16,10 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "setSelector");
+    _.bindAll(this, "setSelector", "buildDownload");
 
     app.on("editor:columnHighlight", this.setSelector);
+    app.on("download:before", this.buildDownload);
   }
 
   , setSelector: function (element) {
@@ -62,5 +63,9 @@ module.exports = View.extend({
     property  = $(e.target).siblings("input[name=property]").val();
 
     this.customCSS.insertRule(this.selector, property, value);
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.style = this.customCSS.toString();
   }
 });

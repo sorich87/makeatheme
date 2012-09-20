@@ -833,8 +833,6 @@ window.require.define({"views/download_button": function(exports, require, modul
     , download: function (e) {
       var attrs, regions, templates;
 
-      app.trigger("download:before");
-
       regions = _.map(this.regions.models, function (region) {
         return _.pick(region.attributes, "_id", "name", "slug", "template");
       });
@@ -849,6 +847,8 @@ window.require.define({"views/download_button": function(exports, require, modul
       });
       e.target.setAttribute("disabled", "true");
       e.target.innerHTML = "Baking... Please wait.";
+
+      app.trigger("download:before", attrs);
 
       (new Theme).save(attrs, {
         success: function (theme) {
@@ -1790,9 +1790,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "setSelector");
+      _.bindAll(this, "setSelector", "buildDownload");
 
       app.on("editor:columnHighlight", this.setSelector);
+      app.on("download:before", this.buildDownload);
     }
 
     , setSelector: function (element) {
@@ -1836,6 +1837,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       property  = $(e.target).siblings("input[name=property]").val();
 
       this.customCSS.insertRule(this.selector, property, value);
+    }
+
+    , buildDownload: function (attributes) {
+      attributes.style = this.customCSS.toString();
     }
   });
   
