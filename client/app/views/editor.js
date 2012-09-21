@@ -12,7 +12,7 @@ module.exports = View.extend({
     , "click h4": "showSection"
   }
 
-  // Show editor when "templateLoaded" event is triggered
+  // Show editor when "template:loaded" event is triggered
   , render: function () {
     this.$el
       .children(".x-handle").empty()

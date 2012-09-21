@@ -28,7 +28,7 @@ module.exports = View.extend({
 
     app.on("download:before", this.buildDownload);
     app.on("mutations:started", this.makeMutable);
-    app.on("regionLoad", this.saveRegion);
+    app.on("region:load", this.saveRegion);
   }
 
   , render: function () {
@@ -81,11 +81,11 @@ module.exports = View.extend({
     this.loadTemplate(template);
   }
 
-  // Save current template, display it and trigger templateLoaded event
+  // Save current template, display it and trigger template:loaded event
   , loadTemplate: function (template) {
     var regions;
 
-    app.trigger("templateLoad", template);
+    app.trigger("template:load", template);
 
     regions = template.get("regions_attributes");
 
@@ -95,7 +95,7 @@ module.exports = View.extend({
 
     this.collection.setCurrent(template);
 
-    app.trigger("templateLoaded", template);
+    app.trigger("template:loaded", template);
   }
 
   // Remove column if confirmed.

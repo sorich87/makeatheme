@@ -21,7 +21,7 @@ module.exports = View.extend({
 
     app.on("download:before", this.buildDownload);
     app.on("mutations:started", this.makeMutable);
-    app.on("templateLoad", this.addRegionsToTemplate);
+    app.on("template:load", this.addRegionsToTemplate);
   }
 
   , render: function () {
@@ -64,12 +64,12 @@ module.exports = View.extend({
   , loadRegion: function (region) {
     var name = region.get("name");
 
-    app.trigger("regionLoad", region);
+    app.trigger("region:load", region);
 
     $("#page").children(name)[0].outerHTML = region.get("build");
     $("#page").children(name).fadeOut().fadeIn();
 
-    app.trigger("regionLoaded", region);
+    app.trigger("region:loaded", region);
   }
 
   , addRegion: function (e) {

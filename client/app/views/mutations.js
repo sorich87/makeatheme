@@ -7,11 +7,11 @@ module.exports = View.extend({
     _.bindAll(this);
     window.addEventListener("DOMContentLoaded", this.observeMutations);
 
-    app.on("templateLoad", this.stopObserving);
-    app.on("templateLoaded", this.restartObserving);
+    app.on("template:load", this.stopObserving);
+    app.on("template:loaded", this.restartObserving);
 
-    app.on("regionLoad", this.stopObserving);
-    app.on("regionLoaded", this.restartObserving);
+    app.on("region:load", this.stopObserving);
+    app.on("region:loaded", this.restartObserving);
   }
 
   , stopObserving: function () {

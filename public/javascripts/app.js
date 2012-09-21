@@ -892,7 +892,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       , "click h4": "showSection"
     }
 
-    // Show editor when "templateLoaded" event is triggered
+    // Show editor when "template:loaded" event is triggered
     , render: function () {
       this.$el
         .children(".x-handle").empty()
@@ -1303,11 +1303,11 @@ window.require.define({"views/mutations": function(exports, require, module) {
       _.bindAll(this);
       window.addEventListener("DOMContentLoaded", this.observeMutations);
 
-      app.on("templateLoad", this.stopObserving);
-      app.on("templateLoaded", this.restartObserving);
+      app.on("template:load", this.stopObserving);
+      app.on("template:loaded", this.restartObserving);
 
-      app.on("regionLoad", this.stopObserving);
-      app.on("regionLoaded", this.restartObserving);
+      app.on("region:load", this.stopObserving);
+      app.on("region:loaded", this.restartObserving);
     }
 
     , stopObserving: function () {
@@ -1603,7 +1603,7 @@ window.require.define({"views/regions": function(exports, require, module) {
 
       app.on("download:before", this.buildDownload);
       app.on("mutations:started", this.makeMutable);
-      app.on("templateLoad", this.addRegionsToTemplate);
+      app.on("template:load", this.addRegionsToTemplate);
     }
 
     , render: function () {
@@ -1646,12 +1646,12 @@ window.require.define({"views/regions": function(exports, require, module) {
     , loadRegion: function (region) {
       var name = region.get("name");
 
-      app.trigger("regionLoad", region);
+      app.trigger("region:load", region);
 
       $("#page").children(name)[0].outerHTML = region.get("build");
       $("#page").children(name).fadeOut().fadeIn();
 
-      app.trigger("regionLoaded", region);
+      app.trigger("region:loaded", region);
     }
 
     , addRegion: function (e) {
@@ -1898,7 +1898,7 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       app.on("download:before", this.buildDownload);
       app.on("mutations:started", this.makeMutable);
-      app.on("regionLoad", this.saveRegion);
+      app.on("region:load", this.saveRegion);
     }
 
     , render: function () {
@@ -1951,11 +1951,11 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.loadTemplate(template);
     }
 
-    // Save current template, display it and trigger templateLoaded event
+    // Save current template, display it and trigger template:loaded event
     , loadTemplate: function (template) {
       var regions;
 
-      app.trigger("templateLoad", template);
+      app.trigger("template:load", template);
 
       regions = template.get("regions_attributes");
 
@@ -1965,7 +1965,7 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       this.collection.setCurrent(template);
 
-      app.trigger("templateLoaded", template);
+      app.trigger("template:loaded", template);
     }
 
     // Remove column if confirmed.
