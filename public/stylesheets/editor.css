@@ -162,6 +162,9 @@
 #x-layout-editor ul.x-rects li input {
   margin: 0 10px;
 }
+#x-layout-editor select.x-element {
+  width: 100%;
+}
 #x-layout-editor ul.x-rules li input {
   width: 45%;
 }

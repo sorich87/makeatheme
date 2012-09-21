@@ -1808,45 +1808,92 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , className: "x-section"
 
     , events: {
-        "click button": "addInputs"
+        "change select": "setSelector"
+      , "click button": "addInputs"
       , "keyup input[name=value]": "addStyle"
       , "blur input[name=value]": "addStyle"
       , "change input[name=value]": "addStyle"
     }
 
     , initialize: function () {
-      _.bindAll(this, "setSelector", "buildDownload");
+      _.bindAll(this, "setColumn", "buildDownload");
 
-      app.on("editor:columnHighlight", this.setSelector);
+      app.on("editor:columnHighlight", this.setColumn);
       app.on("download:before", this.buildDownload);
 
+      this.selector = "body";
       this.customCSS = new CustomCSS(app.data.style);
     }
 
-    , setSelector: function (element) {
-      this.selector = "#" + element.id;
+    , setSelector: function (e) {
+      var val = $(e.target).val();
+
+      switch (val) {
+        case "body":
+        case "#page > header":
+        case "#page > footer":
+          this.selector = val;
+        break;
+
+        case "column":
+          this.selector = this.column;
+        break;
+      }
+
       this.render();
     }
 
-    , render: function () {
-      var rules;
+    , setColumn: function (element) {
+      this.column = "#" + element.id;
 
-      if (!this.selector) {
-        this.$el.html("Click on an element in the design to customize it.");
-        return this;
+      if (this.$("select").val() === "column") {
+        this.selector = this.column;
+        this.render();
       }
+    }
 
-      rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+    , render: function () {
+      var rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
         rule.property = property;
         return rule;
       });
 
       this.$el.html(template({
-          selector: this.selector
+          elements: this.elementOptions()
+        , selector: this.selector
         , rules: rules
       }));
 
+      if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
+        this.$(".x-choice").hide();
+      }
+
       return this;
+    }
+
+    , elementOptions: function () {
+      return [
+        {
+            label: "Whole Document"
+          , value: "body"
+          , selected: this.selector === "body" ? " selected" : ""
+        }
+        , {
+            label: "Header"
+          , value: "#page > header"
+          , selected: this.selector === "#page > header" ? " selected" : ""
+        }
+        , {
+            label: "Footer"
+          , value: "#page > footer"
+          , selected: this.selector === "#page > footer" ? " selected" : ""
+        }
+        , {
+            label: "Selected Element"
+          , value: "column"
+          , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
+        }
+      ];
     }
 
     , addInputs: function (e) {
@@ -2218,6 +2265,43 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
+    buffer += "\n    <option value=\"";
+    foundHelper = helpers.value;
+    stack1 = foundHelper || depth0.value;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.selected;
+    stack1 = foundHelper || depth0.selected;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n    ";
+    return buffer;}
+
+  function program3(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  Selected Element: <b>";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</b>\n  ";
+    return buffer;}
+
+  function program5(depth0,data) {
+    
+    
+    return "\n  Click on an element in the design to customize it.\n  ";}
+
+  function program7(depth0,data) {
+    
+    var buffer = "", stack1;
     buffer += "\n    <li><input name=\"property\" value=\"";
     foundHelper = helpers.property;
     stack1 = foundHelper || depth0.property;
@@ -2231,16 +2315,31 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "\" /></li>\n    ";
     return buffer;}
 
-    buffer += "<form>\n  <p class=\"x-choice\">\n    <label>Current Element:</label>\n    <b>";
+    buffer += "<form>\n  <select class=\"x-element\">\n    ";
+    foundHelper = helpers.elements;
+    stack1 = foundHelper || depth0.elements;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </select>\n\n  <p class=\"x-choice\">\n  ";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  </p>\n  <ul class=\"x-rules\">\n    ";
+    stack2 = helpers['if'];
+    tmp1 = self.program(3, program3, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(5, program5, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </p>\n\n  <ul class=\"x-rules\">\n    ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
+    tmp1 = self.program(7, program7, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
