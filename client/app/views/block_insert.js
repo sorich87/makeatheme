@@ -1,8 +1,7 @@
 // Display list of blocks to insert
 var View = require("views/base/view")
   , Blocks = require("collections/blocks")
-  , app = require("application")
-  , idIncrement = 1;
+  , app = require("application");
 
 module.exports = View.extend({
     id: "x-block-insert"
@@ -52,14 +51,9 @@ module.exports = View.extend({
   // If the element is inserted in a row,
   // load the actual template chuck to insert
   , dragEnd: function (e, drag) {
-    if (drag.element.parent().hasClass("row")) {
-      var block = this.collection.getByCid(drag.element.data("cid"));
+    var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
-        + block.className() + "'>" + block.get("build") + "</div>";
-
-      idIncrement++;
-    }
+    app.trigger("block:inserted", block, drag.element);
   }
 
   , makeMutable: function (pieces) {

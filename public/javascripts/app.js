@@ -743,8 +743,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
   // Display list of blocks to insert
   var View = require("views/base/view")
     , Blocks = require("collections/blocks")
-    , app = require("application")
-    , idIncrement = 1;
+    , app = require("application");
 
   module.exports = View.extend({
       id: "x-block-insert"
@@ -794,14 +793,9 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     // If the element is inserted in a row,
     // load the actual template chuck to insert
     , dragEnd: function (e, drag) {
-      if (drag.element.parent().hasClass("row")) {
-        var block = this.collection.getByCid(drag.element.data("cid"));
+      var block = this.collection.getByCid(drag.element.data("cid"));
 
-        drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
-          + block.className() + "'>" + block.get("build") + "</div>";
-
-        idIncrement++;
-      }
+      app.trigger("block:inserted", block, drag.element);
     }
 
     , makeMutable: function (pieces) {
@@ -1031,12 +1025,14 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "addDataBypass", "removeDataBypass");
+      _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
 
       this.addDataBypass();
       app.on("download:before", this.removeDataBypass);
       app.on("download:after", this.addDataBypass);
       app.on("download:error", this.addDataBypass);
+
+      app.on("block:inserted", this.insertColumn);
     }
 
     , removeDataBypass: function () {
@@ -1201,6 +1197,16 @@ window.require.define({"views/layout": function(exports, require, module) {
         } else {
           $(e.currentTarget.parentNode).remove();
         }
+      }
+    }
+
+    // Insert column when a block is dragged into the layout.
+    , insertColumn: function (block, element) {
+      if (element.parent().hasClass("row")) {
+        element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns "
+          + block.className() + "'>" + block.get("build") + "</div>";
+
+        idIncrement++;
       }
     }
   });

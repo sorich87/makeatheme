@@ -61,12 +61,14 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "addDataBypass", "removeDataBypass");
+    _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
 
     this.addDataBypass();
     app.on("download:before", this.removeDataBypass);
     app.on("download:after", this.addDataBypass);
     app.on("download:error", this.addDataBypass);
+
+    app.on("block:inserted", this.insertColumn);
   }
 
   , removeDataBypass: function () {
@@ -231,6 +233,16 @@ module.exports = View.extend({
       } else {
         $(e.currentTarget.parentNode).remove();
       }
+    }
+  }
+
+  // Insert column when a block is dragged into the layout.
+  , insertColumn: function (block, element) {
+    if (element.parent().hasClass("row")) {
+      element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns "
+        + block.className() + "'>" + block.get("build") + "</div>";
+
+      idIncrement++;
     }
   }
 });
