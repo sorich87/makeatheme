@@ -1396,22 +1396,30 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
 
-      // Get destination row.
+      // Get parent destination.
       parentNode = sandbox.getElementById(node.parentNode.id);
 
-      // Insert the node in the row
+      // Insert the node in the template.
+      // If the next sibling of the node is the footer region,
+      // insert the node at the end.
       if (node.nextElementSibling) {
-        sibling = sandbox.getElementById(node.nextElementSibling.id);
-        parentNode.insertBefore(copy, sibling);
+        if ("FOOTER" === node.nextElementSibling.tagName) {
+          sandbox.body.innerHTML = sandbox.body.innerHTML + node.outerHTML;
+        } else {
+          nextNode = sandbox.getElementById(node.nextElementSibling.id);
+          if (nextNode.parentNode) {
+            nextNode.parentNode.insertBefore(copy, nextNode);
+          }
+        }
       } else {
-        parentNode.appendChild(copy);
+        sandbox.getElementById(node.parentNode.id).appendChild(copy);
       }
 
       piece.set("template", sandbox.body.innerHTML);
     }
 
     , removeNode: function (node, oldParentNode, type) {
-      var topNode, parentNode;
+      var topNode;
 
       if (type === "column") {
         topNode = oldParentNode.parentNode;
@@ -1428,23 +1436,23 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
 
-      parentNode = sandbox.getElementById(oldParentNode.id);
+      copy = sandbox.getElementById(node.id);
 
-      parentNode.removeChild(sandbox.getElementById(node.id));
+      copy.parentNode.removeChild(copy);
 
       piece.set("template", sandbox.body.innerHTML);
     }
 
     , reparentNode: function (node, oldParentNode) {
-      this.addNode(node);
+      this.addNode(node, "column");
       // Remove node if it was in a different region
       if (oldParentNode.parentNode !== null) {
-        this.removeNode(node, oldParentNode);
+        this.removeNode(node, oldParentNode, "column");
       }
     }
 
     , reorderNode: function (node, oldPreviousSibling) {
-      this.addNode(node);
+      this.addNode(node, "column");
     }
 
     , getTemplatePiece: function(topNode) {
