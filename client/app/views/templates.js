@@ -1,12 +1,13 @@
 var View = require("views/base/view")
   , app = require("application")
   , Template = require("models/template")
-  , template = require("views/templates/templates");
+  , template = require("views/templates/templates")
+  , Templates = require("collections/templates");
 
 module.exports = View.extend({
     id: "x-templates-select"
   , className: "x-section"
-  , collection: app.templates
+  , collection: new Templates(app.data.theme_pieces.templates)
 
   , events: {
       "change ul input": "switchTemplate"
@@ -19,13 +20,15 @@ module.exports = View.extend({
   }
 
   , initialize: function (options) {
-    _.bindAll(this, "buildDownload");
+    _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
 
     this.collection.on("add", this.addOne, this);
     this.collection.on("reset", this.addAll, this);
     this.collection.on("remove", this.removeOne, this);
 
     app.on("download:before", this.buildDownload);
+    app.on("mutations:started", this.makeMutable);
+    app.on("regionLoad", this.saveRegion);
   }
 
   , render: function () {
@@ -80,16 +83,13 @@ module.exports = View.extend({
 
   // Save current template, display it and trigger templateLoaded event
   , loadTemplate: function (template) {
-    var header, footer, regions;
+    var regions;
 
     app.trigger("templateLoad", template);
 
-    regions = template.get("regions");
+    regions = template.get("regions_attributes");
 
-    header = app.regions.getByName("header", regions.header);
-    footer = app.regions.getByName("footer", regions.footer);
-
-    build = header.get("build") + template.get("build") + footer.get("build");
+    build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
 
     $("#page").fadeOut().empty().append(build).fadeIn();
 
@@ -151,5 +151,13 @@ module.exports = View.extend({
     attributes.templates = _.map(this.collection.models, function (template) {
       return _.pick(template.attributes, "_id", "name", "template");
     });
+  }
+
+  , makeMutable: function (pieces) {
+    pieces.templates = this.collection;
+  }
+
+  , saveRegion: function (region) {
+    this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
   }
 });

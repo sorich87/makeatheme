@@ -18,13 +18,6 @@ _.extend(Application, {
     // Initialize current user model instance
     this.currentUser = new User(this.data.currentUser);
 
-    // Load default collections models
-    if (this.data.theme_pieces) {
-      this.templates = new Templates(this.data.theme_pieces.templates);
-      this.regions = new Regions(this.data.theme_pieces.regions);
-      this.blocks = new Blocks(this.data.theme_pieces.blocks);
-    }
-
     // Initialize router
     this.router = new Router();
 

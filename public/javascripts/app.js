@@ -95,13 +95,6 @@ window.require.define({"application": function(exports, require, module) {
       // Initialize current user model instance
       this.currentUser = new User(this.data.currentUser);
 
-      // Load default collections models
-      if (this.data.theme_pieces) {
-        this.templates = new Templates(this.data.theme_pieces.templates);
-        this.regions = new Regions(this.data.theme_pieces.regions);
-        this.blocks = new Blocks(this.data.theme_pieces.blocks);
-      }
-
       // Initialize router
       this.router = new Router();
 
@@ -756,7 +749,7 @@ window.require.define({"views/block_insert": function(exports, require, module) 
   module.exports = View.extend({
       id: "x-block-insert"
     , className: "x-section"
-    , collection: app.blocks
+    , collection: new Blocks(app.data.theme_pieces.blocks)
 
     , events: {
         "draginit #x-block-insert .x-drag": "dragInit"
@@ -764,7 +757,11 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , initialize: function () {
+      _.bindAll(this, "makeMutable");
+
       this.collection.on("reset", this.addAll, this);
+
+      app.on("mutations:started", this.makeMutable);
     }
 
     , render: function () {
@@ -805,6 +802,10 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
         idIncrement++;
       }
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.blocks = this.collection;
     }
   });
   
@@ -1309,6 +1310,10 @@ window.require.define({"views/mutations": function(exports, require, module) {
         , queries: [{all: true}]
         , callback: this.propagateMutations
       });
+
+      this.pieces = {};
+
+      app.trigger("mutations:started", this.pieces);
     }
 
     , propagateMutations: function (summaries) {
@@ -1353,11 +1358,11 @@ window.require.define({"views/mutations": function(exports, require, module) {
       grandParentNode = node.parentNode.parentNode;
 
       if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-        piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
+        piece = this.pieces.regions.getByName(grandParentNode.tagName.toLowerCase());
 
         piece.set("build", grandParentNode.outerHTML);
       } else {
-        piece = app.templates.getCurrent();
+        piece = this.pieces.templates.getCurrent();
 
         templateClone = window.document.getElementById("page").cloneNode(true);
         $(templateClone).children("header, footer").remove();
@@ -1381,8 +1386,8 @@ window.require.define({"views/mutations": function(exports, require, module) {
       }
 
       // Replace node innerHTML by Handlebars tag
-      for (var i in app.blocks.models) {
-        block = app.blocks.models[i];
+      for (var i in this.pieces.blocks.models) {
+        block = this.pieces.blocks.models[i];
 
         if (node.className.indexOf(block.className()) !== -1) {
           copy.innerHTML = block.tag();
@@ -1425,11 +1430,11 @@ window.require.define({"views/mutations": function(exports, require, module) {
       // If grandparent is header or footer, remove from corresponding region template.
       // If not, remove from template
       if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-        piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
+        piece = this.pieces.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
 
         piece.set("build", oldGrandParentNode.outerHTML);
       } else {
-        piece = app.templates.getCurrent();
+        piece = this.pieces.templates.getCurrent();
 
         templateClone = window.document.getElementById("page").cloneNode(true);
         $(templateClone).children("header, footer").remove();
@@ -1583,12 +1588,13 @@ window.require.define({"views/regions": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/regions")
     , app = require("application")
-    , Region = require("models/region");
+    , Region = require("models/region")
+    , Regions = require("collections/regions");
 
   module.exports = View.extend({
       id: "x-region-select"
     , className: "x-section"
-    , collection: app.regions
+    , collection: new Regions(app.data.theme_pieces.regions)
 
     , events: {
         "change .x-header-select, .x-footer-select": "switchRegion"
@@ -1596,13 +1602,13 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "buildDownload");
-
-      this.template = app.templates.getCurrent();
+      _.bindAll(this, "buildDownload", "makeMutable", "addRegionsToTemplate");
 
       this.collection.on("add", this.addOne, this);
 
       app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable);
+      app.on("templateLoad", this.addRegionsToTemplate);
     }
 
     , render: function () {
@@ -1643,12 +1649,9 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , loadRegion: function (region) {
-      var name = region.get("name")
-        , slug = region.get("slug");
+      var name = region.get("name");
 
       app.trigger("regionLoad", region);
-
-      this.template.setRegion(name, slug);
 
       $("#page").children(name)[0].outerHTML = region.get("build");
       $("#page").children(name).fadeOut().fadeIn();
@@ -1698,6 +1701,19 @@ window.require.define({"views/regions": function(exports, require, module) {
     , buildDownload: function (attributes) {
       attributes.regions = _.map(this.collection.models, function (region) {
         return _.pick(region.attributes, "_id", "name", "slug", "template");
+      });
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.regions = this.collection;
+    }
+
+    , addRegionsToTemplate: function (template) {
+      var regions = template.get("regions");
+
+      template.set("regions_attributes", {
+          header: this.collection.getByName("header", regions.header)
+        , footer: this.collection.getByName("footer", regions.footer)
       });
     }
   });
@@ -1860,12 +1876,13 @@ window.require.define({"views/templates": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
     , Template = require("models/template")
-    , template = require("views/templates/templates");
+    , template = require("views/templates/templates")
+    , Templates = require("collections/templates");
 
   module.exports = View.extend({
       id: "x-templates-select"
     , className: "x-section"
-    , collection: app.templates
+    , collection: new Templates(app.data.theme_pieces.templates)
 
     , events: {
         "change ul input": "switchTemplate"
@@ -1878,13 +1895,15 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , initialize: function (options) {
-      _.bindAll(this, "buildDownload");
+      _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
 
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
       this.collection.on("remove", this.removeOne, this);
 
       app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable);
+      app.on("regionLoad", this.saveRegion);
     }
 
     , render: function () {
@@ -1939,16 +1958,13 @@ window.require.define({"views/templates": function(exports, require, module) {
 
     // Save current template, display it and trigger templateLoaded event
     , loadTemplate: function (template) {
-      var header, footer, regions;
+      var regions;
 
       app.trigger("templateLoad", template);
 
-      regions = template.get("regions");
+      regions = template.get("regions_attributes");
 
-      header = app.regions.getByName("header", regions.header);
-      footer = app.regions.getByName("footer", regions.footer);
-
-      build = header.get("build") + template.get("build") + footer.get("build");
+      build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
 
       $("#page").fadeOut().empty().append(build).fadeIn();
 
@@ -2010,6 +2026,14 @@ window.require.define({"views/templates": function(exports, require, module) {
       attributes.templates = _.map(this.collection.models, function (template) {
         return _.pick(template.attributes, "_id", "name", "template");
       });
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.templates = this.collection;
+    }
+
+    , saveRegion: function (region) {
+      this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
     }
   });
   

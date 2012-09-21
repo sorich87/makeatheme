@@ -28,6 +28,10 @@ module.exports = View.extend({
       , queries: [{all: true}]
       , callback: this.propagateMutations
     });
+
+    this.pieces = {};
+
+    app.trigger("mutations:started", this.pieces);
   }
 
   , propagateMutations: function (summaries) {
@@ -72,11 +76,11 @@ module.exports = View.extend({
     grandParentNode = node.parentNode.parentNode;
 
     if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-      piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
+      piece = this.pieces.regions.getByName(grandParentNode.tagName.toLowerCase());
 
       piece.set("build", grandParentNode.outerHTML);
     } else {
-      piece = app.templates.getCurrent();
+      piece = this.pieces.templates.getCurrent();
 
       templateClone = window.document.getElementById("page").cloneNode(true);
       $(templateClone).children("header, footer").remove();
@@ -100,8 +104,8 @@ module.exports = View.extend({
     }
 
     // Replace node innerHTML by Handlebars tag
-    for (var i in app.blocks.models) {
-      block = app.blocks.models[i];
+    for (var i in this.pieces.blocks.models) {
+      block = this.pieces.blocks.models[i];
 
       if (node.className.indexOf(block.className()) !== -1) {
         copy.innerHTML = block.tag();
@@ -144,11 +148,11 @@ module.exports = View.extend({
     // If grandparent is header or footer, remove from corresponding region template.
     // If not, remove from template
     if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-      piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
+      piece = this.pieces.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
 
       piece.set("build", oldGrandParentNode.outerHTML);
     } else {
-      piece = app.templates.getCurrent();
+      piece = this.pieces.templates.getCurrent();
 
       templateClone = window.document.getElementById("page").cloneNode(true);
       $(templateClone).children("header, footer").remove();

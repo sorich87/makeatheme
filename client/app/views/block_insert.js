@@ -7,7 +7,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-block-insert"
   , className: "x-section"
-  , collection: app.blocks
+  , collection: new Blocks(app.data.theme_pieces.blocks)
 
   , events: {
       "draginit #x-block-insert .x-drag": "dragInit"
@@ -15,7 +15,11 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
+    _.bindAll(this, "makeMutable");
+
     this.collection.on("reset", this.addAll, this);
+
+    app.on("mutations:started", this.makeMutable);
   }
 
   , render: function () {
@@ -56,5 +60,9 @@ module.exports = View.extend({
 
       idIncrement++;
     }
+  }
+
+  , makeMutable: function (pieces) {
+    pieces.blocks = this.collection;
   }
 });
