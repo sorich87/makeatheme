@@ -42,6 +42,10 @@ module.exports = View.extend({
       return node.className && node.className.indexOf("column") !== -1;
     };
 
+    isRow = function (node) {
+      return node.className && node.className.indexOf("row") !== -1;
+    };
+
     summary.added.forEach(function (node) {
       if (isColumn(node)) {
         this.addNode(node);
@@ -50,7 +54,9 @@ module.exports = View.extend({
 
     summary.removed.forEach(function (node) {
       if (isColumn(node)) {
-        this.removeNode(node, summary.getOldParentNode(node));
+        this.removeNode(node, summary.getOldParentNode(node), "column");
+      } else if (isRow(node)) {
+        this.removeNode(node, summary.getOldParentNode(node), "row");
       }
     }.bind(this));
 
@@ -140,17 +146,26 @@ module.exports = View.extend({
     piece.set("template", sandbox.body.innerHTML);
   }
 
-  , removeNode: function (node, oldParentNode) {
-    var oldGrandParentNode, parentNode;
+  , removeNode: function (node, oldParentNode, type) {
+    var topNode, parentNode;
 
-    oldGrandParentNode = oldParentNode.parentNode;
+    if (type === "column") {
+      topNode = oldParentNode.parentNode;
 
-    // If grandparent is header or footer, remove from corresponding region template.
+      // If no topNode, it means the parent row has been removed as well.
+      if (topNode === null) {
+        return;
+      }
+    } else if (type === "row") {
+      topNode = oldParentNode;
+    }
+
+    // If header or footer, remove from corresponding region template.
     // If not, remove from template
-    if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-      piece = this.pieces.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
+    if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
+      piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
 
-      piece.set("build", oldGrandParentNode.outerHTML);
+      piece.set("build", topNode.outerHTML);
     } else {
       piece = this.pieces.templates.getCurrent();
 
@@ -163,15 +178,7 @@ module.exports = View.extend({
 
     parentNode = sandbox.getElementById(oldParentNode.id);
 
-    // If parent node doesn't have anymore children, remove it
-    // If not, simply remove the node
-    if (oldParentNode.children.length === 0) {
-      if (parentNode.parentNode) {
-        parentNode.parentNode.removeChild(parentNode);
-      }
-    } else {
-      parentNode.removeChild(sandbox.getElementById(node.id));
-    }
+    parentNode.removeChild(sandbox.getElementById(node.id));
 
     piece.set("template", sandbox.body.innerHTML);
   }

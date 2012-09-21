@@ -221,8 +221,14 @@ module.exports = View.extend({
 
   // Remove column if confirmed.
   , removeColumn: function (e) {
+    var grandParentNode = e.currentTarget.parentNode.parentNode;
+
     if (confirm("Are you sure you want to remove this element?")) {
-      $(e.currentTarget).parent().remove();
+      if (grandParentNode.children.length === 1) {
+        $(grandParentNode).remove();
+      } else {
+        $(e.currentTarget.parentNode).remove();
+      }
     }
   }
 });

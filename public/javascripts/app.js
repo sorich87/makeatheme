@@ -1191,8 +1191,14 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     // Remove column if confirmed.
     , removeColumn: function (e) {
+      var grandParentNode = e.currentTarget.parentNode.parentNode;
+
       if (confirm("Are you sure you want to remove this element?")) {
-        $(e.currentTarget).parent().remove();
+        if (grandParentNode.children.length === 1) {
+          $(grandParentNode).remove();
+        } else {
+          $(e.currentTarget.parentNode).remove();
+        }
       }
     }
   });
@@ -1324,6 +1330,10 @@ window.require.define({"views/mutations": function(exports, require, module) {
         return node.className && node.className.indexOf("column") !== -1;
       };
 
+      isRow = function (node) {
+        return node.className && node.className.indexOf("row") !== -1;
+      };
+
       summary.added.forEach(function (node) {
         if (isColumn(node)) {
           this.addNode(node);
@@ -1332,7 +1342,9 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       summary.removed.forEach(function (node) {
         if (isColumn(node)) {
-          this.removeNode(node, summary.getOldParentNode(node));
+          this.removeNode(node, summary.getOldParentNode(node), "column");
+        } else if (isRow(node)) {
+          this.removeNode(node, summary.getOldParentNode(node), "row");
         }
       }.bind(this));
 
@@ -1422,17 +1434,26 @@ window.require.define({"views/mutations": function(exports, require, module) {
       piece.set("template", sandbox.body.innerHTML);
     }
 
-    , removeNode: function (node, oldParentNode) {
-      var oldGrandParentNode, parentNode;
+    , removeNode: function (node, oldParentNode, type) {
+      var topNode, parentNode;
 
-      oldGrandParentNode = oldParentNode.parentNode;
+      if (type === "column") {
+        topNode = oldParentNode.parentNode;
 
-      // If grandparent is header or footer, remove from corresponding region template.
+        // If no topNode, it means the parent row has been removed as well.
+        if (topNode === null) {
+          return;
+        }
+      } else if (type === "row") {
+        topNode = oldParentNode;
+      }
+
+      // If header or footer, remove from corresponding region template.
       // If not, remove from template
-      if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-        piece = this.pieces.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
+      if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
+        piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
 
-        piece.set("build", oldGrandParentNode.outerHTML);
+        piece.set("build", topNode.outerHTML);
       } else {
         piece = this.pieces.templates.getCurrent();
 
@@ -1445,15 +1466,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       parentNode = sandbox.getElementById(oldParentNode.id);
 
-      // If parent node doesn't have anymore children, remove it
-      // If not, simply remove the node
-      if (oldParentNode.children.length === 0) {
-        if (parentNode.parentNode) {
-          parentNode.parentNode.removeChild(parentNode);
-        }
-      } else {
-        parentNode.removeChild(sandbox.getElementById(node.id));
-      }
+      parentNode.removeChild(sandbox.getElementById(node.id));
 
       piece.set("template", sandbox.body.innerHTML);
     }
