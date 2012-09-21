@@ -1,6 +1,7 @@
 var totalColumnsWidth, isRowFull
   , View = require("views/base/view")
-  , app = require("application");
+  , app = require("application")
+  , idIncrement = 1;
 
 // Return total width of all columns children of a row
 // except the one being dragged
@@ -155,7 +156,8 @@ module.exports = View.extend({
     $dragParent = $drag.parent();
 
     if (isRowFull($drop, $drag)) {
-      $row = $("<div class='row'></div>").insertAfter($drop);
+      $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
+      idIncrement++;
     } else {
       $row = $drop;
     }

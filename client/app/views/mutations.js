@@ -48,7 +48,9 @@ module.exports = View.extend({
 
     summary.added.forEach(function (node) {
       if (isColumn(node)) {
-        this.addNode(node);
+        this.addNode(node, "column");
+      } else if (isRow(node)) {
+        this.addNode(node, "row");
       }
     }.bind(this));
 
@@ -73,74 +75,40 @@ module.exports = View.extend({
     }.bind(this));
   }
 
-  , addNode: function (node) {
-    var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling, templateClone;
+  , addNode: function (node, type) {
+    var topNode, region, template, parentNode, sandbox, block, sibling, templateClone;
 
-    // copy of the node that will be inserted
-    copy = node.cloneNode(true);
+    copy = node.cloneNode(false);
 
-    grandParentNode = node.parentNode.parentNode;
+    if (type === "column") {
+      topNode = node.parentNode.parentNode;
 
-    if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-      piece = this.pieces.regions.getByName(grandParentNode.tagName.toLowerCase());
+      // Add corresponding Liquid tag in column node.
+      for (var i in this.pieces.blocks.models) {
+        block = this.pieces.blocks.models[i];
 
-      piece.set("build", grandParentNode.outerHTML);
+        if (node.className.indexOf(block.className()) !== -1) {
+          copy.innerHTML = block.tag();
+          break;
+        }
+      }
     } else {
-      piece = this.pieces.templates.getCurrent();
-
-      templateClone = window.document.getElementById("page").cloneNode(true);
-      $(templateClone).children("header, footer").remove();
-      piece.set("build", templateClone.innerHTML);
+      topNode = node.parentNode;
     }
+
+    piece = this.getTemplatePiece(topNode);
 
     sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
 
     // Get destination row.
-    row = sandbox.getElementById(node.parentNode.id);
-
-    // If the destination node doesn't exist in the template, create it.
-    if (!row) {
-      row = sandbox.createElement("div");
-      row.className = "row";
-      row.id = "y-" + idIncrement;
-      idIncrement++;
-
-      // Set the ID of the row the user sees
-      node.parentNode.id = row.id
-    }
-
-    // Replace node innerHTML by Handlebars tag
-    for (var i in this.pieces.blocks.models) {
-      block = this.pieces.blocks.models[i];
-
-      if (node.className.indexOf(block.className()) !== -1) {
-        copy.innerHTML = block.tag();
-        break;
-      }
-    }
+    parentNode = sandbox.getElementById(node.parentNode.id);
 
     // Insert the node in the row
     if (node.nextElementSibling) {
       sibling = sandbox.getElementById(node.nextElementSibling.id);
-      row.insertBefore(copy, sibling);
+      parentNode.insertBefore(copy, sibling);
     } else {
-      row.appendChild(copy);
-    }
-
-    // Insert the row in the template.
-    // If the next sibling of the node is the footer region,
-    // insert the row at the end.
-    if (node.parentNode.nextElementSibling) {
-      if ("FOOTER" === node.parentNode.nextElementSibling.tagName) {
-        sandbox.body.innerHTML = sandbox.body.innerHTML + row.outerHTML;
-      } else {
-        nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
-        if (nextRow.parentNode) {
-          nextRow.parentNode.insertBefore(row, nextRow);
-        }
-      }
-    } else {
-      sandbox.getElementById(grandParentNode.id).appendChild(row);
+      parentNode.appendChild(copy);
     }
 
     piece.set("template", sandbox.body.innerHTML);
@@ -160,19 +128,7 @@ module.exports = View.extend({
       topNode = oldParentNode;
     }
 
-    // If header or footer, remove from corresponding region template.
-    // If not, remove from template
-    if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
-      piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
-
-      piece.set("build", topNode.outerHTML);
-    } else {
-      piece = this.pieces.templates.getCurrent();
-
-      templateClone = window.document.getElementById("page").cloneNode(true);
-      $(templateClone).children("header, footer").remove();
-      piece.set("build", templateClone.innerHTML);
-    }
+    piece = this.getTemplatePiece(topNode);
 
     sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
 
@@ -193,5 +149,23 @@ module.exports = View.extend({
 
   , reorderNode: function (node, oldPreviousSibling) {
     this.addNode(node);
+  }
+
+  , getTemplatePiece: function(topNode) {
+    var piece;
+
+    if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
+      piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
+
+      piece.set("build", topNode.outerHTML);
+    } else {
+      piece = this.pieces.templates.getCurrent();
+
+      templateClone = window.document.getElementById("page").cloneNode(true);
+      $(templateClone).children("header, footer").remove();
+      piece.set("build", templateClone.innerHTML);
+    }
+
+    return piece;
   }
 });
