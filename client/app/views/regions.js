@@ -14,9 +14,13 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
+    _.bindAll(this, "buildDownload");
+
     this.template = app.templates.getCurrent();
 
     this.collection.on("add", this.addOne, this);
+
+    app.on("download:before", this.buildDownload);
   }
 
   , render: function () {
@@ -107,5 +111,11 @@ module.exports = View.extend({
       .children(":selected").removeAttr("selected").end()
       .children("[value='']")
         .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.regions = _.map(this.collection.models, function (region) {
+      return _.pick(region.attributes, "_id", "name", "slug", "template");
+    });
   }
 });

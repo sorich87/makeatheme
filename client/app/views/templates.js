@@ -19,9 +19,13 @@ module.exports = View.extend({
   }
 
   , initialize: function (options) {
+    _.bindAll(this, "buildDownload");
+
     this.collection.on("add", this.addOne, this);
     this.collection.on("reset", this.addAll, this);
     this.collection.on("remove", this.removeOne, this);
+
+    app.on("download:before", this.buildDownload);
   }
 
   , render: function () {
@@ -141,5 +145,11 @@ module.exports = View.extend({
     this.render();
 
     app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.templates = _.map(this.collection.models, function (template) {
+      return _.pick(template.attributes, "_id", "name", "template");
+    });
   }
 });
