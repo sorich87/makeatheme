@@ -19,9 +19,7 @@ totalColumnsWidth = function (dropElement, dragElement) {
 // Does total width of all columns children of a drop row
 // allow a new column?
 isRowFull = function (dropElement, dragElement) {
-  var rowWidth = $(dropElement).width();
-
-  return rowWidth <= totalColumnsWidth(dropElement, dragElement);
+  return $(dropElement).width() <= totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
 };
 
 module.exports = View.extend({
