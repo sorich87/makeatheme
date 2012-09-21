@@ -9,41 +9,18 @@ module ThemeImport
   end
 
   module ClassMethods
-    def new_from_zip(zip_file, attributes = {})
+    def create_from_zip(zip_file, attributes = {})
       theme = self.new(attributes)
+      import = ThemeImport.new(zip_file)
 
-      begin
-        import = ThemeImport.new(zip_file)
+      theme.templates = import.templates
+      theme.regions = import.regions
+      theme.write_attributes(import.attributes)
 
-        theme.templates = import.templates
-        theme.regions = import.regions
-        theme.write_attributes(import.attributes)
-
-        if theme.valid?
-          group = theme.build_theme_file_group
-
-          import.static_files.each do |static_file|
-            static_file = StaticThemeFile.new(
-              :file_name => static_file[:filename],
-              :file => static_file[:tempfile]
-            )
-            # Pass invalid files
-            if static_file.valid?
-              group.static_theme_files << static_file
-              theme.static_theme_files << static_file
-              static_file.save
-            end
-          end
-
-          group.save
-        end
-      ensure
-        import.static_files.each do |static_file|
-          static_file[:tempfile].close
-          File.unlink(static_file[:tempfile])
-        end
+      if theme.valid?
+        theme.save
+        Resque.enqueue(UploadThemeFiles, theme.id, import.static_files)
       end
-
       theme
     end
   end
@@ -119,8 +96,10 @@ module ThemeImport
 
       @static_files << {
         :filename => entry.to_s,
-        :tempfile => tempfile
+        :tempfile => tempfile.path
       }
+
+      tempfile.close
     end
 
     def read_theme_info_file(entry)

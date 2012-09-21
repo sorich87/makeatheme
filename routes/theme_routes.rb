@@ -55,12 +55,12 @@ post '/themes' do
 
   status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
 
-  theme = Theme.new_from_zip(file[:tempfile], author: current_user)
+  theme = Theme.create_from_zip(file[:tempfile], author: current_user)
 
   if theme.valid?
     theme.save
 
-    generate_theme_screenshot(theme)
+    #generate_theme_screenshot(theme)
 
     status 201
     respond_with theme
