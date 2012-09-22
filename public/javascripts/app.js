@@ -296,16 +296,16 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     this.insertRules(rules);
   };
 
-  CustomCSS.prototype.insertRule = function (selector, property, value) {
-    var index;
-
+  CustomCSS.prototype.insertRule = function (selector, property, value, index) {
     if (!selector || !property || !value) {
       return;
     }
 
     this.deleteRule(selector, property);
 
-    index = this.sheet.cssRules.length;
+    if (index === null || index === void 0) {
+      index = this.sheet.cssRules.length;
+    }
 
     this.rules[selector] = this.rules[selector] || {};
     this.rules[selector][property] = {
@@ -313,7 +313,9 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       , index: index
     };
 
-    return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+    this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+
+    return index;
   };
 
   CustomCSS.prototype.insertRules = function (rules) {
@@ -2169,9 +2171,9 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         "change .x-element": "setSelector"
       , "change .x-tag": "setTag"
       , "click button": "addInputs"
-      , "keyup input[name=value]": "addStyle"
-      , "blur input[name=value]": "addStyle"
-      , "change input[name=value]": "addStyle"
+      , "keyup input": "addStyle"
+      , "blur input": "addStyle"
+      , "change input": "addStyle"
     }
 
     , initialize: function () {
@@ -2286,22 +2288,26 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       e.preventDefault();
 
       this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
-                          <input name='value' value='' placeholder='value' /></li>");
+                          <input name='value' value='' placeholder='value' />\
+                          <input type='hidden' name='index' /></li>");
     }
 
     , addStyle: function (e) {
-      var selector, property, value;
+      var selector, property, value, index
+        , $li = $(e.target).parent();
 
       selector = this.selector;
       if (this.tag) {
         selector += " " + this.tag;
       }
 
-      value = e.target.value;
+      property  = $li.find("input[name=property]").val();
+      value  = $li.find("input[name=value]").val();
+      index  = $li.find("input[name=index]").val() || null;
 
-      property  = $(e.target).siblings("input[name=property]").val();
+      index = this.customCSS.insertRule(selector, property, value, index);
 
-      this.customCSS.insertRule(selector, property, value);
+      $li.find("input[name=index]").val(index);
     }
 
     , buildDownload: function (attributes) {
@@ -2739,17 +2745,22 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program10(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n    <li><input name=\"property\" value=\"";
+    buffer += "\n    <li>\n      <input name=\"property\" value=\"";
     foundHelper = helpers.property;
     stack1 = foundHelper || depth0.property;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />: <input name=\"value\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />:\n      <input name=\"value\" value=\"";
     foundHelper = helpers.value;
     stack1 = foundHelper || depth0.value;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" /></li>\n    ";
+    buffer += escapeExpression(stack1) + "\" />\n      <input type=\"hidden\" name=\"index\" value=\"";
+    foundHelper = helpers.index;
+    stack1 = foundHelper || depth0.index;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "index", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
     return buffer;}
 
     buffer += "<form>\n  <select class=\"x-element\">\n    ";

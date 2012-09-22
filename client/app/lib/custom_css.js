@@ -15,16 +15,16 @@ var CustomCSS = function (rules) {
   this.insertRules(rules);
 };
 
-CustomCSS.prototype.insertRule = function (selector, property, value) {
-  var index;
-
+CustomCSS.prototype.insertRule = function (selector, property, value, index) {
   if (!selector || !property || !value) {
     return;
   }
 
   this.deleteRule(selector, property);
 
-  index = this.sheet.cssRules.length;
+  if (index === null || index === void 0) {
+    index = this.sheet.cssRules.length;
+  }
 
   this.rules[selector] = this.rules[selector] || {};
   this.rules[selector][property] = {
@@ -32,7 +32,9 @@ CustomCSS.prototype.insertRule = function (selector, property, value) {
     , index: index
   };
 
-  return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+  this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+
+  return index;
 };
 
 CustomCSS.prototype.insertRules = function (rules) {

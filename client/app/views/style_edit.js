@@ -12,9 +12,9 @@ module.exports = View.extend({
       "change .x-element": "setSelector"
     , "change .x-tag": "setTag"
     , "click button": "addInputs"
-    , "keyup input[name=value]": "addStyle"
-    , "blur input[name=value]": "addStyle"
-    , "change input[name=value]": "addStyle"
+    , "keyup input": "addStyle"
+    , "blur input": "addStyle"
+    , "change input": "addStyle"
   }
 
   , initialize: function () {
@@ -129,22 +129,26 @@ module.exports = View.extend({
     e.preventDefault();
 
     this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
-                        <input name='value' value='' placeholder='value' /></li>");
+                        <input name='value' value='' placeholder='value' />\
+                        <input type='hidden' name='index' /></li>");
   }
 
   , addStyle: function (e) {
-    var selector, property, value;
+    var selector, property, value, index
+      , $li = $(e.target).parent();
 
     selector = this.selector;
     if (this.tag) {
       selector += " " + this.tag;
     }
 
-    value = e.target.value;
+    property  = $li.find("input[name=property]").val();
+    value  = $li.find("input[name=value]").val();
+    index  = $li.find("input[name=index]").val() || null;
 
-    property  = $(e.target).siblings("input[name=property]").val();
+    index = this.customCSS.insertRule(selector, property, value, index);
 
-    this.customCSS.insertRule(selector, property, value);
+    $li.find("input[name=index]").val(index);
   }
 
   , buildDownload: function (attributes) {
