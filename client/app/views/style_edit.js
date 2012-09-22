@@ -1,14 +1,16 @@
 var View = require("views/base/view")
   , template = require("views/templates/style_edit")
   , app = require("application")
-  , CustomCSS = require("lib/custom_css");
+  , CustomCSS = require("lib/custom_css")
+  , html_tags = require("lib/html_tags");
 
 module.exports = View.extend({
     id: "x-style-edit"
   , className: "x-section"
 
   , events: {
-      "change select": "setSelector"
+      "change .x-element": "setSelector"
+    , "change .x-tag": "setTag"
     , "click button": "addInputs"
     , "keyup input[name=value]": "addStyle"
     , "blur input[name=value]": "addStyle"
@@ -43,6 +45,12 @@ module.exports = View.extend({
     this.render();
   }
 
+  , setTag: function (e) {
+    this.tag = $(e.target).val();
+
+    this.render();
+  }
+
   , setColumn: function (element) {
     this.column = "#" + element.id;
 
@@ -53,13 +61,22 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+    var rules;
+
+    if (this.tag) {
+      rules = this.customCSS.rules[this.selector + " " + this.tag];
+    } else {
+      rules = this.customCSS.rules[this.selector];
+    }
+
+    rules = _.map(rules, function (rule, property) {
       rule.property = property;
       return rule;
     });
 
     this.$el.html(template({
         elements: this.elementOptions()
+      , htmlTags: this.tagOptions()
       , selector: this.selector
       , rules: rules
     }));
@@ -96,6 +113,18 @@ module.exports = View.extend({
     ];
   }
 
+  , tagOptions: function () {
+    var _this = this;
+
+    return html_tags.map(function (group) {
+      group.tags = group.tags.map(function (tag) {
+        tag.selected = tag.tag === _this.tag ? " selected" : "";
+        return tag;
+      });
+      return group;
+    });
+  }
+
   , addInputs: function (e) {
     e.preventDefault();
 
@@ -104,13 +133,18 @@ module.exports = View.extend({
   }
 
   , addStyle: function (e) {
-    var property, value;
+    var selector, property, value;
+
+    selector = this.selector;
+    if (this.tag) {
+      selector += " " + this.tag;
+    }
 
     value = e.target.value;
 
     property  = $(e.target).siblings("input[name=property]").val();
 
-    this.customCSS.insertRule(this.selector, property, value);
+    this.customCSS.insertRule(selector, property, value);
   }
 
   , buildDownload: function (attributes) {

@@ -5,6 +5,17 @@
     {{/each}}
   </select>
 
+  <select class="x-tag">
+    <option value="">Every Tag</option>
+    {{#each htmlTags}}
+    <optgroup label="{{group}}">
+      {{#each tags}}
+      <option value="{{tag}}"{{selected}}>{{label}} ({{tag}})</option>
+      {{/each}}
+    </optgroup>
+    {{/each}}
+  </select>
+
   <p class="x-choice">
   {{#if selector}}
   Selected Element: <b>{{selector}}</b>

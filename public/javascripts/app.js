@@ -381,6 +381,229 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   
 }});
 
+window.require.define({"lib/html_tags": function(exports, require, module) {
+  module.exports = [
+    {
+        group: "Text"
+      , tags: [
+        {
+            tag: "p"
+          , label: "Paragraphs"
+        }
+        , {
+            tag: "h1"
+          , label: "Headings 1"
+        }
+        , {
+            tag: "h2"
+          , label: "Headings 2"
+        }
+        , {
+            tag: "h3"
+          , label: "Headings 3"
+        }
+        , {
+            tag: "h4"
+          , label: "Headings 4"
+        }
+        , {
+            tag: "h5"
+          , label: "Headings 5"
+        }
+        , {
+            tag: "h6"
+          , label: "Headings 6"
+        }
+      ]
+    }
+    , {
+        group: "Lists"
+      , tags: [
+        {
+            tag: "dl"
+          , label: "Definition Lists"
+        }
+        , {
+            tag: "dt"
+          , label: "Definition Terms"
+        }
+        , {
+            tag: "dd"
+          , label: "Definitions"
+        }
+        , {
+            tag: "ol"
+          , label: "Ordered Lists"
+        }
+        , {
+            tag: "ul"
+          , label: "Unordered Lists"
+        }
+        , {
+            tag: "menu"
+          , label: "Menu Lists"
+        }
+        , {
+            tag: "li"
+          , label: "List Items"
+        }
+      ]
+    }
+    , {
+        group: "Forms"
+      , tags: [
+        {
+            tag: "form"
+          , label: "Forms"
+        }
+        , {
+            tag: "fieldset"
+          , label: "Fieldsets"
+        }
+        , {
+            tag: "legend"
+          , label: "Fieldset legends"
+        }
+        , {
+            tag: "input[type=checkbox]"
+          , label: "Checkboxes"
+        }
+        , {
+            tag: "input[type=radio]"
+          , label: "Radio buttons"
+        }
+        , {
+            tag: "button"
+          , label: "Buttons"
+        }
+        , {
+            tag: "input[type=button]"
+          , label: "Buttons"
+        }
+        , {
+            tag: "input[type=submit]"
+          , label: "Submit buttons"
+        }
+        , {
+            tag: "input[type=image]"
+          , label: "Image buttons"
+        }
+        , {
+            tag: "input[type=reset]"
+          , label: "Reset buttons"
+        }
+        , {
+            tag: "input[type=text]"
+          , label: "Text fields"
+        }
+        , {
+            tag: "input[type=text]"
+          , label: "Text fields"
+        }
+        , {
+            tag: "input[type=password]"
+          , label: "Password fields"
+        }
+        , {
+            tag: "input[type=file]"
+          , label: "File fields"
+        }
+        , {
+            tag: "select"
+          , label: "Selection lists"
+        }
+        , {
+            tag: "optgroup"
+          , label: "Group of options"
+        }
+        , {
+            tag: "option"
+          , label: "Options"
+        }
+        , {
+            tag: "textarea"
+          , label: "Multi-line text areas"
+        }
+      ]
+    }
+    , {
+        group: "Tables"
+      , tags: [
+        {
+            tag: "table"
+          , label: "Tables"
+        }
+        , {
+            tag: "caption"
+          , label: "Table captions"
+        }
+        , {
+            tag: "thead"
+          , label: "Table headers"
+        }
+        , {
+            tag: "tbody"
+          , label: "Table bodies"
+        }
+        , {
+            tag: "tfoot"
+          , label: "Table footers"
+        }
+        , {
+            tag: "tr"
+          , label: "Table rows"
+        }
+        , {
+            tag: "th"
+          , label: "Table header cells"
+        }
+        , {
+            tag: "td"
+          , label: "Table data cells"
+        }
+        , {
+            tag: "colgroup"
+          , label: "Table column groups"
+        }
+        , {
+            tag: "col"
+          , label: "Table columns"
+        }
+      ]
+    }
+    , {
+        group: "Media"
+      , tags: [
+        {
+            tag: "img"
+          , label: "Images"
+        }
+        , {
+            tag: "map"
+          , label: "Maps"
+        }
+        , {
+            tag: "area"
+          , label: "Map areas"
+        }
+        , {
+            tag: "object"
+          , label: "Media object"
+        }
+        , {
+            tag: "embed"
+          , label: "Media embed"
+        }
+        , {
+            tag: "iframe"
+          , label: "Iframes"
+        }
+      ]
+    }
+  ];
+  
+}});
+
 window.require.define({"models/base/model": function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
@@ -1807,14 +2030,16 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
     , app = require("application")
-    , CustomCSS = require("lib/custom_css");
+    , CustomCSS = require("lib/custom_css")
+    , html_tags = require("lib/html_tags");
 
   module.exports = View.extend({
       id: "x-style-edit"
     , className: "x-section"
 
     , events: {
-        "change select": "setSelector"
+        "change .x-element": "setSelector"
+      , "change .x-tag": "setTag"
       , "click button": "addInputs"
       , "keyup input[name=value]": "addStyle"
       , "blur input[name=value]": "addStyle"
@@ -1849,6 +2074,12 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       this.render();
     }
 
+    , setTag: function (e) {
+      this.tag = $(e.target).val();
+
+      this.render();
+    }
+
     , setColumn: function (element) {
       this.column = "#" + element.id;
 
@@ -1859,13 +2090,22 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+      var rules;
+
+      if (this.tag) {
+        rules = this.customCSS.rules[this.selector + " " + this.tag];
+      } else {
+        rules = this.customCSS.rules[this.selector];
+      }
+
+      rules = _.map(rules, function (rule, property) {
         rule.property = property;
         return rule;
       });
 
       this.$el.html(template({
           elements: this.elementOptions()
+        , htmlTags: this.tagOptions()
         , selector: this.selector
         , rules: rules
       }));
@@ -1902,6 +2142,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       ];
     }
 
+    , tagOptions: function () {
+      var _this = this;
+
+      return html_tags.map(function (group) {
+        group.tags = group.tags.map(function (tag) {
+          tag.selected = tag.tag === _this.tag ? " selected" : "";
+          return tag;
+        });
+        return group;
+      });
+    }
+
     , addInputs: function (e) {
       e.preventDefault();
 
@@ -1910,13 +2162,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , addStyle: function (e) {
-      var property, value;
+      var selector, property, value;
+
+      selector = this.selector;
+      if (this.tag) {
+        selector += " " + this.tag;
+      }
 
       value = e.target.value;
 
       property  = $(e.target).siblings("input[name=property]").val();
 
-      this.customCSS.insertRule(this.selector, property, value);
+      this.customCSS.insertRule(selector, property, value);
     }
 
     , buildDownload: function (attributes) {
@@ -2291,6 +2548,52 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 
   function program3(depth0,data) {
     
+    var buffer = "", stack1, stack2;
+    buffer += "\n    <optgroup label=\"";
+    foundHelper = helpers.group;
+    stack1 = foundHelper || depth0.group;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "group", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      ";
+    foundHelper = helpers.tags;
+    stack1 = foundHelper || depth0.tags;
+    stack2 = helpers.each;
+    tmp1 = self.program(4, program4, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n    </optgroup>\n    ";
+    return buffer;}
+  function program4(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <option value=\"";
+    foundHelper = helpers.tag;
+    stack1 = foundHelper || depth0.tag;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "tag", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.selected;
+    stack1 = foundHelper || depth0.selected;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " (";
+    foundHelper = helpers.tag;
+    stack1 = foundHelper || depth0.tag;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "tag", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ")</option>\n      ";
+    return buffer;}
+
+  function program6(depth0,data) {
+    
     var buffer = "", stack1;
     buffer += "\n  Selected Element: <b>";
     foundHelper = helpers.selector;
@@ -2300,12 +2603,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "</b>\n  ";
     return buffer;}
 
-  function program5(depth0,data) {
+  function program8(depth0,data) {
     
     
     return "\n  Click on an element in the design to customize it.\n  ";}
 
-  function program7(depth0,data) {
+  function program10(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n    <li><input name=\"property\" value=\"";
@@ -2331,21 +2634,31 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </select>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    foundHelper = helpers.htmlTags;
+    stack1 = foundHelper || depth0.htmlTags;
+    stack2 = helpers.each;
+    tmp1 = self.program(3, program3, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </select>\n\n  <p class=\"x-choice\">\n  ";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     stack2 = helpers['if'];
-    tmp1 = self.program(3, program3, data);
+    tmp1 = self.program(6, program6, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.program(5, program5, data);
+    tmp1.inverse = self.program(8, program8, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </p>\n\n  <ul class=\"x-rules\">\n    ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
-    tmp1 = self.program(7, program7, data);
+    tmp1 = self.program(10, program10, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
