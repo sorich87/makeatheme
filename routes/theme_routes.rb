@@ -9,8 +9,6 @@ get '/themes/:id' do
 
   halt 404 unless theme
 
-  forbid and return if theme.preview_only?(current_user)
-
   if theme
     respond_with theme
   else
@@ -78,8 +76,6 @@ get '/editor/:theme', provides: 'html' do
 
   # Return 404 if no theme found.
   halt 404 unless theme
-
-  forbid and return if theme.preview_only?(current_user)
 
   preview_only = theme.preview_only?(current_user)
 

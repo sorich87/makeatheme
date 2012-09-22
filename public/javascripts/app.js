@@ -991,9 +991,6 @@ window.require.define({"router": function(exports, require, module) {
 
       // Initialize editor view
       app.createView("editor").render();
-
-      // Setup drag and drop and resize
-      app.createView("layout").render();
     }
 
     , login: function () {
@@ -1243,6 +1240,11 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
+      var regionsView = app.reuseView("regions")
+        , blocksView = app.reuseView("block_insert")
+        , styleView = app.reuseView("style_edit")
+        , shareView = app.reuseView("share_link")
+        , downloadView = app.reuseView("download_button");
       this.$el
         .children(".x-handle").empty()
           .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
@@ -1253,16 +1255,19 @@ window.require.define({"views/editor": function(exports, require, module) {
       if (app.data.preview_only !== true) {
         this.$el
           .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
-          .append(app.reuseView("regions").render().$el)
+          .append(regionsView.render().$el)
           .append("<h4>Page Elements <span>&or;</span></h4>")
-          .append(app.reuseView("block_insert").render().$el)
+          .append(blocksView.render().$el)
           .append("<h4>Style <span>&or;</span></h4>")
-          .append(app.reuseView("style_edit").render().$el)
+          .append(styleView.render().$el)
           .append("<h4>Share <span>&or;</span></h4>")
-          .append(app.reuseView("share_link").render().$el)
-          .append(app.reuseView("download_button").render().$el);
+          .append(shareView.render().$el)
+          .append(downloadView.render().$el);
 
         app.reuseView("mutations");
+
+        // Setup drag and drop and resize
+        app.createView("layout").render();
 
         this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
       }
@@ -2346,7 +2351,10 @@ window.require.define({"views/templates": function(exports, require, module) {
         return !!this.collection.getByName(standard.name);
       }.bind(this));
 
-      this.$el.empty().append(template({standards: standards}));
+      this.$el.empty().append(template({
+          standards: standards
+        , edit: !app.data.preview_only
+      }));
 
       this.collection.reset(this.collection.models);
 
@@ -2804,6 +2812,21 @@ window.require.define({"views/templates/templates": function(exports, require, m
 
   function program1(depth0,data) {
     
+    var buffer = "", stack1, stack2;
+    buffer += "\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    foundHelper = helpers.standards;
+    stack1 = foundHelper || depth0.standards;
+    stack2 = helpers.each;
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    return buffer;}
+  function program2(depth0,data) {
+    
     var buffer = "", stack1;
     buffer += "\n      <option value=\"";
     foundHelper = helpers.name;
@@ -2818,17 +2841,17 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
-    foundHelper = helpers.standards;
-    stack1 = foundHelper || depth0.standards;
-    stack2 = helpers.each;
+    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n";
+    foundHelper = helpers.edit;
+    stack1 = foundHelper || depth0.edit;
+    stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    buffer += "\n";
     return buffer;});
 }});
 

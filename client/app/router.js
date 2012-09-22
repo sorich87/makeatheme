@@ -60,9 +60,6 @@ module.exports = Backbone.Router.extend({
 
     // Initialize editor view
     app.createView("editor").render();
-
-    // Setup drag and drop and resize
-    app.createView("layout").render();
   }
 
   , login: function () {

@@ -36,7 +36,10 @@ module.exports = View.extend({
       return !!this.collection.getByName(standard.name);
     }.bind(this));
 
-    this.$el.empty().append(template({standards: standards}));
+    this.$el.empty().append(template({
+        standards: standards
+      , edit: !app.data.preview_only
+    }));
 
     this.collection.reset(this.collection.models);
 

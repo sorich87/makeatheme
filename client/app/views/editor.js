@@ -14,6 +14,11 @@ module.exports = View.extend({
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
+    var regionsView = app.reuseView("regions")
+      , blocksView = app.reuseView("block_insert")
+      , styleView = app.reuseView("style_edit")
+      , shareView = app.reuseView("share_link")
+      , downloadView = app.reuseView("download_button");
     this.$el
       .children(".x-handle").empty()
         .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
@@ -24,16 +29,19 @@ module.exports = View.extend({
     if (app.data.preview_only !== true) {
       this.$el
         .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
-        .append(app.reuseView("regions").render().$el)
+        .append(regionsView.render().$el)
         .append("<h4>Page Elements <span>&or;</span></h4>")
-        .append(app.reuseView("block_insert").render().$el)
+        .append(blocksView.render().$el)
         .append("<h4>Style <span>&or;</span></h4>")
-        .append(app.reuseView("style_edit").render().$el)
+        .append(styleView.render().$el)
         .append("<h4>Share <span>&or;</span></h4>")
-        .append(app.reuseView("share_link").render().$el)
-        .append(app.reuseView("download_button").render().$el);
+        .append(shareView.render().$el)
+        .append(downloadView.render().$el);
 
       app.reuseView("mutations");
+
+      // Setup drag and drop and resize
+      app.createView("layout").render();
 
       this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
     }
