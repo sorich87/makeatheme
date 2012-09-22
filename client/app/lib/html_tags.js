@@ -1,12 +1,8 @@
 module.exports = [
   {
-      group: "Text"
+      group: "Headings"
     , tags: [
       {
-          tag: "p"
-        , label: "Paragraphs"
-      }
-      , {
           tag: "h1"
         , label: "Headings 1"
       }
@@ -29,6 +25,84 @@ module.exports = [
       , {
           tag: "h6"
         , label: "Headings 6"
+      }
+    ]
+  }
+  , {
+      group: "Content sections"
+    , tags: [
+      {
+          tag: "p"
+        , label: "Paragraphs"
+      }
+      , {
+          tag: "blockquote"
+        , label: "Block quotations"
+      }
+      , {
+          tag: "pre"
+        , label: "Pre-formatted content"
+      }
+      , {
+          tag: "address"
+        , label: "Addresses"
+      }
+      , {
+          tag: "ins"
+        , label: "Inserted content"
+      }
+      , {
+          tag: "del"
+        , label: "Deleted content"
+      }
+      , {
+          tag: "hr"
+        , label: "Horizontal rules"
+      }
+    ]
+  }
+  , {
+      group: "Inline elements"
+    , tags: [
+      {
+          tag: "a"
+        , label: "Links"
+      }
+      , {
+          tag: "abbr"
+        , label: "Abbreviations"
+      }
+      , {
+          tag: "acronym"
+        , label: "Acronyms"
+      }
+      , {
+          tag: "dfn"
+        , label: "Inline definitions"
+      }
+      , {
+          tag: "em"
+        , label: "Emphases"
+      }
+      , {
+          tag: "strong"
+        , label: "Strong emphases"
+      }
+      , {
+          tag: "cite"
+        , label: "Citations"
+      }
+      , {
+          tag: "q"
+        , label: "Inline quotations"
+      }
+      , {
+          tag: "sub"
+        , label: "Subscripts"
+      }
+      , {
+          tag: "sup"
+        , label: "Superscripts"
       }
     ]
   }
@@ -213,6 +287,60 @@ module.exports = [
       , {
           tag: "iframe"
         , label: "Iframes"
+      }
+    ]
+  }
+  , {
+      group: "Computer text"
+    , tags: [
+      {
+          tag: "code"
+        , label: "Source code"
+      }
+      , {
+          tag: "var"
+        , label: "Source code variables"
+      }
+      , {
+          tag: "kbd"
+        , label: "User input"
+      }
+      , {
+          tag: "samp"
+        , label: "Program output"
+      }
+    ]
+  }
+  , {
+      group: "Presentation"
+    , tags: [
+      {
+          tag: "b"
+        , label: "b"
+      }
+      , {
+          tag: "i"
+        , label: "i"
+      }
+      , {
+          tag: "u"
+        , label: "u"
+      }
+      , {
+          tag: "s"
+        , label: "s"
+      }
+      , {
+          tag: "small"
+        , label: "small"
+      }
+      , {
+          tag: "big"
+        , label: "big"
+      }
+      , {
+          tag: "tt"
+        , label: "tt"
       }
     ]
   }
