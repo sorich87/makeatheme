@@ -25,6 +25,7 @@ exports.config =
           'vendor/scripts/jquery.js',
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone.js',
+          'vendor/scripts/backbone-history-browser.js',
           'vendor/scripts/backbone-validation.js',
           'vendor/scripts/backbone-validation-bootstrap.coffee',
 

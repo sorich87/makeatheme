@@ -24,6 +24,9 @@ _.extend(Application, {
     // Render the login and logout links
     this.reuseView("auth_links").render();
 
+    // Set per-view body classes
+    this.setBodyClasses();
+
     // Prevent further modification of the application object
     Object.freeze(this);
   }
@@ -56,6 +59,12 @@ _.extend(Application, {
     views[name] = new View(options);
     this.views = views;
     return views[name];
+  }
+
+  , setBodyClasses: function () {
+    Backbone.history.on("route", function (router, name) {
+      $("body")[0].className = name;
+    });
   }
 }, Backbone.Events);
 

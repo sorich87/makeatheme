@@ -50,16 +50,6 @@ module.exports = Backbone.Router.extend({
     var themeView = app.createView("theme", {themeID: id});
 
     $("#main").empty().append(themeView.render().$el);
-
-    // Add theme class to body
-    $("body").addClass("theme");
-
-    // Remove body class when navigating away from this route
-    Backbone.history.on("route", function (e, name) {
-      if (name !== "theme") {
-        $("body").removeClass("theme");
-      }
-    });
   }
 
   , editor: function (id) {
@@ -76,36 +66,27 @@ module.exports = Backbone.Router.extend({
   }
 
   , login: function () {
-    // Remove all modals and show the 'login' one
-    // We could use modal("hide") here but it would trigger
-    // events which we don't want
-    $("body").removeClass("modal-open")
-      .find(".modal, .modal-backdrop").remove().end()
-      .append(app.createView("login").render().$el.modal("show"));
+    $(".modal").modal("hide");
+
+    $("body").append(app.createView("login").render().$el.modal("show"));
   }
 
   , register: function () {
-    // Remove all modals and show the 'register' one
-    // We could use modal("hide") here but it would trigger
-    // events which we don't want
-    $("body").removeClass("modal-open")
-      .find(".modal, .modal-backdrop").remove().end()
-      .append(app.createView("register").render().$el.modal("show"));
+    $(".modal").modal("hide");
+
+    $("body").append(app.createView("register").render().$el.modal("show"));
   }
 
   , reset_password: function () {
-    // Remove all modals and show the 'reset_password' one
-    // We could use modal("hide") here but it would trigger
-    // events which we don't want
-    $("body").removeClass("modal-open")
-      .find(".modal, .modal-backdrop").remove().end()
-      .append(app.createView("password_reset").render().$el.modal("show"));
+    $(".modal").modal("hide");
+
+    $("body").append(app.createView("password_reset").render().$el.modal("show"));
   }
 
   , upload: function () {
-    $("body").removeClass("modal-open")
-      .find(".modal, .modal-backdrop").remove().end()
-      .append(app.createView("theme_upload").render().$el.modal("show"));
+    $(".modal").modal("hide");
+
+    $("body").append(app.createView("theme_upload").render().$el.modal("show"));
   }
 
   , notFound: function () {

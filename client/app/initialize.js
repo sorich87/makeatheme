@@ -14,7 +14,7 @@ $(function() {
       if ($("#main").children().length === 0) {
         Backbone.history.navigate("/", true);
       } else {
-        history.go(-1);
+        Backbone.history.back(true);
       }
     });
 
