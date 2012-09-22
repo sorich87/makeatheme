@@ -29,6 +29,7 @@ set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
 set :json_encoder, JSON
 set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/33
+set :connections, []
 
 configure :development do
   require 'config/environments/development'
@@ -85,6 +86,7 @@ get '/', provides: 'html' do
   load_index
 end
 
+require 'application_routes'
 require 'session_routes'
 require 'theme_routes'
 require 'user_routes'

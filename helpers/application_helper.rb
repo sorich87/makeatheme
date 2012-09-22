@@ -14,4 +14,10 @@ module ApplicationHelper
     }
   end
 
+  def send_notification(type, text)
+    settings.connections.each do |out|
+      out << "data: {\ndata: \"type\": \"#{type}\",\ndata: \"text\": \"#{text}\"\ndata: }\n\n"
+    end
+  end
+
 end

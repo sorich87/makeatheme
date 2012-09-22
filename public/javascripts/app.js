@@ -1853,9 +1853,11 @@ window.require.define({"views/notifications": function(exports, require, module)
     , className: "unstyled"
 
     , initialize: function () {
-      _.bindAll(this, "showNotification");
+      _.bindAll(this, "showNotification", "handleServerNotifications");
 
       app.on("notification", this.showNotification);
+
+      (new EventSource("/notifications")).onmessage = this.handleServerNotifications;
     }
 
     , showNotification: function (type, text) {
@@ -1866,6 +1868,11 @@ window.require.define({"views/notifications": function(exports, require, module)
       }, 4000);
 
       return this;
+    }
+
+    , handleServerNotifications: function (e) {
+      var data = JSON.parse(e.data);
+      this.showNotification(data.type, data.text);
     }
   });
   
