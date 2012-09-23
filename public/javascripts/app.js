@@ -1647,8 +1647,7 @@ window.require.define({"views/login": function(exports, require, module) {
 
 window.require.define({"views/mutations": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application")
-    , idIncrement = 1; // For temporary ids when inserting rows.
+    , app = require("application");
 
   module.exports = View.extend({
     initialize: function () {

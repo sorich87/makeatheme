@@ -1,6 +1,5 @@
 var View = require("views/base/view")
-  , app = require("application")
-  , idIncrement = 1; // For temporary ids when inserting rows.
+  , app = require("application");
 
 module.exports = View.extend({
   initialize: function () {
