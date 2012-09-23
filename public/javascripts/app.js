@@ -107,6 +107,9 @@ window.require.define({"application": function(exports, require, module) {
       // Holds editor settings and data
       this.editor = {};
 
+      // Listen to events coming from server and trigger them here
+      (new EventSource("/events")).onmessage = this.dispatchServerEvents.bind(this);
+
       // Prevent further modification of the application object
       Object.freeze(this);
     }
@@ -145,6 +148,13 @@ window.require.define({"application": function(exports, require, module) {
       Backbone.history.on("route", function (router, name) {
         $("body")[0].className = name;
       });
+    }
+
+    , dispatchServerEvents: function (e) {
+      var data = JSON.parse(e.data);
+
+      data.args.unshift(data.name);
+      this.trigger.apply(this, data.args);
     }
   }, Backbone.Events);
 
@@ -1940,11 +1950,9 @@ window.require.define({"views/notifications": function(exports, require, module)
     , className: "unstyled"
 
     , initialize: function () {
-      _.bindAll(this, "showNotification", "handleServerNotifications");
+      _.bindAll(this, "showNotification");
 
       app.on("notification", this.showNotification);
-
-      (new EventSource("/notifications")).onmessage = this.handleServerNotifications;
     }
 
     , showNotification: function (type, text) {
@@ -1955,11 +1963,6 @@ window.require.define({"views/notifications": function(exports, require, module)
       }, 4000);
 
       return this;
-    }
-
-    , handleServerNotifications: function (e) {
-      var data = JSON.parse(e.data);
-      this.showNotification(data.type, data.text);
     }
   });
   

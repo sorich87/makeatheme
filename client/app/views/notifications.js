@@ -12,11 +12,9 @@ module.exports = View.extend({
   , className: "unstyled"
 
   , initialize: function () {
-    _.bindAll(this, "showNotification", "handleServerNotifications");
+    _.bindAll(this, "showNotification");
 
     app.on("notification", this.showNotification);
-
-    (new EventSource("/notifications")).onmessage = this.handleServerNotifications;
   }
 
   , showNotification: function (type, text) {
@@ -27,10 +25,5 @@ module.exports = View.extend({
     }, 4000);
 
     return this;
-  }
-
-  , handleServerNotifications: function (e) {
-    var data = JSON.parse(e.data);
-    this.showNotification(data.type, data.text);
   }
 });

@@ -14,9 +14,15 @@ module ApplicationHelper
     }
   end
 
-  def send_notification(type, text)
+  def send_event(name, args)
+    args.collect! {|arg| "\"#{arg}\""}
+    data = "data: {\n"
+    data << "data: \"name\": \"#{name}\",\n"
+    data << "data: \"args\": [#{args.join(', ')}]\n"
+    data << "data: }\n\n"
+
     settings.connections.each do |out|
-      out << "data: {\ndata: \"type\": \"#{type}\",\ndata: \"text\": \"#{text}\"\ndata: }\n\n"
+      out << data
     end
   end
 

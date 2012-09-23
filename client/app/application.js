@@ -30,6 +30,9 @@ _.extend(Application, {
     // Holds editor settings and data
     this.editor = {};
 
+    // Listen to events coming from server and trigger them here
+    (new EventSource("/events")).onmessage = this.dispatchServerEvents.bind(this);
+
     // Prevent further modification of the application object
     Object.freeze(this);
   }
@@ -68,6 +71,13 @@ _.extend(Application, {
     Backbone.history.on("route", function (router, name) {
       $("body")[0].className = name;
     });
+  }
+
+  , dispatchServerEvents: function (e) {
+    var data = JSON.parse(e.data);
+
+    data.args.unshift(data.name);
+    this.trigger.apply(this, data.args);
   }
 }, Backbone.Events);
 
