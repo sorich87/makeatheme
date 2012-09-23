@@ -46,7 +46,7 @@ module ThemeImport
         add_stored_file(zip_file)
       elsif filename =~ /\Atheme\.info\z/
         read_theme_info_file(zip_file)
-      elsif filename =~ /\A[^\.]+/ # Ignore dotted files or __MACOSX files & such
+      elsif filename =~ /\A[^_\.]\w+\.?\w+\z/ # Ignore dotted files or __MACOSX files & such
         add_static_file(zip_file)
       end
     end
