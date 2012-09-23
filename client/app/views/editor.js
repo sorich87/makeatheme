@@ -1,5 +1,6 @@
 var app = require("application")
-  , View = require("views/base/view");
+  , View = require("views/base/view")
+  , data = require("lib/editor_data");
 
 module.exports = View.extend({
   el: "<div id='x-layout-editor'>" +
@@ -12,6 +13,16 @@ module.exports = View.extend({
     , "click h4": "showSection"
   }
 
+  , initialize: function () {
+    _.extend(app.editor, {
+        preview_only: !!app.data.preview_only
+      , templates: data.templates
+      , regions: data.regions
+      , blocks: data.blocks
+      , style: data.style
+    });
+  }
+
   // Show editor when "template:loaded" event is triggered
   , render: function () {
     var regionsView = app.reuseView("regions")
@@ -19,6 +30,7 @@ module.exports = View.extend({
       , styleView = app.reuseView("style_edit")
       , shareView = app.reuseView("share_link")
       , downloadView = app.reuseView("download_button");
+
     this.$el
       .children(".x-handle").empty()
         .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
@@ -26,7 +38,7 @@ module.exports = View.extend({
       .append("<h4>Current Template <span>&and;</span></h4>")
       .append(app.reuseView("templates").render().$el);
 
-    if (app.data.preview_only !== true) {
+    if (!app.editor.preview_only) {
       this.$el
         .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
         .append(regionsView.render().$el)

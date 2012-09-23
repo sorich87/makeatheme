@@ -1,13 +1,12 @@
 var View = require("views/base/view")
   , app = require("application")
   , Template = require("models/template")
-  , template = require("views/templates/templates")
-  , Templates = require("collections/templates");
+  , template = require("views/templates/templates");
 
 module.exports = View.extend({
     id: "x-templates-select"
   , className: "x-section"
-  , collection: new Templates(app.data.theme_pieces.templates)
+  , collection: app.editor.templates
 
   , events: {
       "change ul input": "switchTemplate"
@@ -38,10 +37,12 @@ module.exports = View.extend({
 
     this.$el.empty().append(template({
         standards: standards
-      , edit: !app.data.preview_only
+      , edit: !app.editor.preview_only
     }));
 
     this.collection.reset(this.collection.models);
+
+    this.loadTemplate(this.collection.getCurrent());
 
     return this;
   }

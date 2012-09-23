@@ -104,6 +104,9 @@ window.require.define({"application": function(exports, require, module) {
       // Set per-view body classes
       this.setBodyClasses();
 
+      // Holds editor settings and data
+      this.editor = {};
+
       // Prevent further modification of the application object
       Object.freeze(this);
     }
@@ -408,6 +411,51 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   module.exports = CustomCSS;
+  
+}});
+
+window.require.define({"lib/editor_data": function(exports, require, module) {
+  var data
+    , app = require("application")
+    , Templates = require("collections/templates")
+    , Regions = require("collections/regions")
+    , Blocks = require("collections/blocks")
+    , CustomCSS = require("lib/custom_css");
+
+  data = sessionStorage.getItem("theme-" + app.data.theme._id);
+  data = JSON.parse(data);
+
+  // If no data in sessionStorage, get it from server.
+  if (!data) {
+    data = {
+      templates: app.data.theme_pieces.templates
+      , regions: app.data.theme_pieces.regions
+      , blocks: app.data.theme_pieces.blocks
+      , style: app.data.style
+    };
+  }
+
+  data = {
+    templates: new Templates(data.templates)
+    , regions: new Regions(data.regions)
+    , blocks: new Blocks(data.blocks)
+    , style: new CustomCSS(data.style)
+  };
+
+  // Save data in sessionStorage every 1s.
+  setInterval(function () {
+    var store = {
+      templates: data.templates.toJSON()
+      , regions: data.regions.toJSON()
+      , blocks: data.blocks.toJSON()
+      , style: data.style.rules
+    };
+
+    store = JSON.stringify(store);
+    sessionStorage.setItem("theme-" + app.data.theme._id, store);
+  }, 1000);
+
+  module.exports = data;
   
 }});
 
@@ -1113,13 +1161,12 @@ window.require.define({"views/base/view": function(exports, require, module) {
 window.require.define({"views/block_insert": function(exports, require, module) {
   // Display list of blocks to insert
   var View = require("views/base/view")
-    , Blocks = require("collections/blocks")
     , app = require("application");
 
   module.exports = View.extend({
       id: "x-block-insert"
     , className: "x-section"
-    , collection: new Blocks(app.data.theme_pieces.blocks)
+    , collection: app.editor.blocks
 
     , events: {
         "draginit #x-block-insert .x-drag": "dragInit"
@@ -1250,7 +1297,8 @@ window.require.define({"views/download_button": function(exports, require, modul
 
 window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
-    , View = require("views/base/view");
+    , View = require("views/base/view")
+    , data = require("lib/editor_data");
 
   module.exports = View.extend({
     el: "<div id='x-layout-editor'>" +
@@ -1263,6 +1311,16 @@ window.require.define({"views/editor": function(exports, require, module) {
       , "click h4": "showSection"
     }
 
+    , initialize: function () {
+      _.extend(app.editor, {
+          preview_only: !!app.data.preview_only
+        , templates: data.templates
+        , regions: data.regions
+        , blocks: data.blocks
+        , style: data.style
+      });
+    }
+
     // Show editor when "template:loaded" event is triggered
     , render: function () {
       var regionsView = app.reuseView("regions")
@@ -1270,6 +1328,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         , styleView = app.reuseView("style_edit")
         , shareView = app.reuseView("share_link")
         , downloadView = app.reuseView("download_button");
+
       this.$el
         .children(".x-handle").empty()
           .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
@@ -1277,7 +1336,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         .append("<h4>Current Template <span>&and;</span></h4>")
         .append(app.reuseView("templates").render().$el);
 
-      if (app.data.preview_only !== true) {
+      if (!app.editor.preview_only) {
         this.$el
           .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
           .append(regionsView.render().$el)
@@ -1974,13 +2033,12 @@ window.require.define({"views/regions": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/regions")
     , app = require("application")
-    , Region = require("models/region")
-    , Regions = require("collections/regions");
+    , Region = require("models/region");
 
   module.exports = View.extend({
       id: "x-region-select"
     , className: "x-section"
-    , collection: new Regions(app.data.theme_pieces.regions)
+    , collection: app.editor.regions
 
     , events: {
         "change .x-header-select, .x-footer-select": "switchRegion"
@@ -2186,7 +2244,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
     , app = require("application")
-    , CustomCSS = require("lib/custom_css")
     , html_tags = require("lib/html_tags");
 
   module.exports = View.extend({
@@ -2209,7 +2266,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       app.on("download:before", this.buildDownload);
 
       this.selector = "body";
-      this.customCSS = new CustomCSS(app.data.style);
+      this.customCSS = app.editor.style;
     }
 
     , setSelector: function (e) {
@@ -2347,13 +2404,12 @@ window.require.define({"views/templates": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
     , Template = require("models/template")
-    , template = require("views/templates/templates")
-    , Templates = require("collections/templates");
+    , template = require("views/templates/templates");
 
   module.exports = View.extend({
       id: "x-templates-select"
     , className: "x-section"
-    , collection: new Templates(app.data.theme_pieces.templates)
+    , collection: app.editor.templates
 
     , events: {
         "change ul input": "switchTemplate"
@@ -2384,10 +2440,12 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       this.$el.empty().append(template({
           standards: standards
-        , edit: !app.data.preview_only
+        , edit: !app.editor.preview_only
       }));
 
       this.collection.reset(this.collection.models);
+
+      this.loadTemplate(this.collection.getCurrent());
 
       return this;
     }

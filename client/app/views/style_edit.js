@@ -1,7 +1,6 @@
 var View = require("views/base/view")
   , template = require("views/templates/style_edit")
   , app = require("application")
-  , CustomCSS = require("lib/custom_css")
   , html_tags = require("lib/html_tags");
 
 module.exports = View.extend({
@@ -24,7 +23,7 @@ module.exports = View.extend({
     app.on("download:before", this.buildDownload);
 
     this.selector = "body";
-    this.customCSS = new CustomCSS(app.data.style);
+    this.customCSS = app.editor.style;
   }
 
   , setSelector: function (e) {

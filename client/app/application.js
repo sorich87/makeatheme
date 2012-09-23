@@ -27,6 +27,9 @@ _.extend(Application, {
     // Set per-view body classes
     this.setBodyClasses();
 
+    // Holds editor settings and data
+    this.editor = {};
+
     // Prevent further modification of the application object
     Object.freeze(this);
   }

@@ -1,13 +1,12 @@
 var View = require("views/base/view")
   , template = require("views/templates/regions")
   , app = require("application")
-  , Region = require("models/region")
-  , Regions = require("collections/regions");
+  , Region = require("models/region");
 
 module.exports = View.extend({
     id: "x-region-select"
   , className: "x-section"
-  , collection: new Regions(app.data.theme_pieces.regions)
+  , collection: app.editor.regions
 
   , events: {
       "change .x-header-select, .x-footer-select": "switchRegion"

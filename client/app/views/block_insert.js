@@ -1,12 +1,11 @@
 // Display list of blocks to insert
 var View = require("views/base/view")
-  , Blocks = require("collections/blocks")
   , app = require("application");
 
 module.exports = View.extend({
     id: "x-block-insert"
   , className: "x-section"
-  , collection: new Blocks(app.data.theme_pieces.blocks)
+  , collection: app.editor.blocks
 
   , events: {
       "draginit #x-block-insert .x-drag": "dragInit"
