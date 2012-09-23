@@ -64,3 +64,12 @@ exports.config =
   #   port: 3333
   #   # Run even without `--server` option?
   #   run: yes
+
+  jshint:
+    pattern: /^app\/.*\.js$/
+    options:
+      bitwise: true
+      curly: true
+      laxcomma: true
+    globals:
+      jQuery: true
