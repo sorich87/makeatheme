@@ -1134,7 +1134,11 @@ window.require.define({"views/auth_links": function(exports, require, module) {
         , url: "/session"
         , complete: function (jqXHR, textStatus) {
           if (textStatus === "success") {
-            window.location = "/";
+            sessionStorage.clear();
+
+            setTimeout(function () {
+              window.location = "/";
+            });
           }
         }.bind(this)
       });
