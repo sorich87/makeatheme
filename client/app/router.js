@@ -39,7 +39,7 @@ module.exports = Backbone.Router.extend({
   }
 
   , your_themes: function () {
-    var collection = new Themes(app.currentUser.get("themes"));
+    var collection = app.currentUser.get("themes");
 
     $("#main").empty()
       .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")

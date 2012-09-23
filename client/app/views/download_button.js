@@ -51,7 +51,7 @@ module.exports = View.extend({
         e.target.removeAttribute("disabled");
         e.target.innerHTML = "Download Theme";
 
-        app.trigger("download:after");
+        app.trigger("download:after", theme);
 
         window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }

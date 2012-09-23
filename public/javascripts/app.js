@@ -81,19 +81,14 @@ window.require.define({"application": function(exports, require, module) {
 
   _.extend(Application, {
     initialize: function() {
-      var Router = require("router")
-        , User = require("models/user")
-        , Templates = require("collections/templates")
-        , Regions = require("collections/regions")
-        , Blocks = require("collections/blocks");
+      var Router = require("router");
 
       // Setup notifications handling
       // Append to top window in case document is in an iframe
       this.createView("notifications").render()
         .$el.appendTo($("body", window.top.document));
 
-      // Initialize current user model instance
-      this.currentUser = new User(this.data.currentUser);
+      this.setCurrentUser();
 
       // Initialize router
       this.router = new Router();
@@ -155,6 +150,25 @@ window.require.define({"application": function(exports, require, module) {
 
       data.args.unshift(data.name);
       this.trigger.apply(this, data.args);
+    }
+
+    , setCurrentUser: function () {
+      var User = require("models/user")
+        , Themes = require("collections/themes");
+
+      if (this.data.currentUser) {
+        this.currentUser = new User(this.data.currentUser);
+        this.currentUser.set("themes", new Themes(this.data.currentUser.themes));
+      } else {
+        this.currentUser = new User();
+      }
+
+      this.on("upload:after", this.updateCurrentUserThemes);
+      this.on("download:after", this.updateCurrentUserThemes);
+    }
+
+    , updateCurrentUserThemes: function (theme) {
+      this.currentUser.get("themes").add(theme);
     }
   }, Backbone.Events);
 
@@ -1053,7 +1067,7 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , your_themes: function () {
-      var collection = new Themes(app.currentUser.get("themes"));
+      var collection = app.currentUser.get("themes");
 
       $("#main").empty()
         .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
@@ -1291,7 +1305,7 @@ window.require.define({"views/download_button": function(exports, require, modul
           e.target.removeAttribute("disabled");
           e.target.innerHTML = "Download Theme";
 
-          app.trigger("download:after");
+          app.trigger("download:after", theme);
 
           window.top.Backbone.history.navigate("/themes/" + theme.id, true);
         }
@@ -3089,6 +3103,8 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $form.children(".alert-error").remove();
 
+      app.trigger("upload:before");
+
       $.ajax({
           type: "POST"
         , url: "/themes"
@@ -3097,6 +3113,8 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
           // Remove modal without evant
           $("body").removeClass("modal-open")
             .find(".modal, .modal-backdrop").remove();
+
+          app.trigger("upload:after", data);
 
           app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
 

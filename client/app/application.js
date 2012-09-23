@@ -4,19 +4,14 @@ Application = window.Application || {};
 
 _.extend(Application, {
   initialize: function() {
-    var Router = require("router")
-      , User = require("models/user")
-      , Templates = require("collections/templates")
-      , Regions = require("collections/regions")
-      , Blocks = require("collections/blocks");
+    var Router = require("router");
 
     // Setup notifications handling
     // Append to top window in case document is in an iframe
     this.createView("notifications").render()
       .$el.appendTo($("body", window.top.document));
 
-    // Initialize current user model instance
-    this.currentUser = new User(this.data.currentUser);
+    this.setCurrentUser();
 
     // Initialize router
     this.router = new Router();
@@ -78,6 +73,25 @@ _.extend(Application, {
 
     data.args.unshift(data.name);
     this.trigger.apply(this, data.args);
+  }
+
+  , setCurrentUser: function () {
+    var User = require("models/user")
+      , Themes = require("collections/themes");
+
+    if (this.data.currentUser) {
+      this.currentUser = new User(this.data.currentUser);
+      this.currentUser.set("themes", new Themes(this.data.currentUser.themes));
+    } else {
+      this.currentUser = new User();
+    }
+
+    this.on("upload:after", this.updateCurrentUserThemes);
+    this.on("download:after", this.updateCurrentUserThemes);
+  }
+
+  , updateCurrentUserThemes: function (theme) {
+    this.currentUser.get("themes").add(theme);
   }
 }, Backbone.Events);
 

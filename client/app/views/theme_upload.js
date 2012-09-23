@@ -20,6 +20,8 @@ module.exports = View.extend({
 
     $form.children(".alert-error").remove();
 
+    app.trigger("upload:before");
+
     $.ajax({
         type: "POST"
       , url: "/themes"
@@ -28,6 +30,8 @@ module.exports = View.extend({
         // Remove modal without evant
         $("body").removeClass("modal-open")
           .find(".modal, .modal-backdrop").remove();
+
+        app.trigger("upload:after", data);
 
         app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
 
