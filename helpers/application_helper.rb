@@ -14,14 +14,16 @@ module ApplicationHelper
     }
   end
 
-  def send_event(name, args)
+  def send_event(name, args, session_id)
     args.collect! {|arg| "\"#{arg}\""}
     data = "data: {\n"
     data << "data: \"name\": \"#{name}\",\n"
     data << "data: \"args\": [#{args.join(', ')}]\n"
     data << "data: }\n\n"
 
-    settings.connections.each do |out|
+    settings.connections[session_id] = [] if settings.connections[session_id].nil?
+
+    settings.connections[session_id].each do |out|
       out << data
     end
   end
