@@ -20,11 +20,11 @@ module.exports = Backbone.Router.extend({
       , $main = $("#main");
 
     if (window.MutationSummary === void 0) {
-      alert = "<div class='alert alert-error'>\
-        Although the themes built with the online editor work in any browser,\
-        the editor itself has been tested only with the latest versions of\
-        <a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far.\
-        Support for other browsers is coming soon.</div>";
+      alert = "<div class='alert alert-error'>" +
+        "Although the themes built with the online editor work in any browser," +
+        "the editor itself has been tested only with the latest versions of" +
+        "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far." +
+        "Support for other browsers is coming soon.</div>";
     }
 
     $main.empty().append(alert);

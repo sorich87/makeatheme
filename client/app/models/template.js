@@ -10,9 +10,15 @@ module.exports = Model.extend({
   }
 
   , label: function () {
-    for (i in this.standards) {
-      if (this.get("name") === this.standards[i].name) {
-        return this.standards[i].label;
+    var key;
+
+    for (key in this.standards) {
+      if (!this.standards.hasOwnProperty(key)) {
+        continue;
+      }
+
+      if (this.get("name") === this.standards[key].name) {
+        return this.standards[key].label;
       }
     }
 

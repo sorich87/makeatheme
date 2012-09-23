@@ -36,7 +36,7 @@ module.exports = View.extend({
 
     app.trigger("download:before", attrs);
 
-    (new Theme).save(attrs, {
+    (new Theme()).save(attrs, {
       success: function (theme) {
         // Add Iframe with archive URL as src to trigger download
         var $iframe = $("#download-iframe", window.top.document);

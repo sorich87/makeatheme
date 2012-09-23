@@ -32,7 +32,7 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var standards = _.reject((new Template).standards, function (standard) {
+    var standards = _.reject((new Template()).standards, function (standard) {
       return !!this.collection.getByName(standard.name);
     }.bind(this));
 
@@ -47,7 +47,9 @@ module.exports = View.extend({
   }
 
   , addOne: function (template) {
-    var checked = current = remove = "";
+    var checked = ""
+      , current = ""
+      , remove = "";
 
     if (template.cid === this.collection.getCurrent().cid) {
       checked = " checked='checked'";
@@ -58,9 +60,9 @@ module.exports = View.extend({
       remove = "<span class='x-remove' title='Delete template'>&times;</span>";
     }
 
-    this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
-                        + " type='radio' value='" + template.cid + "' />"
-                        + template.label() + "</label>" + remove + "</li>");
+    this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
+                        " type='radio' value='" + template.cid + "' />" +
+                        template.label() + "</label>" + remove + "</li>");
   }
 
   , addAll: function () {
@@ -130,8 +132,8 @@ module.exports = View.extend({
   , addTemplate: function () {
     var name, attributes, template;
 
-    name = this.$(".x-new-template-select select").val()
-                      || this.$(".x-new-template-name").val();
+    name = this.$(".x-new-template-select select").val() ||
+           this.$(".x-new-template-name").val();
 
     if (!name) {
       app.trigger("notification", "error", "Please, enter a template name.");

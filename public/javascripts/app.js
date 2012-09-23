@@ -190,6 +190,48 @@ window.require.define({"collections/regions": function(exports, require, module)
   
 }});
 
+window.require.define({"collections/templates": function(exports, require, module) {
+  // Templates collection class.
+  var Collection = require("collections/base/collection")
+    , Template = require("models/template");
+
+  module.exports = Collection.extend({
+      model: Template
+
+    // Get a template by its name
+    , getByName: function (name) {
+      return this.find(function (template) {
+        return template.get("name") === name;
+      });
+    }
+
+    // Get template being edited
+    , getCurrent: function () {
+      var current = this.find(function (template) {
+        return template.get("current") === true;
+      });
+
+      if (! current) {
+        current = this.getByName("index");
+      }
+
+      return current;
+    }
+
+    // Save template being edited
+    , setCurrent: function (template) {
+      var oldCurrent= this.getCurrent();
+
+      if (oldCurrent) {
+        oldCurrent.set("current", false);
+      }
+
+      template.set("current", true);
+    }
+  });
+  
+}});
+
 window.require.define({"collections/themes": function(exports, require, module) {
   // Themes collection class.
   var Collection = require("collections/base/collection")
@@ -243,6 +285,129 @@ window.require.define({"initialize": function(exports, require, module) {
       });
     });
   });
+  
+}});
+
+window.require.define({"lib/custom_css": function(exports, require, module) {
+  // Manage custom css in the document <head>
+  // and a 'rules' hash for easy access
+
+  var CustomCSS = function (rules) {
+    var node = document.createElement("style");
+
+    node.type = "text/css";
+    node.rel = "alternate stylesheet";
+
+    document.head.appendChild(node);
+
+    this.node = node;
+    this.sheet = node.sheet;
+
+    this.insertRules(rules);
+  };
+
+  CustomCSS.prototype.insertRule = function (selector, property, value, index) {
+    if (!selector || !property || !value) {
+      return;
+    }
+
+    this.deleteRule(selector, property);
+
+    if (index === null || index === void 0) {
+      index = this.sheet.cssRules.length;
+    }
+
+    this.rules[selector] = this.rules[selector] || {};
+    this.rules[selector][property] = {
+        value: value
+      , index: index
+    };
+
+    this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+
+    return index;
+  };
+
+  CustomCSS.prototype.insertRules = function (rules) {
+    var rule, selector, property;
+
+    rules = rules || {};
+
+    for (selector in rules) {
+      if (!rules.hasOwnProperty(selector)) {
+        continue;
+      }
+
+      for (property in rules[selector]) {
+        if (!rules[selector].hasOwnProperty(property)) {
+          continue;
+        }
+
+        rule = rules[selector][property];
+
+        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
+      }
+    }
+
+    this.rules = rules;
+  };
+
+  CustomCSS.prototype.getRule = function (selector, property) {
+    if (!selector || !property) {
+      return;
+    }
+
+    if (!this.rules[selector] || !this.rules[selector][property]) {
+      return;
+    }
+
+    return this.rules[selector][property].value;
+  };
+
+  CustomCSS.prototype.deleteRule = function (selector, property) {
+    if (!selector || !property) {
+      return;
+    }
+
+    if (!this.rules[selector] || !this.rules[selector][property]) {
+      return;
+    }
+
+    this.sheet.deleteRule(this.rules[selector][property].index);
+
+    return delete this.rules[selector][property];
+  };
+
+  CustomCSS.prototype.toString = function () {
+    var selector, property
+      , string = "";
+
+    if (!this.rules || this.rules.length === 0) {
+      return;
+    }
+
+    for (selector in this.rules) {
+      if (!this.rules.hasOwnProperty(selector)) {
+        continue;
+      }
+
+      string += selector + " {\n";
+
+      for (property in this.rules[selector]) {
+        if (!this.rules[selector].hasOwnProperty(property)) {
+          continue;
+        }
+
+        string += property + ": " + this.rules[selector][property].value + ";\n";
+      }
+
+      string += "}\n";
+    }
+
+    return string;
+  };
+
+  module.exports = CustomCSS;
   
 }});
 
@@ -651,6 +816,78 @@ window.require.define({"models/region": function(exports, require, module) {
   
 }});
 
+window.require.define({"models/template": function(exports, require, module) {
+  // Template model class.
+  var Model = require("models/base/model");
+
+  module.exports = Model.extend({
+    defaults: {
+        name: ""
+      , template: ""
+      , build: ""
+      , regions: { header: "default", footer: "default" }
+    }
+
+    , label: function () {
+      var key;
+
+      for (key in this.standards) {
+        if (!this.standards.hasOwnProperty(key)) {
+          continue;
+        }
+
+        if (this.get("name") === this.standards[key].name) {
+          return this.standards[key].label;
+        }
+      }
+
+      return this.get("name");
+    }
+
+    , setRegion: function (name, slug) {
+      var regions = this.get("regions");
+      regions[name] = slug;
+      this.set("regions", regions);
+    }
+
+    , standards: [
+        {
+          name: "index"
+        , label: "Default"
+      }
+      , {
+          name: "front-page"
+        , label: "Front Page"
+      }
+      , {
+          name: "home"
+        , label: "Blog"
+      }
+      , {
+          name: "single"
+        , label: "Article"
+      }
+      , {
+          name: "page"
+        , label: "Page"
+      }
+      , {
+          name: "archive"
+        , label: "Archive"
+      }
+      , {
+          name: "search"
+        , label: "Search Results"
+      }
+      , {
+          name: "404"
+        , label: "Error 404"
+      }
+    ]
+  });
+  
+}});
+
 window.require.define({"models/theme": function(exports, require, module) {
   // Theme model class.
   var Model = require("models/base/model");
@@ -716,6 +953,103 @@ window.require.define({"models/user": function(exports, require, module) {
   
 }});
 
+window.require.define({"router": function(exports, require, module) {
+  var app = require("application")
+    , Themes = require("collections/themes");
+
+  module.exports = Backbone.Router.extend({
+    routes: {
+        "": "index"
+      , "me/themes": "your_themes"
+      , "themes/:id": "theme"
+      , "editor/:file": "editor"
+      , "login": "login"
+      , "register": "register"
+      , "reset_password": "reset_password"
+      , "upload": "upload"
+      , "*actions": "notFound"
+    }
+
+    , index: function () {
+      var collection = new Themes(app.data.themes)
+        , alert = ""
+        , $main = $("#main");
+
+      if (window.MutationSummary === void 0) {
+        alert = "<div class='alert alert-error'>" +
+          "Although the themes built with the online editor work in any browser," +
+          "the editor itself has been tested only with the latest versions of" +
+          "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far." +
+          "Support for other browsers is coming soon.</div>";
+      }
+
+      $main.empty().append(alert);
+
+      if (!app.currentUser.id) {
+        $main.append(app.reuseView("faq").render().$el);
+      }
+
+      $main
+        .append("<h1 class='page-header'>Public Themes</h1>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
+    }
+
+    , your_themes: function () {
+      var collection = new Themes(app.currentUser.get("themes"));
+
+      $("#main").empty()
+        .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
+    }
+
+    , theme: function (id) {
+      var themeView = app.createView("theme", {themeID: id});
+
+      $("#main").empty().append(themeView.render().$el);
+    }
+
+    , editor: function (id) {
+      if (app.data.theme === void 0) {
+        window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+        return;
+      }
+
+      // Initialize editor view
+      app.createView("editor").render();
+    }
+
+    , login: function () {
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("login").render().$el.modal("show"));
+    }
+
+    , register: function () {
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("register").render().$el.modal("show"));
+    }
+
+    , reset_password: function () {
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("password_reset").render().$el.modal("show"));
+    }
+
+    , upload: function () {
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("theme_upload").render().$el.modal("show"));
+    }
+
+    , notFound: function () {
+      $("#main").empty()
+        .append(app.reuseView("not_found").render().$el);
+    }
+  });
+  
+}});
+
 window.require.define({"views/auth_links": function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
@@ -776,12 +1110,482 @@ window.require.define({"views/base/view": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/block_insert": function(exports, require, module) {
+  // Display list of blocks to insert
+  var View = require("views/base/view")
+    , Blocks = require("collections/blocks")
+    , app = require("application");
+
+  module.exports = View.extend({
+      id: "x-block-insert"
+    , className: "x-section"
+    , collection: new Blocks(app.data.theme_pieces.blocks)
+
+    , events: {
+        "draginit #x-block-insert .x-drag": "dragInit"
+      , "dragend #x-block-insert .x-drag": "dragEnd"
+    }
+
+    , initialize: function () {
+      _.bindAll(this, "makeMutable");
+
+      this.collection.on("reset", this.addAll, this);
+
+      app.on("mutations:started", this.makeMutable);
+    }
+
+    , render: function () {
+
+      this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
+
+      this.collection.reset(this.collection.models);
+
+      return this;
+    }
+
+    , addOne: function (block) {
+      this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
+                          "<span>&Dagger;</span> " + block.label() + "</span></li>");
+    }
+
+    , addAll: function () {
+      this.$("ul").empty();
+
+      _.each(this.collection.models, function (block) {
+        this.addOne(block);
+      }, this);
+    }
+
+    // Replace the drag element by its clone
+    , dragInit: function (e, drag) {
+      drag.element = drag.ghost();
+    }
+
+    // If the element is inserted in a row,
+    // load the actual template chuck to insert
+    , dragEnd: function (e, drag) {
+      var block = this.collection.getByCid(drag.element.data("cid"));
+
+      app.trigger("block:inserted", block, drag.element);
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.blocks = this.collection;
+    }
+  });
+  
+}});
+
+window.require.define({"views/download_button": function(exports, require, module) {
+  var View = require("views/base/view")
+    , Theme = require("models/theme")
+    , app = require("application");
+
+  module.exports = View.extend({
+      id: "x-download-button"
+
+    , events: {
+        "click button.x-download": "download"
+      , "click button.x-login": "login"
+    }
+
+    , render: function () {
+      var button;
+
+      if (app.currentUser.id === void 0) {
+        button = "<button class='x-btn x-btn-success x-login'>Login to Download</button>";
+      } else {
+        button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
+      }
+
+      this.$el.empty().append(button);
+
+      return this;
+    }
+
+    , login: function () {
+      window.top.Backbone.history.navigate("/login", true);
+    }
+
+    , download: function (e) {
+      var attrs = _.clone(app.data.theme);
+
+      e.target.setAttribute("disabled", "true");
+      e.target.innerHTML = "Baking... Please wait.";
+
+      app.trigger("download:before", attrs);
+
+      (new Theme()).save(attrs, {
+        success: function (theme) {
+          // Add Iframe with archive URL as src to trigger download
+          var $iframe = $("#download-iframe", window.top.document);
+
+          if ($iframe.length === 0) {
+            $iframe = $("<iframe id='download-iframe' width='0' height='0' src='" + theme.get("archive") + "'></iframe>")
+              .appendTo($("body", window.top.document));
+          } else {
+            $iframe.attr("src", theme.get("archive"));
+          }
+
+          e.target.removeAttribute("disabled");
+          e.target.innerHTML = "Download Theme";
+
+          app.trigger("download:after");
+
+          window.top.Backbone.history.navigate("/themes/" + theme.id, true);
+        }
+        , error: function (theme, response) {
+          app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");
+
+          e.target.removeAttribute("disabled");
+          e.target.innerHTML = "Download Theme";
+
+          app.trigger("download:error");
+        }
+      });
+    }
+  });
+  
+}});
+
+window.require.define({"views/editor": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view");
+
+  module.exports = View.extend({
+    el: "<div id='x-layout-editor'>" +
+        "<div class='x-handle'></div>" +
+        "</div>"
+
+    , events: {
+        "draginit #x-layout-editor .x-handle": "dragInit"
+      , "dragmove #x-layout-editor .x-handle": "dragMove"
+      , "click h4": "showSection"
+    }
+
+    // Show editor when "template:loaded" event is triggered
+    , render: function () {
+      var regionsView = app.reuseView("regions")
+        , blocksView = app.reuseView("block_insert")
+        , styleView = app.reuseView("style_edit")
+        , shareView = app.reuseView("share_link")
+        , downloadView = app.reuseView("download_button");
+      this.$el
+        .children(".x-handle").empty()
+          .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
+          .end()
+        .append("<h4>Current Template <span>&and;</span></h4>")
+        .append(app.reuseView("templates").render().$el);
+
+      if (app.data.preview_only !== true) {
+        this.$el
+          .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
+          .append(regionsView.render().$el)
+          .append("<h4>Page Elements <span>&or;</span></h4>")
+          .append(blocksView.render().$el)
+          .append("<h4>Style <span>&or;</span></h4>")
+          .append(styleView.render().$el)
+          .append("<h4>Share <span>&or;</span></h4>")
+          .append(shareView.render().$el)
+          .append(downloadView.render().$el);
+
+        app.reuseView("mutations");
+
+        // Setup drag and drop and resize
+        app.createView("layout").render();
+
+        this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
+      }
+
+      this.$el.appendTo($("body"));
+
+      return this;
+    }
+
+    , showSection: function (e) {
+      $(e.target).next().slideToggle("slow", function () {
+        var $this = $(this)
+          , $handle = $this.prev().children("span").empty();
+
+        if ($this.is(":hidden")) {
+          $handle.append("&or;");
+        } else {
+          $handle.append("&and;");
+        }
+      });
+    }
+
+    // Drag the editor box
+    , dragInit: function (e, drag) {
+      var mouse = drag.mouseElementPosition;
+
+      drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+    }
+
+    // Keep the editor box above other elements when moving
+    , dragMove: function (e, drag) {
+      $(drag.element).parent().css("zIndex", 9999);
+    }
+  });
+  
+}});
+
 window.require.define({"views/faq": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
       className: "well"
     , template: "faq"
+  });
+  
+}});
+
+window.require.define({"views/layout": function(exports, require, module) {
+  var totalColumnsWidth, isRowFull
+    , View = require("views/base/view")
+    , app = require("application")
+    , idIncrement = 1;
+
+  // Return total width of all columns children of a row
+  // except the one being dragged
+  totalColumnsWidth = function (dropElement, dragElement) {
+    return _.reduce($(dropElement).children(), function (memo, child) {
+      if ($(child).is(dragElement)) {
+        return memo;
+      } else {
+        return memo + $(child).outerWidth(true);
+      }
+    }, 0);
+
+  };
+
+  // Does total width of all columns children of a drop row
+  // allow a new column?
+  isRowFull = function (dropElement, dragElement) {
+    return $(dropElement).width() <= totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
+  };
+
+  module.exports = View.extend({
+      el: $("body")
+
+    , currentAction: null
+
+    , events: {
+        // Highlight columns.
+        "click .columns": "highlightColumns"
+
+        // Links in columns shouldn't be clickable.
+      , "click .columns a": "preventDefault"
+
+        // Links and images in columns shoulnd't be draggable
+      , "mousedown .columns a, .columns img": "preventDefault"
+
+        // Forms shouldn't be submittable
+      , "submit .columns form": "preventDefault"
+
+        // Drag
+      , "draginit .columns": "dragInit"
+      , "dragend .columns": "dragEnd"
+
+        // Drop
+      , "dropover .row": "dropOver"
+      , "dropout .row": "dropOut"
+      , "dropon .row": "dropOn"
+
+        // Resize
+      , "draginit .x-resize": "resizeInit"
+      , "dragmove .x-resize": "resizeMove"
+      , "dragend .x-resize": "resizeEnd"
+
+        // Remove column
+      , "click .columns .x-remove": "removeColumn"
+    }
+
+    , initialize: function () {
+      _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
+
+      this.addDataBypass();
+      app.on("download:before", this.removeDataBypass);
+      app.on("download:after", this.addDataBypass);
+      app.on("download:error", this.addDataBypass);
+
+      app.on("block:inserted", this.insertColumn);
+    }
+
+    , removeDataBypass: function () {
+      this.$(".columns a").removeAttr("data-bypass");
+    }
+
+    , addDataBypass: function () {
+      this.$(".columns a").attr("data-bypass", true);
+    }
+
+    , preventDefault: function (e) {
+      e.preventDefault();
+    }
+
+    // Remove .x-current from previously highlighted column and add to current one.
+    // Add resize and delete handles to the column if they weren't there already.
+    , highlightColumns: function (e) {
+      if (this.currentAction !== null) {
+        return;
+      }
+
+      app.trigger("editor:columnHighlight", e.currentTarget);
+
+      var $column = $(e.currentTarget);
+
+      this.$(".columns.x-current").removeClass("x-current");
+      $column.addClass("x-current");
+
+      if ($column.children(".x-resize").length === 0) {
+        $column.html(function (i, html) {
+          return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+        });
+      }
+
+      if ($column.children(".x-remove").length === 0) {
+        $column.html(function (i, html) {
+          return html + "<div class='x-remove' title='Remove element'>&times;</div>";
+        });
+      }
+
+    }
+
+    // Start drag and limit it to direct children of body.
+    // If released, revert to original position.
+    , dragInit: function (e, drag) {
+      this.currentAction = "drag";
+
+      drag.limit(this.$el.children()).revert();
+    }
+
+    // Reset position of dragged element.
+    , dragEnd: function (e, drag) {
+      $(drag.element).css({
+        top: drag.startPosition.top() + "px",
+        left: drag.startPosition.left() + "px"
+      });
+
+      this.currentAction = null;
+    }
+
+    // Mark the row as full or not.
+    , dropOver: function (e, drop, drag) {
+      $(drop.element).addClass(function () {
+        if (isRowFull(this, drag.element)) {
+          $(this).addClass("x-full");
+        } else {
+          $(this).addClass("x-not-full");
+        }
+      });
+    }
+
+    // Remove x-full or x-not-full class if previously added.
+    , dropOut: function (e, drop, drag) {
+      $(drop.element).removeClass("x-full x-not-full");
+    }
+
+    // Add column to row. If the row is full, add a new row.
+    // If original parent row doesn't have any more children
+    // and is not a <header> or <footer> and has no id attribute, remove it.
+    // Remove x-full and x-not-full classes if one was previously added.
+    , dropOn: function (e, drop, drag) {
+      var row, $drag, $dragParent, $dragGrandParent;
+
+      $drag = $(drag.element);
+      $drop = $(drop.element);
+
+      $dragParent = $drag.parent();
+
+      if (isRowFull($drop, $drag)) {
+        $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
+        idIncrement++;
+      } else {
+        $row = $drop;
+      }
+      $drag.appendTo($row);
+
+      $drop.removeClass("x-empty");
+
+      if ($dragParent.children().length === 0 ) {
+        $dragGrandParent = $dragParent.parent();
+
+        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
+            $dragParent.attr("id").indexOf("x-") !== 0) {
+          $dragParent.addClass("x-empty");
+        } else {
+          $dragParent.remove();
+        }
+      }
+
+      $drop.removeClass("x-full x-not-full");
+    }
+
+    // Init drag of resize handle horizontally and don't notify drops.
+    , resizeInit: function (e, drag) {
+      this.currentAction = "resize";
+
+      drag.horizontal().only();
+    }
+
+    // Resize the column.
+    // Sum of column widths in the row should never be larger than row.
+    , resizeMove: function (e, drag) {
+      var $drag = $(drag.element)
+      , $column = $drag.parent()
+      , $row = $column.parent();
+
+      width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+
+      if (width >= $row.width()) {
+        width = $row.width();
+        e.preventDefault();
+      } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
+        width = $row.width() - totalColumnsWidth($row, $column);
+        // When width is a float, calculation is incorrect because browsers use integers
+        // The following line fixes that. Replace as soon as you find a cleaner solution
+        width = width - 1;
+        e.preventDefault();
+      }
+
+      $column.width(width);
+      drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
+    }
+
+    // Reset position of resize handle
+    , resizeEnd: function (e, drag) {
+      $(drag.element).css({
+        position: "absolute"
+        , right: "-12px"
+        , left: "auto"
+      });
+
+      this.currentAction = null;
+    }
+
+    // Remove column if confirmed.
+    , removeColumn: function (e) {
+      var grandParentNode = e.currentTarget.parentNode.parentNode;
+
+      if (confirm("Are you sure you want to remove this element?")) {
+        if (grandParentNode.children.length === 1) {
+          $(grandParentNode).remove();
+        } else {
+          $(e.currentTarget.parentNode).remove();
+        }
+      }
+    }
+
+    // Insert column when a block is dragged into the layout.
+    , insertColumn: function (block, element) {
+      if (element.parent().hasClass("row")) {
+        element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns " +
+          block.className() + "'>" + block.get("build") + "</div>";
+
+        idIncrement++;
+      }
+    }
   });
   
 }});
@@ -861,6 +1665,188 @@ window.require.define({"views/login": function(exports, require, module) {
           }
         }.bind(this)
       });
+    }
+  });
+  
+}});
+
+window.require.define({"views/mutations": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+    initialize: function () {
+      _.bindAll(this);
+      window.addEventListener("DOMContentLoaded", this.observeMutations);
+
+      app.on("template:load", this.stopObserving);
+      app.on("template:loaded", this.restartObserving);
+
+      app.on("region:load", this.stopObserving);
+      app.on("region:loaded", this.restartObserving);
+    }
+
+    , stopObserving: function () {
+      this.observer.disconnect();
+    }
+
+    , restartObserving: function () {
+      this.observer.reconnect();
+    }
+
+    , observeMutations: function () {
+      this.observer = new MutationSummary({
+          rootNode: $("body")[0]
+        , queries: [{all: true}]
+        , callback: this.propagateMutations
+      });
+
+      this.pieces = {};
+
+      app.trigger("mutations:started", this.pieces);
+    }
+
+    , propagateMutations: function (summaries) {
+      var isColumn
+        , summary = summaries[0];
+
+      isColumn = function (node) {
+        return node.className && node.className.indexOf("column") !== -1;
+      };
+
+      isRow = function (node) {
+        return node.className && node.className.indexOf("row") !== -1;
+      };
+
+      summary.added.forEach(function (node) {
+        if (isColumn(node)) {
+          this.addNode(node, "column");
+        } else if (isRow(node)) {
+          this.addNode(node, "row");
+        }
+      }.bind(this));
+
+      summary.removed.forEach(function (node) {
+        if (isColumn(node)) {
+          this.removeNode(node, summary.getOldParentNode(node), "column");
+        } else if (isRow(node)) {
+          this.removeNode(node, summary.getOldParentNode(node), "row");
+        }
+      }.bind(this));
+
+      summary.reparented.forEach(function (node) {
+        if (isColumn(node)) {
+          this.reparentNode(node, summary.getOldParentNode(node));
+        }
+      }.bind(this));
+
+      summary.reordered.forEach(function (node) {
+        if (isColumn(node)) {
+          this.reorderNode(node, summary.getOldPreviousSibling(node));
+        }
+      }.bind(this));
+    }
+
+    , addNode: function (node, type) {
+      var topNode, region, template, parentNode, sandbox, block, sibling, templateClone;
+
+      copy = node.cloneNode(false);
+
+      if (type === "column") {
+        topNode = node.parentNode.parentNode;
+
+        // Add corresponding Liquid tag in column node.
+        for (var i in this.pieces.blocks.models) {
+          block = this.pieces.blocks.models[i];
+
+          if (node.className.indexOf(block.className()) !== -1) {
+            copy.innerHTML = block.tag();
+            break;
+          }
+        }
+      } else {
+        topNode = node.parentNode;
+      }
+
+      piece = this.getTemplatePiece(topNode);
+
+      sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
+
+      // Get parent destination.
+      parentNode = sandbox.getElementById(node.parentNode.id);
+
+      // Insert the node in the template.
+      // If the next sibling of the node is the footer region,
+      // insert the node at the end.
+      if (node.nextElementSibling) {
+        if ("FOOTER" === node.nextElementSibling.tagName) {
+          sandbox.body.innerHTML = sandbox.body.innerHTML + node.outerHTML;
+        } else {
+          nextNode = sandbox.getElementById(node.nextElementSibling.id);
+          if (nextNode.parentNode) {
+            nextNode.parentNode.insertBefore(copy, nextNode);
+          }
+        }
+      } else {
+        sandbox.getElementById(node.parentNode.id).appendChild(copy);
+      }
+
+      piece.set("template", sandbox.body.innerHTML);
+    }
+
+    , removeNode: function (node, oldParentNode, type) {
+      var topNode;
+
+      if (type === "column") {
+        topNode = oldParentNode.parentNode;
+
+        // If no topNode, it means the parent row has been removed as well.
+        if (topNode === null) {
+          return;
+        }
+      } else if (type === "row") {
+        topNode = oldParentNode;
+      }
+
+      piece = this.getTemplatePiece(topNode);
+
+      sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
+
+      copy = sandbox.getElementById(node.id);
+
+      copy.parentNode.removeChild(copy);
+
+      piece.set("template", sandbox.body.innerHTML);
+    }
+
+    , reparentNode: function (node, oldParentNode) {
+      this.addNode(node, "column");
+      // Remove node if it was in a different region
+      if (oldParentNode.parentNode !== null) {
+        this.removeNode(node, oldParentNode, "column");
+      }
+    }
+
+    , reorderNode: function (node, oldPreviousSibling) {
+      this.addNode(node, "column");
+    }
+
+    , getTemplatePiece: function(topNode) {
+      var piece;
+
+      if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
+        piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
+
+        piece.set("build", topNode.outerHTML);
+      } else {
+        piece = this.pieces.templates.getCurrent();
+
+        templateClone = window.document.getElementById("page").cloneNode(true);
+        $(templateClone).children("header, footer").remove();
+        piece.set("build", templateClone.innerHTML);
+      }
+
+      return piece;
     }
   });
   
@@ -1191,6 +2177,339 @@ window.require.define({"views/share_link": function(exports, require, module) {
     , template: "share_link"
     , data: {
       theme: app.data.theme._id
+    }
+  });
+  
+}});
+
+window.require.define({"views/style_edit": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/style_edit")
+    , app = require("application")
+    , CustomCSS = require("lib/custom_css")
+    , html_tags = require("lib/html_tags");
+
+  module.exports = View.extend({
+      id: "x-style-edit"
+    , className: "x-section"
+
+    , events: {
+        "change .x-element": "setSelector"
+      , "change .x-tag": "setTag"
+      , "click button": "addInputs"
+      , "keyup input": "addStyle"
+      , "blur input": "addStyle"
+      , "change input": "addStyle"
+    }
+
+    , initialize: function () {
+      _.bindAll(this, "setColumn", "buildDownload");
+
+      app.on("editor:columnHighlight", this.setColumn);
+      app.on("download:before", this.buildDownload);
+
+      this.selector = "body";
+      this.customCSS = new CustomCSS(app.data.style);
+    }
+
+    , setSelector: function (e) {
+      var val = $(e.target).val();
+
+      switch (val) {
+        case "body":
+        case "#page > header":
+        case "#page > footer":
+          this.selector = val;
+        break;
+
+        case "column":
+          this.selector = this.column;
+        break;
+      }
+
+      this.render();
+    }
+
+    , setTag: function (e) {
+      this.tag = $(e.target).val();
+
+      this.render();
+    }
+
+    , setColumn: function (element) {
+      this.column = "#" + element.id;
+
+      if (this.$("select").val() === "column") {
+        this.selector = this.column;
+        this.render();
+      }
+    }
+
+    , render: function () {
+      var rules;
+
+      if (this.tag) {
+        rules = this.customCSS.rules[this.selector + " " + this.tag];
+      } else {
+        rules = this.customCSS.rules[this.selector];
+      }
+
+      rules = _.map(rules, function (rule, property) {
+        rule.property = property;
+        return rule;
+      });
+
+      this.$el.html(template({
+          elements: this.elementOptions()
+        , htmlTags: this.tagOptions()
+        , selector: this.selector
+        , rules: rules
+      }));
+
+      if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
+        this.$(".x-choice").hide();
+      }
+
+      return this;
+    }
+
+    , elementOptions: function () {
+      return [
+        {
+            label: "Whole Document"
+          , value: "body"
+          , selected: this.selector === "body" ? " selected" : ""
+        }
+        , {
+            label: "Header"
+          , value: "#page > header"
+          , selected: this.selector === "#page > header" ? " selected" : ""
+        }
+        , {
+            label: "Footer"
+          , value: "#page > footer"
+          , selected: this.selector === "#page > footer" ? " selected" : ""
+        }
+        , {
+            label: "Selected Element"
+          , value: "column"
+          , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
+        }
+      ];
+    }
+
+    , tagOptions: function () {
+      var _this = this;
+
+      return html_tags.map(function (group) {
+        group.tags = group.tags.map(function (tag) {
+          tag.selected = tag.tag === _this.tag ? " selected" : "";
+          return tag;
+        });
+        return group;
+      });
+    }
+
+    , addInputs: function (e) {
+      e.preventDefault();
+
+      this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+                          "<input name='value' value='' placeholder='value' />" +
+                          "<input type='hidden' name='index' /></li>");
+    }
+
+    , addStyle: function (e) {
+      var selector, property, value, index
+        , $li = $(e.target).parent();
+
+      selector = this.selector;
+      if (this.tag) {
+        selector += " " + this.tag;
+      }
+
+      property  = $li.find("input[name=property]").val();
+      value  = $li.find("input[name=value]").val();
+      index  = $li.find("input[name=index]").val() || null;
+
+      index = this.customCSS.insertRule(selector, property, value, index);
+
+      $li.find("input[name=index]").val(index);
+    }
+
+    , buildDownload: function (attributes) {
+      attributes.style = this.customCSS.rules;
+    }
+  });
+  
+}});
+
+window.require.define({"views/templates": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application")
+    , Template = require("models/template")
+    , template = require("views/templates/templates")
+    , Templates = require("collections/templates");
+
+  module.exports = View.extend({
+      id: "x-templates-select"
+    , className: "x-section"
+    , collection: new Templates(app.data.theme_pieces.templates)
+
+    , events: {
+        "change ul input": "switchTemplate"
+      , "focus ul input": "switchTemplate"
+      , "blur ul input": "switchTemplate"
+      , "click .x-remove": "removeTemplate"
+      , "click .x-new-template": "showForm"
+      , "change .x-new-template-select select": "selectTemplate"
+      , "click .x-new-template-add": "addTemplate"
+    }
+
+    , initialize: function (options) {
+      _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
+
+      this.collection.on("add", this.addOne, this);
+      this.collection.on("reset", this.addAll, this);
+      this.collection.on("remove", this.removeOne, this);
+
+      app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable);
+      app.on("region:load", this.saveRegion);
+    }
+
+    , render: function () {
+      var standards = _.reject((new Template()).standards, function (standard) {
+        return !!this.collection.getByName(standard.name);
+      }.bind(this));
+
+      this.$el.empty().append(template({
+          standards: standards
+        , edit: !app.data.preview_only
+      }));
+
+      this.collection.reset(this.collection.models);
+
+      return this;
+    }
+
+    , addOne: function (template) {
+      var checked = ""
+        , current = ""
+        , remove = "";
+
+      if (template.cid === this.collection.getCurrent().cid) {
+        checked = " checked='checked'";
+        current = " class='x-current'";
+      }
+
+      if (template.get("name") != "index") {
+        remove = "<span class='x-remove' title='Delete template'>&times;</span>";
+      }
+
+      this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
+                          " type='radio' value='" + template.cid + "' />" +
+                          template.label() + "</label>" + remove + "</li>");
+    }
+
+    , addAll: function () {
+      this.$("ul").empty();
+
+      _.each(this.collection.models, function (template) {
+        this.addOne(template);
+      }, this);
+    }
+
+    , removeOne: function (template) {
+      this.$("input[value='" + template.cid + "']").closest("li").remove();
+    }
+
+    , switchTemplate: function () {
+      var template = this.collection.getByCid(this.$("ul input:checked").val());
+
+      this.$("ul li").removeClass("x-current");
+      this.$("ul input:checked").closest("li").addClass("x-current");
+
+      this.loadTemplate(template);
+    }
+
+    // Save current template, display it and trigger template:loaded event
+    , loadTemplate: function (template) {
+      var regions;
+
+      app.trigger("template:load", template);
+
+      regions = template.get("regions_attributes");
+
+      build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
+
+      $("#page").fadeOut().empty().append(build).fadeIn();
+
+      this.collection.setCurrent(template);
+
+      app.trigger("template:loaded", template);
+    }
+
+    // Remove column if confirmed.
+    , removeTemplate: function (e) {
+      if (confirm("Are you sure you want to delete this template?")) {
+        var cid = $(e.currentTarget).parent().find("input").val();
+        this.collection.remove(cid);
+      }
+    }
+
+    , showForm: function (e) {
+      var $div = this.$(".x-new-template-select");
+
+      if ($div.is(":hidden")) {
+        $div.show("normal");
+      } else {
+        $div.hide("normal");
+      }
+    }
+
+    , selectTemplate: function (e) {
+      if ($(e.currentTarget).val() === "") {
+        this.$(".x-new-template-name").show();
+      } else {
+        this.$(".x-new-template-name").hide();
+      }
+    }
+
+    , addTemplate: function () {
+      var name, attributes, template;
+
+      name = this.$(".x-new-template-select select").val() ||
+             this.$(".x-new-template-name").val();
+
+      if (!name) {
+        app.trigger("notification", "error", "Please, enter a template name.");
+        return;
+      }
+
+      attributes = _.pick(this.collection.getByName("index").attributes,
+                          "template", "build", "regions");
+      attributes.name = name;
+
+      template = new Template(attributes);
+      this.collection.add(template);
+      this.collection.setCurrent(template);
+      this.render();
+
+      app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
+    }
+
+    , buildDownload: function (attributes) {
+      attributes.templates = _.map(this.collection.models, function (template) {
+        return _.pick(template.attributes, "_id", "name", "template");
+      });
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.templates = this.collection;
+    }
+
+    , saveRegion: function (region) {
+      this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
     }
   });
   
@@ -1677,6 +2996,67 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       this.collection.each(function (theme) {
         this.addOne(theme);
       }, this);
+    }
+  });
+  
+}});
+
+window.require.define({"views/theme_upload": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+      className: "modal"
+    , template: "theme_upload"
+
+    , events: {
+      "submit form": "sendFormData"
+    }
+
+    , sendFormData: function (e) {
+      var $form = this.$("form")
+        , button = this.$("button[type=submit]")[0];
+
+      e.preventDefault();
+
+      button.setAttribute("disabled", "true");
+      button.innerHTML = "Uploading... Please wait.";
+
+      $form.children(".alert-error").remove();
+
+      $.ajax({
+          type: "POST"
+        , url: "/themes"
+        , data: new FormData($form[0])
+        , success: function (data, textStatus, jqXHR) {
+          // Remove modal without evant
+          $("body").removeClass("modal-open")
+            .find(".modal, .modal-backdrop").remove();
+
+          app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
+
+          Backbone.history.navigate("/themes/" + data._id, true);
+        }.bind(this)
+
+        , error: function (jqXHR, textStatus, errorThrown) {
+          var key
+            , response = JSON.parse(jqXHR.responseText);
+
+          for (key in response) {
+            if (response.hasOwnProperty(key)) {
+              $form.prepend("<p class='alert alert-error'>" + response[key] + "</p>");
+            }
+          }
+
+          button.removeAttribute("disabled");
+          button.innerHTML = "Upload Theme";
+        }
+
+        , cache: false
+        , contentType: false
+        , dataType: "json"
+        , processData: false
+      });
     }
   });
   

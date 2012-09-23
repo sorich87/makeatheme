@@ -128,9 +128,9 @@ module.exports = View.extend({
   , addInputs: function (e) {
     e.preventDefault();
 
-    this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
-                        <input name='value' value='' placeholder='value' />\
-                        <input type='hidden' name='index' /></li>");
+    this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+                        "<input name='value' value='' placeholder='value' />" +
+                        "<input type='hidden' name='index' /></li>");
   }
 
   , addStyle: function (e) {

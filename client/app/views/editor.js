@@ -2,9 +2,9 @@ var app = require("application")
   , View = require("views/base/view");
 
 module.exports = View.extend({
-  el: "<div id='x-layout-editor'>\
-      <div class='x-handle'></div>\
-      </div>"
+  el: "<div id='x-layout-editor'>" +
+      "<div class='x-handle'></div>" +
+      "</div>"
 
   , events: {
       "draginit #x-layout-editor .x-handle": "dragInit"

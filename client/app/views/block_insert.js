@@ -31,8 +31,8 @@ module.exports = View.extend({
   }
 
   , addOne: function (block) {
-    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>\
-                        <span>&Dagger;</span> " + block.label() + "</span></li>");
+    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
+                        "<span>&Dagger;</span> " + block.label() + "</span></li>");
   }
 
   , addAll: function () {

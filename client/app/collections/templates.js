@@ -27,8 +27,9 @@ module.exports = Collection.extend({
 
   // Save template being edited
   , setCurrent: function (template) {
-    var oldCurrent;
-    if (oldCurrent = this.getCurrent()) {
+    var oldCurrent= this.getCurrent();
+
+    if (oldCurrent) {
       oldCurrent.set("current", false);
     }
 

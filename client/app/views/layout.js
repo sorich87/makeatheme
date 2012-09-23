@@ -93,7 +93,7 @@ module.exports = View.extend({
     var $column = $(e.currentTarget);
 
     this.$(".columns.x-current").removeClass("x-current");
-    $column.addClass("x-current")
+    $column.addClass("x-current");
 
     if ($column.children(".x-resize").length === 0) {
       $column.html(function (i, html) {
@@ -168,8 +168,8 @@ module.exports = View.extend({
     if ($dragParent.children().length === 0 ) {
       $dragGrandParent = $dragParent.parent();
 
-      if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
-          && $dragParent.attr("id").indexOf("x-") !== 0) {
+      if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
+          $dragParent.attr("id").indexOf("x-") !== 0) {
         $dragParent.addClass("x-empty");
       } else {
         $dragParent.remove();
@@ -202,7 +202,7 @@ module.exports = View.extend({
       width = $row.width() - totalColumnsWidth($row, $column);
       // When width is a float, calculation is incorrect because browsers use integers
       // The following line fixes that. Replace as soon as you find a cleaner solution
-      width = width - 1
+      width = width - 1;
       e.preventDefault();
     }
 
@@ -237,8 +237,8 @@ module.exports = View.extend({
   // Insert column when a block is dragged into the layout.
   , insertColumn: function (block, element) {
     if (element.parent().hasClass("row")) {
-      element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns "
-        + block.className() + "'>" + block.get("build") + "</div>";
+      element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns " +
+        block.className() + "'>" + block.get("build") + "</div>";
 
       idIncrement++;
     }

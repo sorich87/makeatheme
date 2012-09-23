@@ -35,10 +35,13 @@ module.exports = View.extend({
       }.bind(this)
 
       , error: function (jqXHR, textStatus, errorThrown) {
-        var response = JSON.parse(jqXHR.responseText);
+        var key
+          , response = JSON.parse(jqXHR.responseText);
 
-        for (i in response) {
-          $form.prepend("<p class='alert alert-error'>" + response[i] + "</p>");
+        for (key in response) {
+          if (response.hasOwnProperty(key)) {
+            $form.prepend("<p class='alert alert-error'>" + response[key] + "</p>");
+          }
         }
 
         button.removeAttribute("disabled");

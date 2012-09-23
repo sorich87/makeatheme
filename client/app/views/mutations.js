@@ -97,7 +97,7 @@ module.exports = View.extend({
 
     piece = this.getTemplatePiece(topNode);
 
-    sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
+    sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
 
     // Get parent destination.
     parentNode = sandbox.getElementById(node.parentNode.id);
@@ -137,7 +137,7 @@ module.exports = View.extend({
 
     piece = this.getTemplatePiece(topNode);
 
-    sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
+    sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
 
     copy = sandbox.getElementById(node.id);
 
