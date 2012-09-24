@@ -9,6 +9,8 @@ class ThemeUpload
   validates_presence_of :archive, :nil => false
 
   before_save :save_to_gridfs
+  before_destroy :delete_from_gridfs
+  after_save :enqueue_processing!
 
   def archive
     return @archive unless persisted?
@@ -18,6 +20,11 @@ class ThemeUpload
   end
 
   private
+
+  def delete_from_gridfs
+    Mongoid::GridFS.delete(self.archive_id)
+  end
+
   def save_to_gridfs
     result = Mongoid::GridFS.put self.archive
     if result.nil? or result.id.nil?
@@ -28,6 +35,6 @@ class ThemeUpload
   end
 
   def enqueue_processing!
-    Resque.enqueue(ProcessTheme, self.id, self.created_at)
+    Resque.enqueue(ProcessTheme, self.id)
   end
 end

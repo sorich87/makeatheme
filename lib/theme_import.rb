@@ -19,7 +19,6 @@ module ThemeImport
 
       if theme.valid?
         theme.save
-        Resque.enqueue(UploadThemeFiles, theme.id, import.static_files)
       end
       theme
     end
