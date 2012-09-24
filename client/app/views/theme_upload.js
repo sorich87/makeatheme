@@ -20,6 +20,8 @@ module.exports = View.extend({
 
     $form.children(".alert-error").remove();
 
+    app.trigger("upload:before");
+
     $.ajax({
         type: "POST"
       , url: "/themes"
@@ -29,16 +31,21 @@ module.exports = View.extend({
         $("body").removeClass("modal-open")
           .find(".modal, .modal-backdrop").remove();
 
+        app.trigger("upload:after", data);
+
         app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
 
         Backbone.history.navigate("/themes/" + data._id, true);
       }.bind(this)
 
       , error: function (jqXHR, textStatus, errorThrown) {
-        var response = JSON.parse(jqXHR.responseText);
+        var key
+          , response = JSON.parse(jqXHR.responseText);
 
-        for (i in response) {
-          $form.prepend("<p class='alert alert-error'>" + response[i] + "</p>");
+        for (key in response) {
+          if (response.hasOwnProperty(key)) {
+            $form.prepend("<p class='alert alert-error'>" + response[key] + "</p>");
+          }
         }
 
         button.removeAttribute("disabled");

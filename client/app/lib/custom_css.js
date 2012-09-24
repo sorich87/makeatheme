@@ -15,16 +15,16 @@ var CustomCSS = function (rules) {
   this.insertRules(rules);
 };
 
-CustomCSS.prototype.insertRule = function (selector, property, value) {
-  var index;
-
+CustomCSS.prototype.insertRule = function (selector, property, value, index) {
   if (!selector || !property || !value) {
     return;
   }
 
   this.deleteRule(selector, property);
 
-  index = this.sheet.cssRules.length;
+  if (index === null || index === void 0) {
+    index = this.sheet.cssRules.length;
+  }
 
   this.rules[selector] = this.rules[selector] || {};
   this.rules[selector][property] = {
@@ -32,15 +32,26 @@ CustomCSS.prototype.insertRule = function (selector, property, value) {
     , index: index
   };
 
-  return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+  this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+
+  return index;
 };
 
 CustomCSS.prototype.insertRules = function (rules) {
-  var rule
-    , rules = rules || {};
+  var rule, selector, property;
+
+  rules = rules || {};
 
   for (selector in rules) {
+    if (!rules.hasOwnProperty(selector)) {
+      continue;
+    }
+
     for (property in rules[selector]) {
+      if (!rules[selector].hasOwnProperty(property)) {
+        continue;
+      }
+
       rule = rules[selector][property];
 
       this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
@@ -77,16 +88,25 @@ CustomCSS.prototype.deleteRule = function (selector, property) {
 };
 
 CustomCSS.prototype.toString = function () {
-  var string = "";
+  var selector, property
+    , string = "";
 
   if (!this.rules || this.rules.length === 0) {
     return;
   }
 
   for (selector in this.rules) {
+    if (!this.rules.hasOwnProperty(selector)) {
+      continue;
+    }
+
     string += selector + " {\n";
 
     for (property in this.rules[selector]) {
+      if (!this.rules[selector].hasOwnProperty(property)) {
+        continue;
+      }
+
       string += property + ": " + this.rules[selector][property].value + ";\n";
     }
 

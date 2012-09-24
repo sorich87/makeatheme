@@ -1,69 +1,153 @@
 var View = require("views/base/view")
   , template = require("views/templates/style_edit")
   , app = require("application")
-  , CustomCSS = require("lib/custom_css");
+  , html_tags = require("lib/html_tags");
 
 module.exports = View.extend({
     id: "x-style-edit"
   , className: "x-section"
 
   , events: {
-      "click button": "addInputs"
-    , "keyup input[name=value]": "addStyle"
-    , "blur input[name=value]": "addStyle"
-    , "change input[name=value]": "addStyle"
+      "change .x-element": "setSelector"
+    , "change .x-tag": "setTag"
+    , "click button": "addInputs"
+    , "keyup input": "addStyle"
+    , "blur input": "addStyle"
+    , "change input": "addStyle"
   }
 
   , initialize: function () {
-    _.bindAll(this, "setSelector", "buildDownload");
+    _.bindAll(this, "setColumn", "buildDownload");
 
-    app.on("editor:columnHighlight", this.setSelector);
+    app.on("editor:columnHighlight", this.setColumn);
     app.on("download:before", this.buildDownload);
 
-    this.customCSS = new CustomCSS(app.data.style);
+    this.selector = "body";
+    this.customCSS = app.editor.style;
   }
 
-  , setSelector: function (element) {
-    this.selector = "#" + element.id;
+  , setSelector: function (e) {
+    var val = $(e.target).val();
+
+    switch (val) {
+      case "body":
+      case "#page > header":
+      case "#page > footer":
+        this.selector = val;
+      break;
+
+      case "column":
+        this.selector = this.column;
+      break;
+    }
+
     this.render();
+  }
+
+  , setTag: function (e) {
+    this.tag = $(e.target).val();
+
+    this.render();
+  }
+
+  , setColumn: function (element) {
+    this.column = "#" + element.id;
+
+    if (this.$("select").val() === "column") {
+      this.selector = this.column;
+      this.render();
+    }
   }
 
   , render: function () {
     var rules;
 
-    if (!this.selector) {
-      this.$el.html("Click on an element in the design to customize it.");
-      return this;
+    if (this.tag) {
+      rules = this.customCSS.rules[this.selector + " " + this.tag];
+    } else {
+      rules = this.customCSS.rules[this.selector];
     }
 
-    rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+    rules = _.map(rules, function (rule, property) {
       rule.property = property;
       return rule;
     });
 
     this.$el.html(template({
-        selector: this.selector
+        elements: this.elementOptions()
+      , htmlTags: this.tagOptions()
+      , selector: this.selector
       , rules: rules
     }));
 
+    if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
+      this.$(".x-choice").hide();
+    }
+
     return this;
+  }
+
+  , elementOptions: function () {
+    return [
+      {
+          label: "Whole Document"
+        , value: "body"
+        , selected: this.selector === "body" ? " selected" : ""
+      }
+      , {
+          label: "Header"
+        , value: "#page > header"
+        , selected: this.selector === "#page > header" ? " selected" : ""
+      }
+      , {
+          label: "Footer"
+        , value: "#page > footer"
+        , selected: this.selector === "#page > footer" ? " selected" : ""
+      }
+      , {
+          label: "Selected Element"
+        , value: "column"
+        , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
+      }
+    ];
+  }
+
+  , tagOptions: function () {
+    var _this = this;
+
+    return html_tags.map(function (group) {
+      group.tags = group.tags.map(function (tag) {
+        tag.selected = tag.tag === _this.tag ? " selected" : "";
+        return tag;
+      });
+      return group;
+    });
   }
 
   , addInputs: function (e) {
     e.preventDefault();
 
-    this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
-                        <input name='value' value='' placeholder='value' /></li>");
+    this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+                        "<input name='value' value='' placeholder='value' />" +
+                        "<input type='hidden' name='index' /></li>");
   }
 
   , addStyle: function (e) {
-    var property, value;
+    var selector, property, value, index
+      , $li = $(e.target).parent();
 
-    value = e.target.value;
+    selector = this.selector;
+    if (this.tag) {
+      selector += " " + this.tag;
+    }
 
-    property  = $(e.target).siblings("input[name=property]").val();
+    property  = $li.find("input[name=property]").val();
+    value  = $li.find("input[name=value]").val();
+    index  = $li.find("input[name=index]").val() || null;
 
-    this.customCSS.insertRule(this.selector, property, value);
+    index = this.customCSS.insertRule(selector, property, value, index);
+
+    $li.find("input[name=index]").val(index);
   }
 
   , buildDownload: function (attributes) {

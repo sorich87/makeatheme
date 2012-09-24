@@ -81,32 +81,29 @@ window.require.define({"application": function(exports, require, module) {
 
   _.extend(Application, {
     initialize: function() {
-      var Router = require("router")
-        , User = require("models/user")
-        , Templates = require("collections/templates")
-        , Regions = require("collections/regions")
-        , Blocks = require("collections/blocks");
+      var Router = require("router");
 
       // Setup notifications handling
       // Append to top window in case document is in an iframe
       this.createView("notifications").render()
         .$el.appendTo($("body", window.top.document));
 
-      // Initialize current user model instance
-      this.currentUser = new User(this.data.currentUser);
-
-      // Load default collections models
-      if (this.data.theme_pieces) {
-        this.templates = new Templates(this.data.theme_pieces.templates);
-        this.regions = new Regions(this.data.theme_pieces.regions);
-        this.blocks = new Blocks(this.data.theme_pieces.blocks);
-      }
+      this.setCurrentUser();
 
       // Initialize router
       this.router = new Router();
 
       // Render the login and logout links
       this.reuseView("auth_links").render();
+
+      // Set per-view body classes
+      this.setBodyClasses();
+
+      // Holds editor settings and data
+      this.editor = {};
+
+      // Listen to events coming from server and trigger them here
+      (new EventSource("/events")).onmessage = this.dispatchServerEvents.bind(this);
 
       // Prevent further modification of the application object
       Object.freeze(this);
@@ -140,6 +137,38 @@ window.require.define({"application": function(exports, require, module) {
       views[name] = new View(options);
       this.views = views;
       return views[name];
+    }
+
+    , setBodyClasses: function () {
+      Backbone.history.on("route", function (router, name) {
+        $("body")[0].className = name;
+      });
+    }
+
+    , dispatchServerEvents: function (e) {
+      var data = JSON.parse(e.data);
+
+      data.args.unshift(data.name);
+      this.trigger.apply(this, data.args);
+    }
+
+    , setCurrentUser: function () {
+      var User = require("models/user")
+        , Themes = require("collections/themes");
+
+      if (this.data.currentUser) {
+        this.currentUser = new User(this.data.currentUser);
+        this.currentUser.set("themes", new Themes(this.data.currentUser.themes));
+      } else {
+        this.currentUser = new User();
+      }
+
+      this.on("upload:after", this.updateCurrentUserThemes);
+      this.on("download:after", this.updateCurrentUserThemes);
+    }
+
+    , updateCurrentUserThemes: function (theme) {
+      this.currentUser.get("themes").add(theme);
     }
   }, Backbone.Events);
 
@@ -218,8 +247,9 @@ window.require.define({"collections/templates": function(exports, require, modul
 
     // Save template being edited
     , setCurrent: function (template) {
-      var oldCurrent;
-      if (oldCurrent = this.getCurrent()) {
+      var oldCurrent= this.getCurrent();
+
+      if (oldCurrent) {
         oldCurrent.set("current", false);
       }
 
@@ -258,7 +288,7 @@ window.require.define({"initialize": function(exports, require, module) {
         if ($("#main").children().length === 0) {
           Backbone.history.navigate("/", true);
         } else {
-          history.go(-1);
+          Backbone.history.back(true);
         }
       });
 
@@ -303,16 +333,16 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     this.insertRules(rules);
   };
 
-  CustomCSS.prototype.insertRule = function (selector, property, value) {
-    var index;
-
+  CustomCSS.prototype.insertRule = function (selector, property, value, index) {
     if (!selector || !property || !value) {
       return;
     }
 
     this.deleteRule(selector, property);
 
-    index = this.sheet.cssRules.length;
+    if (index === null || index === void 0) {
+      index = this.sheet.cssRules.length;
+    }
 
     this.rules[selector] = this.rules[selector] || {};
     this.rules[selector][property] = {
@@ -320,15 +350,26 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       , index: index
     };
 
-    return this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+    this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+
+    return index;
   };
 
   CustomCSS.prototype.insertRules = function (rules) {
-    var rule
-      , rules = rules || {};
+    var rule, selector, property;
+
+    rules = rules || {};
 
     for (selector in rules) {
+      if (!rules.hasOwnProperty(selector)) {
+        continue;
+      }
+
       for (property in rules[selector]) {
+        if (!rules[selector].hasOwnProperty(property)) {
+          continue;
+        }
+
         rule = rules[selector][property];
 
         this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
@@ -365,16 +406,25 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   CustomCSS.prototype.toString = function () {
-    var string = "";
+    var selector, property
+      , string = "";
 
     if (!this.rules || this.rules.length === 0) {
       return;
     }
 
     for (selector in this.rules) {
+      if (!this.rules.hasOwnProperty(selector)) {
+        continue;
+      }
+
       string += selector + " {\n";
 
       for (property in this.rules[selector]) {
+        if (!this.rules[selector].hasOwnProperty(property)) {
+          continue;
+        }
+
         string += property + ": " + this.rules[selector][property].value + ";\n";
       }
 
@@ -385,6 +435,402 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   module.exports = CustomCSS;
+  
+}});
+
+window.require.define({"lib/editor_data": function(exports, require, module) {
+  var data
+    , app = require("application")
+    , Templates = require("collections/templates")
+    , Regions = require("collections/regions")
+    , Blocks = require("collections/blocks")
+    , CustomCSS = require("lib/custom_css");
+
+  data = sessionStorage.getItem("theme-" + app.data.theme._id);
+  data = JSON.parse(data);
+
+  // If no data in sessionStorage, get it from server.
+  if (!data) {
+    data = {
+      templates: app.data.theme_pieces.templates
+      , regions: app.data.theme_pieces.regions
+      , blocks: app.data.theme_pieces.blocks
+      , style: app.data.style
+    };
+  }
+
+  data = {
+    templates: new Templates(data.templates)
+    , regions: new Regions(data.regions)
+    , blocks: new Blocks(data.blocks)
+    , style: new CustomCSS(data.style)
+  };
+
+  // Save data in sessionStorage every 1s.
+  setInterval(function () {
+    var store = {
+      templates: data.templates.toJSON()
+      , regions: data.regions.toJSON()
+      , blocks: data.blocks.toJSON()
+      , style: data.style.rules
+    };
+
+    store = JSON.stringify(store);
+    sessionStorage.setItem("theme-" + app.data.theme._id, store);
+  }, 1000);
+
+  module.exports = data;
+  
+}});
+
+window.require.define({"lib/html_tags": function(exports, require, module) {
+  module.exports = [
+    {
+        group: "Headings"
+      , tags: [
+        {
+            tag: "h1"
+          , label: "Headings 1"
+        }
+        , {
+            tag: "h2"
+          , label: "Headings 2"
+        }
+        , {
+            tag: "h3"
+          , label: "Headings 3"
+        }
+        , {
+            tag: "h4"
+          , label: "Headings 4"
+        }
+        , {
+            tag: "h5"
+          , label: "Headings 5"
+        }
+        , {
+            tag: "h6"
+          , label: "Headings 6"
+        }
+      ]
+    }
+    , {
+        group: "Content sections"
+      , tags: [
+        {
+            tag: "p"
+          , label: "Paragraphs"
+        }
+        , {
+            tag: "blockquote"
+          , label: "Block quotations"
+        }
+        , {
+            tag: "pre"
+          , label: "Pre-formatted content"
+        }
+        , {
+            tag: "address"
+          , label: "Addresses"
+        }
+        , {
+            tag: "ins"
+          , label: "Inserted content"
+        }
+        , {
+            tag: "del"
+          , label: "Deleted content"
+        }
+        , {
+            tag: "hr"
+          , label: "Horizontal rules"
+        }
+      ]
+    }
+    , {
+        group: "Inline elements"
+      , tags: [
+        {
+            tag: "a"
+          , label: "Links"
+        }
+        , {
+            tag: "abbr"
+          , label: "Abbreviations"
+        }
+        , {
+            tag: "acronym"
+          , label: "Acronyms"
+        }
+        , {
+            tag: "dfn"
+          , label: "Inline definitions"
+        }
+        , {
+            tag: "em"
+          , label: "Emphases"
+        }
+        , {
+            tag: "strong"
+          , label: "Strong emphases"
+        }
+        , {
+            tag: "cite"
+          , label: "Citations"
+        }
+        , {
+            tag: "q"
+          , label: "Inline quotations"
+        }
+        , {
+            tag: "sub"
+          , label: "Subscripts"
+        }
+        , {
+            tag: "sup"
+          , label: "Superscripts"
+        }
+      ]
+    }
+    , {
+        group: "Lists"
+      , tags: [
+        {
+            tag: "dl"
+          , label: "Definition Lists"
+        }
+        , {
+            tag: "dt"
+          , label: "Definition Terms"
+        }
+        , {
+            tag: "dd"
+          , label: "Definitions"
+        }
+        , {
+            tag: "ol"
+          , label: "Ordered Lists"
+        }
+        , {
+            tag: "ul"
+          , label: "Unordered Lists"
+        }
+        , {
+            tag: "menu"
+          , label: "Menu Lists"
+        }
+        , {
+            tag: "li"
+          , label: "List Items"
+        }
+      ]
+    }
+    , {
+        group: "Forms"
+      , tags: [
+        {
+            tag: "form"
+          , label: "Forms"
+        }
+        , {
+            tag: "fieldset"
+          , label: "Fieldsets"
+        }
+        , {
+            tag: "legend"
+          , label: "Fieldset legends"
+        }
+        , {
+            tag: "input[type=checkbox]"
+          , label: "Checkboxes"
+        }
+        , {
+            tag: "input[type=radio]"
+          , label: "Radio buttons"
+        }
+        , {
+            tag: "button"
+          , label: "Buttons"
+        }
+        , {
+            tag: "input[type=button]"
+          , label: "Buttons"
+        }
+        , {
+            tag: "input[type=submit]"
+          , label: "Submit buttons"
+        }
+        , {
+            tag: "input[type=image]"
+          , label: "Image buttons"
+        }
+        , {
+            tag: "input[type=reset]"
+          , label: "Reset buttons"
+        }
+        , {
+            tag: "input[type=text]"
+          , label: "Text fields"
+        }
+        , {
+            tag: "input[type=text]"
+          , label: "Text fields"
+        }
+        , {
+            tag: "input[type=password]"
+          , label: "Password fields"
+        }
+        , {
+            tag: "input[type=file]"
+          , label: "File fields"
+        }
+        , {
+            tag: "select"
+          , label: "Selection lists"
+        }
+        , {
+            tag: "optgroup"
+          , label: "Group of options"
+        }
+        , {
+            tag: "option"
+          , label: "Options"
+        }
+        , {
+            tag: "textarea"
+          , label: "Multi-line text areas"
+        }
+      ]
+    }
+    , {
+        group: "Tables"
+      , tags: [
+        {
+            tag: "table"
+          , label: "Tables"
+        }
+        , {
+            tag: "caption"
+          , label: "Table captions"
+        }
+        , {
+            tag: "thead"
+          , label: "Table headers"
+        }
+        , {
+            tag: "tbody"
+          , label: "Table bodies"
+        }
+        , {
+            tag: "tfoot"
+          , label: "Table footers"
+        }
+        , {
+            tag: "tr"
+          , label: "Table rows"
+        }
+        , {
+            tag: "th"
+          , label: "Table header cells"
+        }
+        , {
+            tag: "td"
+          , label: "Table data cells"
+        }
+        , {
+            tag: "colgroup"
+          , label: "Table column groups"
+        }
+        , {
+            tag: "col"
+          , label: "Table columns"
+        }
+      ]
+    }
+    , {
+        group: "Media"
+      , tags: [
+        {
+            tag: "img"
+          , label: "Images"
+        }
+        , {
+            tag: "map"
+          , label: "Maps"
+        }
+        , {
+            tag: "area"
+          , label: "Map areas"
+        }
+        , {
+            tag: "object"
+          , label: "Media object"
+        }
+        , {
+            tag: "embed"
+          , label: "Media embed"
+        }
+        , {
+            tag: "iframe"
+          , label: "Iframes"
+        }
+      ]
+    }
+    , {
+        group: "Computer text"
+      , tags: [
+        {
+            tag: "code"
+          , label: "Source code"
+        }
+        , {
+            tag: "var"
+          , label: "Source code variables"
+        }
+        , {
+            tag: "kbd"
+          , label: "User input"
+        }
+        , {
+            tag: "samp"
+          , label: "Program output"
+        }
+      ]
+    }
+    , {
+        group: "Presentation"
+      , tags: [
+        {
+            tag: "b"
+          , label: "b"
+        }
+        , {
+            tag: "i"
+          , label: "i"
+        }
+        , {
+            tag: "u"
+          , label: "u"
+        }
+        , {
+            tag: "s"
+          , label: "s"
+        }
+        , {
+            tag: "small"
+          , label: "small"
+        }
+        , {
+            tag: "big"
+          , label: "big"
+        }
+        , {
+            tag: "tt"
+          , label: "tt"
+        }
+      ]
+    }
+  ];
   
 }});
 
@@ -455,9 +901,15 @@ window.require.define({"models/template": function(exports, require, module) {
     }
 
     , label: function () {
-      for (i in this.standards) {
-        if (this.get("name") === this.standards[i].name) {
-          return this.standards[i].label;
+      var key;
+
+      for (key in this.standards) {
+        if (!this.standards.hasOwnProperty(key)) {
+          continue;
+        }
+
+        if (this.get("name") === this.standards[key].name) {
+          return this.standards[key].label;
         }
       }
 
@@ -592,24 +1044,30 @@ window.require.define({"router": function(exports, require, module) {
 
     , index: function () {
       var collection = new Themes(app.data.themes)
-        , alert = "";
+        , alert = ""
+        , $main = $("#main");
 
       if (window.MutationSummary === void 0) {
-        alert = "<div class='alert alert-error'>\
-          Although the themes built with our online editor work in any browser,\
-          the editor itself has been tested with the latest versions of\
-          <a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> only.\
-          Support for other browsers is coming soon.</div>";
+        alert = "<div class='alert alert-error'>" +
+          "Although the themes built with the online editor work in any browser," +
+          "the editor itself has been tested only with the latest versions of" +
+          "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far." +
+          "Support for other browsers is coming soon.</div>";
       }
 
-      $("#main").empty()
-        .append(alert)
-        .append(app.reuseView("faq").render().$el)
+      $main.empty().append(alert);
+
+      if (!app.currentUser.id) {
+        $main.append(app.reuseView("faq").render().$el);
+      }
+
+      $main
+        .append("<h1 class='page-header'>Public Themes</h1>")
         .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
 
     , your_themes: function () {
-      var collection = new Themes(app.currentUser.get("themes"));
+      var collection = app.currentUser.get("themes");
 
       $("#main").empty()
         .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
@@ -620,16 +1078,6 @@ window.require.define({"router": function(exports, require, module) {
       var themeView = app.createView("theme", {themeID: id});
 
       $("#main").empty().append(themeView.render().$el);
-
-      // Add theme class to body
-      $("body").addClass("theme");
-
-      // Remove body class when navigating away from this route
-      Backbone.history.on("route", function (e, name) {
-        if (name !== "theme") {
-          $("body").removeClass("theme");
-        }
-      });
     }
 
     , editor: function (id) {
@@ -640,42 +1088,30 @@ window.require.define({"router": function(exports, require, module) {
 
       // Initialize editor view
       app.createView("editor").render();
-
-      // Setup drag and drop and resize
-      app.createView("layout").render();
     }
 
     , login: function () {
-      // Remove all modals and show the 'login' one
-      // We could use modal("hide") here but it would trigger
-      // events which we don't want
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.createView("login").render().$el.modal("show"));
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("login").render().$el.modal("show"));
     }
 
     , register: function () {
-      // Remove all modals and show the 'register' one
-      // We could use modal("hide") here but it would trigger
-      // events which we don't want
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.createView("register").render().$el.modal("show"));
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("register").render().$el.modal("show"));
     }
 
     , reset_password: function () {
-      // Remove all modals and show the 'reset_password' one
-      // We could use modal("hide") here but it would trigger
-      // events which we don't want
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.createView("password_reset").render().$el.modal("show"));
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("password_reset").render().$el.modal("show"));
     }
 
     , upload: function () {
-      $("body").removeClass("modal-open")
-        .find(".modal, .modal-backdrop").remove().end()
-        .append(app.createView("theme_upload").render().$el.modal("show"));
+      $(".modal").modal("hide");
+
+      $("body").append(app.createView("theme_upload").render().$el.modal("show"));
     }
 
     , notFound: function () {
@@ -722,7 +1158,11 @@ window.require.define({"views/auth_links": function(exports, require, module) {
         , url: "/session"
         , complete: function (jqXHR, textStatus) {
           if (textStatus === "success") {
-            window.location = "/";
+            sessionStorage.clear();
+
+            setTimeout(function () {
+              window.location = "/";
+            });
           }
         }.bind(this)
       });
@@ -749,14 +1189,12 @@ window.require.define({"views/base/view": function(exports, require, module) {
 window.require.define({"views/block_insert": function(exports, require, module) {
   // Display list of blocks to insert
   var View = require("views/base/view")
-    , Blocks = require("collections/blocks")
-    , app = require("application")
-    , idIncrement = 1;
+    , app = require("application");
 
   module.exports = View.extend({
       id: "x-block-insert"
     , className: "x-section"
-    , collection: app.blocks
+    , collection: app.editor.blocks
 
     , events: {
         "draginit #x-block-insert .x-drag": "dragInit"
@@ -764,7 +1202,11 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , initialize: function () {
+      _.bindAll(this, "makeMutable");
+
       this.collection.on("reset", this.addAll, this);
+
+      app.on("mutations:started", this.makeMutable);
     }
 
     , render: function () {
@@ -777,8 +1219,8 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , addOne: function (block) {
-      this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>\
-                          <span>&Dagger;</span> " + block.label() + "</span></li>");
+      this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
+                          "<span>&Dagger;</span> " + block.label() + "</span></li>");
     }
 
     , addAll: function () {
@@ -797,14 +1239,13 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     // If the element is inserted in a row,
     // load the actual template chuck to insert
     , dragEnd: function (e, drag) {
-      if (drag.element.parent().hasClass("row")) {
-        var block = this.collection.getByCid(drag.element.data("cid"));
+      var block = this.collection.getByCid(drag.element.data("cid"));
 
-        drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
-          + block.className() + "'>" + block.get("build") + "</div>";
+      app.trigger("block:inserted", block, drag.element);
+    }
 
-        idIncrement++;
-      }
+    , makeMutable: function (pieces) {
+      pieces.blocks = this.collection;
     }
   });
   
@@ -821,11 +1262,6 @@ window.require.define({"views/download_button": function(exports, require, modul
     , events: {
         "click button.x-download": "download"
       , "click button.x-login": "login"
-    }
-
-    , initialize: function () {
-      this.regions = app.regions;
-      this.templates = app.templates;
     }
 
     , render: function () {
@@ -847,26 +1283,14 @@ window.require.define({"views/download_button": function(exports, require, modul
     }
 
     , download: function (e) {
-      var attrs, regions, templates;
+      var attrs = _.clone(app.data.theme);
 
-      regions = _.map(this.regions.models, function (region) {
-        return _.pick(region.attributes, "_id", "name", "slug", "template");
-      });
-
-      templates = _.map(this.templates.models, function (template) {
-        return _.pick(template.attributes, "_id", "name", "template");
-      });
-
-      attrs = _.extend(app.data.theme, {
-          regions: regions
-        , templates: templates
-      });
       e.target.setAttribute("disabled", "true");
       e.target.innerHTML = "Baking... Please wait.";
 
       app.trigger("download:before", attrs);
 
-      (new Theme).save(attrs, {
+      (new Theme()).save(attrs, {
         success: function (theme) {
           // Add Iframe with archive URL as src to trigger download
           var $iframe = $("#download-iframe", window.top.document);
@@ -881,7 +1305,7 @@ window.require.define({"views/download_button": function(exports, require, modul
           e.target.removeAttribute("disabled");
           e.target.innerHTML = "Download Theme";
 
-          app.trigger("download:after");
+          app.trigger("download:after", theme);
 
           window.top.Backbone.history.navigate("/themes/" + theme.id, true);
         }
@@ -901,12 +1325,13 @@ window.require.define({"views/download_button": function(exports, require, modul
 
 window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
-    , View = require("views/base/view");
+    , View = require("views/base/view")
+    , data = require("lib/editor_data");
 
   module.exports = View.extend({
-    el: "<div id='x-layout-editor'>\
-        <div class='x-handle'></div>\
-        </div>"
+    el: "<div id='x-layout-editor'>" +
+        "<div class='x-handle'></div>" +
+        "</div>"
 
     , events: {
         "draginit #x-layout-editor .x-handle": "dragInit"
@@ -914,8 +1339,24 @@ window.require.define({"views/editor": function(exports, require, module) {
       , "click h4": "showSection"
     }
 
-    // Show editor when "templateLoaded" event is triggered
+    , initialize: function () {
+      _.extend(app.editor, {
+          preview_only: !!app.data.preview_only
+        , templates: data.templates
+        , regions: data.regions
+        , blocks: data.blocks
+        , style: data.style
+      });
+    }
+
+    // Show editor when "template:loaded" event is triggered
     , render: function () {
+      var regionsView = app.reuseView("regions")
+        , blocksView = app.reuseView("block_insert")
+        , styleView = app.reuseView("style_edit")
+        , shareView = app.reuseView("share_link")
+        , downloadView = app.reuseView("download_button");
+
       this.$el
         .children(".x-handle").empty()
           .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
@@ -923,19 +1364,22 @@ window.require.define({"views/editor": function(exports, require, module) {
         .append("<h4>Current Template <span>&and;</span></h4>")
         .append(app.reuseView("templates").render().$el);
 
-      if (app.data.preview_only !== true) {
+      if (!app.editor.preview_only) {
         this.$el
           .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
-          .append(app.reuseView("regions").render().$el)
+          .append(regionsView.render().$el)
           .append("<h4>Page Elements <span>&or;</span></h4>")
-          .append(app.reuseView("block_insert").render().$el)
+          .append(blocksView.render().$el)
           .append("<h4>Style <span>&or;</span></h4>")
-          .append(app.reuseView("style_edit").render().$el)
+          .append(styleView.render().$el)
           .append("<h4>Share <span>&or;</span></h4>")
-          .append(app.reuseView("share_link").render().$el)
-          .append(app.reuseView("download_button").render().$el);
+          .append(shareView.render().$el)
+          .append(downloadView.render().$el);
 
         app.reuseView("mutations");
+
+        // Setup drag and drop and resize
+        app.createView("layout").render();
 
         this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
       }
@@ -986,7 +1430,8 @@ window.require.define({"views/faq": function(exports, require, module) {
 window.require.define({"views/layout": function(exports, require, module) {
   var totalColumnsWidth, isRowFull
     , View = require("views/base/view")
-    , app = require("application");
+    , app = require("application")
+    , idIncrement = 1;
 
   // Return total width of all columns children of a row
   // except the one being dragged
@@ -1004,9 +1449,7 @@ window.require.define({"views/layout": function(exports, require, module) {
   // Does total width of all columns children of a drop row
   // allow a new column?
   isRowFull = function (dropElement, dragElement) {
-    var rowWidth = $(dropElement).width();
-
-    return rowWidth <= totalColumnsWidth(dropElement, dragElement);
+    return $(dropElement).width() <= totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
   };
 
   module.exports = View.extend({
@@ -1046,12 +1489,14 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "addDataBypass", "removeDataBypass");
+      _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
 
       this.addDataBypass();
       app.on("download:before", this.removeDataBypass);
       app.on("download:after", this.addDataBypass);
       app.on("download:error", this.addDataBypass);
+
+      app.on("block:inserted", this.insertColumn);
     }
 
     , removeDataBypass: function () {
@@ -1078,7 +1523,7 @@ window.require.define({"views/layout": function(exports, require, module) {
       var $column = $(e.currentTarget);
 
       this.$(".columns.x-current").removeClass("x-current");
-      $column.addClass("x-current")
+      $column.addClass("x-current");
 
       if ($column.children(".x-resize").length === 0) {
         $column.html(function (i, html) {
@@ -1141,7 +1586,8 @@ window.require.define({"views/layout": function(exports, require, module) {
       $dragParent = $drag.parent();
 
       if (isRowFull($drop, $drag)) {
-        $row = $("<div class='row'></div>").insertAfter($drop);
+        $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
+        idIncrement++;
       } else {
         $row = $drop;
       }
@@ -1152,8 +1598,8 @@ window.require.define({"views/layout": function(exports, require, module) {
       if ($dragParent.children().length === 0 ) {
         $dragGrandParent = $dragParent.parent();
 
-        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1)
-            && $dragParent.attr("id").indexOf("x-") !== 0) {
+        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
+            $dragParent.attr("id").indexOf("x-") !== 0) {
           $dragParent.addClass("x-empty");
         } else {
           $dragParent.remove();
@@ -1186,7 +1632,7 @@ window.require.define({"views/layout": function(exports, require, module) {
         width = $row.width() - totalColumnsWidth($row, $column);
         // When width is a float, calculation is incorrect because browsers use integers
         // The following line fixes that. Replace as soon as you find a cleaner solution
-        width = width - 1
+        width = width - 1;
         e.preventDefault();
       }
 
@@ -1207,8 +1653,24 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     // Remove column if confirmed.
     , removeColumn: function (e) {
+      var grandParentNode = e.currentTarget.parentNode.parentNode;
+
       if (confirm("Are you sure you want to remove this element?")) {
-        $(e.currentTarget).parent().remove();
+        if (grandParentNode.children.length === 1) {
+          $(grandParentNode).remove();
+        } else {
+          $(e.currentTarget.parentNode).remove();
+        }
+      }
+    }
+
+    // Insert column when a block is dragged into the layout.
+    , insertColumn: function (block, element) {
+      if (element.parent().hasClass("row")) {
+        element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns " +
+          block.className() + "'>" + block.get("build") + "</div>";
+
+        idIncrement++;
       }
     }
   });
@@ -1297,19 +1759,18 @@ window.require.define({"views/login": function(exports, require, module) {
 
 window.require.define({"views/mutations": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application")
-    , idIncrement = 1; // For temporary ids when inserting rows.
+    , app = require("application");
 
   module.exports = View.extend({
     initialize: function () {
       _.bindAll(this);
       window.addEventListener("DOMContentLoaded", this.observeMutations);
 
-      app.on("templateLoad", this.stopObserving);
-      app.on("templateLoaded", this.restartObserving);
+      app.on("template:load", this.stopObserving);
+      app.on("template:loaded", this.restartObserving);
 
-      app.on("regionLoad", this.stopObserving);
-      app.on("regionLoaded", this.restartObserving);
+      app.on("region:load", this.stopObserving);
+      app.on("region:loaded", this.restartObserving);
     }
 
     , stopObserving: function () {
@@ -1326,6 +1787,10 @@ window.require.define({"views/mutations": function(exports, require, module) {
         , queries: [{all: true}]
         , callback: this.propagateMutations
       });
+
+      this.pieces = {};
+
+      app.trigger("mutations:started", this.pieces);
     }
 
     , propagateMutations: function (summaries) {
@@ -1336,15 +1801,23 @@ window.require.define({"views/mutations": function(exports, require, module) {
         return node.className && node.className.indexOf("column") !== -1;
       };
 
+      isRow = function (node) {
+        return node.className && node.className.indexOf("row") !== -1;
+      };
+
       summary.added.forEach(function (node) {
         if (isColumn(node)) {
-          this.addNode(node);
+          this.addNode(node, "column");
+        } else if (isRow(node)) {
+          this.addNode(node, "row");
         }
       }.bind(this));
 
       summary.removed.forEach(function (node) {
         if (isColumn(node)) {
-          this.removeNode(node, summary.getOldParentNode(node));
+          this.removeNode(node, summary.getOldParentNode(node), "column");
+        } else if (isRow(node)) {
+          this.removeNode(node, summary.getOldParentNode(node), "row");
         }
       }.bind(this));
 
@@ -1361,125 +1834,106 @@ window.require.define({"views/mutations": function(exports, require, module) {
       }.bind(this));
     }
 
-    , addNode: function (node) {
-      var grandParentNode, region, template, row, sandbox, block, blockClassName, sibling, templateClone;
+    , addNode: function (node, type) {
+      var topNode, region, template, parentNode, sandbox, block, sibling, templateClone;
 
-      // copy of the node that will be inserted
-      copy = node.cloneNode(true);
+      copy = node.cloneNode(false);
 
-      grandParentNode = node.parentNode.parentNode;
+      if (type === "column") {
+        topNode = node.parentNode.parentNode;
 
-      if (["HEADER", "FOOTER"].indexOf(grandParentNode.tagName) !== -1) {
-        piece = app.regions.getByName(grandParentNode.tagName.toLowerCase());
+        // Add corresponding Liquid tag in column node.
+        for (var i in this.pieces.blocks.models) {
+          block = this.pieces.blocks.models[i];
 
-        piece.set("build", grandParentNode.outerHTML);
-      } else {
-        piece = app.templates.getCurrent();
-
-        templateClone = window.document.getElementById("page").cloneNode(true);
-        $(templateClone).children("header, footer").remove();
-        piece.set("build", templateClone.innerHTML);
-      }
-
-      sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
-
-      // Get destination row.
-      row = sandbox.getElementById(node.parentNode.id);
-
-      // If the destination node doesn't exist in the template, create it.
-      if (!row) {
-        row = sandbox.createElement("div");
-        row.className = "row";
-        row.id = "y-" + idIncrement;
-        idIncrement++;
-
-        // Set the ID of the row the user sees
-        node.parentNode.id = row.id
-      }
-
-      // Replace node innerHTML by Handlebars tag
-      for (var i in app.blocks.models) {
-        block = app.blocks.models[i];
-
-        if (node.className.indexOf(block.className()) !== -1) {
-          copy.innerHTML = block.tag();
-          break;
-        }
-      }
-
-      // Insert the node in the row
-      if (node.nextElementSibling) {
-        sibling = sandbox.getElementById(node.nextElementSibling.id);
-        row.insertBefore(copy, sibling);
-      } else {
-        row.appendChild(copy);
-      }
-
-      // Insert the row in the template.
-      // If the next sibling of the node is the footer region,
-      // insert the row at the end.
-      if (node.parentNode.nextElementSibling) {
-        if ("FOOTER" === node.parentNode.nextElementSibling.tagName) {
-          sandbox.body.innerHTML = sandbox.body.innerHTML + row.outerHTML;
-        } else {
-          nextRow = sandbox.getElementById(node.parentNode.nextElementSibling.id);
-          if (nextRow.parentNode) {
-            nextRow.parentNode.insertBefore(row, nextRow);
+          if (node.className.indexOf(block.className()) !== -1) {
+            copy.innerHTML = block.tag();
+            break;
           }
         }
       } else {
-        sandbox.getElementById(grandParentNode.id).appendChild(row);
+        topNode = node.parentNode;
+      }
+
+      piece = this.getTemplatePiece(topNode);
+
+      sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
+
+      // Get parent destination.
+      parentNode = sandbox.getElementById(node.parentNode.id);
+
+      // Insert the node in the template.
+      // If the next sibling of the node is the footer region,
+      // insert the node at the end.
+      if (node.nextElementSibling) {
+        if ("FOOTER" === node.nextElementSibling.tagName) {
+          sandbox.body.innerHTML = sandbox.body.innerHTML + node.outerHTML;
+        } else {
+          nextNode = sandbox.getElementById(node.nextElementSibling.id);
+          if (nextNode.parentNode) {
+            nextNode.parentNode.insertBefore(copy, nextNode);
+          }
+        }
+      } else {
+        sandbox.getElementById(node.parentNode.id).appendChild(copy);
       }
 
       piece.set("template", sandbox.body.innerHTML);
     }
 
-    , removeNode: function (node, oldParentNode) {
-      var oldGrandParentNode, parentNode;
+    , removeNode: function (node, oldParentNode, type) {
+      var topNode;
 
-      oldGrandParentNode = oldParentNode.parentNode;
+      if (type === "column") {
+        topNode = oldParentNode.parentNode;
 
-      // If grandparent is header or footer, remove from corresponding region template.
-      // If not, remove from template
-      if (["HEADER", "FOOTER"].indexOf(oldGrandParentNode.tagName) !== -1) {
-        piece = app.regions.getByName(oldGrandParentNode.tagName.toLowerCase());
-
-        piece.set("build", oldGrandParentNode.outerHTML);
-      } else {
-        piece = app.templates.getCurrent();
-
-        templateClone = window.document.getElementById("page").cloneNode(true);
-        $(templateClone).children("header, footer").remove();
-        piece.set("build", templateClone.innerHTML);
-      }
-
-      sandbox = (new DOMParser).parseFromString(piece.get("template"), "text/html");
-
-      parentNode = sandbox.getElementById(oldParentNode.id);
-
-      // If parent node doesn't have anymore children, remove it
-      // If not, simply remove the node
-      if (oldParentNode.children.length === 0) {
-        if (parentNode.parentNode) {
-          parentNode.parentNode.removeChild(parentNode);
+        // If no topNode, it means the parent row has been removed as well.
+        if (topNode === null) {
+          return;
         }
-      } else {
-        parentNode.removeChild(sandbox.getElementById(node.id));
+      } else if (type === "row") {
+        topNode = oldParentNode;
       }
+
+      piece = this.getTemplatePiece(topNode);
+
+      sandbox = (new DOMParser()).parseFromString(piece.get("template"), "text/html");
+
+      copy = sandbox.getElementById(node.id);
+
+      copy.parentNode.removeChild(copy);
 
       piece.set("template", sandbox.body.innerHTML);
     }
 
     , reparentNode: function (node, oldParentNode) {
-      this.addNode(node);
+      this.addNode(node, "column");
       // Remove node if it was in a different region
       if (oldParentNode.parentNode !== null) {
-        this.removeNode(node, oldParentNode);
+        this.removeNode(node, oldParentNode, "column");
       }
     }
 
     , reorderNode: function (node, oldPreviousSibling) {
-      this.addNode(node);
+      this.addNode(node, "column");
+    }
+
+    , getTemplatePiece: function(topNode) {
+      var piece;
+
+      if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
+        piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
+
+        piece.set("build", topNode.outerHTML);
+      } else {
+        piece = this.pieces.templates.getCurrent();
+
+        templateClone = window.document.getElementById("page").cloneNode(true);
+        $(templateClone).children("header, footer").remove();
+        piece.set("build", templateClone.innerHTML);
+      }
+
+      return piece;
     }
   });
   
@@ -1605,7 +2059,7 @@ window.require.define({"views/regions": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-region-select"
     , className: "x-section"
-    , collection: app.regions
+    , collection: app.editor.regions
 
     , events: {
         "change .x-header-select, .x-footer-select": "switchRegion"
@@ -1613,9 +2067,13 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , initialize: function () {
-      this.template = app.templates.getCurrent();
+      _.bindAll(this, "buildDownload", "makeMutable", "addRegionsToTemplate");
 
       this.collection.on("add", this.addOne, this);
+
+      app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable);
+      app.on("template:load", this.addRegionsToTemplate);
     }
 
     , render: function () {
@@ -1656,17 +2114,14 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , loadRegion: function (region) {
-      var name = region.get("name")
-        , slug = region.get("slug");
+      var name = region.get("name");
 
-      app.trigger("regionLoad", region);
-
-      this.template.setRegion(name, slug);
+      app.trigger("region:load", region);
 
       $("#page").children(name)[0].outerHTML = region.get("build");
       $("#page").children(name).fadeOut().fadeIn();
 
-      app.trigger("regionLoaded", region);
+      app.trigger("region:loaded", region);
     }
 
     , addRegion: function (e) {
@@ -1706,6 +2161,25 @@ window.require.define({"views/regions": function(exports, require, module) {
         .children(":selected").removeAttr("selected").end()
         .children("[value='']")
           .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
+    }
+
+    , buildDownload: function (attributes) {
+      attributes.regions = _.map(this.collection.models, function (region) {
+        return _.pick(region.attributes, "_id", "name", "slug", "template");
+      });
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.regions = this.collection;
+    }
+
+    , addRegionsToTemplate: function (template) {
+      var regions = template.get("regions");
+
+      template.set("regions_attributes", {
+          header: this.collection.getByName("header", regions.header)
+        , footer: this.collection.getByName("footer", regions.footer)
+      });
     }
   });
   
@@ -1791,69 +2265,153 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
     , app = require("application")
-    , CustomCSS = require("lib/custom_css");
+    , html_tags = require("lib/html_tags");
 
   module.exports = View.extend({
       id: "x-style-edit"
     , className: "x-section"
 
     , events: {
-        "click button": "addInputs"
-      , "keyup input[name=value]": "addStyle"
-      , "blur input[name=value]": "addStyle"
-      , "change input[name=value]": "addStyle"
+        "change .x-element": "setSelector"
+      , "change .x-tag": "setTag"
+      , "click button": "addInputs"
+      , "keyup input": "addStyle"
+      , "blur input": "addStyle"
+      , "change input": "addStyle"
     }
 
     , initialize: function () {
-      _.bindAll(this, "setSelector", "buildDownload");
+      _.bindAll(this, "setColumn", "buildDownload");
 
-      app.on("editor:columnHighlight", this.setSelector);
+      app.on("editor:columnHighlight", this.setColumn);
       app.on("download:before", this.buildDownload);
 
-      this.customCSS = new CustomCSS(app.data.style);
+      this.selector = "body";
+      this.customCSS = app.editor.style;
     }
 
-    , setSelector: function (element) {
-      this.selector = "#" + element.id;
+    , setSelector: function (e) {
+      var val = $(e.target).val();
+
+      switch (val) {
+        case "body":
+        case "#page > header":
+        case "#page > footer":
+          this.selector = val;
+        break;
+
+        case "column":
+          this.selector = this.column;
+        break;
+      }
+
       this.render();
+    }
+
+    , setTag: function (e) {
+      this.tag = $(e.target).val();
+
+      this.render();
+    }
+
+    , setColumn: function (element) {
+      this.column = "#" + element.id;
+
+      if (this.$("select").val() === "column") {
+        this.selector = this.column;
+        this.render();
+      }
     }
 
     , render: function () {
       var rules;
 
-      if (!this.selector) {
-        this.$el.html("Click on an element in the design to customize it.");
-        return this;
+      if (this.tag) {
+        rules = this.customCSS.rules[this.selector + " " + this.tag];
+      } else {
+        rules = this.customCSS.rules[this.selector];
       }
 
-      rules = _.map(this.customCSS.rules[this.selector], function (rule, property) {
+      rules = _.map(rules, function (rule, property) {
         rule.property = property;
         return rule;
       });
 
       this.$el.html(template({
-          selector: this.selector
+          elements: this.elementOptions()
+        , htmlTags: this.tagOptions()
+        , selector: this.selector
         , rules: rules
       }));
 
+      if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
+        this.$(".x-choice").hide();
+      }
+
       return this;
+    }
+
+    , elementOptions: function () {
+      return [
+        {
+            label: "Whole Document"
+          , value: "body"
+          , selected: this.selector === "body" ? " selected" : ""
+        }
+        , {
+            label: "Header"
+          , value: "#page > header"
+          , selected: this.selector === "#page > header" ? " selected" : ""
+        }
+        , {
+            label: "Footer"
+          , value: "#page > footer"
+          , selected: this.selector === "#page > footer" ? " selected" : ""
+        }
+        , {
+            label: "Selected Element"
+          , value: "column"
+          , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
+        }
+      ];
+    }
+
+    , tagOptions: function () {
+      var _this = this;
+
+      return html_tags.map(function (group) {
+        group.tags = group.tags.map(function (tag) {
+          tag.selected = tag.tag === _this.tag ? " selected" : "";
+          return tag;
+        });
+        return group;
+      });
     }
 
     , addInputs: function (e) {
       e.preventDefault();
 
-      this.$("ul").append("<li><input name='property' value='' placeholder='property' />: \
-                          <input name='value' value='' placeholder='value' /></li>");
+      this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+                          "<input name='value' value='' placeholder='value' />" +
+                          "<input type='hidden' name='index' /></li>");
     }
 
     , addStyle: function (e) {
-      var property, value;
+      var selector, property, value, index
+        , $li = $(e.target).parent();
 
-      value = e.target.value;
+      selector = this.selector;
+      if (this.tag) {
+        selector += " " + this.tag;
+      }
 
-      property  = $(e.target).siblings("input[name=property]").val();
+      property  = $li.find("input[name=property]").val();
+      value  = $li.find("input[name=value]").val();
+      index  = $li.find("input[name=index]").val() || null;
 
-      this.customCSS.insertRule(this.selector, property, value);
+      index = this.customCSS.insertRule(selector, property, value, index);
+
+      $li.find("input[name=index]").val(index);
     }
 
     , buildDownload: function (attributes) {
@@ -1872,7 +2430,7 @@ window.require.define({"views/templates": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-templates-select"
     , className: "x-section"
-    , collection: app.templates
+    , collection: app.editor.templates
 
     , events: {
         "change ul input": "switchTemplate"
@@ -1885,25 +2443,38 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , initialize: function (options) {
+      _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
+
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
       this.collection.on("remove", this.removeOne, this);
+
+      app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable);
+      app.on("region:load", this.saveRegion);
     }
 
     , render: function () {
-      var standards = _.reject((new Template).standards, function (standard) {
+      var standards = _.reject((new Template()).standards, function (standard) {
         return !!this.collection.getByName(standard.name);
       }.bind(this));
 
-      this.$el.empty().append(template({standards: standards}));
+      this.$el.empty().append(template({
+          standards: standards
+        , edit: !app.editor.preview_only
+      }));
 
       this.collection.reset(this.collection.models);
+
+      this.loadTemplate(this.collection.getCurrent());
 
       return this;
     }
 
     , addOne: function (template) {
-      var checked = current = remove = "";
+      var checked = ""
+        , current = ""
+        , remove = "";
 
       if (template.cid === this.collection.getCurrent().cid) {
         checked = " checked='checked'";
@@ -1914,9 +2485,9 @@ window.require.define({"views/templates": function(exports, require, module) {
         remove = "<span class='x-remove' title='Delete template'>&times;</span>";
       }
 
-      this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
-                          + " type='radio' value='" + template.cid + "' />"
-                          + template.label() + "</label>" + remove + "</li>");
+      this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
+                          " type='radio' value='" + template.cid + "' />" +
+                          template.label() + "</label>" + remove + "</li>");
     }
 
     , addAll: function () {
@@ -1940,24 +2511,21 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.loadTemplate(template);
     }
 
-    // Save current template, display it and trigger templateLoaded event
+    // Save current template, display it and trigger template:loaded event
     , loadTemplate: function (template) {
-      var header, footer, regions;
+      var regions;
 
-      app.trigger("templateLoad", template);
+      app.trigger("template:load", template);
 
-      regions = template.get("regions");
+      regions = template.get("regions_attributes");
 
-      header = app.regions.getByName("header", regions.header);
-      footer = app.regions.getByName("footer", regions.footer);
-
-      build = header.get("build") + template.get("build") + footer.get("build");
+      build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
 
       $("#page").fadeOut().empty().append(build).fadeIn();
 
       this.collection.setCurrent(template);
 
-      app.trigger("templateLoaded", template);
+      app.trigger("template:loaded", template);
     }
 
     // Remove column if confirmed.
@@ -1989,8 +2557,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     , addTemplate: function () {
       var name, attributes, template;
 
-      name = this.$(".x-new-template-select select").val()
-                        || this.$(".x-new-template-name").val();
+      name = this.$(".x-new-template-select select").val() ||
+             this.$(".x-new-template-name").val();
 
       if (!name) {
         app.trigger("notification", "error", "Please, enter a template name.");
@@ -2007,6 +2575,20 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.render();
 
       app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
+    }
+
+    , buildDownload: function (attributes) {
+      attributes.templates = _.map(this.collection.models, function (template) {
+        return _.pick(template.attributes, "_id", "name", "template");
+      });
+    }
+
+    , makeMutable: function (pieces) {
+      pieces.templates = this.collection;
+    }
+
+    , saveRegion: function (region) {
+      this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
     }
   });
   
@@ -2047,7 +2629,7 @@ window.require.define({"views/templates/faq": function(exports, require, module)
     var foundHelper, self=this;
 
 
-    return "<div class=\"page-header\">\n  <h1>\n    Online Theme Editor\n    <small>exports to HTML and WordPress themes</small>\n  </h1>\n</div>\n<p class=\"lead\">Cook your <i class=\"icon-ok\"></i> standard compliant,\n<i class=\"icon-ok\"></i> responsive,  <i class=\"icon-ok\"></i> semantic,\n[<i class=\"icon-ok\"></i> insert any buzzword here ;)] <i class=\"icon-ok\"></i> HTML5 theme\nin a few minutes with our easy to use drag and drop editor.</p>\n<p>Start by choosing a preset theme below.\n(<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n<div id=\"faq\" class=\"collapse\">\n  <h3>Frequently Asked Questions</h3>\n  <h4>How it works?</h4>\n  <ul>\n    <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n    <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n    to the customizer where you can make edits until you are satisfied.</li>\n    <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n  </ul>\n  <h4>Something doesn't work. What should I do?</h4>\n  <p>It is our fault and we are sorry for that. This site is a work in progress and\n  we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n  and we will quickly find a solution.</p>\n\n  <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n</div>\n";});
+    return "<div class=\"page-header\">\n  <h1>\n    Online Theme Editor\n    <small>exports to HTML5 and WordPress themes</small>\n  </h1>\n</div>\n<p class=\"lead\">The future of website design is here, now, in your browser.\n<a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started</a></p>\n<p>The easiest to use online theme editor that churns out beautiful, standard compliant, responsive,<br />\nSEO-friendly, [ insert any buzzword here ;) ]  HTML5 and WordPress themes in minutes.</p>\n<p>Start by choosing a preset theme below.\n(<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n<div id=\"faq\" class=\"collapse\">\n  <h3>Frequently Asked Questions</h3>\n  <h4>How it works?</h4>\n  <ul>\n    <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n    <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n    to the customizer where you can make edits until you are satisfied.</li>\n    <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n  </ul>\n  <h4>Something doesn't work. What should I do?</h4>\n  <p>It is our fault and we are sorry for that. This site is a work in progress and\n  we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n  and we will quickly find a solution.</p>\n\n  <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
@@ -2056,7 +2638,7 @@ window.require.define({"views/templates/login": function(exports, require, modul
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"/reset_password\" data-replace=\"true\">Reset password</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"/reset_password\" data-dismiss=\"modal\">Reset password</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -2094,7 +2676,7 @@ window.require.define({"views/templates/password_reset": function(exports, requi
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">New Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Remember your password? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-replace=\"true\">Register</a></li>\n  </ul>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">New Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Remember your password? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/regions": function(exports, require, module) {
@@ -2164,7 +2746,7 @@ window.require.define({"views/templates/register": function(exports, require, mo
     var foundHelper, self=this;
 
 
-    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create an account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-replace=\"true\">Log in</a></li>\n  </ul>\n</div>\n";});
+    return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create an account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n  </ul>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/share_link": function(exports, require, module) {
@@ -2190,29 +2772,142 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n    <li><input name=\"property\" value=\"";
-    foundHelper = helpers.property;
-    stack1 = foundHelper || depth0.property;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />: <input name=\"value\" value=\"";
+    buffer += "\n    <option value=\"";
     foundHelper = helpers.value;
     stack1 = foundHelper || depth0.value;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" /></li>\n    ";
+    buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.selected;
+    stack1 = foundHelper || depth0.selected;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
-    buffer += "<form>\n  <p class=\"x-choice\">\n    <label>Current Element:</label>\n    <b>";
+  function program3(depth0,data) {
+    
+    var buffer = "", stack1, stack2;
+    buffer += "\n    <optgroup label=\"";
+    foundHelper = helpers.group;
+    stack1 = foundHelper || depth0.group;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "group", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      ";
+    foundHelper = helpers.tags;
+    stack1 = foundHelper || depth0.tags;
+    stack2 = helpers.each;
+    tmp1 = self.program(4, program4, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n    </optgroup>\n    ";
+    return buffer;}
+  function program4(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <option value=\"";
+    foundHelper = helpers.tag;
+    stack1 = foundHelper || depth0.tag;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "tag", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.selected;
+    stack1 = foundHelper || depth0.selected;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " (";
+    foundHelper = helpers.tag;
+    stack1 = foundHelper || depth0.tag;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "tag", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ")</option>\n      ";
+    return buffer;}
+
+  function program6(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  Selected Element: <b>";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  </p>\n  <ul class=\"x-rules\">\n    ";
+    buffer += escapeExpression(stack1) + "</b>\n  ";
+    return buffer;}
+
+  function program8(depth0,data) {
+    
+    
+    return "\n  Click on an element in the design to customize it.\n  ";}
+
+  function program10(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n    <li>\n      <input name=\"property\" value=\"";
+    foundHelper = helpers.property;
+    stack1 = foundHelper || depth0.property;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />:\n      <input name=\"value\" value=\"";
+    foundHelper = helpers.value;
+    stack1 = foundHelper || depth0.value;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n      <input type=\"hidden\" name=\"index\" value=\"";
+    foundHelper = helpers.index;
+    stack1 = foundHelper || depth0.index;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "index", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
+    return buffer;}
+
+    buffer += "<form>\n  <select class=\"x-element\">\n    ";
+    foundHelper = helpers.elements;
+    stack1 = foundHelper || depth0.elements;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </select>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    foundHelper = helpers.htmlTags;
+    stack1 = foundHelper || depth0.htmlTags;
+    stack2 = helpers.each;
+    tmp1 = self.program(3, program3, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </select>\n\n  <p class=\"x-choice\">\n  ";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    stack2 = helpers['if'];
+    tmp1 = self.program(6, program6, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(8, program8, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </p>\n\n  <ul class=\"x-rules\">\n    ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
+    tmp1 = self.program(10, program10, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -2229,6 +2924,21 @@ window.require.define({"views/templates/templates": function(exports, require, m
 
   function program1(depth0,data) {
     
+    var buffer = "", stack1, stack2;
+    buffer += "\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    foundHelper = helpers.standards;
+    stack1 = foundHelper || depth0.standards;
+    stack2 = helpers.each;
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    return buffer;}
+  function program2(depth0,data) {
+    
     var buffer = "", stack1;
     buffer += "\n      <option value=\"";
     foundHelper = helpers.name;
@@ -2243,17 +2953,17 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
-    foundHelper = helpers.standards;
-    stack1 = foundHelper || depth0.standards;
-    stack2 = helpers.each;
+    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n";
+    foundHelper = helpers.edit;
+    stack1 = foundHelper || depth0.edit;
+    stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    buffer += "\n";
     return buffer;});
 }});
 
@@ -2393,6 +3103,8 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $form.children(".alert-error").remove();
 
+      app.trigger("upload:before");
+
       $.ajax({
           type: "POST"
         , url: "/themes"
@@ -2402,16 +3114,21 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
           $("body").removeClass("modal-open")
             .find(".modal, .modal-backdrop").remove();
 
+          app.trigger("upload:after", data);
+
           app.trigger("notification", "success", "Your theme is uploaded and ready to be customized!");
 
           Backbone.history.navigate("/themes/" + data._id, true);
         }.bind(this)
 
         , error: function (jqXHR, textStatus, errorThrown) {
-          var response = JSON.parse(jqXHR.responseText);
+          var key
+            , response = JSON.parse(jqXHR.responseText);
 
-          for (i in response) {
-            $form.prepend("<p class='alert alert-error'>" + response[i] + "</p>");
+          for (key in response) {
+            if (response.hasOwnProperty(key)) {
+              $form.prepend("<p class='alert alert-error'>" + response[key] + "</p>");
+            }
           }
 
           button.removeAttribute("disabled");

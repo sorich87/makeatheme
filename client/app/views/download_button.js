@@ -10,11 +10,6 @@ module.exports = View.extend({
     , "click button.x-login": "login"
   }
 
-  , initialize: function () {
-    this.regions = app.regions;
-    this.templates = app.templates;
-  }
-
   , render: function () {
     var button;
 
@@ -34,26 +29,14 @@ module.exports = View.extend({
   }
 
   , download: function (e) {
-    var attrs, regions, templates;
+    var attrs = _.clone(app.data.theme);
 
-    regions = _.map(this.regions.models, function (region) {
-      return _.pick(region.attributes, "_id", "name", "slug", "template");
-    });
-
-    templates = _.map(this.templates.models, function (template) {
-      return _.pick(template.attributes, "_id", "name", "template");
-    });
-
-    attrs = _.extend(app.data.theme, {
-        regions: regions
-      , templates: templates
-    });
     e.target.setAttribute("disabled", "true");
     e.target.innerHTML = "Baking... Please wait.";
 
     app.trigger("download:before", attrs);
 
-    (new Theme).save(attrs, {
+    (new Theme()).save(attrs, {
       success: function (theme) {
         // Add Iframe with archive URL as src to trigger download
         var $iframe = $("#download-iframe", window.top.document);
@@ -68,7 +51,7 @@ module.exports = View.extend({
         e.target.removeAttribute("disabled");
         e.target.innerHTML = "Download Theme";
 
-        app.trigger("download:after");
+        app.trigger("download:after", theme);
 
         window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }

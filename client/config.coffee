@@ -5,8 +5,6 @@ exports.config =
 
   files:
     javascripts:
-      # Defines what file will be generated with `brunch generate`.
-      defaultExtension: 'js'
       # Describes how files will be compiled & joined together.
       # Available formats:
       # * 'outputFilePath'
@@ -25,6 +23,7 @@ exports.config =
           'vendor/scripts/jquery.js',
           'vendor/scripts/underscore.js',
           'vendor/scripts/backbone.js',
+          'vendor/scripts/backbone-history-browser.js',
           'vendor/scripts/backbone-validation.js',
           'vendor/scripts/backbone-validation-bootstrap.coffee',
 
@@ -47,7 +46,6 @@ exports.config =
         ]
 
     stylesheets:
-      defaultExtension: 'styl'
       joinTo:
         'stylesheets/app.css': /^(app(\/|\\)styles(\/|\\)(?!editor)|vendor)/
         'stylesheets/editor.css': /^app(\/|\\)styles(\/|\\)(?=editor)/
@@ -56,12 +54,7 @@ exports.config =
        after: ['vendor/styles/bootstrap/bootstrap-responsive.less']
 
     templates:
-      defaultExtension: 'hbs'
       joinTo: 'javascripts/app.js'
-
-  # Change this if you're using something other than backbone (e.g. 'ember').
-  # Content of files, generated with `brunch generate` depends on the setting.
-  # framework: 'backbone'
 
   # Settings of web server that will run with `brunch watch [--server]`.
   # server:
@@ -71,3 +64,12 @@ exports.config =
   #   port: 3333
   #   # Run even without `--server` option?
   #   run: yes
+
+  jshint:
+    pattern: /^app\/.*\.js$/
+    options:
+      bitwise: true
+      curly: true
+      laxcomma: true
+    globals:
+      jQuery: true

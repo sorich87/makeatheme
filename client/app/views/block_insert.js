@@ -1,13 +1,11 @@
 // Display list of blocks to insert
 var View = require("views/base/view")
-  , Blocks = require("collections/blocks")
-  , app = require("application")
-  , idIncrement = 1;
+  , app = require("application");
 
 module.exports = View.extend({
     id: "x-block-insert"
   , className: "x-section"
-  , collection: app.blocks
+  , collection: app.editor.blocks
 
   , events: {
       "draginit #x-block-insert .x-drag": "dragInit"
@@ -15,7 +13,11 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
+    _.bindAll(this, "makeMutable");
+
     this.collection.on("reset", this.addAll, this);
+
+    app.on("mutations:started", this.makeMutable);
   }
 
   , render: function () {
@@ -28,8 +30,8 @@ module.exports = View.extend({
   }
 
   , addOne: function (block) {
-    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>\
-                        <span>&Dagger;</span> " + block.label() + "</span></li>");
+    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
+                        "<span>&Dagger;</span> " + block.label() + "</span></li>");
   }
 
   , addAll: function () {
@@ -48,13 +50,12 @@ module.exports = View.extend({
   // If the element is inserted in a row,
   // load the actual template chuck to insert
   , dragEnd: function (e, drag) {
-    if (drag.element.parent().hasClass("row")) {
-      var block = this.collection.getByCid(drag.element.data("cid"));
+    var block = this.collection.getByCid(drag.element.data("cid"));
 
-      drag.element[0].outerHTML = "<div id='z-" + idIncrement + "' class='columns "
-        + block.className() + "'>" + block.get("build") + "</div>";
+    app.trigger("block:inserted", block, drag.element);
+  }
 
-      idIncrement++;
-    }
+  , makeMutable: function (pieces) {
+    pieces.blocks = this.collection;
   }
 });

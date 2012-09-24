@@ -1,11 +1,36 @@
 <form>
+  <select class="x-element">
+    {{#each elements}}
+    <option value="{{value}}"{{selected}}>{{label}}</option>
+    {{/each}}
+  </select>
+
+  <select class="x-tag">
+    <option value="">Every Tag</option>
+    {{#each htmlTags}}
+    <optgroup label="{{group}}">
+      {{#each tags}}
+      <option value="{{tag}}"{{selected}}>{{label}} ({{tag}})</option>
+      {{/each}}
+    </optgroup>
+    {{/each}}
+  </select>
+
   <p class="x-choice">
-    <label>Current Element:</label>
-    <b>{{selector}}</b>
+  {{#if selector}}
+  Selected Element: <b>{{selector}}</b>
+  {{else}}
+  Click on an element in the design to customize it.
+  {{/if}}
   </p>
+
   <ul class="x-rules">
     {{#each rules}}
-    <li><input name="property" value="{{property}}" />: <input name="value" value="{{value}}" /></li>
+    <li>
+      <input name="property" value="{{property}}" />:
+      <input name="value" value="{{value}}" />
+      <input type="hidden" name="index" value="{{index}}" />
+    </li>
     {{/each}}
   </ul>
   <button>Add custom style</button>

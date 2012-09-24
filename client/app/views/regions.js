@@ -6,7 +6,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-region-select"
   , className: "x-section"
-  , collection: app.regions
+  , collection: app.editor.regions
 
   , events: {
       "change .x-header-select, .x-footer-select": "switchRegion"
@@ -14,9 +14,13 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    this.template = app.templates.getCurrent();
+    _.bindAll(this, "buildDownload", "makeMutable", "addRegionsToTemplate");
 
     this.collection.on("add", this.addOne, this);
+
+    app.on("download:before", this.buildDownload);
+    app.on("mutations:started", this.makeMutable);
+    app.on("template:load", this.addRegionsToTemplate);
   }
 
   , render: function () {
@@ -57,17 +61,14 @@ module.exports = View.extend({
   }
 
   , loadRegion: function (region) {
-    var name = region.get("name")
-      , slug = region.get("slug");
+    var name = region.get("name");
 
-    app.trigger("regionLoad", region);
-
-    this.template.setRegion(name, slug);
+    app.trigger("region:load", region);
 
     $("#page").children(name)[0].outerHTML = region.get("build");
     $("#page").children(name).fadeOut().fadeIn();
 
-    app.trigger("regionLoaded", region);
+    app.trigger("region:loaded", region);
   }
 
   , addRegion: function (e) {
@@ -107,5 +108,24 @@ module.exports = View.extend({
       .children(":selected").removeAttr("selected").end()
       .children("[value='']")
         .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.regions = _.map(this.collection.models, function (region) {
+      return _.pick(region.attributes, "_id", "name", "slug", "template");
+    });
+  }
+
+  , makeMutable: function (pieces) {
+    pieces.regions = this.collection;
+  }
+
+  , addRegionsToTemplate: function (template) {
+    var regions = template.get("regions");
+
+    template.set("regions_attributes", {
+        header: this.collection.getByName("header", regions.header)
+      , footer: this.collection.getByName("footer", regions.footer)
+    });
   }
 });

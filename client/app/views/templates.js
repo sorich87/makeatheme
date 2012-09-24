@@ -6,7 +6,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-templates-select"
   , className: "x-section"
-  , collection: app.templates
+  , collection: app.editor.templates
 
   , events: {
       "change ul input": "switchTemplate"
@@ -19,25 +19,38 @@ module.exports = View.extend({
   }
 
   , initialize: function (options) {
+    _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
+
     this.collection.on("add", this.addOne, this);
     this.collection.on("reset", this.addAll, this);
     this.collection.on("remove", this.removeOne, this);
+
+    app.on("download:before", this.buildDownload);
+    app.on("mutations:started", this.makeMutable);
+    app.on("region:load", this.saveRegion);
   }
 
   , render: function () {
-    var standards = _.reject((new Template).standards, function (standard) {
+    var standards = _.reject((new Template()).standards, function (standard) {
       return !!this.collection.getByName(standard.name);
     }.bind(this));
 
-    this.$el.empty().append(template({standards: standards}));
+    this.$el.empty().append(template({
+        standards: standards
+      , edit: !app.editor.preview_only
+    }));
 
     this.collection.reset(this.collection.models);
+
+    this.loadTemplate(this.collection.getCurrent());
 
     return this;
   }
 
   , addOne: function (template) {
-    var checked = current = remove = "";
+    var checked = ""
+      , current = ""
+      , remove = "";
 
     if (template.cid === this.collection.getCurrent().cid) {
       checked = " checked='checked'";
@@ -48,9 +61,9 @@ module.exports = View.extend({
       remove = "<span class='x-remove' title='Delete template'>&times;</span>";
     }
 
-    this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked
-                        + " type='radio' value='" + template.cid + "' />"
-                        + template.label() + "</label>" + remove + "</li>");
+    this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
+                        " type='radio' value='" + template.cid + "' />" +
+                        template.label() + "</label>" + remove + "</li>");
   }
 
   , addAll: function () {
@@ -74,24 +87,21 @@ module.exports = View.extend({
     this.loadTemplate(template);
   }
 
-  // Save current template, display it and trigger templateLoaded event
+  // Save current template, display it and trigger template:loaded event
   , loadTemplate: function (template) {
-    var header, footer, regions;
+    var regions;
 
-    app.trigger("templateLoad", template);
+    app.trigger("template:load", template);
 
-    regions = template.get("regions");
+    regions = template.get("regions_attributes");
 
-    header = app.regions.getByName("header", regions.header);
-    footer = app.regions.getByName("footer", regions.footer);
-
-    build = header.get("build") + template.get("build") + footer.get("build");
+    build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
 
     $("#page").fadeOut().empty().append(build).fadeIn();
 
     this.collection.setCurrent(template);
 
-    app.trigger("templateLoaded", template);
+    app.trigger("template:loaded", template);
   }
 
   // Remove column if confirmed.
@@ -123,8 +133,8 @@ module.exports = View.extend({
   , addTemplate: function () {
     var name, attributes, template;
 
-    name = this.$(".x-new-template-select select").val()
-                      || this.$(".x-new-template-name").val();
+    name = this.$(".x-new-template-select select").val() ||
+           this.$(".x-new-template-name").val();
 
     if (!name) {
       app.trigger("notification", "error", "Please, enter a template name.");
@@ -141,5 +151,19 @@ module.exports = View.extend({
     this.render();
 
     app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.templates = _.map(this.collection.models, function (template) {
+      return _.pick(template.attributes, "_id", "name", "template");
+    });
+  }
+
+  , makeMutable: function (pieces) {
+    pieces.templates = this.collection;
+  }
+
+  , saveRegion: function (region) {
+    this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
   }
 });

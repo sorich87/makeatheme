@@ -99,7 +99,7 @@ class Theme
   end
 
   def fork(attributes={})
-    Theme.new(self.attributes.merge(:parent => self).merge(attributes))
+    Theme.new(self.attributes.merge(parent: self, listed: false).merge(attributes))
   end
 
   def fork!(attributes={})
@@ -108,13 +108,6 @@ class Theme
 
   def fork?
     !self.parent.nil?
-  end
-
-  # For now all fork are private which means they can be edited by the owner only.
-  # Very soon we will need to add permissions to selected users,
-  # and public forks which can be forked by anyone.
-  def private?
-    fork?
   end
 
   # Return what files are needed to build this customization
@@ -130,7 +123,7 @@ class Theme
 
   # Can the user only preview the theme or can he edit it
   def preview_only?(user)
-    !author?(user) && private?
+    !listed && !author?(user)
   end
 
   def slug
