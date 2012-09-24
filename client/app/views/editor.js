@@ -43,7 +43,7 @@ module.exports = View.extend({
       this.$el
         .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
         .append(regionsView.render().$el)
-        .append("<h4>Page Elements <span>&or;</span></h4>")
+        .append("<h4>Blocks <span>&or;</span></h4>")
         .append(blocksView.render().$el)
         .append("<h4>Style <span>&or;</span></h4>")
         .append(styleView.render().$el)
