@@ -1324,6 +1324,11 @@ window.require.define({"views/download_button": function(exports, require, modul
     , download: function (e) {
       var attrs = _.clone(app.data.theme);
 
+      if (app.editor.fork) {
+        attrs.parent_id = attrs._id;
+        attrs._id = null;
+      }
+
       e.target.setAttribute("disabled", "true");
       e.target.innerHTML = "Baking... Please wait.";
 
@@ -1346,7 +1351,7 @@ window.require.define({"views/download_button": function(exports, require, modul
 
           app.trigger("download:after", theme);
 
-          window.top.Backbone.history.navigate("/themes/" + theme.id, true);
+          window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
         }
         , error: function (theme, response) {
           app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");
@@ -1385,6 +1390,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         , regions: data.regions
         , blocks: data.blocks
         , style: data.style
+        , fork: this.options.fork
       });
     }
 
@@ -3342,7 +3348,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $.ajax({
           type: "POST"
-        , url: "/themes"
+        , url: "/theme_upload"
         , data: new FormData($form[0])
         , success: function (data, textStatus, jqXHR) {
           // Remove modal without evant

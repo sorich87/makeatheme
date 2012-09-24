@@ -24,7 +24,7 @@ module.exports = View.extend({
 
     $.ajax({
         type: "POST"
-      , url: "/themes"
+      , url: "/theme_upload"
       , data: new FormData($form[0])
       , success: function (data, textStatus, jqXHR) {
         // Remove modal without evant

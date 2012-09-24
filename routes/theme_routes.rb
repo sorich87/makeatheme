@@ -16,6 +16,37 @@ get '/themes/:id' do
   end
 end
 
+post '/themes' do
+  halt 401 unless authenticated?
+
+  params = JSON.parse(request.body.read, symbolize_names: true)
+
+  theme = Theme.unscoped.where(:id => params[:parent_id]).first
+
+  halt 404 if theme.nil?
+
+  halt 401 if theme.preview_only?(current_user)
+
+  theme = theme.fork({
+    :author => current_user
+  })
+
+  theme.regions = params[:regions].map { |region| Region.new(region) }
+  theme.templates = params[:templates].map { |template| Template.new(template) }
+  theme.style = params[:style]
+
+  if theme.save
+    generate_theme_screenshot(theme.reload)
+    theme.generate_archive!
+
+    status 201
+    respond_with theme
+  else
+    status 400
+    respond_with theme.errors
+  end
+end
+
 put '/themes/:id' do
   forbid and return unless authenticated?
 
@@ -23,11 +54,7 @@ put '/themes/:id' do
 
   status 404 and return if theme.nil?
 
-  forbid and return if theme.preview_only?(current_user)
-
-  theme = theme.fork({
-    :author => current_user
-  }) unless theme.author?(current_user)
+  forbid and return unless theme.author?(current_user)
 
   params = JSON.parse(request.body.read)
   theme.regions = params['regions'].map { |region| Region.new(region) }
@@ -46,7 +73,7 @@ put '/themes/:id' do
   end
 end
 
-post '/themes' do
+post '/theme_upload' do
   forbid and return unless authenticated?
 
   file = params[:file]
