@@ -68,10 +68,28 @@ post '/themes' do
   end
 end
 
-# Render a theme template with regions replaced
-# and dummy content inserted
-# Double render because regions contain tags
-get '/editor/:theme', provides: 'html' do
+get '/preview/:theme', provides: 'html' do
+  theme = Theme.unscoped.find(params[:theme])
+
+  # Return 404 if no theme found.
+  halt 404 unless theme
+
+  preview_only = theme.preview_only?(current_user)
+
+  pieces = theme_pieces(theme, !preview_only)
+
+  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
+  respond_with :editor,
+    theme: theme.to_json,
+    style: theme.style.to_json,
+    pieces: pieces.to_json,
+    static_files_dir: theme.static_files_dir,
+    preview_only: preview_only,
+    template: index[:full]
+end
+
+get '/editor/:theme/?:action?', provides: 'html' do
   theme = Theme.unscoped.find(params[:theme])
 
   # Return 404 if no theme found.

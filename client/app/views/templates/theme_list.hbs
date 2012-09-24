@@ -1,11 +1,13 @@
 <li class="span3">
   <div class="thumbnail">
-    <a href="/themes/{{_id}}"><img src="{{screenshot_uri}}" alt=""></a>
+    <a href="{{uri}}"><img src="{{screenshot_uri}}" alt=""></a>
     <div class="caption">
       <h4>{{name}}</h4>
+      {{#if author}}
       <p>by <a href="#">{{author}}</a></p>
+      {{/if}}
       <div>
-        <a class="btn btn-primary pull-right" href="/themes/{{_id}}"><i class="icon-pencil icon-white"></i> Customize</a>
+        <a class="btn btn-primary pull-right" href="{{uri}}"><i class="icon-pencil icon-white"></i> {{edit_text}}</a>
       </div>
     </div>
   </div>

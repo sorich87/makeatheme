@@ -2,7 +2,9 @@
 var Model = require("models/base/model");
 
 module.exports = Model.extend({
-  defaults: {
+    idAttribute: "_id"
+
+  , defaults: {
       name: ""
     , template: ""
     , build: ""
