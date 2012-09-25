@@ -29,6 +29,18 @@ module ThemeHelper
 
         locals[local_name] = piece[:build] = liquid(piece[:template], locals: locals)
 
+        if type == :templates
+          header = pieces[:regions].select { |r|
+            r[:name] == 'header' && r[:slug] == piece.regions[:header]
+          }[0]
+
+          footer = pieces[:regions].select { |r|
+            r[:name] == 'footer' && r[:slug] == piece.regions[:footer]
+          }[0]
+
+          piece[:full] = header[:build] + piece[:build] + footer[:build]
+        end
+
         pieces[type] << piece
       end
     end
@@ -37,6 +49,6 @@ module ThemeHelper
   end
 
   def generate_theme_screenshot(theme)
-    Resque.enqueue(Screenshot, theme.id, url("/editor/#{theme.id}"))
+    Resque.enqueue(Screenshot, theme.id, url("/preview/#{theme.id}"))
   end
 end

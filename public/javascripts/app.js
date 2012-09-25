@@ -846,7 +846,9 @@ window.require.define({"models/block": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-    defaults: {
+      idAttribute: "_id"
+
+    , defaults: {
         name: ""
       , template: ""
       , build: ""
@@ -873,7 +875,9 @@ window.require.define({"models/region": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-    defaults: {
+      idAttribute: "_id"
+
+    , defaults: {
         slug: ""
       , name: ""
       , template: ""
@@ -893,7 +897,9 @@ window.require.define({"models/template": function(exports, require, module) {
   var Model = require("models/base/model");
 
   module.exports = Model.extend({
-    defaults: {
+      idAttribute: "_id"
+
+    , defaults: {
         name: ""
       , template: ""
       , build: ""
@@ -1034,7 +1040,11 @@ window.require.define({"router": function(exports, require, module) {
         "": "index"
       , "me/themes": "your_themes"
       , "themes/:id": "theme"
-      , "editor/:file": "editor"
+      , "themes/:id/edit": "theme_edit"
+      , "themes/:id/fork": "theme_fork"
+      , "preview/:id": "preview"
+      , "editor/:id": "editor"
+      , "editor/:id/:fork": "editor"
       , "login": "login"
       , "register": "register"
       , "reset_password": "reset_password"
@@ -1075,19 +1085,45 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      var themeView = app.createView("theme", {themeID: id});
-
-      $("#main").empty().append(themeView.render().$el);
+      $("#main").empty().append(app.createView("theme", {
+          themeID: id
+        , route: "preview"
+      }).render().$el);
     }
 
-    , editor: function (id) {
+    , theme_edit: function (id) {
+      $("#main").empty().append(app.createView("theme", {
+          themeID: id
+        , route: "editor"
+        , action: "edit"
+      }).render().$el);
+    }
+
+    , theme_fork: function (id) {
+      $("#main").empty().append(app.createView("theme", {
+          themeID: id
+        , route: "editor"
+        , action: "fork"
+      }).render().$el);
+    }
+
+    , preview: function (id) {
+      if (app.data.theme === void 0) {
+        window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+        return;
+      }
+
+      app.createView("preview").render();
+    }
+
+    , editor: function (id, fork) {
       if (app.data.theme === void 0) {
         window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
         return;
       }
 
       // Initialize editor view
-      app.createView("editor").render();
+      app.createView("editor", {fork: !!fork}).render();
     }
 
     , login: function () {
@@ -1175,9 +1211,12 @@ window.require.define({"views/base/view": function(exports, require, module) {
   // Base class for all views.
   module.exports = Backbone.View.extend({
     render: function () {
-      // If template attribute is set, render the template
+      var data;
+
       if (this.template) {
-        this.$el.empty().append(require("views/templates/" + this.template)(this.data));
+        data = _.isFunction(this.data) ? this.data() : this.data;
+
+        this.$el.empty().append(require("views/templates/" + this.template)(data));
       }
 
       return this;
@@ -1285,6 +1324,11 @@ window.require.define({"views/download_button": function(exports, require, modul
     , download: function (e) {
       var attrs = _.clone(app.data.theme);
 
+      if (app.editor.fork) {
+        attrs.parent_id = attrs._id;
+        attrs._id = null;
+      }
+
       e.target.setAttribute("disabled", "true");
       e.target.innerHTML = "Baking... Please wait.";
 
@@ -1307,7 +1351,7 @@ window.require.define({"views/download_button": function(exports, require, modul
 
           app.trigger("download:after", theme);
 
-          window.top.Backbone.history.navigate("/themes/" + theme.id, true);
+          window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
         }
         , error: function (theme, response) {
           app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");
@@ -1346,6 +1390,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         , regions: data.regions
         , blocks: data.blocks
         , style: data.style
+        , fork: this.options.fork
       });
     }
 
@@ -2045,6 +2090,71 @@ window.require.define({"views/password_reset": function(exports, require, module
           }
         }.bind(this)
       });
+    }
+  });
+  
+}});
+
+window.require.define({"views/preview": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view")
+    , data = require("lib/editor_data");
+
+  module.exports = View.extend({
+    el: $("body")
+
+    , events: {
+        "draginit #x-layout-editor .x-handle": "dragInit"
+      , "dragmove #x-layout-editor .x-handle": "dragMove"
+      , "click a:not(#x-customize-button a)": "stopPropagation"
+      , "click #x-customize-button a": "loadEditor"
+    }
+
+    , initialize: function () {
+      _.extend(app.editor, {
+          preview_only: !!app.data.preview_only
+        , templates: data.templates
+        , regions: data.regions
+        , blocks: data.blocks
+        , style: data.style
+      });
+    }
+
+    // Show editor when "template:loaded" event is triggered
+    , render: function () {
+      var regionsView = app.reuseView("regions")
+        , downloadView = app.reuseView("download_button");
+
+      this.$el.append("<div id='x-layout-editor'>" +
+        "<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>" +
+        "<h4>Current Template <span>&and;</span></h4>" +
+        "</div>");
+
+      this.$("#x-layout-editor")
+        .append(app.reuseView("templates_select").render().$el)
+        .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize the Theme</a></div>");
+
+      return this;
+    }
+
+    // Drag the editor box
+    , dragInit: function (e, drag) {
+      var mouse = drag.mouseElementPosition;
+
+      drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+    }
+
+    // Keep the editor box above other elements when moving
+    , dragMove: function (e, drag) {
+      $(drag.element).parent().css("zIndex", 9999);
+    }
+
+    , stopPropagation: function () {
+      return false;
+    }
+
+    , loadEditor: function (e) {
+      window.top.Backbone.history.navigate(window.top.Backbone.history.fragment + "/fork", true);
     }
   });
   
@@ -2967,32 +3077,107 @@ window.require.define({"views/templates/templates": function(exports, require, m
     return buffer;});
 }});
 
-window.require.define({"views/templates/theme": function(exports, require, module) {
+window.require.define({"views/templates/templates_select": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-
-    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/editor/";
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <option value=\"";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
+    buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.selected;
+    stack1 = foundHelper || depth0.selected;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    buffer += escapeExpression(stack1) + ">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n  ";
+    return buffer;}
+
+    buffer += "<p>Click to change</p>\n<select>\n  ";
+    foundHelper = helpers.templates;
+    stack1 = foundHelper || depth0.templates;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n</select>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/theme": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "/";
+    foundHelper = helpers.action;
+    stack1 = foundHelper || depth0.action;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "action", { hash: {} }); }
+    buffer += escapeExpression(stack1);
+    return buffer;}
+
+    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/";
+    foundHelper = helpers.route;
+    stack1 = foundHelper || depth0.route;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "route", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "/";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1);
+    foundHelper = helpers.action;
+    stack1 = foundHelper || depth0.action;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
     return buffer;});
 }});
 
 window.require.define({"views/templates/theme_list": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-
-    buffer += "<li class=\"span3\">\n  <div class=\"thumbnail\">\n    <a href=\"/themes/";
-    foundHelper = helpers._id;
-    stack1 = foundHelper || depth0._id;
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <p>by <a href=\"#\">";
+    foundHelper = helpers.author;
+    stack1 = foundHelper || depth0.author;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "_id", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "author", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a></p>\n      ";
+    return buffer;}
+
+    buffer += "<li class=\"span3\">\n  <div class=\"thumbnail\">\n    <a href=\"";
+    foundHelper = helpers.uri;
+    stack1 = foundHelper || depth0.uri;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "uri", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\"><img src=\"";
     foundHelper = helpers.screenshot_uri;
     stack1 = foundHelper || depth0.screenshot_uri;
@@ -3003,17 +3188,27 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</h4>\n      <p>by <a href=\"#\">";
+    buffer += escapeExpression(stack1) + "</h4>\n      ";
     foundHelper = helpers.author;
     stack1 = foundHelper || depth0.author;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n      <div>\n        <a class=\"btn btn-primary pull-right\" href=\"";
+    foundHelper = helpers.uri;
+    stack1 = foundHelper || depth0.uri;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "author", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a></p>\n      <div>\n        <a class=\"btn btn-primary pull-right\" href=\"/themes/";
-    foundHelper = helpers._id;
-    stack1 = foundHelper || depth0._id;
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "uri", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\"><i class=\"icon-pencil icon-white\"></i> ";
+    foundHelper = helpers.edit_text;
+    stack1 = foundHelper || depth0.edit_text;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "_id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><i class=\"icon-pencil icon-white\"></i> Customize</a>\n      </div>\n    </div>\n  </div>\n</li>\n";
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "edit_text", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a>\n      </div>\n    </div>\n  </div>\n</li>\n";
     return buffer;});
 }});
 
@@ -3026,17 +3221,55 @@ window.require.define({"views/templates/theme_upload": function(exports, require
     return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\">Theme Archive</label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Upload Theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
 }});
 
+window.require.define({"views/templates_select": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application")
+    , Template = require("models/template")
+    , template = require("views/templates/templates");
+
+  module.exports = View.extend({
+      id: "x-templates-select"
+    , className: "x-section"
+    , template: "templates_select"
+    , collection: app.editor.templates
+
+    , data: {
+      templates: app.editor.templates.map(function (template) {
+        return {
+            id: template.id
+          , label: template.label()
+          , selected: template.get("name") === "index" ? " selected='selected'" : ""
+        };
+      })
+    }
+
+    , events: {
+      "change select": "switchTemplate"
+    }
+
+    , switchTemplate: function () {
+      var template = this.collection.get(this.$("select").val());
+
+      $("#page").fadeOut().empty()
+        .append(template.get("full"))
+        .fadeIn();
+    }
+  });
+  
+}});
+
 window.require.define({"views/theme": function(exports, require, module) {
   var View = require("views/base/view")
-    , template = require("views/templates/theme")
     , application = require("application");
 
   module.exports = View.extend({
-    render: function () {
-      this.$el.empty()
-        .append(template({id: this.options.themeID}));
-
-      return this;
+      template: "theme"
+    , data: function () {
+      return {
+          route: this.options.route
+        , id: this.options.themeID
+        , action: this.options.action || ""
+      };
     }
   });
   
@@ -3066,7 +3299,15 @@ window.require.define({"views/theme_list": function(exports, require, module) {
     }
 
     , addOne: function (theme) {
-      this.$el.append(template(theme.toJSON()));
+      var currentUserIsOwner = theme.get("author_id") === app.currentUser.id;
+
+      this.$el.append(template({
+          uri: "/themes/" + theme.id + (currentUserIsOwner ? "/edit": "")
+        , screenshot_uri: theme.get("screenshot_uri")
+        , name: theme.get("name")
+        , author: theme.get("author")
+        , edit_text: currentUserIsOwner ? "Edit" : "View & Customise"
+      }));
     }
 
     , addAll: function () {
@@ -3107,7 +3348,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $.ajax({
           type: "POST"
-        , url: "/themes"
+        , url: "/theme_upload"
         , data: new FormData($form[0])
         , success: function (data, textStatus, jqXHR) {
           // Remove modal without evant

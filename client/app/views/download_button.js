@@ -31,6 +31,11 @@ module.exports = View.extend({
   , download: function (e) {
     var attrs = _.clone(app.data.theme);
 
+    if (app.editor.fork) {
+      attrs.parent_id = attrs._id;
+      attrs._id = null;
+    }
+
     e.target.setAttribute("disabled", "true");
     e.target.innerHTML = "Baking... Please wait.";
 
@@ -53,7 +58,7 @@ module.exports = View.extend({
 
         app.trigger("download:after", theme);
 
-        window.top.Backbone.history.navigate("/themes/" + theme.id, true);
+        window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
       }
       , error: function (theme, response) {
         app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");

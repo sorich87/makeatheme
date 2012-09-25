@@ -21,7 +21,15 @@ module.exports = View.extend({
   }
 
   , addOne: function (theme) {
-    this.$el.append(template(theme.toJSON()));
+    var currentUserIsOwner = theme.get("author_id") === app.currentUser.id;
+
+    this.$el.append(template({
+        uri: "/themes/" + theme.id + (currentUserIsOwner ? "/edit": "")
+      , screenshot_uri: theme.get("screenshot_uri")
+      , name: theme.get("name")
+      , author: theme.get("author")
+      , edit_text: currentUserIsOwner ? "Edit" : "View & Customise"
+    }));
   }
 
   , addAll: function () {

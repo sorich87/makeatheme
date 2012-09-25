@@ -6,7 +6,11 @@ module.exports = Backbone.Router.extend({
       "": "index"
     , "me/themes": "your_themes"
     , "themes/:id": "theme"
-    , "editor/:file": "editor"
+    , "themes/:id/edit": "theme_edit"
+    , "themes/:id/fork": "theme_fork"
+    , "preview/:id": "preview"
+    , "editor/:id": "editor"
+    , "editor/:id/:fork": "editor"
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
@@ -47,19 +51,45 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
-    var themeView = app.createView("theme", {themeID: id});
-
-    $("#main").empty().append(themeView.render().$el);
+    $("#main").empty().append(app.createView("theme", {
+        themeID: id
+      , route: "preview"
+    }).render().$el);
   }
 
-  , editor: function (id) {
+  , theme_edit: function (id) {
+    $("#main").empty().append(app.createView("theme", {
+        themeID: id
+      , route: "editor"
+      , action: "edit"
+    }).render().$el);
+  }
+
+  , theme_fork: function (id) {
+    $("#main").empty().append(app.createView("theme", {
+        themeID: id
+      , route: "editor"
+      , action: "fork"
+    }).render().$el);
+  }
+
+  , preview: function (id) {
+    if (app.data.theme === void 0) {
+      window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+      return;
+    }
+
+    app.createView("preview").render();
+  }
+
+  , editor: function (id, fork) {
     if (app.data.theme === void 0) {
       window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
       return;
     }
 
     // Initialize editor view
-    app.createView("editor").render();
+    app.createView("editor", {fork: !!fork}).render();
   }
 
   , login: function () {

@@ -20,6 +20,7 @@ module.exports = View.extend({
       , regions: data.regions
       , blocks: data.blocks
       , style: data.style
+      , fork: this.options.fork
     });
   }
 
