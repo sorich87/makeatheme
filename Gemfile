@@ -17,12 +17,14 @@ gem "pony", "~> 1.4"
 gem 'nokogiri', '~> 1.5.0'
 gem 'liquid'
 gem 'resque', '~> 1.22.0'
-gem 'sinatra-reloader', '~> 1.0'
+
+group :development do
+  gem 'sinatra-reloader', '~> 1.0'
+end
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'
   # Automatic reload when editing files
-  gem 'shotgun'
   gem 'mongoid-rspec'
   gem 'database_cleaner'
   gem 'simplecov', :require => false
