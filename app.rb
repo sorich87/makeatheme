@@ -1,4 +1,5 @@
 require 'sinatra'
+require "sinatra/reloader" if development?
 
 $LOAD_PATH.unshift(settings.root)
 $LOAD_PATH.unshift(File.join(settings.root, 'lib'))
