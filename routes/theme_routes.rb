@@ -114,7 +114,7 @@ post '/theme_upload' do
   intermediate = ThemeUpload.new(
     archive: file[:tempfile],
     author: current_user,
-    url: url("/editor")
+    url: url("/preview")
   )
 
   if intermediate.valid?
