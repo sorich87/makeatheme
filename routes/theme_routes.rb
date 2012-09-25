@@ -73,6 +73,26 @@ put '/themes/:id' do
   end
 end
 
+post '/themes' do
+  forbid and return unless authenticated?
+
+  file = params[:file]
+  status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
+
+  intermediate = ThemeUpload.new(
+    :author => current_user, :archive => file[:tempfile],
+    :url => url("/editor"))
+
+  if intermediate.valid?
+    intermediate.save
+
+    status 204
+  else
+    status 400
+    respond_with intermediate.errors
+  end
+end
+
 post '/theme_upload' do
   forbid and return unless authenticated?
 

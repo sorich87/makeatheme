@@ -18,8 +18,23 @@ module ThemeImport
       theme.write_attributes(import.attributes)
 
       if theme.valid?
+        group = theme.build_theme_file_group
+
+        import.static_files.each do |static_file|
+          static_file = StaticThemeFile.new(
+            :file_name => static_file[:filename],
+            :file => static_file[:tempfile]
+          )
+          # Pass invalid files
+          if static_file.valid?
+            group.static_theme_files << static_file
+            theme.static_theme_files << static_file
+            static_file.save
+          end
+        end
+
+        group.save
         theme.save
-        Resque.enqueue(UploadThemeFiles, theme.id, import.static_files)
       end
       theme
     end
@@ -96,10 +111,8 @@ module ThemeImport
 
       @static_files << {
         :filename => entry.to_s,
-        :tempfile => tempfile.path
+        :tempfile => tempfile
       }
-
-      tempfile.close
     end
 
     def read_theme_info_file(entry)

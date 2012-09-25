@@ -9,6 +9,7 @@ $LOAD_PATH.unshift(File.join(settings.root, 'routes'))
 require 'sinatra/session'
 require 'sinatra/respond_with'
 require 'mongoid'
+require 'mongoid-grid_fs'
 require 'kaminari'
 require 'base64'
 require 'pony'
@@ -44,8 +45,7 @@ configure :test do
 end
 
 # Models
-require 'theme'
-require 'store_user'
+Dir["models/*.rb"].each {|file| require file}
 
 # Classes
 require 'defaults'
