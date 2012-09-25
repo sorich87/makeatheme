@@ -103,7 +103,8 @@ window.require.define({"application": function(exports, require, module) {
       this.editor = {};
 
       // Listen to events coming from server and trigger them here
-      (new EventSource("/events")).onmessage = this.dispatchServerEvents.bind(this);
+      this.listenToServerEvents();
+      this.on("login", this.listenToServerEvents);
 
       // Prevent further modification of the application object
       Object.freeze(this);
@@ -143,6 +144,12 @@ window.require.define({"application": function(exports, require, module) {
       Backbone.history.on("route", function (router, name) {
         $("body")[0].className = name;
       });
+    }
+
+    , listenToServerEvents: function () {
+      if (this.currentUser.id) {
+        (new EventSource("/events/" + this.currentUser.id)).onmessage = this.dispatchServerEvents.bind(this);
+      }
     }
 
     , dispatchServerEvents: function (e) {
@@ -1196,6 +1203,8 @@ window.require.define({"views/auth_links": function(exports, require, module) {
           if (textStatus === "success") {
             sessionStorage.clear();
 
+            app.trigger("logout");
+
             setTimeout(function () {
               window.location = "/";
             });
@@ -1797,6 +1806,8 @@ window.require.define({"views/login": function(exports, require, module) {
           switch (textStatus) {
             case "success":
               this.model.set(response);
+
+              app.trigger("login");
 
               this.$el.modal("hide");
 

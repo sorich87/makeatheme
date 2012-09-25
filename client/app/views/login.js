@@ -57,6 +57,8 @@ module.exports = View.extend({
           case "success":
             this.model.set(response);
 
+            app.trigger("login");
+
             this.$el.modal("hide");
 
             app.trigger("notification", "success", "Welcome back, " + this.model.get("first_name") + ".");

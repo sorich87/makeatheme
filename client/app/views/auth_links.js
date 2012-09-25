@@ -35,6 +35,8 @@ module.exports = View.extend({
         if (textStatus === "success") {
           sessionStorage.clear();
 
+          app.trigger("logout");
+
           setTimeout(function () {
             window.location = "/";
           });
