@@ -86,6 +86,7 @@
   font-size: 13px;
   font-weight: normal;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 18px;
 }
 #x-layout-editor * {
   -webkit-box-sizing: border-box;
@@ -142,6 +143,8 @@
 }
 #x-layout-editor input {
   padding: 0 3px;
+  height: 18px;
+  line-height: 18px;
 }
 #x-layout-editor .x-pixels {
   width: 26px;
