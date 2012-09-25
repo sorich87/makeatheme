@@ -53,7 +53,9 @@ post '/themes' do
   file = params[:file]
   status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
 
-  intermediate = ThemeUpload.new(:author => current_user, :archive => file[:tempfile])
+  intermediate = ThemeUpload.new(
+    :author => current_user, :archive => file[:tempfile],
+    :url => url("/editor"))
 
   if intermediate.valid?
     intermediate.save

@@ -13,9 +13,11 @@ class ProcessTheme
       theme = Theme.create_from_zip(tempfile, author: intermediate.author)
       if theme.valid?
         theme.save
+
+        url = "#{intermediate.url}/#{theme.id}"
         intermediate.destroy
 
-        self.generate_screenshot(theme)
+        self.generate_screenshot(theme, url)
       else
         # TODO: Give user errors
       end
@@ -25,12 +27,11 @@ class ProcessTheme
     end
   end
 
-  def self.generate_screenshot(theme)
+  def self.generate_screenshot(theme, url)
     script = File.join(settings.root, 'script', 'rasterize.js')
 
     tmpdir = Dir.mktmpdir
     path = File.join(tmpdir, 'screenshot.png')
-    url = "127.0.0.1:9393/editor/#{theme.id}" # TODO: This is bad, yes.
 
     `phantomjs #{script} #{url} #{path}`
     if $?.to_i == 0
