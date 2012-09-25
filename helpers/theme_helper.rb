@@ -25,10 +25,20 @@ module ThemeHelper
           piece[:template] = template.to_html
         end
 
-        local_name = piece[:name]
+        # Build that will be displayed to users.
+        piece[:build] = liquid(piece[:template], locals: locals)
 
-        locals[local_name] = piece[:build] = liquid(piece[:template], locals: locals)
+        # Add data attribute to recognize regions in the build.
+        if type == :blocks
+          build = Nokogiri::HTML::DocumentFragment.parse(piece[:build])
+          build.xpath('*[1]').each do |node|
+            node['data-x-name'] = piece[:name]
+            node['data-x-id'] = "Default"
+          end
+          piece[:build] = build.to_html
+        end
 
+        # Add the header and footer to the template.
         if type == :templates
           header = pieces[:regions].select { |r|
             r[:name] == 'header' && r[:slug] == piece.regions[:header]
@@ -40,6 +50,9 @@ module ThemeHelper
 
           piece[:full] = header[:build] + piece[:build] + footer[:build]
         end
+
+        # Add build to locals for future replacements
+        locals[piece[:name]] = piece[:build]
 
         pieces[type] << piece
       end

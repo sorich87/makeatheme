@@ -1,3 +1,9 @@
+.x-current,
+.x-remove,
+.x-resize {
+  font-size: 12px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
 .columns.x-current {
   outline: 1px solid #1982d1;
   cursor: move;
@@ -37,6 +43,18 @@
 }
 .columns.x-current a {
   cursor: move;
+}
+.columns .x-name {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 2px 5px;
+  color: #1982d1;
+  background-color: lightYellow;
+  display: none;
+}
+.columns.x-current .x-name {
+  display: block;
 }
 .x-full:after,
 .x-empty:after {

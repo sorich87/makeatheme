@@ -1559,13 +1559,15 @@ window.require.define({"views/layout": function(exports, require, module) {
     // Remove .x-current from previously highlighted column and add to current one.
     // Add resize and delete handles to the column if they weren't there already.
     , highlightColumns: function (e) {
+      var $column, name, slug;
+
       if (this.currentAction !== null) {
         return;
       }
 
       app.trigger("editor:columnHighlight", e.currentTarget);
 
-      var $column = $(e.currentTarget);
+      $column = $(e.currentTarget);
 
       this.$(".columns.x-current").removeClass("x-current");
       $column.addClass("x-current");
@@ -1582,6 +1584,20 @@ window.require.define({"views/layout": function(exports, require, module) {
         });
       }
 
+      if ($column.children(".x-name").length === 0) {
+        name = $column.children(":first").data("x-name");
+        id = $column.children(":first").data("x-id");
+
+        if (!name || !id) {
+          return;
+        }
+
+        name = _.str.titleize(_.str.humanize(name));
+
+        $column.html(function (i, html) {
+          return html + "<div class='x-name'>" + id + " " + name + "</div>";
+        });
+      }
     }
 
     // Start drag and limit it to direct children of body.
