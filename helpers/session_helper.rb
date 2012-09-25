@@ -9,7 +9,7 @@ module SessionHelper
   end
 
   def forbid
-    status 401
+    halt 401
   end
 
   def authenticated?
