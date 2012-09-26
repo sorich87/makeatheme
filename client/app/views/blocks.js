@@ -17,7 +17,7 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "makeMutable");
+    _.bindAll(this, "makeMutable", "buildDownload");
 
     this.collection.on("reset", this.addAll, this);
     this.collection.on("add", this.addOne, this);
@@ -125,7 +125,7 @@ module.exports = View.extend({
   }
 
   , buildDownload: function (attributes) {
-    attributes.blocks = _.map(this.collection.models, function (template) {
+    attributes.blocks = _.map(this.collection.models, function (block) {
       return _.pick(block.attributes, "_id", "name", "label", "template");
     });
   }

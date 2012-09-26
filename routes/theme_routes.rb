@@ -31,6 +31,7 @@ post '/themes' do
     :author => current_user
   })
 
+  theme.blocks = params[:blocks].map { |block| Block.new(block) }
   theme.regions = params[:regions].map { |region| Region.new(region) }
   theme.templates = params[:templates].map { |template| Template.new(template) }
   theme.style = params[:style]
@@ -50,6 +51,8 @@ end
 put '/themes/:id' do
   forbid and return unless authenticated?
 
+  params = JSON.parse(request.body.read, symbolize_names: true)
+
   theme = Theme.unscoped.where(:id => params[:id]).first
 
   status 404 and return if theme.nil?
@@ -57,9 +60,10 @@ put '/themes/:id' do
   forbid and return unless theme.author?(current_user)
 
   params = JSON.parse(request.body.read)
-  theme.regions = params['regions'].map { |region| Region.new(region) }
-  theme.templates = params['templates'].map { |template| Template.new(template) }
-  theme.style = params['style']
+  theme.blocks = params[:blocks].map { |block| Block.new(block) }
+  theme.regions = params[:regions].map { |region| Region.new(region) }
+  theme.templates = params[:templates].map { |template| Template.new(template) }
+  theme.style = params[:style]
 
   if theme.save
     generate_theme_screenshot(theme.reload)
@@ -88,6 +92,7 @@ post '/themes' do
     :author => current_user
   })
 
+  theme.blocks = params[:blocks].map { |block| Block.new(block) }
   theme.regions = params[:regions].map { |region| Region.new(region) }
   theme.templates = params[:templates].map { |template| Template.new(template) }
   theme.style = params[:style]
