@@ -78,7 +78,7 @@ module.exports = View.extend({
   }
 
   , addBlock: function () {
-    var name, label, attributes, block;
+    var name, label, attributes, block, build;
 
     name = this.$(".x-new-block-select select").val();
     label = this.$(".x-new-block-name").val();
@@ -91,6 +91,12 @@ module.exports = View.extend({
     attributes = _.find(this.allBlocks, function (block) {
       return block.name === name;
     });
+
+    build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
+    build.firstChild.setAttribute("data-x-label", label);
+    build.firstChild.setAttribute("data-x-name", name);
+
+    attributes.build = build.outerHTML;
     attributes.label = label;
 
     this.collection.add(attributes);
