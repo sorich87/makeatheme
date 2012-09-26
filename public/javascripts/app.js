@@ -379,7 +379,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
         rule = rules[selector][property];
 
-        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", rule.index);
+        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", this.sheet.rules.length);
       }
     }
 
