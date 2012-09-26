@@ -111,16 +111,16 @@ module.exports = View.extend({
 
     if ($column.children(".x-name").length === 0) {
       name = $column.children(":first").data("x-name");
-      id = $column.children(":first").data("x-id");
+      label = $column.children(":first").data("x-label");
 
-      if (!name || !id) {
+      if (!name || !label) {
         return;
       }
 
-      name = _.str.titleize(_.str.humanize(name));
+      label = _.str.titleize(label + " " + _.str.humanize(name));
 
       $column.html(function (i, html) {
-        return html + "<div class='x-name'>" + id + " " + name + "</div>";
+        return html + "<div class='x-name'>" + label + "</div>";
       });
     }
   }

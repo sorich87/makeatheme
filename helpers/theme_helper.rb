@@ -1,4 +1,14 @@
 module ThemeHelper
+  # Return all available blocks with Liquid tags replaced
+  def all_blocks()
+    Defaults::HTML::BLOCKS.map do |name, template|
+      {
+        name: name.to_s,
+        template: template,
+        build: liquid(template, locals: Defaults::HTML::CONTENT)
+      }
+    end
+  end
 
   # Return theme blocks and regions with Liquid tags replaced
   def theme_pieces(theme, ensure_id = false)
@@ -33,7 +43,7 @@ module ThemeHelper
           build = Nokogiri::HTML::DocumentFragment.parse(piece[:build])
           build.xpath('*[1]').each do |node|
             node['data-x-name'] = piece[:name]
-            node['data-x-id'] = "Default"
+            node['data-x-label'] = "Default"
           end
           piece[:build] = build.to_html
         end

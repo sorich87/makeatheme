@@ -1,5 +1,6 @@
 // Display list of blocks to insert
 var View = require("views/base/view")
+  , template = require("views/templates/blocks")
   , app = require("application");
 
 module.exports = View.extend({
@@ -10,19 +11,26 @@ module.exports = View.extend({
   , events: {
       "draginit #x-block-insert .x-drag": "dragInit"
     , "dragend #x-block-insert .x-drag": "dragEnd"
+    , "click .x-new-block": "showForm"
+    , "click .x-new-block-add": "addBlock"
   }
 
   , initialize: function () {
     _.bindAll(this, "makeMutable");
 
     this.collection.on("reset", this.addAll, this);
+    this.collection.on("add", this.addOne, this);
 
     app.on("mutations:started", this.makeMutable);
+
+    this.allBlocks = _.map(app.data.blocks, function (block) {
+      block.label = _.str.titleize(_.str.humanize(block.name));
+      return block;
+    });
   }
 
   , render: function () {
-
-    this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
+    this.$el.empty().append(template({all: this.allBlocks}));
 
     this.collection.reset(this.collection.models);
 
@@ -57,5 +65,36 @@ module.exports = View.extend({
 
   , makeMutable: function (pieces) {
     pieces.blocks = this.collection;
+  }
+
+  , showForm: function (e) {
+    var $div = this.$(".x-new-block-select");
+
+    if ($div.is(":hidden")) {
+      $div.show("normal");
+    } else {
+      $div.hide("normal");
+    }
+  }
+
+  , addBlock: function () {
+    var name, label, attributes, block;
+
+    name = this.$(".x-new-block-select select").val();
+    label = this.$(".x-new-block-name").val();
+
+    if (!label) {
+      app.trigger("notification", "error", "Please, enter a block name.");
+      return;
+    }
+
+    attributes = _.find(this.allBlocks, function (block) {
+      return block.name === name;
+    });
+    attributes.label = label;
+
+    this.collection.add(attributes);
+
+    app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
   }
 });

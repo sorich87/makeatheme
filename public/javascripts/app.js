@@ -197,7 +197,13 @@ window.require.define({"collections/blocks": function(exports, require, module) 
     , Block = require("models/block");
 
   module.exports = Collection.extend({
-    model: Block
+      model: Block
+
+    , getByName: function (name) {
+      return this.find(function (block) {
+        return block.get("name") === name;
+      });
+    }
   });
   
 }});
@@ -862,16 +868,16 @@ window.require.define({"models/block": function(exports, require, module) {
     }
 
     , label: function () {
-      return _.str.humanize(this.get("name"));
+      return _.str.titleize(this.get("label") + " " + _.str.humanize(this.get("name")));
     }
 
     , className: function () {
       return this.get("name").replace("_", "-");
     }
 
-    // Return block Handlebars tag
+    // Return block Liquid tag
     , tag: function () {
-      return "{{ " + this.get("name") + " }}";
+      return "{{" + this.get("name") + "}}";
     }
   });
   
@@ -1234,9 +1240,10 @@ window.require.define({"views/base/view": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/block_insert": function(exports, require, module) {
+window.require.define({"views/blocks": function(exports, require, module) {
   // Display list of blocks to insert
   var View = require("views/base/view")
+    , template = require("views/templates/blocks")
     , app = require("application");
 
   module.exports = View.extend({
@@ -1247,19 +1254,26 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     , events: {
         "draginit #x-block-insert .x-drag": "dragInit"
       , "dragend #x-block-insert .x-drag": "dragEnd"
+      , "click .x-new-block": "showForm"
+      , "click .x-new-block-add": "addBlock"
     }
 
     , initialize: function () {
       _.bindAll(this, "makeMutable");
 
       this.collection.on("reset", this.addAll, this);
+      this.collection.on("add", this.addOne, this);
 
       app.on("mutations:started", this.makeMutable);
+
+      this.allBlocks = _.map(app.data.blocks, function (block) {
+        block.label = _.str.titleize(_.str.humanize(block.name));
+        return block;
+      });
     }
 
     , render: function () {
-
-      this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
+      this.$el.empty().append(template({all: this.allBlocks}));
 
       this.collection.reset(this.collection.models);
 
@@ -1294,6 +1308,37 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
     , makeMutable: function (pieces) {
       pieces.blocks = this.collection;
+    }
+
+    , showForm: function (e) {
+      var $div = this.$(".x-new-block-select");
+
+      if ($div.is(":hidden")) {
+        $div.show("normal");
+      } else {
+        $div.hide("normal");
+      }
+    }
+
+    , addBlock: function () {
+      var name, label, attributes, block;
+
+      name = this.$(".x-new-block-select select").val();
+      label = this.$(".x-new-block-name").val();
+
+      if (!label) {
+        app.trigger("notification", "error", "Please, enter a block name.");
+        return;
+      }
+
+      attributes = _.find(this.allBlocks, function (block) {
+        return block.name === name;
+      });
+      attributes.label = label;
+
+      this.collection.add(attributes);
+
+      app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
     }
   });
   
@@ -1406,7 +1451,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     // Show editor when "template:loaded" event is triggered
     , render: function () {
       var regionsView = app.reuseView("regions")
-        , blocksView = app.reuseView("block_insert")
+        , blocksView = app.reuseView("blocks")
         , styleView = app.reuseView("style_edit")
         , shareView = app.reuseView("share_link")
         , downloadView = app.reuseView("download_button");
@@ -1595,16 +1640,16 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       if ($column.children(".x-name").length === 0) {
         name = $column.children(":first").data("x-name");
-        id = $column.children(":first").data("x-id");
+        label = $column.children(":first").data("x-label");
 
-        if (!name || !id) {
+        if (!name || !label) {
           return;
         }
 
-        name = _.str.titleize(_.str.humanize(name));
+        label = _.str.titleize(label + " " + _.str.humanize(name));
 
         $column.html(function (i, html) {
-          return html + "<div class='x-name'>" + id + " " + name + "</div>";
+          return html + "<div class='x-name'>" + label + "</div>";
         });
       }
     }
@@ -2757,6 +2802,41 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/blocks": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <option value=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n      ";
+    return buffer;}
+
+    buffer += "<p>Drag and drop to insert</p>\n<ul class='x-rects'></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<div class=\"x-new-block-select\">\n  <label>Type:\n    <select>\n      ";
+    foundHelper = helpers.all;
+    stack1 = foundHelper || depth0.all;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n    </select>\n  </label>\n  <input class=\"x-new-block-name\" type=\"text\" value=\"\" placeholder=\"Name\" />\n  <button class=\"x-new-block-add\">Add</button>\n</div>\n";
     return buffer;});
 }});
 

@@ -71,6 +71,7 @@ class Theme
     Defaults::HTML::BLOCKS.map do |name, template|
       {
         name: name.to_s,
+        label: 'Default',
         template: template
       }
     end

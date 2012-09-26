@@ -144,36 +144,23 @@ get '/preview/:theme', provides: 'html' do
     pieces: pieces.to_json,
     static_files_dir: theme.static_files_dir,
     preview_only: preview_only,
-    template: index[:full]
+    template: index[:full],
+    blocks: nil
 end
 
 get '/editor/:theme/?:action?', provides: 'html' do
   theme = Theme.unscoped.find(params[:theme])
 
-  # Return 404 if no theme found.
   halt 404 unless theme
 
-  preview_only = theme.preview_only?(current_user)
-
-  pieces = theme_pieces(theme, !preview_only)
-
-  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
-
-  header = pieces[:regions].select { |r|
-    r[:name] == 'header' && r[:slug] == index.regions[:header]
-  }[0]
-
-  footer = pieces[:regions].select { |r|
-    r[:name] == 'footer' && r[:slug] == index.regions[:footer]
-  }[0]
-
-  template = header[:build] + index[:build] + footer[:build]
+  halt 401 unless params[:action] == 'fork' || theme.author?(current_user)
 
   respond_with :editor,
     theme: theme.to_json,
     style: theme.style.to_json,
-    pieces: pieces.to_json,
+    pieces: theme_pieces(theme, true).to_json,
     static_files_dir: theme.static_files_dir,
-    preview_only: preview_only,
-    template: template
+    blocks: all_blocks.to_json,
+    preview_only: nil,
+    template: nil
 end

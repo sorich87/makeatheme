@@ -27,7 +27,7 @@ module.exports = View.extend({
   // Show editor when "template:loaded" event is triggered
   , render: function () {
     var regionsView = app.reuseView("regions")
-      , blocksView = app.reuseView("block_insert")
+      , blocksView = app.reuseView("blocks")
       , styleView = app.reuseView("style_edit")
       , shareView = app.reuseView("share_link")
       , downloadView = app.reuseView("download_button");
