@@ -1256,6 +1256,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
       , "dragend #x-block-insert .x-drag": "dragEnd"
       , "click .x-new-block": "showForm"
       , "click .x-new-block-add": "addBlock"
+      , "click .x-remove": "removeBlock"
     }
 
     , initialize: function () {
@@ -1263,6 +1264,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       this.collection.on("reset", this.addAll, this);
       this.collection.on("add", this.addOne, this);
+      this.collection.on("remove", this.removeOne, this);
 
       app.on("mutations:started", this.makeMutable);
 
@@ -1281,8 +1283,14 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , addOne: function (block) {
+      var remove = "";
+
+      if (block.get("label") != "Default") {
+        remove = " <span class='x-remove' title='Delete block'>&times;</span>";
+      }
+
       this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
-                          "<span>&Dagger;</span> " + block.label() + "</span></li>");
+                          "<span>&Dagger;</span> " + block.label() + remove + "</span></li>");
     }
 
     , addAll: function () {
@@ -1291,6 +1299,10 @@ window.require.define({"views/blocks": function(exports, require, module) {
       _.each(this.collection.models, function (block) {
         this.addOne(block);
       }, this);
+    }
+
+    , removeOne: function (block) {
+      this.$("span[data-cid='" + block.cid + "']").closest("li").remove();
     }
 
     // Replace the drag element by its clone
@@ -1345,6 +1357,13 @@ window.require.define({"views/blocks": function(exports, require, module) {
       this.collection.add(attributes);
 
       app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
+    }
+
+    , removeBlock: function (e) {
+      if (confirm("Are you sure you want to delete this block?")) {
+        var cid = $(e.currentTarget).parent().data("cid");
+        this.collection.remove(cid);
+      }
     }
   });
   
