@@ -20,6 +20,12 @@ module.exports = Model.extend({
 
   // Return block Liquid tag
   , tag: function () {
-    return "{{" + this.get("name") + "}}";
+    var label = "";
+
+    if (this.get("label") !== "Default") {
+      label = " '" + this.get("label") + "'";
+    }
+
+    return "{{" + this.get("name") + label + "}}";
   }
 });

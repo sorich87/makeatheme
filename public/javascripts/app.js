@@ -877,7 +877,13 @@ window.require.define({"models/block": function(exports, require, module) {
 
     // Return block Liquid tag
     , tag: function () {
-      return "{{" + this.get("name") + "}}";
+      var label = "";
+
+      if (this.get("label") !== "Default") {
+        label = " '" + this.get("label") + "'";
+      }
+
+      return "{{" + this.get("name") + label + "}}";
     }
   });
   
@@ -1988,7 +1994,8 @@ window.require.define({"views/mutations": function(exports, require, module) {
         for (var i in this.pieces.blocks.models) {
           block = this.pieces.blocks.models[i];
 
-          if (node.className.indexOf(block.className()) !== -1) {
+          if (node.className.indexOf(block.className()) !== -1 &&
+              node.firstChild.getAttribute("data-x-label") === block.get("label")) {
             copy.innerHTML = block.tag();
             break;
           }
