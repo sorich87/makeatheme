@@ -36,8 +36,7 @@ post '/themes' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_screenshot(theme.reload)
-    theme.generate_archive!
+    generate_theme_archive(theme.reload)
 
     status 201
     respond_with theme
@@ -62,8 +61,7 @@ put '/themes/:id' do
   theme.style = params['style']
 
   if theme.save
-    generate_theme_screenshot(theme.reload)
-    theme.generate_archive!
+    generate_theme_archive(theme.reload)
 
     status 201
     respond_with theme
@@ -93,8 +91,7 @@ post '/themes' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_screenshot(theme.reload)
-    theme.generate_archive!
+    generate_theme_archive(theme.reload)
 
     status 201
     respond_with theme

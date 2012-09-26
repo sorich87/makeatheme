@@ -36,6 +36,6 @@ class ThemeUpload
   end
 
   def enqueue_processing!
-    Resque.enqueue(ProcessTheme, self.id)
+    Resque.enqueue(Jobs::ProcessTheme, self.id)
   end
 end

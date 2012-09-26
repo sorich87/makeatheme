@@ -61,7 +61,7 @@ module ThemeHelper
     pieces
   end
 
-  def generate_theme_screenshot(theme)
-    Resque.enqueue(ThemeScreenshot, theme.id, url("/preview/#{theme.id}"))
+  def generate_theme_archive(theme)
+    Resque.enqueue(Jobs::ThemeArchive, theme.id, url("/preview/#{theme.id}"))
   end
 end
