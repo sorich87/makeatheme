@@ -13,6 +13,7 @@ module ThemeImport
       theme = self.new(attributes)
       import = ThemeImport.new(zip_file)
 
+      theme.blocks = import.blocks
       theme.templates = import.templates
       theme.regions = import.regions
       theme.write_attributes(import.attributes)
@@ -118,6 +119,16 @@ module ThemeImport
     def read_theme_info_file(entry)
       entry.get_input_stream do |entry_file|
         @attributes = filter_attributes(YAML::load(entry_file.read).symbolize_keys)
+      end
+    end
+
+    def blocks
+      ::Defaults::HTML::BLOCKS.map do |name, template|
+        {
+          name: name.to_s,
+          label: 'Default',
+          template: template
+        }
       end
     end
 

@@ -24,6 +24,7 @@ module.exports = View.extend({
     this.collection.on("remove", this.removeOne, this);
 
     app.on("mutations:started", this.makeMutable);
+    app.on("download:before", this.buildDownload);
 
     this.allBlocks = _.map(app.data.blocks, function (block) {
       block.label = _.str.titleize(_.str.humanize(block.name));
@@ -121,5 +122,11 @@ module.exports = View.extend({
       var cid = $(e.currentTarget).parent().data("cid");
       this.collection.remove(cid);
     }
+  }
+
+  , buildDownload: function (attributes) {
+    attributes.blocks = _.map(this.collection.models, function (template) {
+      return _.pick(block.attributes, "_id", "name", "label", "template");
+    });
   }
 });

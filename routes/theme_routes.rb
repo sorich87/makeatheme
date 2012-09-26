@@ -160,7 +160,7 @@ get '/editor/:theme/?:action?', provides: 'html' do
     style: theme.style.to_json,
     pieces: theme_pieces(theme, true).to_json,
     static_files_dir: theme.static_files_dir,
-    blocks: all_blocks.to_json,
+    blocks: all_blocks(theme).to_json,
     preview_only: nil,
     template: nil
 end

@@ -1,10 +1,12 @@
 module Defaults
   module HTML
-    # Sample content for theme preview
-    CONTENT = {
-      site_title: 'Theme Preview',
-      site_description: 'Just another WordPress site'
-    }
+    def self.locals(theme)
+      {
+        site_title: 'Theme Preview',
+        site_description: 'Just another WordPress site',
+        header_image_url: theme.header_images.first.file.url
+      }
+    end
 
     BLOCKS = {
       header_image: %q(<a href="{{site_url}}">
