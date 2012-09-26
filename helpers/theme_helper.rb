@@ -62,6 +62,6 @@ module ThemeHelper
   end
 
   def generate_theme_screenshot(theme)
-    Resque.enqueue(Screenshot, theme.id, url("/preview/#{theme.id}"))
+    Resque.enqueue(ThemeScreenshot, theme.id, url("/preview/#{theme.id}"))
   end
 end

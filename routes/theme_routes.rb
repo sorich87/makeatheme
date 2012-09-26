@@ -74,22 +74,33 @@ put '/themes/:id' do
 end
 
 post '/themes' do
-  forbid and return unless authenticated?
+  halt 401 unless authenticated?
 
-  file = params[:file]
-  status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
+  params = JSON.parse(request.body.read, symbolize_names: true)
 
-  intermediate = ThemeUpload.new(
-    :author => current_user, :archive => file[:tempfile],
-    :url => url("/editor"))
+  theme = Theme.unscoped.where(:id => params[:parent_id]).first
 
-  if intermediate.valid?
-    intermediate.save
+  halt 404 if theme.nil?
 
-    status 204
+  halt 401 if theme.preview_only?(current_user)
+
+  theme = theme.fork({
+    :author => current_user
+  })
+
+  theme.regions = params[:regions].map { |region| Region.new(region) }
+  theme.templates = params[:templates].map { |template| Template.new(template) }
+  theme.style = params[:style]
+
+  if theme.save
+    generate_theme_screenshot(theme.reload)
+    theme.generate_archive!
+
+    status 201
+    respond_with theme
   else
     status 400
-    respond_with intermediate.errors
+    respond_with theme.errors
   end
 end
 
@@ -100,18 +111,18 @@ post '/theme_upload' do
 
   status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
 
-  theme = Theme.create_from_zip(file[:tempfile], author: current_user)
+  intermediate = ThemeUpload.new(
+    archive: file[:tempfile],
+    author: current_user,
+    url: url("/preview")
+  )
 
-  if theme.valid?
-    theme.save
-
-    #generate_theme_screenshot(theme)
-
-    status 201
-    respond_with theme
+  if intermediate.valid?
+    intermediate.save!
+    status 204
   else
     status 400
-    respond_with theme.errors
+    respond_with intermediate.errors
   end
 end
 
