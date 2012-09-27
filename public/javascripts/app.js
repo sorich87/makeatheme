@@ -347,14 +347,14 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   CustomCSS.prototype.insertRule = function (selector, property, value, index) {
-    if (!selector || !property || !value) {
-      return;
-    }
-
-    this.deleteRule(selector, property);
-
     if (index === null || index === void 0) {
       index = this.sheet.cssRules.length;
+    } else {
+      this.deleteRule(index);
+    }
+
+    if (!selector || !property || !value) {
+      return;
     }
 
     this.rules[selector] = this.rules[selector] || {};
@@ -404,18 +404,30 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     return this.rules[selector][property].value;
   };
 
-  CustomCSS.prototype.deleteRule = function (selector, property) {
-    if (!selector || !property) {
+  CustomCSS.prototype.deleteRule = function (index) {
+    var selector, property;
+
+    if (index === null || index === void 0) {
       return;
     }
 
-    if (!this.rules[selector] || !this.rules[selector][property]) {
-      return;
+    this.sheet.deleteRule(index);
+
+    for (selector in this.rules) {
+      if (!this.rules.hasOwnProperty(selector)) {
+        continue;
+      }
+
+      for (property in this.rules[selector]) {
+        if (!this.rules[selector].hasOwnProperty(property)) {
+          continue;
+        }
+
+        if (this.rules[selector][property].index === index) {
+          return delete this.rules[selector][property];
+        }
+      }
     }
-
-    this.sheet.deleteRule(this.rules[selector][property].index);
-
-    return delete this.rules[selector][property];
   };
 
   CustomCSS.prototype.toString = function () {
@@ -1832,7 +1844,8 @@ window.require.define({"views/layout": function(exports, require, module) {
 
 window.require.define({"views/login": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application");
+    , app = require("application")
+    , Themes = require("collections/themes");
 
   module.exports = View.extend({
       className: "modal"
@@ -1889,6 +1902,7 @@ window.require.define({"views/login": function(exports, require, module) {
           switch (textStatus) {
             case "success":
               this.model.set(response);
+              this.model.set("themes", new Themes(response.themes));
 
               app.trigger("login");
 

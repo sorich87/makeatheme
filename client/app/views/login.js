@@ -1,5 +1,6 @@
 var View = require("views/base/view")
-  , app = require("application");
+  , app = require("application")
+  , Themes = require("collections/themes");
 
 module.exports = View.extend({
     className: "modal"
@@ -56,6 +57,7 @@ module.exports = View.extend({
         switch (textStatus) {
           case "success":
             this.model.set(response);
+            this.model.set("themes", new Themes(response.themes));
 
             app.trigger("login");
 
