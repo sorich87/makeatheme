@@ -3,7 +3,7 @@ module Defaults
     # Sample content for theme preview
     CONTENT = {
       site_title: 'Theme Preview',
-      site_description: 'Just another WordPress site'
+      site_description: 'Just another beautiful design'
     }
 
     BLOCKS = {
