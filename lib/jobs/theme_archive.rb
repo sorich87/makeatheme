@@ -1,5 +1,7 @@
 module Jobs
   class ThemeArchive
+    include Resque::Plugins::UniqueJob
+
     @queue = :theme_archive
 
     def self.perform(theme_id, url)

@@ -1,5 +1,7 @@
 module Jobs
   class ProcessTheme
+    include Resque::Plugins::UniqueJob
+
     @queue = :process_theme
 
     def self.perform(intermediate_id)

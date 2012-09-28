@@ -18,6 +18,7 @@ require 'nokogiri'
 require 'liquid'
 require 'json'
 require 'resque'
+require 'resque-loner'
 
 Mongoid.load!("config/mongoid.yml")
 
