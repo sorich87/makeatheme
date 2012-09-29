@@ -17,11 +17,11 @@ end
 get '/themes/:id/download' do
   theme = Theme.unscoped.find(params[:id])
 
-  if theme and theme.archive.file?
-    redirect theme.archive.expiring_url
-  else
-    status 404
-  end
+  halt 404 unless theme && theme.archive.file?
+
+  halt 401 if theme.preview_only?(current_user)
+
+  redirect theme.archive.expiring_url
 end
 
 post '/themes' do
