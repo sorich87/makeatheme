@@ -1,6 +1,9 @@
+require 'resque-lock-timeout'
+
 module Jobs
   class ProcessTheme
     include Resque::Plugins::Status
+    extend Resque::Plugins::LockTimeout
 
     @queue = :process_theme
 
@@ -26,6 +29,10 @@ module Jobs
         tempfile.close
         tempfile.unlink
       end
+    end
+
+    def self.redis_lock_key(uuid, options = {})
+      ['lock', name, options.to_s].compact.join(':')
     end
   end
 end

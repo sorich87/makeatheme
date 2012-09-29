@@ -1,6 +1,9 @@
+require 'resque-lock-timeout'
+
 module Jobs
   class ThemeArchive
     include Resque::Plugins::Status
+    extend Resque::Plugins::LockTimeout
 
     @queue = :theme_archive
 
@@ -24,6 +27,10 @@ module Jobs
         # TODO: Add error to log
         # How to get some useful info form phantomjs?
       end
+    end
+
+    def self.redis_lock_key(uuid, options = {})
+      ['lock', name, options.to_s].compact.join(':')
     end
   end
 end
