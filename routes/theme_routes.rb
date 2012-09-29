@@ -7,10 +7,18 @@ end
 get '/themes/:id' do
   theme = Theme.unscoped.find(params[:id])
 
-  halt 404 unless theme
-
   if theme
     respond_with theme
+  else
+    status 404
+  end
+end
+
+get '/themes/:id/download' do
+  theme = Theme.unscoped.find(params[:id])
+
+  if theme and theme.archive.file?
+    redirect theme.archive.expiring_url
   else
     status 404
   end

@@ -1313,7 +1313,6 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
 window.require.define({"views/download_button": function(exports, require, module) {
   var View = require("views/base/view")
-    , Theme = require("models/theme")
     , app = require("application");
 
   module.exports = View.extend({
@@ -1343,46 +1342,17 @@ window.require.define({"views/download_button": function(exports, require, modul
     }
 
     , download: function (e) {
-      var attrs = _.clone(app.data.theme);
+      var $iframe = $("#download-iframe", window.top.document)
+        , url = "/themes/" + app.data.theme._id + "/download";
 
-      if (app.editor.fork) {
-        attrs.parent_id = attrs._id;
-        attrs._id = null;
+      e.preventDefault();
+
+      if ($iframe.length === 0) {
+        $iframe = $("<iframe id='download-iframe' width='0' height='0' src='" + url + "'></iframe>")
+          .appendTo($("body", window.top.document));
+      } else {
+        $iframe.attr("src", url);
       }
-
-      e.target.setAttribute("disabled", "true");
-      e.target.innerHTML = "Baking... Please wait.";
-
-      app.trigger("download:before", attrs);
-
-      (new Theme()).save(attrs, {
-        success: function (theme) {
-          // Add Iframe with archive URL as src to trigger download
-          var $iframe = $("#download-iframe", window.top.document);
-
-          if ($iframe.length === 0) {
-            $iframe = $("<iframe id='download-iframe' width='0' height='0' src='" + theme.get("archive") + "'></iframe>")
-              .appendTo($("body", window.top.document));
-          } else {
-            $iframe.attr("src", theme.get("archive"));
-          }
-
-          e.target.removeAttribute("disabled");
-          e.target.innerHTML = "Download Theme";
-
-          app.trigger("download:after", theme);
-
-          window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
-        }
-        , error: function (theme, response) {
-          app.trigger("notification", "error", "Sorry, we are unable to generate the theme archive. Please try again.");
-
-          e.target.removeAttribute("disabled");
-          e.target.innerHTML = "Download Theme";
-
-          app.trigger("download:error");
-        }
-      });
     }
   });
   
@@ -2163,17 +2133,21 @@ window.require.define({"views/preview": function(exports, require, module) {
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      var regionsView = app.reuseView("regions")
-        , downloadView = app.reuseView("download_button");
+      var $editor;
 
       this.$el.append("<div id='x-layout-editor'>" +
         "<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>" +
         "<h4>Current Template <span>&and;</span></h4>" +
         "</div>");
 
-      this.$("#x-layout-editor")
-        .append(app.reuseView("templates_select").render().$el)
-        .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize the Theme</a></div>");
+      $editor = this.$("#x-layout-editor");
+
+      $editor.append(app.reuseView("templates_select").render().$el)
+        .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize Theme</a></div>");
+
+      if (!app.editor.preview_only) {
+        $editor.append(app.reuseView("download_button").render().$el);
+      }
 
       return this;
     }

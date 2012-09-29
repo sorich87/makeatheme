@@ -24,17 +24,21 @@ module.exports = View.extend({
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    var regionsView = app.reuseView("regions")
-      , downloadView = app.reuseView("download_button");
+    var $editor;
 
     this.$el.append("<div id='x-layout-editor'>" +
       "<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>" +
       "<h4>Current Template <span>&and;</span></h4>" +
       "</div>");
 
-    this.$("#x-layout-editor")
-      .append(app.reuseView("templates_select").render().$el)
-      .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize the Theme</a></div>");
+    $editor = this.$("#x-layout-editor");
+
+    $editor.append(app.reuseView("templates_select").render().$el)
+      .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize Theme</a></div>");
+
+    if (!app.editor.preview_only) {
+      $editor.append(app.reuseView("download_button").render().$el);
+    }
 
     return this;
   }
