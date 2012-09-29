@@ -140,6 +140,8 @@ module ThemeArchive
     def insert_custom_style(f)
       f.puts "\n/* Custom Style */\n"
       @theme.style.each do |selector, rules|
+        next if rules.nil?
+
         f.puts "#{selector} {\n"
 
         rules.each do |property, rule|

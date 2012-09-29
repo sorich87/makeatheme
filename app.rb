@@ -19,14 +19,16 @@ require 'liquid'
 require 'json'
 require 'resque'
 require 'resque-loner'
+require 'resque-status'
+require 'resque/status_server'
 
 Mongoid.load!("config/mongoid.yml")
 
-# Load jobs
-Dir["lib/jobs/*.rb"].each {|file| require file }
-
 # Load initializers
 Dir["config/initializers/*.rb"].each {|file| require file }
+
+# Load jobs
+Dir["lib/jobs/*.rb"].each {|file| require file }
 
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true

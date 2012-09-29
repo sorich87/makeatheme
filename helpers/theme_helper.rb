@@ -62,6 +62,6 @@ module ThemeHelper
   end
 
   def generate_theme_archive(theme)
-    Resque.enqueue(Jobs::ThemeArchive, theme.id, url("/preview/#{theme.id}"))
+    Jobs::ThemeArchive.create(theme_id: theme.id, url: url("/preview/#{theme.id}"))
   end
 end

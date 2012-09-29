@@ -1,14 +1,14 @@
 module Jobs
   class ThemeArchive
-    include Resque::Plugins::UniqueJob
+    include Resque::Plugins::Status
 
     @queue = :theme_archive
 
-    def self.perform(theme_id, url)
-      theme = Theme.unscoped.where(id: theme_id).first
+    def perform
+      theme = Theme.unscoped.where(id: options['theme_id']).first
       return if theme.nil?
 
-      theme_url = "#{url}/#{theme.id}"
+      theme_url = "#{options['url']}/#{theme.id}"
       script = File.join(settings.root, 'script', 'rasterize.js')
 
       path = File.join(Dir.mktmpdir, 'screenshot.png')

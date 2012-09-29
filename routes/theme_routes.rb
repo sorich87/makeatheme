@@ -84,9 +84,8 @@ post '/theme_upload' do
     url: url("/preview")
   )
 
-  if intermediate.valid?
-    intermediate.save!
-    status 204
+  if intermediate.save
+    respond_with job_id: intermediate.job_id
   else
     status 400
     respond_with intermediate.errors
@@ -143,4 +142,18 @@ get '/editor/:theme/?:action?', provides: 'html' do
     static_files_dir: theme.static_files_dir,
     preview_only: preview_only,
     template: template
+end
+
+get '/jobs/:job_id', provides: 'text/event-stream' do
+  status = Resque::Plugins::Status::Hash.get(params[:job_id])
+
+  stream :keep_open do |out|
+    if status.completed?
+      out << "event: success\n"
+      out << "data: #{status.message}\n\n"
+    elsif status.failed?
+      out << "event: errors\n"
+      out << "data: #{status.message}\n\n"
+    end
+  end
 end

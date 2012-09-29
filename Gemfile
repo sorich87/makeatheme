@@ -18,6 +18,7 @@ gem 'nokogiri', '~> 1.5.0'
 gem 'liquid'
 gem 'resque', '~> 1.22.0'
 gem 'resque-loner', '~> 1.2.0'
+gem 'resque-status', '~> 0.3.3'
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'
