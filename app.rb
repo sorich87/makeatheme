@@ -37,14 +37,17 @@ set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/
 set :connections, {}
 
 configure :development do
+  set :domain, 'localhost:4567'
   require 'config/environments/development'
 end
 
 configure :production do
+  set :domain, 'www.thememy.com'
   require 'config/environments/production'
 end
 
 configure :test do
+  set :domain, 'localhost:4567'
   require 'config/environments/test'
 end
 

@@ -11,7 +11,7 @@ module Jobs
       theme = Theme.unscoped.where(id: options['theme_id']).first
       return if theme.nil?
 
-      theme_url = "#{options['url']}/#{theme.id}"
+      theme_url = "http://#{settings.domain}/#{theme.id}"
       script = File.join(settings.root, 'script', 'rasterize.js')
 
       path = File.join(Dir.mktmpdir, 'screenshot.png')
@@ -20,9 +20,12 @@ module Jobs
       if $?.to_i == 0
         File.open(path) do |file|
           theme.screenshot = file
+          theme.save
           theme.generate_archive!
         end
         File.delete(path)
+
+        completed theme.to_json
       else
         # TODO: Add error to log
         # How to get some useful info form phantomjs?

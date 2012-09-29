@@ -25,13 +25,13 @@ attrs = [
 
 attrs.each do |theme_attr|
   next if Theme.where(theme_attr).first
-  t = Theme.create_from_zip(theme_file, theme_attr)
+  theme = Theme.create_from_zip(theme_file, theme_attr)
 
-  if t.valid?
-    t.save
+  if theme.save
+    Jobs::ThemeArchive.create(theme_id: theme.id)
   else
     puts "Errors...:"
-    t.errors.each do |key, fault|
+    theme.errors.each do |key, fault|
       puts "\t#{key} #{fault}"
     end
   end

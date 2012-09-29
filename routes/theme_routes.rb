@@ -36,7 +36,7 @@ post '/themes' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_archive(theme.reload)
+    generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -61,7 +61,7 @@ put '/themes/:id' do
   theme.style = params['style']
 
   if theme.save
-    generate_theme_archive(theme.reload)
+    generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -81,7 +81,6 @@ post '/theme_upload' do
   intermediate = ThemeUpload.new(
     archive: file[:tempfile],
     author: current_user,
-    url: url("/preview")
   )
 
   if intermediate.save

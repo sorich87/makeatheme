@@ -18,7 +18,7 @@ module Jobs
         # Process and create the theme
         theme = Theme.create_from_zip(tempfile, author: intermediate.author)
         if theme.save
-          Jobs::ThemeArchive.create(theme_id: theme.id, url: intermediate.url)
+          Jobs::ThemeArchive.create(theme_id: theme.id)
           intermediate.destroy
 
           completed theme.to_json
