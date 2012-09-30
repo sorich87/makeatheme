@@ -3,10 +3,9 @@ class ThemeUpload
   include Mongoid::Timestamps
 
   field :archive_id, type: String
-  field :url, type: String
   belongs_to :author, :class_name => 'StoreUser'
 
-  attr_accessor :archive
+  attr_accessor :archive, :job_id
   validates_presence_of :archive, :nil => false
 
   before_save :save_to_gridfs
@@ -36,6 +35,6 @@ class ThemeUpload
   end
 
   def enqueue_processing!
-    Resque.enqueue(Jobs::ProcessTheme, self.id)
+    @job_id = Jobs::ProcessTheme.create(intermediate_id: self.id)
   end
 end

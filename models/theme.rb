@@ -23,7 +23,7 @@ class Theme
   field :description, type: String
   field :tags,        type: Array,      default: []
   field :listed,      type: Boolean,    default: false
-  field :style,       type: Hash
+  field :style,       type: Hash,       default: {}
   field :processed,   type: Boolean,    default: false
 
   default_scope where(listed: true)
@@ -84,8 +84,7 @@ class Theme
       :author => self.author.to_fullname,
       :author_id => self.author_id,
       :screenshot_uri => self.screenshot.url(:thumb),
-      :fork => self.fork?,
-      :archive => if self.archive.file? then self.archive.expiring_url else nil end
+      :fork => self.fork?
     }
   end
 

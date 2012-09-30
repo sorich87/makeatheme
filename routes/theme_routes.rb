@@ -7,13 +7,21 @@ end
 get '/themes/:id' do
   theme = Theme.unscoped.find(params[:id])
 
-  halt 404 unless theme
-
   if theme
     respond_with theme
   else
     status 404
   end
+end
+
+get '/themes/:id/download' do
+  theme = Theme.unscoped.find(params[:id])
+
+  halt 404 unless theme && theme.archive.file?
+
+  halt 401 if theme.preview_only?(current_user)
+
+  redirect theme.archive.expiring_url
 end
 
 post '/themes' do
@@ -37,7 +45,7 @@ post '/themes' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_archive(theme.reload)
+    generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -64,7 +72,7 @@ put '/themes/:id' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_archive(theme.reload)
+    generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -84,12 +92,10 @@ post '/theme_upload' do
   intermediate = ThemeUpload.new(
     archive: file[:tempfile],
     author: current_user,
-    url: url("/preview")
   )
 
-  if intermediate.valid?
-    intermediate.save!
-    status 204
+  if intermediate.save
+    respond_with job_id: intermediate.job_id
   else
     status 400
     respond_with intermediate.errors
@@ -133,4 +139,18 @@ get '/editor/:theme/?:action?', provides: 'html' do
     blocks: all_blocks(theme).to_json,
     preview_only: nil,
     template: nil
+end
+
+get '/jobs/:job_id', provides: 'text/event-stream' do
+  status = Resque::Plugins::Status::Hash.get(params[:job_id])
+
+  stream :keep_open do |out|
+    if status.completed?
+      out << "event: success\n"
+      out << "data: #{status.message}\n\n"
+    elsif status.failed?
+      out << "event: errors\n"
+      out << "data: #{status.message}\n\n"
+    end
+  end
 end
