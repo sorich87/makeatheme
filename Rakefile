@@ -18,8 +18,3 @@ namespace :db do
   task :reseed => [ "db:purge", "db:seed" ]
 
 end
-
-task "resque:setup" do
-  ENV['QUEUE'] ='*'
-  ENV['TERM_CHILD']='1'
-end

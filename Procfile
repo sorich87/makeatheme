@@ -1,2 +1,2 @@
 web: bundle exec ruby app.rb -p $PORT
-worker: bundle exec rake resque:work
+resque: env TERM_CHILD=1 QUEUE=* bundle exec rake resque:work
