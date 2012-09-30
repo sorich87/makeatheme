@@ -44,7 +44,7 @@ post '/themes' do
   theme.style = params[:style]
 
   if theme.save
-    generate_theme_archive(theme)
+    theme.archive_job_id = generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -69,7 +69,7 @@ put '/themes/:id' do
   theme.style = params['style']
 
   if theme.save
-    generate_theme_archive(theme)
+    theme.archive_job_id = generate_theme_archive(theme)
 
     status 201
     respond_with theme
@@ -153,6 +153,8 @@ end
 
 get '/jobs/:job_id', provides: 'text/event-stream' do
   status = Resque::Plugins::Status::Hash.get(params[:job_id])
+
+  return unless status
 
   stream :keep_open do |out|
     if status.completed?
