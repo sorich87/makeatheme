@@ -8,11 +8,11 @@ module SessionHelper
     @current_user ||= StoreUser.find(session[:user_id]) if session[:user_id]
   end
 
-  def forbid
-    halt 401
-  end
-
   def authenticated?
     !!current_user
+  end
+
+  def protect!
+    halt 401 unless authenticated?
   end
 end

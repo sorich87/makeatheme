@@ -64,4 +64,12 @@ module ThemeHelper
   def generate_theme_archive(theme)
     Jobs::ThemeArchive.create(theme_id: theme.id)
   end
+
+  # Load theme by id request parameter
+  # 404 if not found
+  def theme
+    @theme ||= Theme.unscoped.find(params[:id])
+    halt 404 unless @theme
+    @theme
+  end
 end

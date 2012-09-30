@@ -5,19 +5,11 @@ get '/themes' do
 end
 
 get '/themes/:id' do
-  theme = Theme.unscoped.find(params[:id])
-
-  if theme
-    respond_with theme
-  else
-    status 404
-  end
+  respond_with theme
 end
 
 get '/themes/:id/download' do
-  theme = Theme.unscoped.find(params[:id])
-
-  halt 404 unless theme && theme.archive.file?
+  halt 404 unless theme.archive.file?
 
   halt 401 if theme.preview_only?(current_user)
 
@@ -25,7 +17,7 @@ get '/themes/:id/download' do
 end
 
 post '/themes' do
-  halt 401 unless authenticated?
+  protect!
 
   params = JSON.parse(request.body.read, symbolize_names: true)
 
@@ -55,11 +47,7 @@ post '/themes' do
 end
 
 put '/themes/:id' do
-  halt 401 unless authenticated?
-
-  theme = Theme.unscoped.where(:id => params[:id]).first
-
-  halt 404 if theme.nil?
+  protect!
 
   halt 401 unless theme.author?(current_user)
 
@@ -80,7 +68,7 @@ put '/themes/:id' do
 end
 
 post '/theme_upload' do
-  forbid and return unless authenticated?
+  protect!
 
   file = params[:file]
 
@@ -99,12 +87,7 @@ post '/theme_upload' do
   end
 end
 
-get '/preview/:theme', provides: 'html' do
-  theme = Theme.unscoped.find(params[:theme])
-
-  # Return 404 if no theme found.
-  halt 404 unless theme
-
+get '/preview/:id', provides: 'html' do
   preview_only = theme.preview_only?(current_user)
 
   pieces = theme_pieces(theme, !preview_only)
@@ -120,12 +103,7 @@ get '/preview/:theme', provides: 'html' do
     template: index[:full]
 end
 
-get '/editor/:theme/?:action?', provides: 'html' do
-  theme = Theme.unscoped.find(params[:theme])
-
-  # Return 404 if no theme found.
-  halt 404 unless theme
-
+get '/editor/:id/?:action?', provides: 'html' do
   preview_only = theme.preview_only?(current_user)
 
   pieces = theme_pieces(theme, !preview_only)
