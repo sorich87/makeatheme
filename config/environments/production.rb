@@ -1,7 +1,6 @@
 Pony.options = {
   :via => :smtp,
   :via_options => {
-    :host           => 'app.push.ly',
     :address        => 'stmp.sendgrid.net',
     :port           => '587',
     :authentication => :plain,
