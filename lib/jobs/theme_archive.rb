@@ -1,4 +1,5 @@
 require 'resque-lock-timeout'
+require 'heroku-resque-auto-scale'
 
 module Jobs
   class ThemeArchive

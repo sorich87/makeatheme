@@ -19,8 +19,6 @@ require 'liquid'
 require 'json'
 require 'resque'
 require 'resque-status'
-require 'resque/status_server'
-require 'resque-lock-timeout'
 
 Mongoid.load!("config/mongoid.yml")
 
