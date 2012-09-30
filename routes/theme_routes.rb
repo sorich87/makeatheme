@@ -150,19 +150,3 @@ get '/editor/:theme/?:action?', provides: 'html' do
     preview_only: preview_only,
     template: template
 end
-
-get '/jobs/:job_id', provides: 'text/event-stream' do
-  status = Resque::Plugins::Status::Hash.get(params[:job_id])
-
-  return unless status
-
-  stream :keep_open do |out|
-    if status.completed?
-      out << "event: success\n"
-      out << "data: #{status.message}\n\n"
-    elsif status.failed?
-      out << "event: errors\n"
-      out << "data: #{status.message}\n\n"
-    end
-  end
-end
