@@ -1,3 +1,11 @@
+GIT
+  remote: https://github.com/mirthlab/heroku-resque-auto-scale.git
+  revision: 7e0660b535b58f3974ab69a394aa3065c58e4b10
+  specs:
+    heroku-resque-auto-scale (0.1.2)
+      heroku
+      resque (>= 1.10.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -22,6 +30,7 @@ GEM
     activesupport (3.2.7)
       i18n (~> 0.6)
       multi_json (~> 1.0)
+    addressable (2.3.2)
     arel (3.0.2)
     backports (2.6.4)
     bcrypt-ruby (3.0.1)
@@ -44,6 +53,14 @@ GEM
       nokogiri (~> 1.5.0)
       ruby-hmac
     formatador (0.2.3)
+    heroku (2.32.6)
+      heroku-api (~> 0.3.5)
+      launchy (>= 0.3.2)
+      netrc (~> 0.7.7)
+      rest-client (~> 1.6.1)
+      rubyzip
+    heroku-api (0.3.5)
+      excon (~> 0.16.1)
     hike (1.2.1)
     i18n (0.6.1)
     journey (1.0.4)
@@ -52,6 +69,8 @@ GEM
       actionpack (>= 3.0.0)
       activesupport (>= 3.0.0)
       railties (>= 3.0.0)
+    launchy (2.1.2)
+      addressable (~> 2.3)
     liquid (2.4.1)
     macaddr (1.6.1)
       systemu (~> 2.5.0)
@@ -77,6 +96,7 @@ GEM
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-ssh (2.5.2)
+    netrc (0.7.7)
     nokogiri (1.5.5)
     origin (1.0.8)
     paperclip (3.1.4)
@@ -124,6 +144,8 @@ GEM
       redisk (>= 0.2.1)
       resque (~> 1.19)
       uuid (~> 2.3)
+    rest-client (1.6.7)
+      mime-types (>= 1.16)
     rspec (2.11.0)
       rspec-core (~> 2.11.0)
       rspec-expectations (~> 2.11.0)
@@ -179,6 +201,7 @@ DEPENDENCIES
   bcrypt-ruby
   database_cleaner
   fog (~> 1.5.0)
+  heroku-resque-auto-scale!
   kaminari
   liquid
   mongoid (~> 3.0.0)
