@@ -30,6 +30,7 @@ module.exports = View.extend({
       , blocksView = app.reuseView("blocks")
       , styleView = app.reuseView("style_edit")
       , shareView = app.reuseView("share_link")
+      , saveView = app.reuseView("save_button")
       , downloadView = app.reuseView("download_button");
 
     this.$el
@@ -49,6 +50,7 @@ module.exports = View.extend({
         .append(styleView.render().$el)
         .append("<h4>Share <span>&or;</span></h4>")
         .append(shareView.render().$el)
+        .append(saveView.render().$el)
         .append(downloadView.render().$el);
 
       app.reuseView("mutations");

@@ -46,6 +46,8 @@ class Theme
   field :archive_file_size,    :type => Integer
   field :archive_updated_at,   :type => DateTime
 
+  attr_accessor :archive_job_id
+
   validates_presence_of [:name, :author, :description]
   validates_with ThemeValidator
 
@@ -84,7 +86,8 @@ class Theme
       :author => self.author.to_fullname,
       :author_id => self.author_id,
       :screenshot_uri => self.screenshot.url(:thumb),
-      :fork => self.fork?
+      :fork => self.fork?,
+      :archive_job_id => self.archive_job_id
     }
   end
 

@@ -9,6 +9,10 @@ module.exports = View.extend({
     , "click button.x-login": "login"
   }
 
+  , initialize: function () {
+    app.on("save:after", this.waitForArchive.bind(this));
+  }
+
   , render: function () {
     var button;
 
@@ -39,5 +43,29 @@ module.exports = View.extend({
     } else {
       $iframe.attr("src", url);
     }
+  }
+
+  , waitForArchive: function (theme) {
+    var button = this.$("button")[0]
+      , eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
+
+    button.setAttribute("disabled", "true");
+    button.innerHTML = "Rebuilding archive...";
+
+    eventSource.addEventListener("success", this.resetButton.bind(this), false);
+    eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
+  }
+
+  , resetButton: function () {
+    var button = this.$("button")[0];
+
+    button.removeAttribute("disabled");
+    button.innerHTML = "Download Theme";
+  }
+
+  , archiveErrors: function () {
+    this.resetButton();
+
+    app.trigger("notification", "error", "Error generating the theme archive");
   }
 });

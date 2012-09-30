@@ -82,14 +82,16 @@ module.exports = Backbone.Router.extend({
     app.createView("preview").render();
   }
 
-  , editor: function (id, fork) {
+  , editor: function (id, action) {
     if (app.data.theme === void 0) {
       window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
       return;
     }
 
     // Initialize editor view
-    app.createView("editor", {fork: !!fork}).render();
+    app.createView("editor", {
+      fork: action === "fork" ? true : false
+    }).render();
   }
 
   , login: function () {

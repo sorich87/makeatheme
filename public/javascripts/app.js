@@ -102,10 +102,6 @@ window.require.define({"application": function(exports, require, module) {
       // Holds editor settings and data
       this.editor = {};
 
-      // Listen to events coming from server and trigger them here
-      this.listenToServerEvents();
-      this.on("login", this.listenToServerEvents);
-
       // Prevent further modification of the application object
       Object.freeze(this);
     }
@@ -146,19 +142,6 @@ window.require.define({"application": function(exports, require, module) {
       });
     }
 
-    , listenToServerEvents: function () {
-      if (this.currentUser.id) {
-        (new EventSource("/events/" + this.currentUser.id)).onmessage = this.dispatchServerEvents.bind(this);
-      }
-    }
-
-    , dispatchServerEvents: function (e) {
-      var data = JSON.parse(e.data);
-
-      data.args.unshift(data.name);
-      this.trigger.apply(this, data.args);
-    }
-
     , setCurrentUser: function () {
       var User = require("models/user")
         , Themes = require("collections/themes");
@@ -171,7 +154,6 @@ window.require.define({"application": function(exports, require, module) {
       }
 
       this.on("upload:after", this.updateCurrentUserThemes);
-      this.on("download:after", this.updateCurrentUserThemes);
     }
 
     , updateCurrentUserThemes: function (theme) {
@@ -1147,14 +1129,16 @@ window.require.define({"router": function(exports, require, module) {
       app.createView("preview").render();
     }
 
-    , editor: function (id, fork) {
+    , editor: function (id, action) {
       if (app.data.theme === void 0) {
         window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
         return;
       }
 
       // Initialize editor view
-      app.createView("editor", {fork: !!fork}).render();
+      app.createView("editor", {
+        fork: action === "fork" ? true : false
+      }).render();
     }
 
     , login: function () {
@@ -1406,6 +1390,10 @@ window.require.define({"views/download_button": function(exports, require, modul
       , "click button.x-login": "login"
     }
 
+    , initialize: function () {
+      app.on("save:after", this.waitForArchive.bind(this));
+    }
+
     , render: function () {
       var button;
 
@@ -1436,6 +1424,30 @@ window.require.define({"views/download_button": function(exports, require, modul
       } else {
         $iframe.attr("src", url);
       }
+    }
+
+    , waitForArchive: function (theme) {
+      var button = this.$("button")[0]
+        , eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
+
+      button.setAttribute("disabled", "true");
+      button.innerHTML = "Rebuilding archive...";
+
+      eventSource.addEventListener("success", this.resetButton.bind(this), false);
+      eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
+    }
+
+    , resetButton: function () {
+      var button = this.$("button")[0];
+
+      button.removeAttribute("disabled");
+      button.innerHTML = "Download Theme";
+    }
+
+    , archiveErrors: function () {
+      this.resetButton();
+
+      app.trigger("notification", "error", "Error generating the theme archive");
     }
   });
   
@@ -1474,6 +1486,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         , blocksView = app.reuseView("blocks")
         , styleView = app.reuseView("style_edit")
         , shareView = app.reuseView("share_link")
+        , saveView = app.reuseView("save_button")
         , downloadView = app.reuseView("download_button");
 
       this.$el
@@ -1493,6 +1506,7 @@ window.require.define({"views/editor": function(exports, require, module) {
           .append(styleView.render().$el)
           .append("<h4>Share <span>&or;</span></h4>")
           .append(shareView.render().$el)
+          .append(saveView.render().$el)
           .append(downloadView.render().$el);
 
         app.reuseView("mutations");
@@ -1611,9 +1625,9 @@ window.require.define({"views/layout": function(exports, require, module) {
       _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
 
       this.addDataBypass();
-      app.on("download:before", this.removeDataBypass);
-      app.on("download:after", this.addDataBypass);
-      app.on("download:error", this.addDataBypass);
+      app.on("save:before", this.removeDataBypass);
+      app.on("save:after", this.addDataBypass);
+      app.on("save:error", this.addDataBypass);
 
       app.on("block:inserted", this.insertColumn);
     }
@@ -2276,11 +2290,11 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "buildDownload", "makeMutable", "addRegionsToTemplate");
+      _.bindAll(this, "addThemeAttributes", "makeMutable", "addRegionsToTemplate");
 
       this.collection.on("add", this.addOne, this);
 
-      app.on("download:before", this.buildDownload);
+      app.on("save:before", this.addThemeAttributes);
       app.on("mutations:started", this.makeMutable);
       app.on("template:load", this.addRegionsToTemplate);
     }
@@ -2372,7 +2386,7 @@ window.require.define({"views/regions": function(exports, require, module) {
           .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
     }
 
-    , buildDownload: function (attributes) {
+    , addThemeAttributes: function (attributes) {
       attributes.regions = _.map(this.collection.models, function (region) {
         return _.pick(region.attributes, "_id", "name", "slug", "template");
       });
@@ -2455,6 +2469,64 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/save_button": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application");
+
+  module.exports = View.extend({
+      id: "x-save-button"
+
+    , events: {
+      "click button.x-save": "save"
+    }
+
+    , render: function () {
+      var button;
+
+      if (app.currentUser.id) {
+        button = "<button class='x-btn x-btn-primary x-save'>Save Theme</button>";
+      }
+
+      this.$el.empty().append(button);
+
+      return this;
+    }
+
+    , save: function (e) {
+      var attrs = _.clone(app.data.theme);
+
+      if (app.editor.fork) {
+        attrs.parent_id = attrs._id;
+        attrs._id = null;
+      }
+
+      e.target.setAttribute("disabled", "true");
+
+      app.trigger("save:before", attrs);
+
+      app.currentUser.get("themes").create(attrs, {
+        success: function (theme) {
+          app.trigger("save:after", theme);
+
+          e.target.removeAttribute("disabled");
+
+          app.trigger("notification", "success", "Theme saved.");
+
+          window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
+        }
+        , error: function (theme, response) {
+          app.trigger("download:error");
+
+          e.target.removeAttribute("disabled");
+
+          app.trigger("notification", "error", "Unable to save the theme. Please try again.");
+        }
+      });
+    }
+  });
+  
+}});
+
 window.require.define({"views/share_link": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application");
@@ -2490,10 +2562,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "setColumn", "buildDownload");
+      _.bindAll(this, "setColumn", "addThemeAttributes");
 
       app.on("editor:columnHighlight", this.setColumn);
-      app.on("download:before", this.buildDownload);
+      app.on("save:before", this.addThemeAttributes);
 
       this.selector = "body";
       this.customCSS = app.editor.style;
@@ -2623,7 +2695,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       $li.find("input[name=index]").val(index);
     }
 
-    , buildDownload: function (attributes) {
+    , addThemeAttributes: function (attributes) {
       attributes.style = this.customCSS.rules;
     }
   });
@@ -2652,13 +2724,13 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , initialize: function (options) {
-      _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
+      _.bindAll(this, "addThemeAttributes", "makeMutable", "saveRegion");
 
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
       this.collection.on("remove", this.removeOne, this);
 
-      app.on("download:before", this.buildDownload);
+      app.on("save:before", this.addThemeAttributes);
       app.on("mutations:started", this.makeMutable);
       app.on("region:load", this.saveRegion);
     }
@@ -2786,7 +2858,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
     }
 
-    , buildDownload: function (attributes) {
+    , addThemeAttributes: function (attributes) {
       attributes.templates = _.map(this.collection.models, function (template) {
         return _.pick(template.attributes, "_id", "name", "template");
       });

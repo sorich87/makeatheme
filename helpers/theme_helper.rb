@@ -77,4 +77,52 @@ module ThemeHelper
   def generate_theme_archive(theme)
     Jobs::ThemeArchive.create(theme_id: theme.id)
   end
+
+  # Load theme by id request parameter
+  # 404 if not found
+  def theme
+    @theme ||= Theme.unscoped.find(params[:id])
+    halt 404 unless @theme
+    @theme
+  end
+
+  # Load editor template
+  def respond_with_editor!
+    preview_only = theme.preview_only?(current_user)
+
+    pieces = theme_pieces(theme, !preview_only)
+
+    index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
+    respond_with :editor,
+      theme: theme.to_json,
+      style: theme.style.to_json,
+      pieces: pieces.to_json,
+      static_files_dir: theme.static_files_dir,
+      blocks: all_blocks(theme).to_json,
+      preview_only: preview_only,
+      template: index[:full]
+  end
+
+  # Save or fork theme
+  def respond_with_saved_theme!(theme, attrs, fork_theme = false)
+    theme = theme.fork({
+      :author => current_user
+    }) if fork_theme
+
+    theme.blocks = params[:blocks].map { |block| Block.new(block) }
+    theme.regions = attrs[:regions].map { |region| Region.new(region) }
+    theme.templates = attrs[:templates].map { |template| Template.new(template) }
+    theme.style = attrs[:style]
+
+    if theme.save
+      theme.archive_job_id = generate_theme_archive(theme)
+
+      status 201
+      respond_with theme
+    else
+      status 400
+      respond_with theme.errors
+    end
+  end
 end

@@ -38,18 +38,17 @@ set :connections, {}
 
 configure :development do
   set :domain, 'localhost:4567'
-  require 'config/environments/development'
 end
 
 configure :production do
   set :domain, 'www.thememy.com'
-  require 'config/environments/production'
 end
 
 configure :test do
   set :domain, 'localhost:4567'
-  require 'config/environments/test'
 end
+
+require "config/environments/#{settings.environment}"
 
 # Models
 Dir["models/*.rb"].each {|file| require file}
@@ -67,32 +66,6 @@ require 'theme_helper'
 helpers ApplicationHelper, SessionHelper, ThemeHelper
 
 respond_to :html, :json
-
-# Send index content on 404 to html client so that it handles routing
-# Send 404 to other clients
-error 404 do
-  request.accept.each do |type|
-    case type
-    when 'text/html'
-      load_index
-    end
-  end
-end
-
-# Don't send 406 to html client
-error 406 do
-  request.accept.each do |type|
-    case type
-    when 'text/html'
-      load_index
-    end
-  end
-end
-
-# Load index
-get '/', provides: 'html' do
-  load_index
-end
 
 require 'application_routes'
 require 'session_routes'

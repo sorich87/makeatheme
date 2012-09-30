@@ -29,6 +29,7 @@ module Jobs
       else
         # TODO: Add error to log
         # How to get some useful info form phantomjs?
+        failed
       end
     end
 
