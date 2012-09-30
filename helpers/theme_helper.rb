@@ -72,4 +72,21 @@ module ThemeHelper
     halt 404 unless @theme
     @theme
   end
+
+  # Load editor template
+  def respond_with_editor!
+    preview_only = theme.preview_only?(current_user)
+
+    pieces = theme_pieces(theme, !preview_only)
+
+    index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
+    respond_with :editor,
+      theme: theme.to_json,
+      style: theme.style.to_json,
+      pieces: pieces.to_json,
+      static_files_dir: theme.static_files_dir,
+      preview_only: preview_only,
+      template: index[:full]
+  end
 end

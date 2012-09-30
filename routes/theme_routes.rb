@@ -88,43 +88,9 @@ post '/theme_upload' do
 end
 
 get '/preview/:id', provides: 'html' do
-  preview_only = theme.preview_only?(current_user)
-
-  pieces = theme_pieces(theme, !preview_only)
-
-  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
-
-  respond_with :editor,
-    theme: theme.to_json,
-    style: theme.style.to_json,
-    pieces: pieces.to_json,
-    static_files_dir: theme.static_files_dir,
-    preview_only: preview_only,
-    template: index[:full]
+  respond_with_editor!
 end
 
 get '/editor/:id/?:action?', provides: 'html' do
-  preview_only = theme.preview_only?(current_user)
-
-  pieces = theme_pieces(theme, !preview_only)
-
-  index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
-
-  header = pieces[:regions].select { |r|
-    r[:name] == 'header' && r[:slug] == index.regions[:header]
-  }[0]
-
-  footer = pieces[:regions].select { |r|
-    r[:name] == 'footer' && r[:slug] == index.regions[:footer]
-  }[0]
-
-  template = header[:build] + index[:build] + footer[:build]
-
-  respond_with :editor,
-    theme: theme.to_json,
-    style: theme.style.to_json,
-    pieces: pieces.to_json,
-    static_files_dir: theme.static_files_dir,
-    preview_only: preview_only,
-    template: template
+  respond_with_editor!
 end
