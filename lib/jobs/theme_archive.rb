@@ -4,6 +4,7 @@ module Jobs
   class ThemeArchive
     include Resque::Plugins::Status
     extend Resque::Plugins::LockTimeout
+    extend HerokuResqueAutoScale if settings.production?
 
     @queue = :theme_archive
 

@@ -4,6 +4,7 @@ module Jobs
   class ProcessTheme
     include Resque::Plugins::Status
     extend Resque::Plugins::LockTimeout
+    extend HerokuResqueAutoScale if settings.production?
 
     @queue = :process_theme
 
