@@ -89,4 +89,25 @@ module ThemeHelper
       preview_only: preview_only,
       template: index[:full]
   end
+
+  # Save or fork theme
+  def respond_with_saved_theme!(theme, attrs, fork_theme = false)
+    theme = theme.fork({
+      :author => current_user
+    }) if fork_theme
+
+    theme.regions = attrs[:regions].map { |region| Region.new(region) }
+    theme.templates = attrs[:templates].map { |template| Template.new(template) }
+    theme.style = attrs[:style]
+
+    if theme.save
+      theme.archive_job_id = generate_theme_archive(theme)
+
+      status 201
+      respond_with theme
+    else
+      status 400
+      respond_with theme.errors
+    end
+  end
 end

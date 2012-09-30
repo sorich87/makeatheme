@@ -21,29 +21,13 @@ post '/themes' do
 
   params = JSON.parse(request.body.read, symbolize_names: true)
 
-  theme = Theme.unscoped.where(:id => params[:parent_id]).first
+  parent_theme = Theme.unscoped.where(:id => params[:parent_id]).first
 
-  halt 404 if theme.nil?
+  halt 404 if parent_theme.nil?
 
-  halt 401 if theme.preview_only?(current_user)
+  halt 401 if parent_theme.preview_only?(current_user)
 
-  theme = theme.fork({
-    :author => current_user
-  })
-
-  theme.regions = params[:regions].map { |region| Region.new(region) }
-  theme.templates = params[:templates].map { |template| Template.new(template) }
-  theme.style = params[:style]
-
-  if theme.save
-    theme.archive_job_id = generate_theme_archive(theme)
-
-    status 201
-    respond_with theme
-  else
-    status 400
-    respond_with theme.errors
-  end
+  respond_with_saved_theme!(parent_theme, params, true)
 end
 
 put '/themes/:id' do
@@ -51,20 +35,9 @@ put '/themes/:id' do
 
   halt 401 unless theme.author?(current_user)
 
-  params = JSON.parse(request.body.read)
-  theme.regions = params['regions'].map { |region| Region.new(region) }
-  theme.templates = params['templates'].map { |template| Template.new(template) }
-  theme.style = params['style']
+  params = JSON.parse(request.body.read, symbolize_names: true)
 
-  if theme.save
-    theme.archive_job_id = generate_theme_archive(theme)
-
-    status 201
-    respond_with theme
-  else
-    status 400
-    respond_with theme.errors
-  end
+  respond_with_saved_theme!(theme, params)
 end
 
 post '/theme_upload' do
