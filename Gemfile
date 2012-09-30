@@ -30,5 +30,4 @@ end
 
 group :production do
   gem 'thin'
-  gem 'heroku-resque-auto-scale', :git => 'https://github.com/mirthlab/heroku-resque-auto-scale.git'
 end
