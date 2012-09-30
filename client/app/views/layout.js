@@ -62,9 +62,9 @@ module.exports = View.extend({
     _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
 
     this.addDataBypass();
-    app.on("download:before", this.removeDataBypass);
-    app.on("download:after", this.addDataBypass);
-    app.on("download:error", this.addDataBypass);
+    app.on("save:before", this.removeDataBypass);
+    app.on("save:after", this.addDataBypass);
+    app.on("save:error", this.addDataBypass);
 
     app.on("block:inserted", this.insertColumn);
   }

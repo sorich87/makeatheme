@@ -17,10 +17,10 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "setColumn", "buildDownload");
+    _.bindAll(this, "setColumn", "addThemeAttributes");
 
     app.on("editor:columnHighlight", this.setColumn);
-    app.on("download:before", this.buildDownload);
+    app.on("save:before", this.addThemeAttributes);
 
     this.selector = "body";
     this.customCSS = app.editor.style;
@@ -150,7 +150,7 @@ module.exports = View.extend({
     $li.find("input[name=index]").val(index);
   }
 
-  , buildDownload: function (attributes) {
+  , addThemeAttributes: function (attributes) {
     attributes.style = this.customCSS.rules;
   }
 });

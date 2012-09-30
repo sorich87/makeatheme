@@ -13,6 +13,6 @@ module SessionHelper
   end
 
   def authenticated?
-    ! @current_user.nil?
+    !!current_user
   end
 end

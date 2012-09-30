@@ -14,11 +14,11 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "buildDownload", "makeMutable", "addRegionsToTemplate");
+    _.bindAll(this, "addThemeAttributes", "makeMutable", "addRegionsToTemplate");
 
     this.collection.on("add", this.addOne, this);
 
-    app.on("download:before", this.buildDownload);
+    app.on("save:before", this.addThemeAttributes);
     app.on("mutations:started", this.makeMutable);
     app.on("template:load", this.addRegionsToTemplate);
   }
@@ -110,7 +110,7 @@ module.exports = View.extend({
         .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
   }
 
-  , buildDownload: function (attributes) {
+  , addThemeAttributes: function (attributes) {
     attributes.regions = _.map(this.collection.models, function (region) {
       return _.pick(region.attributes, "_id", "name", "slug", "template");
     });

@@ -19,13 +19,13 @@ module.exports = View.extend({
   }
 
   , initialize: function (options) {
-    _.bindAll(this, "buildDownload", "makeMutable", "saveRegion");
+    _.bindAll(this, "addThemeAttributes", "makeMutable", "saveRegion");
 
     this.collection.on("add", this.addOne, this);
     this.collection.on("reset", this.addAll, this);
     this.collection.on("remove", this.removeOne, this);
 
-    app.on("download:before", this.buildDownload);
+    app.on("save:before", this.addThemeAttributes);
     app.on("mutations:started", this.makeMutable);
     app.on("region:load", this.saveRegion);
   }
@@ -153,7 +153,7 @@ module.exports = View.extend({
     app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
   }
 
-  , buildDownload: function (attributes) {
+  , addThemeAttributes: function (attributes) {
     attributes.templates = _.map(this.collection.models, function (template) {
       return _.pick(template.attributes, "_id", "name", "template");
     });

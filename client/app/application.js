@@ -94,7 +94,6 @@ _.extend(Application, {
     }
 
     this.on("upload:after", this.updateCurrentUserThemes);
-    this.on("download:after", this.updateCurrentUserThemes);
   }
 
   , updateCurrentUserThemes: function (theme) {

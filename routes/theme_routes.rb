@@ -55,13 +55,13 @@ post '/themes' do
 end
 
 put '/themes/:id' do
-  forbid and return unless authenticated?
+  halt 401 unless authenticated?
 
   theme = Theme.unscoped.where(:id => params[:id]).first
 
-  status 404 and return if theme.nil?
+  halt 404 if theme.nil?
 
-  forbid and return unless theme.author?(current_user)
+  halt 401 unless theme.author?(current_user)
 
   params = JSON.parse(request.body.read)
   theme.regions = params['regions'].map { |region| Region.new(region) }

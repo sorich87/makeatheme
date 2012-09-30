@@ -324,11 +324,13 @@
   background-color: #408140 9;
 }
 #x-customize-button,
+#x-save-button,
 #x-download-button {
   margin: 10px auto;
   text-align: center;
 }
 #x-customize-button .x-btn,
+#x-save-button .x-btn,
 #x-download-button .x-btn {
   width: 80%;
 }
