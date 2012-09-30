@@ -1,7 +1,7 @@
 Pony.options = {
   :via => :smtp,
   :via_options => {
-    :address        => 'stmp.sendgrid.net',
+    :address        => 'smtp.sendgrid.net',
     :port           => '587',
     :authentication => :plain,
     :user_name      => ENV['SENDGRID_USERNAME'],
