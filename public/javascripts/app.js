@@ -102,10 +102,6 @@ window.require.define({"application": function(exports, require, module) {
       // Holds editor settings and data
       this.editor = {};
 
-      // Listen to events coming from server and trigger them here
-      this.listenToServerEvents();
-      this.on("login", this.listenToServerEvents);
-
       // Prevent further modification of the application object
       Object.freeze(this);
     }
@@ -144,19 +140,6 @@ window.require.define({"application": function(exports, require, module) {
       Backbone.history.on("route", function (router, name) {
         $("body")[0].className = name;
       });
-    }
-
-    , listenToServerEvents: function () {
-      if (this.currentUser.id) {
-        (new EventSource("/events/" + this.currentUser.id)).onmessage = this.dispatchServerEvents.bind(this);
-      }
-    }
-
-    , dispatchServerEvents: function (e) {
-      var data = JSON.parse(e.data);
-
-      data.args.unshift(data.name);
-      this.trigger.apply(this, data.args);
     }
 
     , setCurrentUser: function () {
