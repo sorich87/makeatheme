@@ -33,8 +33,8 @@ module ThemeArchive
       Zip::ZipFile.open(@path, Zip::ZipFile::CREATE) do |zipfile|
         compile_regions(zipfile)
         compile_templates(zipfile)
-        compile_static_files(zipfile)
         compile_php_files(zipfile)
+        compile_static_files(zipfile)
         compile_screenshot(zipfile)
       end
     end
@@ -163,14 +163,12 @@ module ThemeArchive
 
         # Add it to the zipfile
         zipfile.get_output_stream(zip_path) do |f|
-          f.puts template.result
+          f.puts template.result(get_binding(@theme))
         end
       end
     end
 
     # Include screenshot file in archive
-    # Sometimes the screenshot may not be up to date,
-    # we will bother about that when screenshot generation is moved to a background job
     def compile_screenshot(zipfile)
       zipfile.get_output_stream('screenshot.png') do |f|
         f.puts open(@theme.screenshot.url(:thumb)).read if @theme.screenshot.file?
@@ -194,6 +192,10 @@ module ThemeArchive
       locals = locals.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
 
       Liquid::Template.parse(template).render(locals)
+    end
+
+    def get_binding(theme)
+      binding
     end
   end
 

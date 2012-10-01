@@ -46,32 +46,40 @@ function _s_setup() {
 	 */
 	add_theme_support( 'post-thumbnails' );
 
+	<% if navs = theme.blocks.where(name: 'navigation') %>
 	/**
 	 * This theme uses wp_nav_menu() in one location.
 	 */
+	<% navs.each do |nav| %>
 	register_nav_menus( array(
-		'primary' => __( 'Primary Menu', '_s' ),
+		'<%= nav.label.underscore %>' => __( '<%= "#{nav.label} #{nav.name.titleize}" %>', '_s' ),
 	) );
+	<% end %>
+	<% end %>
 }
 endif; // _s_setup
 add_action( 'after_setup_theme', '_s_setup' );
 
+<% if sidebars = theme.blocks.where(name: 'sidebar') %>
 /**
  * Register widgetized area and update sidebar with default widgets
  *
  * @since _s 1.0
  */
 function _s_widgets_init() {
+	<% sidebars.each do |sidebar| %>
 	register_sidebar( array(
-		'name' => __( 'Sidebar', '_s' ),
-		'id' => 'sidebar-1',
+		'name' => __( '<%= "#{sidebar.label} #{sidebar.name.titleize}" %>', '_s' ),
+		'id' => '<%= sidebar.label.underscore %>',
 		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
 		'after_widget' => '</aside>',
 		'before_title' => '<h1 class="widget-title">',
 		'after_title' => '</h1>',
 	) );
+	<% end %>
 }
 add_action( 'widgets_init', '_s_widgets_init' );
+<% end %>
 
 /**
  * Enqueue scripts and styles
@@ -85,7 +93,9 @@ function _s_scripts() {
 }
 add_action( 'wp_enqueue_scripts', '_s_scripts' );
 
+<% if theme.blocks.where(name: 'header_image') %>
 /**
- * Implement the Custom Header feature
- */
+* Implement the Custom Header feature
+*/
 require( get_template_directory() . '/inc/custom-header.php' );
+<% end %>
