@@ -11,7 +11,7 @@ module LiquidTags
         block.name == @name && block.label == @label
       end
 
-      blocks[0][:template] unless blocks.empty?
+      blocks.first[:template] unless blocks.empty?
     end
   end
 end
