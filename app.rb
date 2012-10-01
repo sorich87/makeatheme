@@ -34,18 +34,6 @@ set :json_encoder, JSON
 set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/33
 set :connections, {}
 
-configure :development do
-  set :domain, 'localhost:4567'
-end
-
-configure :production do
-  set :domain, 'www.thememy.com'
-end
-
-configure :test do
-  set :domain, 'localhost:4567'
-end
-
 require "config/environments/#{settings.environment}"
 
 # Models

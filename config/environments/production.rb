@@ -1,3 +1,5 @@
+set :domain, 'www.thememy.com'
+
 Pony.options = {
   :via => :smtp,
   :via_options => {
