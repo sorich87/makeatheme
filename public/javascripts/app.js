@@ -1262,14 +1262,12 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "makeMutable", "buildDownload");
-
       this.collection.on("reset", this.addAll, this);
       this.collection.on("add", this.addOne, this);
       this.collection.on("remove", this.removeOne, this);
 
-      app.on("mutations:started", this.makeMutable);
-      app.on("download:before", this.buildDownload);
+      app.on("mutations:started", this.makeMutable.bind(this));
+      app.on("save:before", this.addThemeAttributes.bind(this));
 
       this.allBlocks = _.map(app.data.blocks, function (block) {
         block.label = _.str.titleize(_.str.humanize(block.name));
@@ -1369,7 +1367,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
       }
     }
 
-    , buildDownload: function (attributes) {
+    , addThemeAttributes: function (attributes) {
       attributes.blocks = _.map(this.collection.models, function (block) {
         return _.pick(block.attributes, "_id", "name", "label", "template");
       });
@@ -2515,7 +2513,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
           window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
         }
         , error: function (theme, response) {
-          app.trigger("download:error");
+          app.trigger("save:error");
 
           e.target.removeAttribute("disabled");
 
