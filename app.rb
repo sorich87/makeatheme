@@ -19,8 +19,6 @@ require 'liquid'
 require 'json'
 require 'resque'
 require 'resque-status'
-require 'resque/status_server'
-require 'resque-lock-timeout'
 
 Mongoid.load!("config/mongoid.yml")
 
@@ -35,18 +33,6 @@ set :method_override, true
 set :json_encoder, JSON
 set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/33
 set :connections, {}
-
-configure :development do
-  set :domain, 'localhost:4567'
-end
-
-configure :production do
-  set :domain, 'www.thememy.com'
-end
-
-configure :test do
-  set :domain, 'localhost:4567'
-end
 
 require "config/environments/#{settings.environment}"
 
