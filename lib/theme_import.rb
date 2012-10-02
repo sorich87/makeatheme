@@ -124,9 +124,10 @@ module ThemeImport
 
     def blocks
       ::Defaults::HTML::BLOCKS.map do |name, template|
+        name = name.to_s.split('-')
         {
-          name: name.to_s,
-          label: 'Default',
+          name: name[0],
+          label: name[1].nil? ? 'Default' : name[1],
           template: template
         }
       end

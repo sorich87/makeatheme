@@ -874,7 +874,7 @@ window.require.define({"models/block": function(exports, require, module) {
       var label = "";
 
       if (this.get("label") !== "Default") {
-        label = " '" + this.get("label") + "'";
+        label = " " + this.get("label");
       }
 
       return "{{" + this.get("name") + label + "}}";

@@ -22,6 +22,11 @@ module ThemeArchive
 
       @path = File.join(Dir.mktmpdir, "./#{@theme.slug}.zip")
 
+      # Register block tags
+      %w(header_image navigation search_form article sidebar).map do |name, template|
+        Liquid::Template.register_tag(name, LiquidTags::PHPBlock)
+      end
+
       create_zip
     end
 
@@ -52,20 +57,12 @@ module ThemeArchive
           header = get_header_tag(template)
           footer = get_footer_tag(template)
 
-          # convert 'article' tag to 'article-slug' for index, single and page templates
-          content = template[:template]
-          if %w(index single page).include?(template.name)
-            content.gsub!(/\{\{\s?(.+?)\s?\}\}/) do |match|
-              if $1 == 'article' then "{{#{$1}-#{template.slug}}}" else match end
-            end
-          end
-
           # Add template name comment before header if template is not a default one.
           unless Defaults::WP::TEMPLATES.include?(template.name)
             header = "/**\n * Template Name: #{template.name}\n */\n" + header
           end
 
-          f.puts render_template(header + content + footer, @locals)
+          f.puts render_template(header + template[:template] + footer, @theme, @locals)
         end
       end
     end
@@ -94,7 +91,7 @@ module ThemeArchive
           template = Defaults::PHP::REGIONS[:header] + template if 'header' == region[:name]
           template = template + Defaults::PHP::REGIONS[:footer] if 'footer' == region[:name]
 
-          f.puts render_template(template, @locals)
+          f.puts render_template(template, @theme, @locals)
         end
       end
     end
@@ -187,9 +184,14 @@ module ThemeArchive
       end
     end
 
-    def render_template(template, locals)
+    def render_template(template, scope, locals)
       # Hash keys should be strings only
       locals = locals.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
+
+      if scope.respond_to?(:to_h)
+        scope  = scope.to_h.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
+        locals = scope.merge(locals)
+      end
 
       Liquid::Template.parse(template).render(locals)
     end

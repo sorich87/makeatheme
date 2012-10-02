@@ -23,7 +23,7 @@ module.exports = Model.extend({
     var label = "";
 
     if (this.get("label") !== "Default") {
-      label = " '" + this.get("label") + "'";
+      label = " " + this.get("label");
     }
 
     return "{{" + this.get("name") + label + "}}";
