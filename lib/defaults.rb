@@ -3,7 +3,7 @@ module Defaults
     def self.locals(theme)
       {
         site_title: 'Theme Preview',
-        site_description: 'Just another WordPress site',
+        site_description: 'Just another beautiful theme',
         header_image_url: theme.header_images.first.file.url
       }
     end
