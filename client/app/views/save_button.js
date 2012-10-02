@@ -43,7 +43,7 @@ module.exports = View.extend({
         window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
       }
       , error: function (theme, response) {
-        app.trigger("download:error");
+        app.trigger("save:error");
 
         e.target.removeAttribute("disabled");
 

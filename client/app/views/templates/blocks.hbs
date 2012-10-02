@@ -1,0 +1,14 @@
+<p>Drag and drop to insert</p>
+<ul class='x-rects'></ul>
+<button class="x-new-block">&plus; New Block</button>
+<div class="x-new-block-select">
+  <label>Type:
+    <select>
+      {{#each all}}
+      <option value="{{name}}">{{label}}</option>
+      {{/each}}
+    </select>
+  </label>
+  <input class="x-new-block-name" type="text" value="" placeholder="Name" />
+  <button class="x-new-block-add">Add</button>
+</div>

@@ -28,6 +28,7 @@ class Theme
 
   default_scope where(listed: true)
 
+  embeds_many :blocks
   embeds_many :regions
   embeds_many :templates
 
@@ -67,16 +68,6 @@ class Theme
   validates_attachment :archive,
     :content_type => { :content_type => 'application/zip' },
     :size => { :less_than => 1.megabyte }
-
-  # Return blocks to insert in the templates
-  def blocks
-    Defaults::HTML::BLOCKS.map do |name, template|
-      {
-        name: name.to_s,
-        template: template
-      }
-    end
-  end
 
   # Get template content from name
   def template_content(name)
@@ -135,6 +126,13 @@ class Theme
   # Header images
   def header_images
     self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+  end
+
+  # Used by Tilt to pass scope to Liquid templates
+  def to_h
+    {
+      blocks: self.blocks
+    }
   end
 end
 

@@ -179,7 +179,13 @@ window.require.define({"collections/blocks": function(exports, require, module) 
     , Block = require("models/block");
 
   module.exports = Collection.extend({
-    model: Block
+      model: Block
+
+    , getByName: function (name) {
+      return this.find(function (block) {
+        return block.get("name") === name;
+      });
+    }
   });
   
 }});
@@ -856,16 +862,22 @@ window.require.define({"models/block": function(exports, require, module) {
     }
 
     , label: function () {
-      return _.str.humanize(this.get("name"));
+      return _.str.titleize(this.get("label") + " " + _.str.humanize(this.get("name")));
     }
 
     , className: function () {
       return this.get("name").replace("_", "-");
     }
 
-    // Return block Handlebars tag
+    // Return block Liquid tag
     , tag: function () {
-      return "{{ " + this.get("name") + " }}";
+      var label = "";
+
+      if (this.get("label") !== "Default") {
+        label = " " + this.get("label");
+      }
+
+      return "{{" + this.get("name") + label + "}}";
     }
   });
   
@@ -1230,9 +1242,10 @@ window.require.define({"views/base/view": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/block_insert": function(exports, require, module) {
+window.require.define({"views/blocks": function(exports, require, module) {
   // Display list of blocks to insert
   var View = require("views/base/view")
+    , template = require("views/templates/blocks")
     , app = require("application");
 
   module.exports = View.extend({
@@ -1243,19 +1256,27 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     , events: {
         "draginit #x-block-insert .x-drag": "dragInit"
       , "dragend #x-block-insert .x-drag": "dragEnd"
+      , "click .x-new-block": "showForm"
+      , "click .x-new-block-add": "addBlock"
+      , "click .x-remove": "removeBlock"
     }
 
     , initialize: function () {
-      _.bindAll(this, "makeMutable");
-
       this.collection.on("reset", this.addAll, this);
+      this.collection.on("add", this.addOne, this);
+      this.collection.on("remove", this.removeOne, this);
 
-      app.on("mutations:started", this.makeMutable);
+      app.on("mutations:started", this.makeMutable.bind(this));
+      app.on("save:before", this.addThemeAttributes.bind(this));
+
+      this.allBlocks = _.map(app.data.blocks, function (block) {
+        block.label = _.str.titleize(_.str.humanize(block.name));
+        return block;
+      });
     }
 
     , render: function () {
-
-      this.$el.empty().append("<p>Drag and drop to insert</p><ul class='x-rects'></ul>");
+      this.$el.empty().append(template({all: this.allBlocks}));
 
       this.collection.reset(this.collection.models);
 
@@ -1263,8 +1284,14 @@ window.require.define({"views/block_insert": function(exports, require, module) 
     }
 
     , addOne: function (block) {
+      var remove = "";
+
+      if (block.get("label") != "Default") {
+        remove = " <span class='x-remove' title='Delete block'>&times;</span>";
+      }
+
       this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
-                          "<span>&Dagger;</span> " + block.label() + "</span></li>");
+                          "<span>&Dagger;</span> " + block.label() + remove + "</span></li>");
     }
 
     , addAll: function () {
@@ -1273,6 +1300,10 @@ window.require.define({"views/block_insert": function(exports, require, module) 
       _.each(this.collection.models, function (block) {
         this.addOne(block);
       }, this);
+    }
+
+    , removeOne: function (block) {
+      this.$("span[data-cid='" + block.cid + "']").closest("li").remove();
     }
 
     // Replace the drag element by its clone
@@ -1290,6 +1321,56 @@ window.require.define({"views/block_insert": function(exports, require, module) 
 
     , makeMutable: function (pieces) {
       pieces.blocks = this.collection;
+    }
+
+    , showForm: function (e) {
+      var $div = this.$(".x-new-block-select");
+
+      if ($div.is(":hidden")) {
+        $div.show("normal");
+      } else {
+        $div.hide("normal");
+      }
+    }
+
+    , addBlock: function () {
+      var name, label, attributes, block, build;
+
+      name = this.$(".x-new-block-select select").val();
+      label = this.$(".x-new-block-name").val();
+
+      if (!label) {
+        app.trigger("notification", "error", "Please, enter a block name.");
+        return;
+      }
+
+      attributes = _.find(this.allBlocks, function (block) {
+        return block.name === name;
+      });
+
+      build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
+      build.firstChild.setAttribute("data-x-label", label);
+      build.firstChild.setAttribute("data-x-name", name);
+
+      attributes.build = build.outerHTML;
+      attributes.label = label;
+
+      this.collection.add(attributes);
+
+      app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
+    }
+
+    , removeBlock: function (e) {
+      if (confirm("Are you sure you want to delete this block?")) {
+        var cid = $(e.currentTarget).parent().data("cid");
+        this.collection.remove(cid);
+      }
+    }
+
+    , addThemeAttributes: function (attributes) {
+      attributes.blocks = _.map(this.collection.models, function (block) {
+        return _.pick(block.attributes, "_id", "name", "label", "template");
+      });
     }
   });
   
@@ -1400,7 +1481,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     // Show editor when "template:loaded" event is triggered
     , render: function () {
       var regionsView = app.reuseView("regions")
-        , blocksView = app.reuseView("block_insert")
+        , blocksView = app.reuseView("blocks")
         , styleView = app.reuseView("style_edit")
         , shareView = app.reuseView("share_link")
         , saveView = app.reuseView("save_button")
@@ -1591,16 +1672,16 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       if ($column.children(".x-name").length === 0) {
         name = $column.children(":first").data("x-name");
-        id = $column.children(":first").data("x-id");
+        label = $column.children(":first").data("x-label");
 
-        if (!name || !id) {
+        if (!name || !label) {
           return;
         }
 
-        name = _.str.titleize(_.str.humanize(name));
+        label = _.str.titleize(label + " " + _.str.humanize(name));
 
         $column.html(function (i, html) {
-          return html + "<div class='x-name'>" + id + " " + name + "</div>";
+          return html + "<div class='x-name'>" + label + "</div>";
         });
       }
     }
@@ -1916,7 +1997,8 @@ window.require.define({"views/mutations": function(exports, require, module) {
         for (var i in this.pieces.blocks.models) {
           block = this.pieces.blocks.models[i];
 
-          if (node.className.indexOf(block.className()) !== -1) {
+          if (node.className.indexOf(block.className()) !== -1 &&
+              node.firstChild.getAttribute("data-x-label") === block.get("label")) {
             copy.innerHTML = block.tag();
             break;
           }
@@ -2431,7 +2513,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
           window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
         }
         , error: function (theme, response) {
-          app.trigger("download:error");
+          app.trigger("save:error");
 
           e.target.removeAttribute("disabled");
 
@@ -2817,6 +2899,41 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/blocks": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n      <option value=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n      ";
+    return buffer;}
+
+    buffer += "<p>Drag and drop to insert</p>\n<ul class='x-rects'></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<div class=\"x-new-block-select\">\n  <label>Type:\n    <select>\n      ";
+    foundHelper = helpers.all;
+    stack1 = foundHelper || depth0.all;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n    </select>\n  </label>\n  <input class=\"x-new-block-name\" type=\"text\" value=\"\" placeholder=\"Name\" />\n  <button class=\"x-new-block-add\">Add</button>\n</div>\n";
     return buffer;});
 }});
 

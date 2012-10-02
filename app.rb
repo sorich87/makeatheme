@@ -39,8 +39,9 @@ require "config/environments/#{settings.environment}"
 # Models
 Dir["models/*.rb"].each {|file| require file}
 
-# Classes
+# Libs
 require 'defaults'
+require 'liquid_tags'
 
 # Helpers
 require 'application_helper'

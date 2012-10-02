@@ -86,7 +86,8 @@ module.exports = View.extend({
       for (var i in this.pieces.blocks.models) {
         block = this.pieces.blocks.models[i];
 
-        if (node.className.indexOf(block.className()) !== -1) {
+        if (node.className.indexOf(block.className()) !== -1 &&
+            node.firstChild.getAttribute("data-x-label") === block.get("label")) {
           copy.innerHTML = block.tag();
           break;
         }

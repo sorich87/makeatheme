@@ -11,15 +11,21 @@ module.exports = Model.extend({
   }
 
   , label: function () {
-    return _.str.humanize(this.get("name"));
+    return _.str.titleize(this.get("label") + " " + _.str.humanize(this.get("name")));
   }
 
   , className: function () {
     return this.get("name").replace("_", "-");
   }
 
-  // Return block Handlebars tag
+  // Return block Liquid tag
   , tag: function () {
-    return "{{ " + this.get("name") + " }}";
+    var label = "";
+
+    if (this.get("label") !== "Default") {
+      label = " " + this.get("label");
+    }
+
+    return "{{" + this.get("name") + label + "}}";
   }
 });
