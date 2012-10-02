@@ -1440,7 +1440,7 @@ window.require.define({"views/download_button": function(exports, require, modul
 
       e.currentTarget.close();
 
-      app.trigger("notification", "error", "Theme archive updated.");
+      app.trigger("notification", "success", "Theme archive updated.");
 
       button.removeAttribute("disabled");
       button.innerHTML = "Download Theme";
