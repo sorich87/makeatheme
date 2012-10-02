@@ -56,16 +56,22 @@ module.exports = View.extend({
     eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
   }
 
-  , resetButton: function () {
+  , resetButton: function (e) {
     var button = this.$("button")[0];
+
+    e.currentTarget.close();
+
+    app.trigger("notification", "success", "Theme archive updated.");
 
     button.removeAttribute("disabled");
     button.innerHTML = "Download Theme";
   }
 
-  , archiveErrors: function () {
+  , archiveErrors: function (e) {
     this.resetButton();
 
-    app.trigger("notification", "error", "Error generating the theme archive");
+    e.currentTarget.close();
+
+    app.trigger("notification", "error", "Error updating the theme archive.");
   }
 });
