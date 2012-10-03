@@ -1070,23 +1070,25 @@ window.require.define({"router": function(exports, require, module) {
         , alert = ""
         , $main = $("#main");
 
-      if (window.MutationSummary === void 0) {
-        alert = "<div class='alert alert-error'>" +
-          "Although the themes built with the online editor work in any browser," +
-          "the editor itself has been tested only with the latest versions of" +
-          "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far." +
-          "Support for other browsers is coming soon.</div>";
-      }
-
-      $main.empty().append(alert);
+      $main.empty();
 
       if (!app.currentUser.id) {
         $main.append(app.reuseView("faq").render().$el);
       }
 
+      if (window.MutationSummary === void 0) {
+        alert = "<div class='alert alert-error'>" +
+          "<b>Please Note:</b> Although the themes built with the online editor work in any browser, " +
+          "the editor itself has been tested only with the latest versions of " +
+          "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far. " +
+          "Support for other browsers is coming soon.</div>";
+      }
+
       $main
-        .append("<h1 class='page-header'>Public Themes</h1>")
-        .append(app.createView("theme_list", {collection: collection}).render().$el);
+        .append(alert)
+        .append("<h3 class='page-title'>Try out with a theme below</h3>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el)
+        .append("<p>It's an open platform... If you are a professional web designer, please contact us. We want to hear from you!</p>");
     }
 
     , your_themes: function () {
@@ -1558,7 +1560,7 @@ window.require.define({"views/faq": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      className: "well"
+      className: "headline"
     , template: "faq"
   });
   
@@ -2949,7 +2951,7 @@ window.require.define({"views/templates/faq": function(exports, require, module)
     var foundHelper, self=this;
 
 
-    return "<div class=\"page-header\">\n  <h1>\n    Online Theme Editor\n    <small>exports to HTML5 and WordPress themes</small>\n  </h1>\n</div>\n<p class=\"lead\">The future of website design is here, now, in your browser.\n<a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started</a></p>\n<p>The easiest to use online theme editor that churns out beautiful, standard compliant, responsive,<br />\nSEO-friendly, [ insert any buzzword here ;) ]  HTML5 and WordPress themes in minutes.</p>\n<p>Start by choosing a preset theme below.\n(<a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\">FAQ</a>)</p>\n\n<div id=\"faq\" class=\"collapse\">\n  <h3>Frequently Asked Questions</h3>\n  <h4>How it works?</h4>\n  <ul>\n    <li>Scroll down the page to see the full list of all the themes and choose the one you like.</li>\n    <li>When you find the theme you want, click the \"Customize\" button and you will be taken\n    to the customizer where you can make edits until you are satisfied.</li>\n    <li>Then, click on \"Download\" to download the WordPress theme with your customizations included.</li>\n  </ul>\n  <h4>Something doesn't work. What should I do?</h4>\n  <p>It is our fault and we are sorry for that. This site is a work in progress and\n  we are building new features and fixing bugs every day. Please contact us if something doesn't work for you\n  and we will quickly find a solution.</p>\n\n  <p><a data-toggle=\"collapse\" data-bypass=\"true\" href=\"#faq\"><i class=\"icon-arrow-up\"></i> Hide</a></p>\n</div>\n";});
+    return "<h1 class=\"catch-phrase\">The next generation theme editor<br /> in your browser</h1>\n<p>Build your own responsive HTML5 and WordPress themes in minutes!</p>\n<p><a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started Now</a></p>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
