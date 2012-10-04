@@ -41,7 +41,7 @@ module.exports = Backbone.Router.extend({
       .append(alert)
       .append("<h3 class='page-title'>Try out with a theme below</h3>")
       .append(app.createView("theme_list", {collection: collection}).render().$el)
-      .append("<p>It's an open platform... If you are a professional web designer, please contact us. We want to hear from you!</p>");
+      .append("<p>This is an open platform... If you are a professional web designer, please contact us. We want to hear from you!</p>");
   }
 
   , your_themes: function () {
