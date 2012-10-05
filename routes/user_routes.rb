@@ -8,9 +8,11 @@ post '/users' do
     authenticate_user!(user)
 
     Pony.mail :to => user.email,
-              :subject => 'Welcome aboard',
-              :from => 'ulrich@thememy.com',
-              :body => erb(:'emails/user_registration', :locals => {:user => user})
+              :subject => 'Getting Started with ThemeMy',
+              :from => 'ThemeMy <notifications@thememy.com>',
+              :reply_to => 'contact@thememy.com',
+              :html_body => erb(:'emails/user_registration.html', :locals => {:user => user}),
+              :body => erb(:'emails/user_registration.txt', :locals => {:user => user})
 
     status 201
     body user.to_json
@@ -33,8 +35,10 @@ post '/users/reset_password' do
 
     Pony.mail :to => user.email,
               :subject => 'ThemeMy Password Reset',
-              :from => 'no-reply@thememy.com',
-              :body => erb(:'emails/password_reset', locals: locals)
+              :from => 'ThemeMy <notifications@thememy.com>',
+              :reply_to => 'contact@thememy.com',
+              :html_body => erb(:'emails/password_reset.html', locals: locals),
+              :body => erb(:'emails/password_reset.txt', locals: locals)
   end
 
   halt 204

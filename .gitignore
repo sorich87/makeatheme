@@ -31,3 +31,6 @@ public/test/*
 
 # SimpleCov coverage report
 coverage
+
+# Environment variables
+.env
