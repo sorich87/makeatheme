@@ -1533,12 +1533,12 @@ window.require.define({"views/editor": function(exports, require, module) {
     , showSection: function (e) {
       $(e.target).next().slideToggle("slow", function () {
         var $this = $(this)
-          , $handle = $this.prev().children("span").empty();
+          , $handle = $this.prev().children("span");
 
         if ($this.is(":hidden")) {
-          $handle.append("&or;");
+          $handle.empty().append("&or;");
         } else {
-          $handle.append("&and;");
+          $handle.empty().append("&and;");
         }
       });
     }
