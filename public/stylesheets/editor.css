@@ -328,7 +328,7 @@
 #x-customize-button .x-btn,
 #x-save-button .x-btn,
 #x-download-button .x-btn {
-  width: 80%;
+  width: 180px;
 }
 #x-share-link {
   padding: 10px;
