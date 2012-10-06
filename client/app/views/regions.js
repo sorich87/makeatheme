@@ -120,6 +120,9 @@ module.exports = View.extend({
     pieces.regions = this.collection;
   }
 
+  // Add corresponding regions attributes to template so that the regions are
+  // displayed in the template.
+  // Mark the regions as selected in the editor.
   , addRegionsToTemplate: function (template) {
     var regions = template.get("regions");
 
@@ -127,5 +130,8 @@ module.exports = View.extend({
         header: this.collection.getByName("header", regions.header)
       , footer: this.collection.getByName("footer", regions.footer)
     });
+
+    this.$(".x-header-select").val(regions.header);
+    this.$(".x-footer-select").val(regions.footer);
   }
 });
