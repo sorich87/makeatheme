@@ -1433,7 +1433,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       button.setAttribute("disabled", "true");
       button.innerHTML = "Rebuilding archive...";
 
-      eventSource.addEventListener("success", this.resetButton.bind(this), false);
+      eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
       eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
     }
 
@@ -1442,16 +1442,18 @@ window.require.define({"views/download_button": function(exports, require, modul
 
       e.currentTarget.close();
 
-      app.trigger("notification", "success", "Theme archive updated.");
-
       button.removeAttribute("disabled");
       button.innerHTML = "Download Theme";
     }
 
-    , archiveErrors: function (e) {
-      this.resetButton();
+    , archiveSuccess: function (e) {
+      this.resetButton(e);
 
-      e.currentTarget.close();
+      app.trigger("notification", "success", "Theme archive updated.");
+    }
+
+    , archiveErrors: function (e) {
+      this.resetButton(e);
 
       app.trigger("notification", "error", "Error updating the theme archive.");
     }

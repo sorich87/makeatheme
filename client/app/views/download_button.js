@@ -52,7 +52,7 @@ module.exports = View.extend({
     button.setAttribute("disabled", "true");
     button.innerHTML = "Rebuilding archive...";
 
-    eventSource.addEventListener("success", this.resetButton.bind(this), false);
+    eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
     eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
   }
 
@@ -61,16 +61,18 @@ module.exports = View.extend({
 
     e.currentTarget.close();
 
-    app.trigger("notification", "success", "Theme archive updated.");
-
     button.removeAttribute("disabled");
     button.innerHTML = "Download Theme";
   }
 
-  , archiveErrors: function (e) {
-    this.resetButton();
+  , archiveSuccess: function (e) {
+    this.resetButton(e);
 
-    e.currentTarget.close();
+    app.trigger("notification", "success", "Theme archive updated.");
+  }
+
+  , archiveErrors: function (e) {
+    this.resetButton(e);
 
     app.trigger("notification", "error", "Error updating the theme archive.");
   }
