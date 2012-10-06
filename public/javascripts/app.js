@@ -1630,14 +1630,16 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "addDataBypass", "removeDataBypass", "insertColumn");
-
+      // Add data-bypass attribute to links so that navigation is not triggered
+      // when clicked on
       this.addDataBypass();
       app.on("save:before", this.removeDataBypass);
       app.on("save:after", this.addDataBypass);
       app.on("save:error", this.addDataBypass);
+      app.on("template:loaded", this.addDataBypass);
+      _.bindAll(this, "addDataBypass", "removeDataBypass");
 
-      app.on("block:inserted", this.insertColumn);
+      app.on("block:inserted", this.insertColumn.bind(this));
     }
 
     , removeDataBypass: function () {
