@@ -62,7 +62,7 @@ module ThemeArchive
             header = "/**\n * Template Name: #{template.name}\n */\n" + header
           end
 
-          f.puts render_template(header + template[:template] + footer, @theme, @locals)
+          f.puts render_template(header + template[:template] + footer, @locals)
         end
       end
     end
@@ -91,7 +91,7 @@ module ThemeArchive
           template = Defaults::PHP::REGIONS[:header] + template if 'header' == region[:name]
           template = template + Defaults::PHP::REGIONS[:footer] if 'footer' == region[:name]
 
-          f.puts render_template(template, @theme, @locals)
+          f.puts render_template(template, @locals)
         end
       end
     end
@@ -184,14 +184,12 @@ module ThemeArchive
       end
     end
 
-    def render_template(template, scope, locals)
+    def render_template(template, locals)
+      scope = LiquidTags::Helpers::ThemeContext.new(@theme)
+      locals = scope.to_h.merge(locals)
+
       # Hash keys should be strings only
       locals = locals.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
-
-      if scope.respond_to?(:to_h)
-        scope  = scope.to_h.inject({}){ |h,(k,v)| h[k.to_s] = v ; h }
-        locals = scope.merge(locals)
-      end
 
       Liquid::Template.parse(template).render(locals)
     end

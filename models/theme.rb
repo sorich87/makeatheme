@@ -127,12 +127,5 @@ class Theme
   def header_images
     self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
   end
-
-  # Used by Tilt to pass scope to Liquid templates
-  def to_h
-    {
-      blocks: self.blocks
-    }
-  end
 end
 

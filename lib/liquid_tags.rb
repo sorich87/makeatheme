@@ -8,10 +8,10 @@ module LiquidTags
 
     def render(context)
       blocks = context['blocks'].select do |block|
-        block.name == @name && block.label == @label
+        block[:name] == @name && block[:label] == @label
       end
 
-      blocks.first[:template] unless blocks.empty?
+      blocks.first[:build] unless blocks.empty?
     end
   end
 
@@ -24,7 +24,7 @@ module LiquidTags
 
     def render(context)
       blocks = context['blocks'].select do |block|
-        block.name == @name && block.label == @label
+        block[:name] == @name && block[:label] == @label
       end
 
       # convert 'article' key to 'article-slug' for single and page templates
@@ -40,6 +40,24 @@ module LiquidTags
 
     def get_binding(block)
       binding
+    end
+  end
+
+  module Helpers
+    # Create a context that can be passed to the templates for rendering
+    class ThemeContext
+      attr_accessor :blocks
+
+      def initialize(theme)
+        @blocks = theme.blocks
+      end
+
+      # Used by Tilt to pass scope to Liquid templates
+      def to_h
+        {
+          blocks: @blocks
+        }
+      end
     end
   end
 end

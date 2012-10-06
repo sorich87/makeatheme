@@ -14,6 +14,7 @@ module ThemeHelper
   def theme_pieces(theme, ensure_id = false)
     pieces = Hash[:blocks, [], :regions, [], :templates, []]
     locals = Defaults::HTML.locals(theme)
+    theme_context = LiquidTags::Helpers::ThemeContext.new(theme)
     xid = 0
 
     # Register block tags
@@ -23,6 +24,7 @@ module ThemeHelper
 
     # Build blocks
     pieces[:blocks] = theme.blocks.collect do |block|
+      block = block.attributes.symbolize_keys
       block[:build] = liquid(block[:template], locals: locals)
 
       # Add data attributes to identify blocks, for use in the editor
@@ -34,6 +36,9 @@ module ThemeHelper
       block[:build] = build.to_html
       block
     end
+
+    # Add build to theme context for replacement in templates
+    theme_context.blocks = pieces[:blocks]
 
     # Build regions and templates
     [:regions, :templates].each do |type|
@@ -50,8 +55,7 @@ module ThemeHelper
           piece[:template] = template.to_html
         end
 
-        piece[:build] = liquid(piece[:template], locals: locals, scope: theme)
-        piece[:build] = liquid(piece[:build], locals: locals, scope: theme)
+        piece[:build] = liquid(piece[:template], locals: locals, scope: theme_context)
 
         pieces[type] << piece
       end
