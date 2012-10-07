@@ -224,7 +224,7 @@ module.exports = View.extend({
       e.preventDefault();
     }
 
-    $column.width(width);
+    $column.attr("style", "width: " + width + "px !important");
     drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
   }
 
