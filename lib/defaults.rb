@@ -8,6 +8,22 @@ module Defaults
       }
     end
 
+    @entry_content = %q(<p>Lorem ipsum dolor sit amet, adipiscing elit. Nullam dignissim
+convallis est. Quisque aliquam. Donec faucibus. Nunc iaculis suscipit dui. Nam
+sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt nec, gravida
+vehicula, nisl. Praesent mattis, massa quis luctus fermentum, turpis mi
+volutpat justo, eu volutpat enim diam eget metus. Maecenas ornare tortor. Donec
+sed tellus eget sapien fringilla nonummy. Mauris a ante. Suspendisse quam sem,
+consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus.</p>
+<p>Lorem ipsum dolor sit amet, <em>emphasis</em> consectetuer adipiscing elit.
+Nullam dignissim convallis est. Quisque aliquam. Donec faucibus. Nunc iaculis
+suscipit dui. Nam sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt
+nec, gravida vehicula, nisl. Praesent mattis, massa quis luctus fermentum,
+turpis mi volutpat justo, eu volutpat enim diam eget metus. Maecenas ornare
+tortor. Donec sed tellus eget sapien fringilla nonummy. Mauris a ante.
+Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi
+imperdiet augue quis tellus.</p>)
+
     BLOCKS = {
       header_image: %q(<a href="{{site_url}}">
   <img src='{{ header_image_url }}' width='1000' height='288' alt='' />
@@ -34,73 +50,34 @@ module Defaults
   <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
 </form>),
 
-      article: %q(<article class="page hentry">
+      article: %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Page</h1>
+    <h1 class="entry-title">Sample Content</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    <p>This is an example page. It's different from a blog post because
-    it will stay in one place and will show up in your site navigation
-    (in most themes). Most people start with an About page that introduces them
-    to potential site visitors. It might say something like this:</p>
-    <blockquote><p>Hi there! I'm a bike messenger by day, aspiring actor by night,
-      and this is my blog. I live in Los Angeles, have a great dog named Jack,
-      and I like pi&#241;a coladas. (And gettin' caught in the rain.)</p></blockquote>
-    <p>...or something like this:</p>
-    <blockquote><p>The XYZ Doohickey Company was founded in 1971, and has been providing
-      quality doohickies to the public ever since. Located in Gotham City,
-      XYZ employs over 2,000 people and does all kinds of awesome things for
-      the Gotham community.</p></blockquote>
-    <p>As a new WordPress user, you should go to <a href="#">your dashboard</a>
-    to delete this page and create new pages for your content. Have fun!</p>
+    #{@entry_content}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
 </article>),
 
-      "article-single" => %q(<article class="page hentry">
+      "article-single" => %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Page</h1>
+    <h1 class="entry-title">Sample Content</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    <p>This is an example page. It's different from a blog post because
-    it will stay in one place and will show up in your site navigation
-    (in most themes). Most people start with an About page that introduces them
-    to potential site visitors. It might say something like this:</p>
-    <blockquote><p>Hi there! I'm a bike messenger by day, aspiring actor by night,
-      and this is my blog. I live in Los Angeles, have a great dog named Jack,
-      and I like pi&#241;a coladas. (And gettin' caught in the rain.)</p></blockquote>
-    <p>...or something like this:</p>
-    <blockquote><p>The XYZ Doohickey Company was founded in 1971, and has been providing
-      quality doohickies to the public ever since. Located in Gotham City,
-      XYZ employs over 2,000 people and does all kinds of awesome things for
-      the Gotham community.</p></blockquote>
-    <p>As a new WordPress user, you should go to <a href="#">your dashboard</a>
-    to delete this page and create new pages for your content. Have fun!</p>
+    #{@entry_content}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
 </article>),
 
-      "article-page" => %q(<article class="page hentry">
+      "article-page" => %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Page</h1>
+    <h1 class="entry-title">Sample Content</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    <p>This is an example page. It's different from a blog post because
-    it will stay in one place and will show up in your site navigation
-    (in most themes). Most people start with an About page that introduces them
-    to potential site visitors. It might say something like this:</p>
-    <blockquote><p>Hi there! I'm a bike messenger by day, aspiring actor by night,
-      and this is my blog. I live in Los Angeles, have a great dog named Jack,
-      and I like pi&#241;a coladas. (And gettin' caught in the rain.)</p></blockquote>
-    <p>...or something like this:</p>
-    <blockquote><p>The XYZ Doohickey Company was founded in 1971, and has been providing
-      quality doohickies to the public ever since. Located in Gotham City,
-      XYZ employs over 2,000 people and does all kinds of awesome things for
-      the Gotham community.</p></blockquote>
-    <p>As a new WordPress user, you should go to <a href="#">your dashboard</a>
-    to delete this page and create new pages for your content. Have fun!</p>
+    #{@entry_content}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
@@ -113,39 +90,14 @@ module Defaults
     <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
   </form>
 </aside>
-<aside id="recent-posts-2" class="widget widget_recent_entries">
-  <h3 class="widget-title">Recent Posts</h3>
+<aside class="widget widget_text">
+  <h3 class="widget-title">Some Title</h3>
+  <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nullam dignissim
+  convallis est.</p>
   <ul>
-    <li><a href="" title="Hello world!">Hello world!</a></li>
-  </ul>
-</aside>
-<aside class="widget widget_recent_comments">
-  <h3 class="widget-title">Recent Comments</h3>
-  <ul id="recentcomments">
-    <li class="recentcomments"><a href='' rel='external nofollow' class='url'>Mr WordPress</a> on <a href="">Hello world!</a></li>
-  </ul>
-</aside>
-<aside id="archives-2" class="widget widget_archive">
-  <h3 class="widget-title">Archives</h3>
-  <ul>
-    <li><a href='' title='May 2012'>May 2012</a></li>
-  </ul>
-</aside>
-<aside class="widget widget_categories">
-  <h3 class="widget-title">Categories</h3>
-  <ul>
-    <li class="cat-item cat-item-1"><a href="" title="View all posts filed under Uncategorized">Uncategorized</a>
-    </li>
-  </ul>
-</aside>
-<aside class="widget widget_meta">
-  <h3 class="widget-title">Meta</h3>
-  <ul>
-    <li><a href="">Site Admin</a></li>
-    <li><a href="">Log out</a></li>
-    <li><a href="" title="Syndicate this site using RSS 2.0">Entries <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-    <li><a href="" title="The latest comments to all posts in RSS">Comments <abbr title="Really Simple Syndication">RSS</abbr></a></li>
-    <li><a href="" title="Powered by WordPress, state-of-the-art semantic personal publishing platform.">WordPress.org</a></li>
+    <li>List Item 1</li>
+    <li>List Item 2</li>
+    <li>List Item 3</li>
   </ul>
 </aside>)
     }
