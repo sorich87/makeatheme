@@ -6026,6 +6026,9 @@ h1 {
   line-height: 1.4em;
   font-weight: bold;
 }
+.call-to-action {
+  margin: 30px 0;
+}
 .page-title {
   text-align: center;
   text-transform: uppercase;

@@ -1402,7 +1402,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       var button;
 
       if (app.currentUser.id === void 0) {
-        button = "<button class='x-btn x-btn-success x-login'>Login to Download</button>";
+        button = "<button class='x-btn x-btn-success x-login'>Login to Save</button>";
       } else {
         button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
       }
@@ -2977,7 +2977,7 @@ window.require.define({"views/templates/faq": function(exports, require, module)
     var foundHelper, self=this;
 
 
-    return "<h1 class=\"catch-phrase\">The next generation theme editor<br /> in your browser</h1>\n<p>Build your own responsive HTML5 and WordPress themes in minutes!</p>\n<p><a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started Now</a></p>\n";});
+    return "<h1 class=\"catch-phrase\">The next generation theme editor<br /> in your browser</h1>\n<p>Build your own responsive HTML5 and WordPress themes in minutes!</p>\n<p class=\"call-to-action\"><a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started Now</a></p>\n<p>ThemeMy makes it easy to build beautiful, professional-grade themes<br />\nyou can use on your website, sell to earn money or share with others for free.</p>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

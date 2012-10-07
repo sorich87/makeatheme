@@ -17,7 +17,7 @@ module.exports = View.extend({
     var button;
 
     if (app.currentUser.id === void 0) {
-      button = "<button class='x-btn x-btn-success x-login'>Login to Download</button>";
+      button = "<button class='x-btn x-btn-success x-login'>Login to Save</button>";
     } else {
       button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
     }
