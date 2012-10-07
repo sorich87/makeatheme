@@ -1637,11 +1637,11 @@ window.require.define({"views/layout": function(exports, require, module) {
       // Add data-bypass attribute to links so that navigation is not triggered
       // when clicked on
       this.addDataBypass();
+      _.bindAll(this, "addDataBypass", "removeDataBypass");
       app.on("save:before", this.removeDataBypass);
       app.on("save:after", this.addDataBypass);
       app.on("save:error", this.addDataBypass);
       app.on("template:loaded", this.addDataBypass);
-      _.bindAll(this, "addDataBypass", "removeDataBypass");
 
       app.on("block:inserted", this.insertColumn.bind(this));
     }
