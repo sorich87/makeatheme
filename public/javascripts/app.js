@@ -354,7 +354,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   CustomCSS.prototype.insertRules = function (rules) {
-    var rule, selector, property;
+    var rule, selector, property, length;
 
     rules = rules || {};
 
@@ -369,8 +369,9 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
         }
 
         rule = rules[selector][property];
+        length = this.sheet.rules ? this.sheet.rules.length : 0;
 
-        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", this.sheet.rules.length);
+        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", length);
       }
     }
 

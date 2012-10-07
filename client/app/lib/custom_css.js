@@ -41,7 +41,7 @@ CustomCSS.prototype.insertRule = function (selector, property, value, index) {
 };
 
 CustomCSS.prototype.insertRules = function (rules) {
-  var rule, selector, property;
+  var rule, selector, property, length;
 
   rules = rules || {};
 
@@ -56,8 +56,9 @@ CustomCSS.prototype.insertRules = function (rules) {
       }
 
       rule = rules[selector][property];
+      length = this.sheet.rules ? this.sheet.rules.length : 0;
 
-      this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", this.sheet.rules.length);
+      this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", length);
     }
   }
 
