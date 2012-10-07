@@ -2021,7 +2021,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
           block = this.pieces.blocks.models[i];
 
           if (node.className.indexOf(block.className()) !== -1 &&
-              node.firstChild.getAttribute("data-x-label") === block.get("label")) {
+              node.firstElementChild.getAttribute("data-x-label") === block.get("label")) {
             copy.innerHTML = block.tag();
             break;
           }
