@@ -5,7 +5,7 @@ var CustomCSS = function (rules) {
   var node = document.createElement("style");
 
   node.type = "text/css";
-  node.rel = "alternate stylesheet";
+  node.rel = "stylesheet";
 
   document.head.appendChild(node);
 
@@ -16,10 +16,13 @@ var CustomCSS = function (rules) {
 };
 
 CustomCSS.prototype.insertRule = function (selector, property, value, index) {
-  if (index === null || index === void 0) {
-    index = this.sheet.cssRules.length;
-  } else {
+  if (index !== null && index !== void 0) {
     this.deleteRule(index);
+  } else if (this.rules[selector] && this.rules[selector][property]) {
+    index = this.rules[selector][property].index;
+    this.deleteRule(index);
+  } else {
+    index = this.sheet.cssRules.length;
   }
 
   if (!selector || !property || !value) {

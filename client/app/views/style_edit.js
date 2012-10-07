@@ -21,6 +21,7 @@ module.exports = View.extend({
 
     app.on("editor:columnHighlight", this.setColumn);
     app.on("save:before", this.addThemeAttributes);
+    app.on("resize:end", this.changeWidth.bind(this));
 
     this.selector = "body";
     this.customCSS = app.editor.style;
@@ -152,5 +153,9 @@ module.exports = View.extend({
 
   , addThemeAttributes: function (attributes) {
     attributes.style = this.customCSS.rules;
+  }
+
+  , changeWidth: function (selector, width) {
+    this.customCSS.insertRule(selector, "width", parseInt(width, 10) + "px");
   }
 });

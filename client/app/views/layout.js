@@ -230,11 +230,18 @@ module.exports = View.extend({
 
   // Reset position of resize handle
   , resizeEnd: function (e, drag) {
-    $(drag.element).css({
-      position: "absolute"
+    var $drag = $(drag.element)
+      , $column = $drag.parent();
+
+    app.trigger("resize:end", "#" + $column[0].id, $column[0].style.width);
+
+    $drag.css({
+        position: "absolute"
       , right: "-12px"
       , left: "auto"
     });
+
+    $column.removeAttr("style");
 
     this.currentAction = null;
   }

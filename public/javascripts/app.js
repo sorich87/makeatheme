@@ -318,7 +318,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     var node = document.createElement("style");
 
     node.type = "text/css";
-    node.rel = "alternate stylesheet";
+    node.rel = "stylesheet";
 
     document.head.appendChild(node);
 
@@ -329,10 +329,13 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   CustomCSS.prototype.insertRule = function (selector, property, value, index) {
-    if (index === null || index === void 0) {
-      index = this.sheet.cssRules.length;
-    } else {
+    if (index !== null && index !== void 0) {
       this.deleteRule(index);
+    } else if (this.rules[selector] && this.rules[selector][property]) {
+      index = this.rules[selector][property].index;
+      this.deleteRule(index);
+    } else {
+      index = this.sheet.cssRules.length;
     }
 
     if (!selector || !property || !value) {
@@ -1801,11 +1804,18 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     // Reset position of resize handle
     , resizeEnd: function (e, drag) {
-      $(drag.element).css({
-        position: "absolute"
+      var $drag = $(drag.element)
+        , $column = $drag.parent();
+
+      app.trigger("resize:end", "#" + $column[0].id, $column[0].style.width);
+
+      $drag.css({
+          position: "absolute"
         , right: "-12px"
         , left: "auto"
       });
+
+      $column.removeAttr("style");
 
       this.currentAction = null;
     }
@@ -2582,6 +2592,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       app.on("editor:columnHighlight", this.setColumn);
       app.on("save:before", this.addThemeAttributes);
+      app.on("resize:end", this.changeWidth.bind(this));
 
       this.selector = "body";
       this.customCSS = app.editor.style;
@@ -2713,6 +2724,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , addThemeAttributes: function (attributes) {
       attributes.style = this.customCSS.rules;
+    }
+
+    , changeWidth: function (selector, width) {
+      this.customCSS.insertRule(selector, "width", parseInt(width, 10) + "px");
     }
   });
   
