@@ -5,8 +5,8 @@
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 .columns.x-current {
-  outline: 1px solid #049cdb;
   cursor: move;
+  box-shadow: 0px 0px 1px 1px #049cdb;
 }
 .columns .x-resize {
   position: absolute;
