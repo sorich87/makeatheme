@@ -140,7 +140,7 @@ module ThemeArchive
         f.puts "#{selector} {\n"
 
         rules.each do |property, rule|
-          f.puts "\t#{property}: #{rule['value']};\n"
+          f.puts "\t#{property}: #{rule['value']} !important;\n"
         end
 
         f.puts "}\n";

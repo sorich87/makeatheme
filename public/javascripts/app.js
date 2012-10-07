@@ -348,7 +348,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       , index: index
     };
 
-    this.sheet.insertRule(selector + " {" + property + ": " + value + "}", index);
+    this.sheet.insertRule(selector + " {" + property + ": " + value + " !important}", index);
 
     return index;
   };
@@ -370,7 +370,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
         rule = rules[selector][property];
 
-        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + "}", this.sheet.rules.length);
+        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", this.sheet.rules.length);
       }
     }
 
