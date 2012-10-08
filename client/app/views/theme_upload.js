@@ -16,7 +16,7 @@ module.exports = View.extend({
     e.preventDefault();
 
     button.setAttribute("disabled", "true");
-    button.innerHTML = "Processing. Please wait for a moment...";
+    button.innerHTML = "Processing...";
 
     $form.children(".alert-error").remove();
 

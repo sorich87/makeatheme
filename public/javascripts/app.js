@@ -3578,7 +3578,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
       e.preventDefault();
 
       button.setAttribute("disabled", "true");
-      button.innerHTML = "Processing. Please wait for a moment...";
+      button.innerHTML = "Processing...";
 
       $form.children(".alert-error").remove();
 
