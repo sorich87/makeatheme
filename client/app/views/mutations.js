@@ -108,7 +108,7 @@ module.exports = View.extend({
     // insert the node at the end.
     if (node.nextElementSibling) {
       if ("FOOTER" === node.nextElementSibling.tagName) {
-        sandbox.body.innerHTML = sandbox.body.innerHTML + node.outerHTML;
+        sandbox.body.innerHTML = sandbox.body.innerHTML + copy.outerHTML;
       } else {
         nextNode = sandbox.getElementById(node.nextElementSibling.id);
         if (nextNode.parentNode) {

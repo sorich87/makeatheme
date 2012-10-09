@@ -26,6 +26,6 @@ module.exports = Model.extend({
       label = " " + this.get("label");
     }
 
-    return "{{" + this.get("name") + label + "}}";
+    return "{% " + this.get("name") + label + " %}";
   }
 });

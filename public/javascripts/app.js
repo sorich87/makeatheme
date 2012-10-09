@@ -881,7 +881,7 @@ window.require.define({"models/block": function(exports, require, module) {
         label = " " + this.get("label");
       }
 
-      return "{{" + this.get("name") + label + "}}";
+      return "{% " + this.get("name") + label + " %}";
     }
   });
   
@@ -1354,7 +1354,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
         return block.name === name;
       });
 
-      build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
+      build = (new DOMParser()).parseFromString(attributes.template, "text/html").body;
       build.firstChild.setAttribute("data-x-label", label);
       build.firstChild.setAttribute("data-x-name", name);
 
@@ -2042,7 +2042,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
       // insert the node at the end.
       if (node.nextElementSibling) {
         if ("FOOTER" === node.nextElementSibling.tagName) {
-          sandbox.body.innerHTML = sandbox.body.innerHTML + node.outerHTML;
+          sandbox.body.innerHTML = sandbox.body.innerHTML + copy.outerHTML;
         } else {
           nextNode = sandbox.getElementById(node.nextElementSibling.id);
           if (nextNode.parentNode) {

@@ -103,7 +103,7 @@ module.exports = View.extend({
       return block.name === name;
     });
 
-    build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
+    build = (new DOMParser()).parseFromString(attributes.template, "text/html").body;
     build.firstChild.setAttribute("data-x-label", label);
     build.firstChild.setAttribute("data-x-name", name);
 

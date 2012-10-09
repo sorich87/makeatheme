@@ -38,6 +38,7 @@ module ThemeArchive
       Zip::ZipFile.open(@path, Zip::ZipFile::CREATE) do |zipfile|
         compile_regions(zipfile)
         compile_templates(zipfile)
+        compile_sidebars(zipfile)
         compile_php_files(zipfile)
         compile_static_files(zipfile)
         compile_screenshot(zipfile)
@@ -92,6 +93,14 @@ module ThemeArchive
           template = template + Defaults::PHP::REGIONS[:footer] if 'footer' == region[:name]
 
           f.puts render_template(template, @locals)
+        end
+      end
+    end
+
+    def compile_sidebars(zipfile)
+      @theme.blocks.where(name: 'sidebar').each do |block|
+        zipfile.get_output_stream(block.wordpress_filename) do |f|
+          f.puts render_template(Defaults::PHP::BLOCKS[:sidebar], block_slug: block.label.underscore)
         end
       end
     end
