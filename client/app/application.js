@@ -61,7 +61,7 @@ _.extend(Application, {
 
   , setBodyClasses: function () {
     Backbone.history.on("route", function (router, name) {
-      $("body")[0].className = name;
+      document.body.className = name;
     });
   }
 
