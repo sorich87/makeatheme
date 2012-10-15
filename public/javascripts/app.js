@@ -1080,14 +1080,6 @@ window.require.define({"router": function(exports, require, module) {
         $main.append(app.reuseView("faq").render().$el);
       }
 
-      if (window.MutationSummary === void 0) {
-        alert = "<div class='alert alert-error'>" +
-          "<b>Please Note:</b> Although the themes built with the online editor work in any browser, " +
-          "the editor itself has been tested only with the latest versions of " +
-          "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far. " +
-          "Support for other browsers is coming soon.</div>";
-      }
-
       $main
         .append(alert)
         .append("<h3 class='page-title'>Try out with a theme below</h3>")
@@ -1708,16 +1700,22 @@ window.require.define({"views/layout": function(exports, require, module) {
       this.currentAction = "drag";
 
       drag.limit(this.$el.children()).revert();
+
+      app.trigger("node:removed", drag.element[0], drag.element[0].parentNode);
     }
 
     // Reset position of dragged element.
     , dragEnd: function (e, drag) {
-      $(drag.element).css({
+      drag.element.css({
         top: drag.startPosition.top() + "px",
         left: drag.startPosition.left() + "px"
       });
 
+      drag.element.removeAttr("style");
+
       this.currentAction = null;
+
+      app.trigger("node:added", drag.element[0]);
     }
 
     // Mark the row as full or not.
@@ -1751,6 +1749,7 @@ window.require.define({"views/layout": function(exports, require, module) {
       if (isRowFull($drop, $drag)) {
         $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
         idIncrement++;
+        app.trigger("node:added", $row[0], "row");
       } else {
         $row = $drop;
       }
@@ -1766,6 +1765,7 @@ window.require.define({"views/layout": function(exports, require, module) {
           $dragParent.addClass("x-empty");
         } else {
           $dragParent.remove();
+          app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
         }
       }
 
@@ -1822,26 +1822,46 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     // Remove column if confirmed.
+    // Remove the whole row if it would be empty.
     , removeColumn: function (e) {
-      var grandParentNode = e.currentTarget.parentNode.parentNode;
+      var nodeToRemove, type, parentNodeId
+        , grandParentNode = e.currentTarget.parentNode.parentNode;
 
-      if (confirm("Are you sure you want to remove this element?")) {
-        if (grandParentNode.children.length === 1) {
-          $(grandParentNode).remove();
-        } else {
-          $(e.currentTarget.parentNode).remove();
-        }
+      if (!confirm("Are you sure you want to remove this element?")) {
+        return;
       }
+
+      if (grandParentNode.children.length === 1) {
+        type = "row";
+        nodeToRemove = grandParentNode;
+      } else {
+        type = "column";
+        nodeToRemove = e.currentTarget.parentNode;
+      }
+
+      parentNodeId = nodeToRemove.parentNode.id;
+
+      nodeToRemove.parentNode.removeChild(nodeToRemove);
+
+      app.trigger("node:removed", nodeToRemove, window.document.getElementById(parentNodeId), type);
     }
 
     // Insert column when a block is dragged into the layout.
-    , insertColumn: function (block, element) {
-      if (element.parent().hasClass("row")) {
-        element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns " +
-          block.className() + "'>" + block.get("build") + "</div>";
+    , insertColumn: function (block, $element) {
+      var id;
 
-        idIncrement++;
+      if ($element[0].parentNode.className.indexOf("row") === false) {
+        return;
       }
+
+      nodeId = "y-" + idIncrement;
+
+      $element[0].outerHTML = "<div id='" + nodeId + "' class='columns " +
+        block.className() + "'>" + block.get("build") + "</div>";
+
+      app.trigger("node:added", window.document.getElementById(nodeId));
+
+      idIncrement++;
     }
   });
   
@@ -1937,97 +1957,33 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
   module.exports = View.extend({
     initialize: function () {
-      _.bindAll(this);
-      window.addEventListener("DOMContentLoaded", this.observeMutations);
-
-      app.on("template:load", this.stopObserving);
-      app.on("template:loaded", this.restartObserving);
-
-      app.on("region:load", this.stopObserving);
-      app.on("region:loaded", this.restartObserving);
-    }
-
-    , stopObserving: function () {
-      this.observer.disconnect();
-    }
-
-    , restartObserving: function () {
-      this.observer.reconnect();
-    }
-
-    , observeMutations: function () {
-      this.observer = new MutationSummary({
-          rootNode: $("body")[0]
-        , queries: [{all: true}]
-        , callback: this.propagateMutations
-      });
+      app.on("node:added", this.addNode.bind(this));
+      app.on("node:removed", this.removeNode.bind(this));
 
       this.pieces = {};
-
       app.trigger("mutations:started", this.pieces);
-    }
-
-    , propagateMutations: function (summaries) {
-      var isColumn
-        , summary = summaries[0];
-
-      isColumn = function (node) {
-        return node.className && node.className.indexOf("column") !== -1;
-      };
-
-      isRow = function (node) {
-        return node.className && node.className.indexOf("row") !== -1;
-      };
-
-      summary.added.forEach(function (node) {
-        if (isColumn(node)) {
-          this.addNode(node, "column");
-        } else if (isRow(node)) {
-          this.addNode(node, "row");
-        }
-      }.bind(this));
-
-      summary.removed.forEach(function (node) {
-        if (isColumn(node)) {
-          this.removeNode(node, summary.getOldParentNode(node), "column");
-        } else if (isRow(node)) {
-          this.removeNode(node, summary.getOldParentNode(node), "row");
-        }
-      }.bind(this));
-
-      summary.reparented.forEach(function (node) {
-        if (isColumn(node)) {
-          this.reparentNode(node, summary.getOldParentNode(node));
-        }
-      }.bind(this));
-
-      summary.reordered.forEach(function (node) {
-        if (isColumn(node)) {
-          this.reorderNode(node, summary.getOldPreviousSibling(node));
-        }
-      }.bind(this));
     }
 
     , addNode: function (node, type) {
       var topNode, region, template, parentNode, sandbox, block, sibling, templateClone;
 
-      copy = node.cloneNode(false);
+      copy = node.cloneNode(true);
 
-      if (type === "column") {
+      if (type === "row") {
+        topNode = node.parentNode;
+      } else {
         topNode = node.parentNode.parentNode;
 
         // Add corresponding Liquid tag in column node.
         for (var i in this.pieces.blocks.models) {
           block = this.pieces.blocks.models[i];
 
-          if (node.className.indexOf(block.className()) !== -1 &&
+          if (node.firstElementChild.getAttribute("data-x-name") === block.get("name") &&
               node.firstElementChild.getAttribute("data-x-label") === block.get("label")) {
             copy.innerHTML = block.tag();
             break;
           }
         }
-      } else {
-        topNode = node.parentNode;
       }
 
       piece = this.getTemplatePiece(topNode);
@@ -2036,6 +1992,8 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
       // Get parent destination.
       parentNode = sandbox.getElementById(node.parentNode.id);
+
+      this.cleanupNode(copy);
 
       // Insert the node in the template.
       // If the next sibling of the node is the footer region,
@@ -2059,15 +2017,15 @@ window.require.define({"views/mutations": function(exports, require, module) {
     , removeNode: function (node, oldParentNode, type) {
       var topNode;
 
-      if (type === "column") {
+      if (type === "row") {
+        topNode = oldParentNode;
+      } else {
         topNode = oldParentNode.parentNode;
 
         // If no topNode, it means the parent row has been removed as well.
         if (topNode === null) {
           return;
         }
-      } else if (type === "row") {
-        topNode = oldParentNode;
       }
 
       piece = this.getTemplatePiece(topNode);
@@ -2079,18 +2037,6 @@ window.require.define({"views/mutations": function(exports, require, module) {
       copy.parentNode.removeChild(copy);
 
       piece.set("template", sandbox.body.innerHTML);
-    }
-
-    , reparentNode: function (node, oldParentNode) {
-      this.addNode(node, "column");
-      // Remove node if it was in a different region
-      if (oldParentNode.parentNode !== null) {
-        this.removeNode(node, oldParentNode, "column");
-      }
-    }
-
-    , reorderNode: function (node, oldPreviousSibling) {
-      this.addNode(node, "column");
     }
 
     , getTemplatePiece: function(topNode) {
@@ -2109,6 +2055,16 @@ window.require.define({"views/mutations": function(exports, require, module) {
       }
 
       return piece;
+    }
+
+    , cleanupNode: function(node) {
+      $(node)
+        .removeClass("x-current")
+        .children(".x-resize, .x-remove")
+          .remove()
+          .end()
+        .find("a[data-bypass=true]")
+          .removeAttr("data-bypass");
     }
   });
   

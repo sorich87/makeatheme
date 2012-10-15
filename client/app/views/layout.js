@@ -133,16 +133,22 @@ module.exports = View.extend({
     this.currentAction = "drag";
 
     drag.limit(this.$el.children()).revert();
+
+    app.trigger("node:removed", drag.element[0], drag.element[0].parentNode);
   }
 
   // Reset position of dragged element.
   , dragEnd: function (e, drag) {
-    $(drag.element).css({
+    drag.element.css({
       top: drag.startPosition.top() + "px",
       left: drag.startPosition.left() + "px"
     });
 
+    drag.element.removeAttr("style");
+
     this.currentAction = null;
+
+    app.trigger("node:added", drag.element[0]);
   }
 
   // Mark the row as full or not.
@@ -176,6 +182,7 @@ module.exports = View.extend({
     if (isRowFull($drop, $drag)) {
       $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
       idIncrement++;
+      app.trigger("node:added", $row[0], "row");
     } else {
       $row = $drop;
     }
@@ -191,6 +198,7 @@ module.exports = View.extend({
         $dragParent.addClass("x-empty");
       } else {
         $dragParent.remove();
+        app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
       }
     }
 
@@ -247,25 +255,45 @@ module.exports = View.extend({
   }
 
   // Remove column if confirmed.
+  // Remove the whole row if it would be empty.
   , removeColumn: function (e) {
-    var grandParentNode = e.currentTarget.parentNode.parentNode;
+    var nodeToRemove, type, parentNodeId
+      , grandParentNode = e.currentTarget.parentNode.parentNode;
 
-    if (confirm("Are you sure you want to remove this element?")) {
-      if (grandParentNode.children.length === 1) {
-        $(grandParentNode).remove();
-      } else {
-        $(e.currentTarget.parentNode).remove();
-      }
+    if (!confirm("Are you sure you want to remove this element?")) {
+      return;
     }
+
+    if (grandParentNode.children.length === 1) {
+      type = "row";
+      nodeToRemove = grandParentNode;
+    } else {
+      type = "column";
+      nodeToRemove = e.currentTarget.parentNode;
+    }
+
+    parentNodeId = nodeToRemove.parentNode.id;
+
+    nodeToRemove.parentNode.removeChild(nodeToRemove);
+
+    app.trigger("node:removed", nodeToRemove, window.document.getElementById(parentNodeId), type);
   }
 
   // Insert column when a block is dragged into the layout.
-  , insertColumn: function (block, element) {
-    if (element.parent().hasClass("row")) {
-      element[0].outerHTML = "<div id='y-" + idIncrement + "' class='columns " +
-        block.className() + "'>" + block.get("build") + "</div>";
+  , insertColumn: function (block, $element) {
+    var id;
 
-      idIncrement++;
+    if ($element[0].parentNode.className.indexOf("row") === false) {
+      return;
     }
+
+    nodeId = "y-" + idIncrement;
+
+    $element[0].outerHTML = "<div id='" + nodeId + "' class='columns " +
+      block.className() + "'>" + block.get("build") + "</div>";
+
+    app.trigger("node:added", window.document.getElementById(nodeId));
+
+    idIncrement++;
   }
 });

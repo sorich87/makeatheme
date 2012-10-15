@@ -29,14 +29,6 @@ module.exports = Backbone.Router.extend({
       $main.append(app.reuseView("faq").render().$el);
     }
 
-    if (window.MutationSummary === void 0) {
-      alert = "<div class='alert alert-error'>" +
-        "<b>Please Note:</b> Although the themes built with the online editor work in any browser, " +
-        "the editor itself has been tested only with the latest versions of " +
-        "<a href=''>Google Chrome</a> and <a href=''>Mozilla Firefox</a> so far. " +
-        "Support for other browsers is coming soon.</div>";
-    }
-
     $main
       .append(alert)
       .append("<h3 class='page-title'>Try out with a theme below</h3>")
