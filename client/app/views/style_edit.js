@@ -156,6 +156,9 @@ module.exports = View.extend({
   }
 
   , changeWidth: function (selector, width) {
-    this.customCSS.insertRule(selector, "width", parseInt(width, 10) + "px");
+    width =  parseInt(width, 10) / $(selector).parent().width() * 100;
+    this.customCSS.insertRule(selector, "width", width + "%");
+
+    this.render();
   }
 });
