@@ -17,9 +17,9 @@ module.exports = View.extend({
     var button;
 
     if (app.currentUser.id === void 0) {
-      button = "<button class='x-btn x-btn-success x-login'>Login to Save</button>";
+      button = "<button class='btn btn-success x-login'>Login to Save</button>";
     } else {
-      button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
+      button = "<button class='btn btn-success x-download'>Download Theme</button>";
     }
 
     this.$el.empty().append(button);

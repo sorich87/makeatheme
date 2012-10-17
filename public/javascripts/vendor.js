@@ -12603,1818 +12603,2137 @@ _.extend(Backbone.Validation.callbacks, {
 });
 ;
 
-//    - jquery.compare.js
-(function($){
-
-/**
- * @function jQuery.fn.compare
- * @parent jQuery.compare
+/*!
+ * jQuery UI Core 1.9.0
+ * http://jqueryui.com
  *
- * Compare two elements and return a bitmask as a number representing the following conditions:
+ * Copyright 2012 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
  *
- * - `000000` -> __0__: Elements are identical
- * - `000001` -> __1__: The nodes are in different documents (or one is outside of a document)
- * - `000010` -> __2__: #bar precedes #foo
- * - `000100` -> __4__: #foo precedes #bar
- * - `001000` -> __8__: #bar contains #foo
- * - `010000` -> __16__: #foo contains #bar
- *
- * You can check for any of these conditions using a bitwise AND:
- *
- *     if( $('#foo').compare($('#bar')) & 2 ) {
- *       console.log("#bar precedes #foo")
- *     }
- *
- * @param {HTMLElement|jQuery} element an element or jQuery collection to compare against.
- * @return {Number} A number representing a bitmask deatiling how the elements are positioned from each other.
+ * http://api.jqueryui.com/category/ui-core/
  */
+(function( $, undefined ) {
 
-// See http://ejohn.org/blog/comparing-document-position/
-jQuery.fn.compare = function(element){ //usually 
-	try{
-		// Firefox 3 throws an error with XUL - we can't use compare then
-		element = element.jquery ? element[0] : element;
-	}catch(e){
-		return null;
-	}
+var uuid = 0,
+	runiqueId = /^ui-id-\d+$/;
 
-	// make sure we aren't coming from XUL element
-	if (window.HTMLElement) {
-		var s = HTMLElement.prototype.toString.call(element)
-		if (s == '[xpconnect wrapped native prototype]' || s == '[object XULElement]' || s === '[object Window]') {
-			return null;
-		}
-	}
-
-	if(this[0].compareDocumentPosition){
-		// For browsers that support it, use compareDocumentPosition
-		// https://developer.mozilla.org/en/DOM/Node.compareDocumentPosition
-		return this[0].compareDocumentPosition(element);
-	}
-
-	// this[0] contains element
-	if(this[0] == document && element != document) return 8;
-
-	var number =
-			// this[0] contains element
-			(this[0] !== element && this[0].contains(element) && 16) +
-			// element contains this[0]
-			(this[0] != element && element.contains(this[0]) && 8),
-		docEl = document.documentElement;
-
-	// Use the sourceIndex
-	if(this[0].sourceIndex){
-		// this[0] precedes element
-		number += (this[0].sourceIndex < element.sourceIndex && 4)
-		// element precedes foo[0]
-		number += (this[0].sourceIndex > element.sourceIndex && 2)
-		// The nodes are in different documents
-		number += (this[0].ownerDocument !== element.ownerDocument ||
-			(this[0] != docEl && this[0].sourceIndex <= 0 ) ||
-			(element != docEl && element.sourceIndex <= 0 )) && 1
-	}
-
-	return number;
+// prevent duplicate loading
+// this is only a problem because we proxy existing functions
+// and we don't want to double proxy them
+$.ui = $.ui || {};
+if ( $.ui.version ) {
+	return;
 }
 
-})(jQuery);
+$.extend( $.ui, {
+	version: "1.9.0",
 
-//    - jquery.within.js
-(function($){
-	// Checks if x and y coordinates are within a box with left, top, width and height
-   var withinBox = function(x, y, left, top, width, height ){
-        return (y >= top &&
-                y <  top + height &&
-                x >= left &&
-                x <  left + width);
-    } 
-/**
- * @function jQuery.fn.within
- * @parent jQuery.within
- * @plugin jquery/dom/within
- * 
- * Returns all elements matching the selector that touch a given point:
- * 
- *     // get all elements that touch 200x200.
- *     $('*').within(200, 200);
- * 
- * @param {Number} left the position from the left of the page 
- * @param {Number} top the position from the top of the page
- * @param {Boolean} [useOffsetCache=false] cache the dimensions and offset of the elements.
- * @return {jQuery} a jQuery collection of elements whos area
- * overlaps the element position.
- */
-$.fn.within= function(left, top, useOffsetCache) {
-    var ret = []
-    this.each(function(){
-        var q = jQuery(this);
+	keyCode: {
+		BACKSPACE: 8,
+		COMMA: 188,
+		DELETE: 46,
+		DOWN: 40,
+		END: 35,
+		ENTER: 13,
+		ESCAPE: 27,
+		HOME: 36,
+		LEFT: 37,
+		NUMPAD_ADD: 107,
+		NUMPAD_DECIMAL: 110,
+		NUMPAD_DIVIDE: 111,
+		NUMPAD_ENTER: 108,
+		NUMPAD_MULTIPLY: 106,
+		NUMPAD_SUBTRACT: 109,
+		PAGE_DOWN: 34,
+		PAGE_UP: 33,
+		PERIOD: 190,
+		RIGHT: 39,
+		SPACE: 32,
+		TAB: 9,
+		UP: 38
+	}
+});
 
-        if (this == document.documentElement) {
-			return ret.push(this);
-		}
-
-	    // uses either the cached offset or .offset()
-        var offset = useOffsetCache ? 
-						jQuery.data(this,"offsetCache") || jQuery.data(this,"offsetCache", q.offset()) : 
-						q.offset();
-
-        // Check if the given coordinates are within the area of the current element
-	    var res =  withinBox(left, top,  offset.left, offset.top,
-                                    this.offsetWidth, this.offsetHeight );
-
-        if (res) {
-	        // Add it to the results
-			ret.push(this);
-		}
-    });
-    
-    return this.pushStack( jQuery.unique( ret ), "within", left+","+top );
-}
-
-
-/**
- * @function jQuery.fn.withinBox
- * @parent jQuery.within
- *
- * Returns all elements matching the selector that have a given area in common:
- *
- *      $('*').withinBox(200, 200, 100, 100)
- *
- * @param {Number} left the position from the left of the page
- * @param {Number} top the position from the top of the page
- * @param {Number} width the width of the area
- * @param {Number} height the height of the area
- * @param {Boolean} [useOffsetCache=false] cache the dimensions and offset of the elements.
- * @return {jQuery} a jQuery collection of elements whos area
- * overlaps the element position.
- */
-$.fn.withinBox = function(left, top, width, height, useOffsetCache){
-	var ret = []
-    this.each(function(){
-        var q = jQuery(this);
-
-        if(this == document.documentElement) return  ret.push(this);
-
-	    // use cached offset or .offset()
-        var offset = cache ? 
-			jQuery.data(this,"offset") || 
-			jQuery.data(this,"offset", q.offset()) : 
-			q.offset();
-
-
-        var ew = q.width(), eh = q.height(),
-	        // Checks if the element offset is within the given box
-	        res =  !( (offset.top > top+height) || (offset.top +eh < top) || (offset.left > left+width ) || (offset.left+ew < left));
-
-        if(res)
-            ret.push(this);
-    });
-    return this.pushStack( jQuery.unique( ret ), "withinBox", jQuery.makeArray(arguments).join(",") );
-}
-    
-})(jQuery);
-
-//    - jquery.lang.vector.js
-(function($){
-	var getSetZero = function(v){ return v !== undefined ? (this.array[0] = v) : this.array[0] },
-		getSetOne = function(v){ return v !== undefined ? (this.array[1] = v) : this.array[1]};
-
-/**
- * @class jQuery.Vector
- * @parent jquerypp
- *
- * `jQuery.Vector` represents a multi dimensional vector with shorthand methods for
- * working with two dimensions.
- *
- * It is mainly used in [jQuery.event.drag drag] & [jQuery.event.drop drop] events.
- *
- * @constructor creates a new vector instance from the arguments.  Example:
- *
- *      new jQuery.Vector(1,2)
- */
-	$.Vector = function(arr) {
-		var array = $.isArray(arr) ? arr : $.makeArray(arguments);
-		this.update(array);
-	};
-	$.Vector.prototype =
-	/* @Prototype*/
-	{
-		/**
-		 * Applys the function to every item in the vector and returns a new vector.
-		 *
-		 * @param {Function} f The function to apply
-		 * @return {jQuery.Vector} A new $.Vector instance
-		 */
-		app: function( f ) {
-			var i, newArr = [];
-
-			for ( i = 0; i < this.array.length; i++ ) {
-				newArr.push(f(this.array[i], i));
-			}
-			return new $.Vector(newArr);
-		},
-		/**
-		 * Adds two vectors together and returns a new instance. Example:
-		 *
-		 *      new $.Vector(1,2).plus(2,3) //-> (3, 5)
-		 *      new $.Vector(3,5).plus(new Vector(4,5)) //-> (7, 10)
-		 *
-		 * @return {$.Vector}
-		 */
-		plus: function() {
-			var i, args = arguments[0] instanceof $.Vector ? arguments[0].array : $.makeArray(arguments),
-				arr = this.array.slice(0),
-				vec = new $.Vector();
-			for ( i = 0; i < args.length; i++ ) {
-				arr[i] = (arr[i] ? arr[i] : 0) + args[i];
-			}
-			return vec.update(arr);
-		},
-		/**
-		 * Subtract one vector from another and returns a new instance. Example:
-		 *
-		 *      new $.Vector(4, 5).minus(2, 1) //-> (2, 4)
-		 *
-		 * @return {jQuery.Vector}
-		 */
-		minus: function() {
-			var i, args = arguments[0] instanceof $.Vector ? arguments[0].array : $.makeArray(arguments),
-				arr = this.array.slice(0),
-				vec = new $.Vector();
-			for ( i = 0; i < args.length; i++ ) {
-				arr[i] = (arr[i] ? arr[i] : 0) - args[i];
-			}
-			return vec.update(arr);
-		},
-		/**
-		 * Returns the current vector if it is equal to the vector passed in.
-		 *
-		 * `null` if otherwise.
-		 *
-		 * @return {jQuery.Vector}
-		 */
-		equals: function() {
-			var i, args = arguments[0] instanceof $.Vector ? arguments[0].array : $.makeArray(arguments),
-				arr = this.array.slice(0),
-				vec = new $.Vector();
-			for ( i = 0; i < args.length; i++ ) {
-				if ( arr[i] != args[i] ) {
-					return null;
-				}
-			}
-			return vec.update(arr);
-		},
-		/**
-		 * Returns the first value of the vector.
-		 * You can also access the same value through the following aliases the
-		 * [jQuery.Vector.prototype.left vector.left()] and [jQuery.Vector.prototype.left vector.width()]
-		 * aliases.
-		 *
-		 * For example:
-		 *
-		 *      var v = new $.Vector(2, 5);
-		 *      v.x() //-> 2
-		 *      v.left() //-> 2
-		 *      v.width() //-> 2
-		 *
-		 * @return {Number} The first value of the vector
-		 */
-		x: getSetZero,
-		/**
-		 * @hide
-		 * Alias for [jQuery.Vector.prototype.x].
-		 *
-		 * @return {Number}
-		 */
-		left: getSetZero,
-		/**
-		 * @hide
-		 * Alias for [jQuery.Vector.prototype.x].
-		 *
-		 * @return {Number}
-		 */
-		width: getSetZero,
-		/**
-		 * Returns the second value of the vector.
-		 * You can also access the same value through the [jQuery.Vector.prototype.top vector.top()]
-		 * and [jQuery.Vector.prototype.height vector.height()] aliases.
-		 *
-		 * For example:
-		 *
-		 *      var v = new $.Vector(2, 5);
-		 *      v.y() //-> 5
-		 *      v.top() //-> 5
-		 *      v.height() //-> 5
-		 *
-		 * @return {Number} The first value of the vector
-		 */
-		y: getSetOne,
-		/**
-		 * @hide
-		 * Alias for [jQuery.Vector.prototype.y].
-		 *
-		 * @return {Number}
-		 */
-		top: getSetOne,
-		/**
-		 * @hide
-		 * Alias for [jQuery.Vector.prototype.y].
-		 *
-		 * @return {Number}
-		 */
-		height: getSetOne,
-		/**
-		 * Returns a string representation of the vector in the form of (x,y,...)
-		 *
-		 *      var v = new $.Vector(4, 6, 1, 3);
-		 *      v.toString() //-> (4, 6, 1, 3)
-		 *
-		 * @return {String}
-		 */
-		toString: function() {
-			return "(" + this.array.join(', ') + ")";
-		},
-		/**
-		 * Replaces the vectors contents
-		 *
-		 *      var v = new $.Vector(2, 3);
-		 *
-		 * @param {Object} array
-		 */
-		update: function( array ) {
-			var i;
-			if ( this.array ) {
-				for ( i = 0; i < this.array.length; i++ ) {
-					delete this.array[i];
-				}
-			}
-			this.array = array;
-			for ( i = 0; i < array.length; i++ ) {
-				this[i] = this.array[i];
-			}
-			return this;
-		}
-	};
-
-	$.Event.prototype.vector = function() {
-		var
-			// Get the first touch element for touch events
-			touches = "ontouchend" in document && this.originalEvent.touches.length ? this.originalEvent.touches[0] : this;
-		if ( this.originalEvent.synthetic ) {
-			var doc = document.documentElement,
-				body = document.body;
-			return new $.Vector(touches.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0),
-				touches.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0));
-		} else {
-			return new $.Vector(touches.pageX, touches.pageY);
-		}
-	};
-
-	$.fn.offsetv = function() {
-		if ( this[0] == window ) {
-			return new $.Vector(window.pageXOffset ? window.pageXOffset : document.documentElement.scrollLeft, window.pageYOffset ? window.pageYOffset : document.documentElement.scrollTop);
-		} else {
-			var offset = this.offset();
-			return new $.Vector(offset.left, offset.top);
-		}
-	};
-
-	$.fn.dimensionsv = function( which ) {
-		if ( this[0] == window || !which ) {
-			return new $.Vector(this.width(), this.height());
-		}
-		else {
-			return new $.Vector(this[which + "Width"](), this[which + "Height"]());
-		}
-	};
-})(jQuery);
-
-//    - jquery.event.livehack.js
-(function() {
-
-	var event = jQuery.event,
-
-		//helper that finds handlers by type and calls back a function, this is basically handle
-		// events - the events object
-		// types - an array of event types to look for
-		// callback(type, handlerFunc, selector) - a callback
-		// selector - an optional selector to filter with, if there, matches by selector
-		//     if null, matches anything, otherwise, matches with no selector
-		findHelper = function( events, types, callback, selector ) {
-			var t, type, typeHandlers, all, h, handle, 
-				namespaces, namespace,
-				match;
-			for ( t = 0; t < types.length; t++ ) {
-				type = types[t];
-				all = type.indexOf(".") < 0;
-				if (!all ) {
-					namespaces = type.split(".");
-					type = namespaces.shift();
-					namespace = new RegExp("(^|\\.)" + namespaces.slice(0).sort().join("\\.(?:.*\\.)?") + "(\\.|$)");
-				}
-				typeHandlers = (events[type] || []).slice(0);
-
-				for ( h = 0; h < typeHandlers.length; h++ ) {
-					handle = typeHandlers[h];
-					
-					match = (all || namespace.test(handle.namespace));
-					
-					if(match){
-						if(selector){
-							if (handle.selector === selector  ) {
-								callback(type, handle.origHandler || handle.handler);
-							}
-						} else if (selector === null){
-							callback(type, handle.origHandler || handle.handler, handle.selector);
-						}
-						else if (!handle.selector ) {
-							callback(type, handle.origHandler || handle.handler);
-							
-						} 
+// plugins
+$.fn.extend({
+	_focus: $.fn.focus,
+	focus: function( delay, fn ) {
+		return typeof delay === "number" ?
+			this.each(function() {
+				var elem = this;
+				setTimeout(function() {
+					$( elem ).focus();
+					if ( fn ) {
+						fn.call( elem );
 					}
-					
-					
-				}
-			}
-		};
+				}, delay );
+			}) :
+			this._focus.apply( this, arguments );
+	},
 
-	/**
-	 * Finds event handlers of a given type on an element.
-	 * @param {HTMLElement} el
-	 * @param {Array} types an array of event names
-	 * @param {String} [selector] optional selector
-	 * @return {Array} an array of event handlers
-	 */
-	event.find = function( el, types, selector ) {
-		var events = ( $._data(el) || {} ).events,
-			handlers = [],
-			t, liver, live;
-
-		if (!events ) {
-			return handlers;
-		}
-		findHelper(events, types, function( type, handler ) {
-			handlers.push(handler);
-		}, selector);
-		return handlers;
-	};
-	/**
-	 * Finds all events.  Group by selector.
-	 * @param {HTMLElement} el the element
-	 * @param {Array} types event types
-	 */
-	event.findBySelector = function( el, types ) {
-		var events = $._data(el).events,
-			selectors = {},
-			//adds a handler for a given selector and event
-			add = function( selector, event, handler ) {
-				var select = selectors[selector] || (selectors[selector] = {}),
-					events = select[event] || (select[event] = []);
-				events.push(handler);
-			};
-
-		if (!events ) {
-			return selectors;
-		}
-		//first check live:
-		/*$.each(events.live || [], function( i, live ) {
-			if ( $.inArray(live.origType, types) !== -1 ) {
-				add(live.selector, live.origType, live.origHandler || live.handler);
-			}
-		});*/
-		//then check straight binds
-		findHelper(events, types, function( type, handler, selector ) {
-			add(selector || "", type, handler);
-		}, null);
-
-		return selectors;
-	};
-	event.supportTouch = "ontouchend" in document;
-	
-	$.fn.respondsTo = function( events ) {
-		if (!this.length ) {
-			return false;
+	scrollParent: function() {
+		var scrollParent;
+		if (($.browser.msie && (/(static|relative)/).test(this.css('position'))) || (/absolute/).test(this.css('position'))) {
+			scrollParent = this.parents().filter(function() {
+				return (/(relative|absolute|fixed)/).test($.css(this,'position')) && (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+			}).eq(0);
 		} else {
-			//add default ?
-			return event.find(this[0], $.isArray(events) ? events : [events]).length > 0;
+			scrollParent = this.parents().filter(function() {
+				return (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+			}).eq(0);
 		}
-	};
-	$.fn.triggerHandled = function( event, data ) {
-		event = (typeof event == "string" ? $.Event(event) : event);
-		this.trigger(event, data);
-		return event.handled;
-	};
-	/**
-	 * Only attaches one event handler for all types ...
-	 * @param {Array} types llist of types that will delegate here
-	 * @param {Object} startingEvent the first event to start listening to
-	 * @param {Object} onFirst a function to call 
-	 */
-	event.setupHelper = function( types, startingEvent, onFirst ) {
-		if (!onFirst ) {
-			onFirst = startingEvent;
-			startingEvent = null;
+
+		return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
+	},
+
+	zIndex: function( zIndex ) {
+		if ( zIndex !== undefined ) {
+			return this.css( "zIndex", zIndex );
 		}
-		var add = function( handleObj ) {
 
-			var bySelector, selector = handleObj.selector || "";
-			if ( selector ) {
-				bySelector = event.find(this, types, selector);
-				if (!bySelector.length ) {
-					$(this).delegate(selector, startingEvent, onFirst);
-				}
-			}
-			else {
-				//var bySelector = event.find(this, types, selector);
-				if (!event.find(this, types, selector).length ) {
-					event.add(this, startingEvent, onFirst, {
-						selector: selector,
-						delegate: this
-					});
-				}
-
-			}
-
-		},
-			remove = function( handleObj ) {
-				var bySelector, selector = handleObj.selector || "";
-				if ( selector ) {
-					bySelector = event.find(this, types, selector);
-					if (!bySelector.length ) {
-						$(this).undelegate(selector, startingEvent, onFirst);
+		if ( this.length ) {
+			var elem = $( this[ 0 ] ), position, value;
+			while ( elem.length && elem[ 0 ] !== document ) {
+				// Ignore z-index if position is set to a value where z-index is ignored by the browser
+				// This makes behavior of this function consistent across browsers
+				// WebKit always returns auto if the element is positioned
+				position = elem.css( "position" );
+				if ( position === "absolute" || position === "relative" || position === "fixed" ) {
+					// IE returns 0 when zIndex is not specified
+					// other browsers return a string
+					// we ignore the case of nested elements with an explicit value of 0
+					// <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
+					value = parseInt( elem.css( "zIndex" ), 10 );
+					if ( !isNaN( value ) && value !== 0 ) {
+						return value;
 					}
 				}
-				else {
-					if (!event.find(this, types, selector).length ) {
-						event.remove(this, startingEvent, onFirst, {
-							selector: selector,
-							delegate: this
-						});
-					}
-				}
-			};
-		$.each(types, function() {
-			event.special[this] = {
-				add: add,
-				remove: remove,
-				setup: function() {},
-				teardown: function() {}
-			};
+				elem = elem.parent();
+			}
+		}
+
+		return 0;
+	},
+
+	uniqueId: function() {
+		return this.each(function() {
+			if ( !this.id ) {
+				this.id = "ui-id-" + (++uuid);
+			}
 		});
-	};
-})(jQuery);
+	},
 
-// Dependencies:
-//
-//    - jquery.event.drag.js
-//    - jquery.event.livehack.js
-//    - jquery.lang.vector.js
+	removeUniqueId: function() {
+		return this.each(function() {
+			if ( runiqueId.test( this.id ) ) {
+				$( this ).removeAttr( "id" );
+			}
+		});
+	}
+});
 
-(function( $ ) {
-	//modify live
-	//steal the live handler ....
-	var bind = function( object, method ) {
-			var args = Array.prototype.slice.call(arguments, 2);
-			return function() {
-				var args2 = [this].concat(args, $.makeArray(arguments));
-				return method.apply(object, args2);
+// support: jQuery <1.8
+if ( !$( "<a>" ).outerWidth( 1 ).jquery ) {
+	$.each( [ "Width", "Height" ], function( i, name ) {
+		var side = name === "Width" ? [ "Left", "Right" ] : [ "Top", "Bottom" ],
+			type = name.toLowerCase(),
+			orig = {
+				innerWidth: $.fn.innerWidth,
+				innerHeight: $.fn.innerHeight,
+				outerWidth: $.fn.outerWidth,
+				outerHeight: $.fn.outerHeight
 			};
-		},
-		event = $.event,
-		// function to clear the window selection if there is one
-		clearSelection = window.getSelection ? function(){
-			window.getSelection().removeAllRanges()
-		} : function(){},
 
-		supportTouch = "ontouchend" in document,
-		// Use touch events or map it to mouse events
-		startEvent = supportTouch ? "touchstart" : "mousedown",
-		stopEvent = supportTouch ? "touchend" : "mouseup",
-		moveEvent = supportTouch ? "touchmove" : "mousemove",
-		// On touchmove events the default (scrolling) event has to be prevented
-		preventTouchScroll = function(ev) {
-			ev.preventDefault();
+		function reduce( elem, size, border, margin ) {
+			$.each( side, function() {
+				size -= parseFloat( $.css( elem, "padding" + this ) ) || 0;
+				if ( border ) {
+					size -= parseFloat( $.css( elem, "border" + this + "Width" ) ) || 0;
+				}
+				if ( margin ) {
+					size -= parseFloat( $.css( elem, "margin" + this ) ) || 0;
+				}
+			});
+			return size;
+		}
+
+		$.fn[ "inner" + name ] = function( size ) {
+			if ( size === undefined ) {
+				return orig[ "inner" + name ].call( this );
+			}
+
+			return this.each(function() {
+				$( this ).css( type, reduce( this, size ) + "px" );
+			});
 		};
 
-	/**
-	 * @class jQuery.Drag
-	 * @parent jQuery.event.drag
-	 * @plugin jquery/event/drag
-	 * @download  http://jmvcsite.heroku.com/pluginify?plugins[]=jquery/event/drag/drag.js
-	 * @test jquery/event/drag/qunit.html
-	 *
-	 * The `$.Drag` constructor is never called directly but an instance of `$.Drag` is passed as the second argument
-	 * to the `dragdown`, `draginit`, `dragmove`, `dragend`, `dragover` and `dragout` event handlers:
-	 *
-	 *      $('#dragger').on('draginit', function(el, drag) {
-	 *          // drag -> $.Drag
-	 *      });
-	 */
-	$.Drag = function() {};
+		$.fn[ "outer" + name] = function( size, margin ) {
+			if ( typeof size !== "number" ) {
+				return orig[ "outer" + name ].call( this, size );
+			}
 
-	/**
-	 * @Static
-	 */
-	$.extend($.Drag, {
-		lowerName: "drag",
-		current: null,
-		distance: 0,
-		/**
-		 * Called when someone mouses down on a draggable object.
-		 * Gathers all callback functions and creates a new Draggable.
-		 * @hide
-		 */
-		mousedown: function( ev, element ) {
-			var isLeftButton = ev.button === 0 || ev.button == 1,
-				doEvent = isLeftButton || supportTouch;
+			return this.each(function() {
+				$( this).css( type, reduce( this, size, true, margin ) + "px" );
+			});
+		};
+	});
+}
 
-			if (!doEvent || this.current ) {
+// selectors
+function focusable( element, isTabIndexNotNaN ) {
+	var map, mapName, img,
+		nodeName = element.nodeName.toLowerCase();
+	if ( "area" === nodeName ) {
+		map = element.parentNode;
+		mapName = map.name;
+		if ( !element.href || !mapName || map.nodeName.toLowerCase() !== "map" ) {
+			return false;
+		}
+		img = $( "img[usemap=#" + mapName + "]" )[0];
+		return !!img && visible( img );
+	}
+	return ( /input|select|textarea|button|object/.test( nodeName ) ?
+		!element.disabled :
+		"a" === nodeName ?
+			element.href || isTabIndexNotNaN :
+			isTabIndexNotNaN) &&
+		// the element and all of its ancestors must be visible
+		visible( element );
+}
+
+function visible( element ) {
+	return !$( element ).parents().andSelf().filter(function() {
+		return $.css( this, "visibility" ) === "hidden" ||
+			$.expr.filters.hidden( this );
+	}).length;
+}
+
+$.extend( $.expr[ ":" ], {
+	data: $.expr.createPseudo ?
+		$.expr.createPseudo(function( dataName ) {
+			return function( elem ) {
+				return !!$.data( elem, dataName );
+			};
+		}) :
+		// support: jQuery <1.8
+		function( elem, i, match ) {
+			return !!$.data( elem, match[ 3 ] );
+		},
+
+	focusable: function( element ) {
+		return focusable( element, !isNaN( $.attr( element, "tabindex" ) ) );
+	},
+
+	tabbable: function( element ) {
+		var tabIndex = $.attr( element, "tabindex" ),
+			isTabIndexNaN = isNaN( tabIndex );
+		return ( isTabIndexNaN || tabIndex >= 0 ) && focusable( element, !isTabIndexNaN );
+	}
+});
+
+// support
+$(function() {
+	var body = document.body,
+		div = body.appendChild( div = document.createElement( "div" ) );
+
+	// access offsetHeight before setting the style to prevent a layout bug
+	// in IE 9 which causes the element to continue to take up space even
+	// after it is removed from the DOM (#8026)
+	div.offsetHeight;
+
+	$.extend( div.style, {
+		minHeight: "100px",
+		height: "auto",
+		padding: 0,
+		borderWidth: 0
+	});
+
+	$.support.minHeight = div.offsetHeight === 100;
+	$.support.selectstart = "onselectstart" in div;
+
+	// set display to none to avoid a layout bug in IE
+	// http://dev.jquery.com/ticket/4014
+	body.removeChild( div ).style.display = "none";
+});
+
+
+
+
+
+// deprecated
+
+$.fn.extend({
+	disableSelection: function() {
+		return this.bind( ( $.support.selectstart ? "selectstart" : "mousedown" ) +
+			".ui-disableSelection", function( event ) {
+				event.preventDefault();
+			});
+	},
+
+	enableSelection: function() {
+		return this.unbind( ".ui-disableSelection" );
+	}
+});
+
+$.extend( $.ui, {
+	// $.ui.plugin is deprecated.  Use the proxy pattern instead.
+	plugin: {
+		add: function( module, option, set ) {
+			var i,
+				proto = $.ui[ module ].prototype;
+			for ( i in set ) {
+				proto.plugins[ i ] = proto.plugins[ i ] || [];
+				proto.plugins[ i ].push( [ option, set[ i ] ] );
+			}
+		},
+		call: function( instance, name, args ) {
+			var i,
+				set = instance.plugins[ name ];
+			if ( !set || !instance.element[ 0 ].parentNode || instance.element[ 0 ].parentNode.nodeType === 11 ) {
 				return;
 			}
 
-			//create Drag
-			var drag = new $.Drag(),
-				delegate = ev.delegateTarget || element,
-				selector = ev.handleObj.selector,
-				self = this;
-			this.current = drag;
-
-			drag.setup({
-				element: element,
-				delegate: ev.delegateTarget || element,
-				selector: ev.handleObj.selector,
-				moved: false,
-				_distance: this.distance,
-				callbacks: {
-					dragdown: event.find(delegate, ["dragdown"], selector),
-					draginit: event.find(delegate, ["draginit"], selector),
-					dragover: event.find(delegate, ["dragover"], selector),
-					dragmove: event.find(delegate, ["dragmove"], selector),
-					dragout: event.find(delegate, ["dragout"], selector),
-					dragend: event.find(delegate, ["dragend"], selector)
-				},
-				destroyed: function() {
-					self.current = null;
+			for ( i = 0; i < set.length; i++ ) {
+				if ( instance.options[ set[ i ][ 0 ] ] ) {
+					set[ i ][ 1 ].apply( instance.element, args );
 				}
-			}, ev);
+			}
 		}
+	},
+
+	contains: $.contains,
+
+	// only used by resizable
+	hasScroll: function( el, a ) {
+
+		//If overflow is hidden, the element might have extra content, but the user wants to hide it
+		if ( $( el ).css( "overflow" ) === "hidden") {
+			return false;
+		}
+
+		var scroll = ( a && a === "left" ) ? "scrollLeft" : "scrollTop",
+			has = false;
+
+		if ( el[ scroll ] > 0 ) {
+			return true;
+		}
+
+		// TODO: determine which cases actually cause this to happen
+		// if the element doesn't have the scroll set, see if it's possible to
+		// set the scroll
+		el[ scroll ] = 1;
+		has = ( el[ scroll ] > 0 );
+		el[ scroll ] = 0;
+		return has;
+	},
+
+	// these are odd functions, fix the API or move into individual plugins
+	isOverAxis: function( x, reference, size ) {
+		//Determines when x coordinate is over "b" element axis
+		return ( x > reference ) && ( x < ( reference + size ) );
+	},
+	isOver: function( y, x, top, left, height, width ) {
+		//Determines when x, y coordinates is over "b" element
+		return $.ui.isOverAxis( y, top, height ) && $.ui.isOverAxis( x, left, width );
+	}
+});
+
+})( jQuery );
+;
+
+/*!
+ * jQuery UI Widget 1.9.0
+ * http://jqueryui.com
+ *
+ * Copyright 2012 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://api.jqueryui.com/jQuery.widget/
+ */
+(function( $, undefined ) {
+
+var uuid = 0,
+	slice = Array.prototype.slice,
+	_cleanData = $.cleanData;
+$.cleanData = function( elems ) {
+	for ( var i = 0, elem; (elem = elems[i]) != null; i++ ) {
+		try {
+			$( elem ).triggerHandler( "remove" );
+		// http://bugs.jquery.com/ticket/8235
+		} catch( e ) {}
+	}
+	_cleanData( elems );
+};
+
+$.widget = function( name, base, prototype ) {
+	var fullName, existingConstructor, constructor, basePrototype,
+		namespace = name.split( "." )[ 0 ];
+
+	name = name.split( "." )[ 1 ];
+	fullName = namespace + "-" + name;
+
+	if ( !prototype ) {
+		prototype = base;
+		base = $.Widget;
+	}
+
+	// create selector for plugin
+	$.expr[ ":" ][ fullName.toLowerCase() ] = function( elem ) {
+		return !!$.data( elem, fullName );
+	};
+
+	$[ namespace ] = $[ namespace ] || {};
+	existingConstructor = $[ namespace ][ name ];
+	constructor = $[ namespace ][ name ] = function( options, element ) {
+		// allow instantiation without "new" keyword
+		if ( !this._createWidget ) {
+			return new constructor( options, element );
+		}
+
+		// allow instantiation without initializing for simple inheritance
+		// must use "new" keyword (the code above always passes args)
+		if ( arguments.length ) {
+			this._createWidget( options, element );
+		}
+	};
+	// extend with the existing constructor to carry over any static properties
+	$.extend( constructor, existingConstructor, {
+		version: prototype.version,
+		// copy the object used to create the prototype in case we need to
+		// redefine the widget later
+		_proto: $.extend( {}, prototype ),
+		// track widgets that inherit from this widget in case this widget is
+		// redefined after a widget inherits from it
+		_childConstructors: []
 	});
 
-	/**
-	 * @Prototype
-	 */
-	$.extend($.Drag.prototype, {
-		setup: function( options, ev ) {
-			$.extend(this, options);
+	basePrototype = new base();
+	// we need to make the options hash a property directly on the new instance
+	// otherwise we'll modify the options hash on the prototype that we're
+	// inheriting from
+	basePrototype.options = $.widget.extend( {}, basePrototype.options );
+	$.each( prototype, function( prop, value ) {
+		if ( $.isFunction( value ) ) {
+			prototype[ prop ] = (function() {
+				var _super = function() {
+						return base.prototype[ prop ].apply( this, arguments );
+					},
+					_superApply = function( args ) {
+						return base.prototype[ prop ].apply( this, args );
+					};
+				return function() {
+					var __super = this._super,
+						__superApply = this._superApply,
+						returnValue;
 
-			this.element = $(this.element);
-			this.event = ev;
-			this.moved = false;
-			this.allowOtherDrags = false;
-			var mousemove = bind(this, this.mousemove),
-				mouseup = bind(this, this.mouseup);
-			this._mousemove = mousemove;
-			this._mouseup = mouseup;
-			this._distance = options.distance ? options.distance : 0;
+					this._super = _super;
+					this._superApply = _superApply;
 
-			//where the mouse is located
-			this.mouseStartPosition = ev.vector();
+					returnValue = value.apply( this, arguments );
 
-			$(document).bind(moveEvent, mousemove);
-			$(document).bind(stopEvent, mouseup);
-			if(supportTouch) {
-				// On touch devices we want to disable scrolling
-				$(document).bind(moveEvent, preventTouchScroll);
+					this._super = __super;
+					this._superApply = __superApply;
+
+					return returnValue;
+				};
+			})();
+		}
+	});
+	constructor.prototype = $.widget.extend( basePrototype, {
+		// TODO: remove support for widgetEventPrefix
+		// always use the name + a colon as the prefix, e.g., draggable:start
+		// don't prefix for widgets that aren't DOM-based
+		widgetEventPrefix: name
+	}, prototype, {
+		constructor: constructor,
+		namespace: namespace,
+		widgetName: name,
+		// TODO remove widgetBaseClass, see #8155
+		widgetBaseClass: fullName,
+		widgetFullName: fullName
+	});
+
+	// If this widget is being redefined then we need to find all widgets that
+	// are inheriting from it and redefine all of them so that they inherit from
+	// the new version of this widget. We're essentially trying to replace one
+	// level in the prototype chain.
+	if ( existingConstructor ) {
+		$.each( existingConstructor._childConstructors, function( i, child ) {
+			var childPrototype = child.prototype;
+
+			// redefine the child widget using the same prototype that was
+			// originally used, but inherit from the new version of the base
+			$.widget( childPrototype.namespace + "." + childPrototype.widgetName, constructor, child._proto );
+		});
+		// remove the list of existing child constructors from the old constructor
+		// so the old child constructors can be garbage collected
+		delete existingConstructor._childConstructors;
+	} else {
+		base._childConstructors.push( constructor );
+	}
+
+	$.widget.bridge( name, constructor );
+};
+
+$.widget.extend = function( target ) {
+	var input = slice.call( arguments, 1 ),
+		inputIndex = 0,
+		inputLength = input.length,
+		key,
+		value;
+	for ( ; inputIndex < inputLength; inputIndex++ ) {
+		for ( key in input[ inputIndex ] ) {
+			value = input[ inputIndex ][ key ];
+			if (input[ inputIndex ].hasOwnProperty( key ) && value !== undefined ) {
+				target[ key ] = $.isPlainObject( value ) ? $.widget.extend( {}, target[ key ], value ) : value;
 			}
+		}
+	}
+	return target;
+};
 
-			if (!this.callEvents('down', this.element, ev) ) {
-			    this.noSelection(this.delegate);
-				//this is for firefox
-				clearSelection();
-			}
-		},
-		/**
-		 * @attribute element
-		 * A reference to the element that is being dragged. For example:
-		 *
-		 *      $('.draggable').on('draginit', function(ev, drag) {
-		 *          drag.element.html('I am the drag element');
-		 *      });
-		 */
+$.widget.bridge = function( name, object ) {
+	var fullName = object.prototype.widgetFullName;
+	$.fn[ name ] = function( options ) {
+		var isMethodCall = typeof options === "string",
+			args = slice.call( arguments, 1 ),
+			returnValue = this;
 
-		/**
-		 * Unbinds listeners and allows other drags ...
-		 * @hide
-		 */
-		destroy: function() {
-			// Unbind the mouse handlers attached for dragging
-			$(document).unbind(moveEvent, this._mousemove);
-			$(document).unbind(stopEvent, this._mouseup);
-			if(supportTouch) {
-				// Enable scrolling again for touch devices when the drag is done
-				$(document).unbind(moveEvent, preventTouchScroll);
-			}
+		// allow multiple hashes to be passed on init
+		options = !isMethodCall && args.length ?
+			$.widget.extend.apply( null, [ options ].concat(args) ) :
+			options;
 
-			if (!this.moved ) {
-				this.event = this.element = null;
-			}
-
-			if(!supportTouch) {
-                this.selection(this.delegate);
-			}
-			this.destroyed();
-		},
-		mousemove: function( docEl, ev ) {
-			if (!this.moved ) {
-				var dist = Math.sqrt( Math.pow( ev.pageX - this.event.pageX, 2 ) + Math.pow( ev.pageY - this.event.pageY, 2 ));
-				// Don't initialize the drag if it hasn't been moved the minimum distance
-				if(dist < this._distance){
+		if ( isMethodCall ) {
+			this.each(function() {
+				var methodValue,
+					instance = $.data( this, fullName );
+				if ( !instance ) {
+					return $.error( "cannot call methods on " + name + " prior to initialization; " +
+						"attempted to call method '" + options + "'" );
+				}
+				if ( !$.isFunction( instance[options] ) || options.charAt( 0 ) === "_" ) {
+					return $.error( "no such method '" + options + "' for " + name + " widget instance" );
+				}
+				methodValue = instance[ options ].apply( instance, args );
+				if ( methodValue !== instance && methodValue !== undefined ) {
+					returnValue = methodValue && methodValue.jquery ?
+						returnValue.pushStack( methodValue.get() ) :
+						methodValue;
 					return false;
 				}
-				// Otherwise call init and indicate that the drag has moved
-				this.init(this.element, ev);
-				this.moved = true;
-			}
-
-			var pointer = ev.vector();
-			if ( this._start_position && this._start_position.equals(pointer) ) {
-				return;
-			}
-			this.draw(pointer, ev);
-		},
-		
-		mouseup: function( docEl, event ) {
-			//if there is a current, we should call its dragstop
-			if ( this.moved ) {
-				this.end(event);
-			}
-			this.destroy();
-		},
-
-        /**
-         * The `drag.noSelection(element)` method turns off text selection during a drag event.
-         * This method is called by default unless a event is listening to the 'dragdown' event.
-         *
-         * ## Example
-         *
-         *      $('div.drag').bind('dragdown', function(elm,event,drag){
-         *          drag.noSelection();
-         *      });
-         *      
-         * @param [elm] an element to prevent selection on.  Defaults to the dragable element.
-         */
-		noSelection: function(elm) {
-            elm = elm || this.delegate
-			document.documentElement.onselectstart = function() {
-                // Disables selection
-				return false;
-			};
-			document.documentElement.unselectable = "on";
-			this.selectionDisabled = (this.selectionDisabled ? this.selectionDisabled.add(elm) : $(elm));
-			this.selectionDisabled.css('-moz-user-select', '-moz-none');
-		},
-
-        /**
-         * @hide
-         * `drag.selection()` method turns on text selection that was previously turned off during the drag event.
-         * This method is always called.
-         * 
-         * ## Example
-         *
-         *     $('div.drag').bind('dragdown', function(elm,event,drag){
-         *       drag.selection();
-         *     });
-         */
-		selection: function() {
-            if(this.selectionDisabled) {
-                document.documentElement.onselectstart = function() {};
-                document.documentElement.unselectable = "off";
-                this.selectionDisabled.css('-moz-user-select', '');
-            }
-		},
-
-		init: function( element, event ) {
-			element = $(element);
-			//the element that has been clicked on
-			var startElement = (this.movingElement = (this.element = $(element)));
-			//if a mousemove has come after the click
-			//if the drag has been cancelled
-			this._cancelled = false;
-			this.event = event;
-			
-			/**
-			 * @attribute mouseElementPosition
-			 * The position of start of the cursor on the element
-			 */
-			this.mouseElementPosition = this.mouseStartPosition.minus(this.element.offsetv()); //where the mouse is on the Element
-			this.callEvents('init', element, event);
-
-			// Check what they have set and respond accordingly if they canceled
-			if ( this._cancelled === true ) {
-				return;
-			}
-			// if they set something else as the element
-			this.startPosition = startElement != this.movingElement ? this.movingElement.offsetv() : this.currentDelta();
-
-			this.makePositioned(this.movingElement);
-			// Adjust the drag elements z-index to a high value
-			this.oldZIndex = this.movingElement.css('zIndex');
-			this.movingElement.css('zIndex', 1000);
-			if (!this._only && this.constructor.responder ) {
-				// calls $.Drop.prototype.compile if there is a drop element
-				this.constructor.responder.compile(event, this);
-			}
-		},
-		makePositioned: function( that ) {
-			var style, pos = that.css('position');
-
-			// Position properly, set top and left to 0px for Opera
-			if (!pos || pos == 'static' ) {
-				style = {
-					position: 'relative'
-				};
-
-				if ( window.opera ) {
-					style.top = '0px';
-					style.left = '0px';
-				}
-				that.css(style);
-			}
-		},
-		callEvents: function( type, element, event, drop ) {
-			var i, cbs = this.callbacks[this.constructor.lowerName + type];
-			for ( i = 0; i < cbs.length; i++ ) {
-				cbs[i].call(element, event, this, drop);
-			}
-			return cbs.length;
-		},
-		/**
-		 * Returns the position of the movingElement by taking its top and left.
-		 * @hide
-		 * @return {$.Vector}
-		 */
-		currentDelta: function() {
-			return new $.Vector(parseInt(this.movingElement.css('left'), 10) || 0, parseInt(this.movingElement.css('top'), 10) || 0);
-		},
-		//draws the position of the dragmove object
-		draw: function( pointer, event ) {
-			// only drag if we haven't been cancelled;
-			if ( this._cancelled ) {
-				return;
-			}
-			clearSelection();
-			/**
-			 * @attribute location
-			 * `drag.location` is a [jQuery.Vector] specifying where the element should be in the page.  This
-			 * takes into account the start position of the cursor on the element.
-			 * 
-			 * If the drag is going to be moved to an unacceptable location, you can call preventDefault in
-			 * dragmove to prevent it from being moved there.
-			 * 
-			 *     $('.mover').bind("dragmove", function(ev, drag){
-			 *       if(drag.location.top() < 100){
-			 *         ev.preventDefault()
-			 *       }
-			 *     });
-			 *     
-			 * You can also set the location to where it should be on the page.
-			 * 
-			 */
-				// the offset between the mouse pointer and the representative that the user asked for
-			this.location = pointer.minus(this.mouseElementPosition);
-
-			// call move events
-			this.move(event);
-			if ( this._cancelled ) {
-				return;
-			}
-			if (!event.isDefaultPrevented() ) {
-				this.position(this.location);
-			}
-
-			// fill in
-			if (!this._only && this.constructor.responder ) {
-				this.constructor.responder.show(pointer, this, event);
-			}
-		},
-		/**
-		 * `drag.position( newOffsetVector )` sets the position of the movingElement.  This is overwritten by
-		 * the [$.Drag::scrolls], [$.Drag::limit] and [$.Drag::step] plugins 
-		 * to make sure the moving element scrolls some element
-		 * or stays within some boundary.  This function is exposed and documented so you could do the same.
-		 * 
-		 * The following approximates how step does it:
-		 * 
-		 *     var oldPosition = $.Drag.prototype.position;
-		 *     $.Drag.prototype.position = function( offsetPositionv ) {
-		 *       if(this._step){
-		 *         // change offsetPositionv to be on the step value
-		 *       }
-		 *       
-		 *       oldPosition.call(this, offsetPosition)
-		 *     }
-		 * 
-		 * @param {jQuery.Vector} newOffsetv the new [$.Drag::location] of the element.
-		 */
-		position: function( newOffsetv ) { //should draw it on the page
-			var style, dragged_element_css_offset = this.currentDelta(),
-				//  the drag element's current left + top css attributes
-				// the vector between the movingElement's page and css positions
-				// this can be thought of as the original offset
-				dragged_element_position_vector =   this.movingElement.offsetv().minus(dragged_element_css_offset);
-			this.required_css_position = newOffsetv.minus(dragged_element_position_vector);
-
-			this.offsetv = newOffsetv;
-			style = this.movingElement[0].style;
-			if (!this._cancelled && !this._horizontal ) {
-				style.top = this.required_css_position.top() + "px";
-			}
-			if (!this._cancelled && !this._vertical ) {
-				style.left = this.required_css_position.left() + "px";
-			}
-		},
-		move: function( event ) {
-			this.callEvents('move', this.element, event);
-		},
-		over: function( event, drop ) {
-			this.callEvents('over', this.element, event, drop);
-		},
-		out: function( event, drop ) {
-			this.callEvents('out', this.element, event, drop);
-		},
-		/**
-		 * Called on drag up
-		 * @hide
-		 * @param {Event} event a mouseup event signalling drag/drop has completed
-		 */
-		end: function( event ) {
-			// If canceled do nothing
-			if ( this._cancelled ) {
-				return;
-			}
-			// notify the responder - usually a $.Drop instance
-			if (!this._only && this.constructor.responder ) {
-				this.constructor.responder.end(event, this);
-			}
-
-			this.callEvents('end', this.element, event);
-
-			if ( this._revert ) {
-				var self = this;
-				// animate moving back to original position
-				this.movingElement.animate({
-					top: this.startPosition.top() + "px",
-					left: this.startPosition.left() + "px"
-				}, function() {
-					self.cleanup.apply(self, arguments);
-				});
-			}
-			else {
-				this.cleanup();
-			}
-			this.event = null;
-		},
-		/**
-		 * Cleans up drag element after drag drop.
-		 * @hide
-		 */
-		cleanup: function() {
-			this.movingElement.css({
-				zIndex: this.oldZIndex
 			});
-			if ( this.movingElement[0] !== this.element[0] && 
-				!this.movingElement.has(this.element[0]).length && 
-				!this.element.has(this.movingElement[0]).length ) {
-				this.movingElement.css({
-					display: 'none'
-				});
-			}
-			if ( this._removeMovingElement ) {
-				// Remove the element when using drag.ghost()
-				this.movingElement.remove();
-			}
-
-			this.movingElement = this.element = this.event = null;
-		},
-		/**
-		 * `drag.cancel()` stops a drag motion from from running.  This also stops any other events from firing, meaning
-		 * that "dragend" will not be called.
-		 * 
-		 *     $("#todos").on(".handle", "draginit", function( ev, drag ) {
-		 *       if(drag.movingElement.hasClass("evil")){
-		 *         drag.cancel();	
-		 *       }
-		 *     })
-		 * 
-		 */
-		cancel: function() {
-			this._cancelled = true;
-			if (!this._only && this.constructor.responder ) {
-				// clear the drops
-				this.constructor.responder.clear(this.event.vector(), this, this.event);
-			}
-			this.destroy();
-
-		},
-		/**
-		 * `drag.ghost( [parent] )` clones the element and uses it as the 
-		 * moving element, leaving the original dragged element in place.  The `parent` option can
-		 * be used to specify where the ghost element should be temporarily added into the 
-		 * DOM.  This method should be called in "draginit".
-		 * 
-		 *     $("#todos").on(".handle", "draginit", function( ev, drag ) {
-		 *       drag.ghost();
-		 *     })
-		 * 
-		 * @param {HTMLElement} [parent] the parent element of the newly created ghost element. If not provided the 
-		 * ghost element is added after the moving element.
-		 * @return {jQuery.fn} the ghost element to do whatever you want with it.
-		 */
-		ghost: function( parent ) {
-			// create a ghost by cloning the source element and attach the clone to the dom after the source element
-			var ghost = this.movingElement.clone().css('position', 'absolute');
-			if( parent ) {
-				$(parent).append(ghost);
-			} else {
-				$(this.movingElement).after(ghost)
-			}
-			ghost.width(this.movingElement.width()).height(this.movingElement.height());
-			// put the ghost in the right location ...
-			ghost.offset(this.movingElement.offset())
-			
-			// store the original element and make the ghost the dragged element
-			this.movingElement = ghost;
-			this.noSelection(ghost)
-			this._removeMovingElement = true;
-			return ghost;
-		},
-		/**
-		 * `drag.representative( element, [offsetX], [offsetY])` tells the drag motion to use
-		 * a different element than the one that began the drag motion. 
-		 * 
-		 * For example, instead of
-		 * dragging an drag-icon of a todo element, you want to move some other representation of
-		 * the todo element (or elements).  To do this you might:
-		 * 
-		 *     $("#todos").on(".handle", "draginit", function( ev, drag ) {
-		 *       // create what we'll drag
-		 *       var rep = $('<div/>').text("todos")
-		 *         .appendTo(document.body)
-		 *       // indicate we want our mouse on the top-right of it
-		 *       drag.representative(rep, rep.width(), 0);
-		 *     })
-		 * 
-		 * @param {HTMLElement} element the element you want to actually drag.  This should be 
-		 * already in the DOM.
-		 * @param {Number} offsetX the x position where you want your mouse on the representative element (defaults to 0)
-		 * @param {Number} offsetY the y position where you want your mouse on the representative element (defaults to 0)
-		 * @return {drag} returns the drag object for chaining.
-		 */
-		representative: function( element, offsetX, offsetY ) {
-			this._offsetX = offsetX || 0;
-			this._offsetY = offsetY || 0;
-
-			var p = this.mouseStartPosition;
-			// Just set the representative as the drag element
-			this.movingElement = $(element);
-			this.movingElement.css({
-				top: (p.y() - this._offsetY) + "px",
-				left: (p.x() - this._offsetX) + "px",
-				display: 'block',
-				position: 'absolute'
-			}).show();
-			this.noSelection(this.movingElement)
-			this.mouseElementPosition = new $.Vector(this._offsetX, this._offsetY);
-			return this;
-		},
-		/**
-		 * `drag.revert([val])` makes the [$.Drag::representative representative] element revert back to it
-		 * original position after the drag motion has completed.  The revert is done with an animation.
-		 * 
-		 *     $("#todos").on(".handle","dragend",function( ev, drag ) {
-		 *       drag.revert();
-		 *     })
-		 * 
-		 * @param {Boolean} [val] optional, set to false if you don't want to revert.
-		 * @return {drag} the drag object for chaining
-		 */
-		revert: function( val ) {
-			this._revert = val === undefined ? true : val;
-			return this;
-		},
-		/**
-		 * `drag.vertical()` isolates the drag to vertical movement.  For example:
-		 * 
-		 *     $("#images").on(".thumbnail","draginit", function(ev, drag){
-		 *       drag.vertical();
-		 *     });
-		 * 
-		 * Call `vertical()` in "draginit" or "dragdown".
-		 * 
-		 * @return {drag} the drag object for chaining.
-		 */
-		vertical: function() {
-			this._vertical = true;
-			return this;
-		},
-		/**
-		 * `drag.horizontal()` isolates the drag to horizontal movement.  For example:
-		 * 
-		 *     $("#images").on(".thumbnail","draginit", function(ev, drag){
-		 *       drag.horizontal();
-		 *     });
-		 * 
-		 * Call `horizontal()` in "draginit" or "dragdown".
-		 * 
-		 * @return {drag} the drag object for chaining.
-		 */
-		horizontal: function() {
-			this._horizontal = true;
-			return this;
-		},
-		/**
-		 * `drag.only([only])` indicates if you __only__ want a drag motion and the drag should
-		 * not notify drops.  The default value is `false`.  Call it with no arguments or pass it true
-		 * to prevent drop events.
-		 * 
-		 *     $("#images").on(".thumbnail","dragdown", function(ev, drag){
-		 * 	     drag.only();
-		 *     });
-		 * 
-		 * @param {Boolean} [only] true if you want to prevent drops, false if otherwise.
-		 * @return {Boolean} the current value of only.
-		 */
-		only: function( only ) {
-			return (this._only = (only === undefined ? true : only));
-		},
-		
-		/**
-		 * `distance([val])` sets or reads the distance the mouse must move before a drag motion is started.  This should be set in
-		 * "dragdown" and delays "draginit" being called until the distance is covered.  The distance
-		 * is measured in pixels.  The default distance is 0 pixels meaning the drag motion starts on the first
-		 * mousemove after a mousedown.
-		 * 
-		 * Set this to make drag motion a little "stickier" to start.
-		 * 
-		 *     $("#images").on(".thumbnail","dragdown", function(ev, drag){
-		 *       drag.distance(10);
-		 *     });
-		 * 
-		 * @param {Number} [val] The number of pixels the mouse must move before "draginit" is called.
-		 * @return {drag|Number} returns the drag instance for chaining if the drag value is being set or the
-		 * distance value if the distance is being read.
-		 */
-		distance: function(val){
-			if(val !== undefined){
-				this._distance = val;
-				return this;
-			}else{
-				return this._distance
-			}
-		}
-	});
-	/**
-	 * @add jQuery.event.special
-	 */
-	event.setupHelper([
-	/**
-	 * @attribute dragdown
-	 * @parent jQuery.event.drag
-	 * 
-	 * `dragdown` is called when a drag movement has started on a mousedown.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second
-	 * parameter.  Listening to `dragdown` allows you to customize 
-	 * the behavior of a drag motion, especially when `draginit` should be called.
-	 * 
-	 *     $(".handles").delegate("dragdown", function(ev, drag){
-	 *       // call draginit only when the mouse has moved 20 px
-	 *       drag.distance(20);
-	 *     })
-	 * 
-	 * Typically, when a drag motion is started, `event.preventDefault` is automatically
-	 * called, preventing text selection.  However, if you listen to 
-	 * `dragdown`, this default behavior is not called. You are responsible for calling it
-	 * if you want it (you probably do).
-	 *
-	 * ### Why might you not want to call `preventDefault`?
-	 *
-	 * You might want it if you want to allow text selection on element
-	 * within the drag element.  Typically these are input elements.
-	 *
-	 *     $(".handles").delegate("dragdown", function(ev, drag){
-	 *       if(ev.target.nodeName === "input"){
-	 *         drag.cancel();
-	 *       } else {
-	 *         ev.preventDefault();
-	 *       }
-	 *     })
-	 */
-	'dragdown',
-	/**
-	 * @attribute draginit
-	 * @parent jQuery.event.drag
-	 *
-	 * `draginit` is triggered when the drag motion starts. Use it to customize the drag behavior
-	 * using the [jQuery.Drag] instance passed as the second parameter:
-	 *
-	 *     $(".draggable").on('draginit', function(ev, drag) {
-	 *       // Only allow vertical drags
-	 *       drag.vertical();
-	 *       // Create a draggable copy of the element
-	 *       drag.ghost();
-	 *     });
-	 */
-	'draginit',
-	/**
-	 * @attribute dragover
-	 * @parent jQuery.event.drag
-	 *
-	 * `dragover` is triggered when a drag is over a [jQuery.event.drop drop element].
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second
-	 * parameter and an instance of [jQuery.Drop] passed as the third argument:
-	 *
-	 *      $('.draggable').on('dragover', function(ev, drag, drop) {
-	 *          // Add the drop-here class indicating that the drag
-	 *          // can be dropped here
-	 *          drag.element.addClass('drop-here');
-	 *      });
-	 */
-	'dragover',
-	/**
-	 * @attribute dragmove
-	 * @parent jQuery.event.drag
-	 *
-	 * `dragmove` is triggered when the drag element moves (similar to a mousemove).
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second
-	 * parameter.
-	 * Use [jQuery.Drag::location] to determine the current position
-	 * as a [jQuery.Vector vector].
-	 *
-	 * For example, `dragmove` can be used to create a draggable element to resize
-	 * a container:
-	 *
-	 *      $('.resizer').on('dragmove', function(ev, drag) {
-	 *          $('#container').width(drag.location.x())
-	 *              .height(drag.location.y());
-	 *      });
-	 */
-	'dragmove',
-	/**
-	 * @attribute dragout
-	 * @parent jQuery.event.drag
-	 *
-	 * `dragout` is called when the drag leaves a drop point.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second
-	 * parameter.
-	 *
-	 *      $('.draggable').on('dragout', function(ev, drag) {
-	 *      	 // Remove the drop-here class
-	 *      	 // (e.g. crossing the drag element out indicating that it
-	 *      	 // can't be dropped here
-	 *          drag.element.removeClass('drop-here');
-	 *      });
-	 */
-	'dragout',
-	/**
-	 * @attribute dragend
-	 * @parent jQuery.event.drag
-	 *
-	 * `dragend` is called when the drag motion is done.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second
-	 * parameter.
-	 *
-	 *     $('.draggable').on('dragend', function(ev, drag)
-	 *       // Clean up when the drag motion is done
-	 *     });
-	 */
-	'dragend'], startEvent, function( e ) {
-		$.Drag.mousedown.call($.Drag, e, this);
-	});
-})(jQuery);
-
-(function( $ ) {
-
-
-	$.Drag.prototype
-	/**
-	 * @function limit
-	 * @plugin jquery/event/drag/limit
-	 * @download  http://jmvcsite.heroku.com/pluginify?plugins[]=jquery/event/event/drag/limit/limit.js
-	 * limits the drag to a containing element
-	 * @param {jQuery} container
-	 * @param {Object} [center] can set the limit to the center of the object.  Can be 
-	 *   'x', 'y' or 'both'
-	 * @return {$.Drag}
-	 */
-	.limit = function( container, center ) {
-		//on draws ... make sure this happens
-		var styles = container.curStyles('borderTopWidth', 'paddingTop', 'borderLeftWidth', 'paddingLeft'),
-			paddingBorder = new $.Vector(
-			parseInt(styles.borderLeftWidth, 10) + parseInt(styles.paddingLeft, 10) || 0, parseInt(styles.borderTopWidth, 10) + parseInt(styles.paddingTop, 10) || 0);
-
-		this._limit = {
-			offset: container.offsetv().plus(paddingBorder),
-			size: container.dimensionsv(),
-			center : center === true ? 'both' : center
-		};
-		return this;
-	};
-
-	var oldPosition = $.Drag.prototype.position;
-	$.Drag.prototype.position = function( offsetPositionv ) {
-		//adjust required_css_position accordingly
-		if ( this._limit ) {
-			var limit = this._limit,
-				center = limit.center && limit.center.toLowerCase(),
-				movingSize = this.movingElement.dimensionsv('outer'),
-				halfHeight = center && center != 'x' ? movingSize.height() / 2 : 0,
-				halfWidth = center && center != 'y' ? movingSize.width() / 2 : 0,
-				lot = limit.offset.top(),
-				lof = limit.offset.left(),
-				height = limit.size.height(),
-				width = limit.size.width();
-
-			//check if we are out of bounds ...
-			//above
-			if ( offsetPositionv.top()+halfHeight < lot ) {
-				offsetPositionv.top(lot - halfHeight);
-			}
-			//below
-			if ( offsetPositionv.top() + movingSize.height() - halfHeight > lot + height ) {
-				offsetPositionv.top(lot + height - movingSize.height() + halfHeight);
-			}
-			//left
-			if ( offsetPositionv.left()+halfWidth < lof ) {
-				offsetPositionv.left(lof - halfWidth);
-			}
-			//right
-			if ( offsetPositionv.left() + movingSize.width() -halfWidth > lof + width ) {
-				offsetPositionv.left(lof + width - movingSize.left()+halfWidth);
-			}
-		}
-
-		oldPosition.call(this, offsetPositionv);
-	};
-
-})(jQuery);;
-
-// Dependencies:
-//
-//    - jquery.event.drop.js
-//    - jquery.compare.js
-//    - jquery.within.js
-//    - jquery.event.drag.js
-//    - jquery.event.livehack.js
-//    - jquery.lang.vector.js
-
-(function($){
-	var event = $.event;
-	/**
-	 * @add jQuery.event.special
-	 */
-	var eventNames = [
-	/**
-	 * @attribute dropover
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropover` is triggered when a [jQuery.event.drag drag] is first moved onto this
-	 * drop element.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 * This event can be used to highlight the element when a drag is moved over it:
-	 *
-	 *      $('.droparea').on('dropover', function(ev, drop, drag) {
-	 *          $(this).addClass('highlight');
-	 *      });
-	 */
-	"dropover",
-	/**
-	 * @attribute dropon
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropon` is triggered when a drag is dropped on a drop element.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 *
-	 *      $('.droparea').on('dropon', function(ev, drop, drag) {
-	 *          $(this).html('Dropped: ' + drag.element.text());
-	 *      });
-	 */
-	"dropon",
-	/**
-	 * @attribute dropout
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropout` is called when a drag is moved out of this drop element.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 *
-	 *      $('.droparea').on('dropover', function(ev, drop, drag) {
-	 *          // Remove the drop element highlight
-	 *          $(this).removeClass('highlight');
-	 *      });
-	 */
-	"dropout",
-	/**
-	 * @attribute dropinit
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropinit` is called when a drag motion starts and the drop elements are initialized.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 * Calling [jQuery.Drop.prototype.cancel drop.cancel()] prevents the element from
-	 * being dropped on:
-	 *
-	 *      $('.droparea').on('dropover', function(ev, drop, drag) {
-	 *          if(drag.element.hasClass('not-me')) {
-	 *            drop.cancel();
-	 *          }
-	 *      });
-	 */
-	"dropinit",
-	/**
-	 * @attribute dropmove
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropmove` is triggered repeatedly when a drag is moved over a drop
-	 * (similar to a mousemove).
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 *
-	 *      $('.droparea').on('dropmove', function(ev, drop, drag) {
-	 *          $(this).html(drag.location.x() + '/' + drag.location.y());
-	 *      });
-	 */
-	"dropmove",
-	/**
-	 * @attribute dropend
-	 * @parent jQuery.event.drop
-	 * 
-	 * `dropend` is called when the drag motion is done for this drop element.
-	 * The event handler gets an instance of [jQuery.Drag] passed as the second and a
-	 * [jQuery.Drop] as the third parameter.
-	 *
-	 *
-	 *      $('.droparea').on('dropend', function(ev, drop, drag) {
-	 *          // Remove the drop element highlight
-	 *          $(this).removeClass('highlight');
-	 *      });
-	 */
-	"dropend"];
-	
-	/**
-	 * @class jQuery.Drop
-	 * @parent jQuery.event.drop
-	 * @plugin jquery/event/drop
-	 * @download  http://jmvcsite.heroku.com/pluginify?plugins[]=jquery/event/drop/drop.js
-	 * @test jquery/event/drag/qunit.html
-	 *
-	 * The `jQuery.Drop` constructor is never called directly but an instance is passed to the
-	 * to the `dropinit`, `dropover`, `dropmove`, `dropon`, and `dropend` event handlers as the
-	 * third argument (the second will be the [jQuery.Drag]):
-	 *
-	 *      $('#dropper').on('dropover', function(el, drop, drag) {
-	 *          // drop -> $.Drop
-	 *          // drag -> $.Drag
-	 *      });
-	 */
-	$.Drop = function(callbacks, element){
-		jQuery.extend(this,callbacks);
-		this.element = $(element);
-	}
-	// add the elements ...
-	$.each(eventNames, function(){
-			event.special[this] = {
-				add: function( handleObj ) {
-					//add this element to the compiles list
-					var el = $(this), current = (el.data("dropEventCount") || 0);
-					el.data("dropEventCount",  current+1   )
-					if(current==0){
-						$.Drop.addElement(this);
-					}
-				},
-				remove: function() {
-					var el = $(this), current = (el.data("dropEventCount") || 0);
-					el.data("dropEventCount",  current-1   )
-					if(current<=1){
-						$.Drop.removeElement(this);
-					}
+		} else {
+			this.each(function() {
+				var instance = $.data( this, fullName );
+				if ( instance ) {
+					instance.option( options || {} )._init();
+				} else {
+					new object( options, this );
 				}
+			});
+		}
+
+		return returnValue;
+	};
+};
+
+$.Widget = function( options, element ) {};
+$.Widget._childConstructors = [];
+
+$.Widget.prototype = {
+	widgetName: "widget",
+	widgetEventPrefix: "",
+	defaultElement: "<div>",
+	options: {
+		disabled: false,
+
+		// callbacks
+		create: null
+	},
+	_createWidget: function( options, element ) {
+		element = $( element || this.defaultElement || this )[ 0 ];
+		this.element = $( element );
+		this.uuid = uuid++;
+		this.eventNamespace = "." + this.widgetName + this.uuid;
+		this.options = $.widget.extend( {},
+			this.options,
+			this._getCreateOptions(),
+			options );
+
+		this.bindings = $();
+		this.hoverable = $();
+		this.focusable = $();
+
+		if ( element !== this ) {
+			// 1.9 BC for #7810
+			// TODO remove dual storage
+			$.data( element, this.widgetName, this );
+			$.data( element, this.widgetFullName, this );
+			this._on({ remove: "destroy" });
+			this.document = $( element.style ?
+				// element within the document
+				element.ownerDocument :
+				// element is window or document
+				element.document || element );
+			this.window = $( this.document[0].defaultView || this.document[0].parentWindow );
+		}
+
+		this._create();
+		this._trigger( "create", null, this._getCreateEventData() );
+		this._init();
+	},
+	_getCreateOptions: $.noop,
+	_getCreateEventData: $.noop,
+	_create: $.noop,
+	_init: $.noop,
+
+	destroy: function() {
+		this._destroy();
+		// we can probably remove the unbind calls in 2.0
+		// all event bindings should go through this._on()
+		this.element
+			.unbind( this.eventNamespace )
+			// 1.9 BC for #7810
+			// TODO remove dual storage
+			.removeData( this.widgetName )
+			.removeData( this.widgetFullName )
+			// support: jquery <1.6.3
+			// http://bugs.jquery.com/ticket/9413
+			.removeData( $.camelCase( this.widgetFullName ) );
+		this.widget()
+			.unbind( this.eventNamespace )
+			.removeAttr( "aria-disabled" )
+			.removeClass(
+				this.widgetFullName + "-disabled " +
+				"ui-state-disabled" );
+
+		// clean up events and states
+		this.bindings.unbind( this.eventNamespace );
+		this.hoverable.removeClass( "ui-state-hover" );
+		this.focusable.removeClass( "ui-state-focus" );
+	},
+	_destroy: $.noop,
+
+	widget: function() {
+		return this.element;
+	},
+
+	option: function( key, value ) {
+		var options = key,
+			parts,
+			curOption,
+			i;
+
+		if ( arguments.length === 0 ) {
+			// don't return a reference to the internal hash
+			return $.widget.extend( {}, this.options );
+		}
+
+		if ( typeof key === "string" ) {
+			// handle nested keys, e.g., "foo.bar" => { foo: { bar: ___ } }
+			options = {};
+			parts = key.split( "." );
+			key = parts.shift();
+			if ( parts.length ) {
+				curOption = options[ key ] = $.widget.extend( {}, this.options[ key ] );
+				for ( i = 0; i < parts.length - 1; i++ ) {
+					curOption[ parts[ i ] ] = curOption[ parts[ i ] ] || {};
+					curOption = curOption[ parts[ i ] ];
+				}
+				key = parts.pop();
+				if ( value === undefined ) {
+					return curOption[ key ] === undefined ? null : curOption[ key ];
+				}
+				curOption[ key ] = value;
+			} else {
+				if ( value === undefined ) {
+					return this.options[ key ] === undefined ? null : this.options[ key ];
+				}
+				options[ key ] = value;
 			}
-	});
-	
-	$.extend($.Drop,{
-		/**
-		 * @static
-		 */
-		lowerName: "drop",
-		_rootElements: [], //elements that are listening for drops
-		_elements: $(),    //elements that can be dropped on
-		last_active: [],
-		endName: "dropon",
-		// adds an element as a 'root' element
-		// this element might have events that we need to respond to
-		addElement: function( el ) {
-			// check other elements
-			for(var i =0; i < this._rootElements.length ; i++  ){
-				if(el ==this._rootElements[i]) return;
-			}
-			this._rootElements.push(el);
-		},
-		removeElement: function( el ) {
-			 for(var i =0; i < this._rootElements.length ; i++  ){
-				if(el == this._rootElements[i]){
-					this._rootElements.splice(i,1)
+		}
+
+		this._setOptions( options );
+
+		return this;
+	},
+	_setOptions: function( options ) {
+		var key;
+
+		for ( key in options ) {
+			this._setOption( key, options[ key ] );
+		}
+
+		return this;
+	},
+	_setOption: function( key, value ) {
+		this.options[ key ] = value;
+
+		if ( key === "disabled" ) {
+			this.widget()
+				.toggleClass( this.widgetFullName + "-disabled ui-state-disabled", !!value )
+				.attr( "aria-disabled", value );
+			this.hoverable.removeClass( "ui-state-hover" );
+			this.focusable.removeClass( "ui-state-focus" );
+		}
+
+		return this;
+	},
+
+	enable: function() {
+		return this._setOption( "disabled", false );
+	},
+	disable: function() {
+		return this._setOption( "disabled", true );
+	},
+
+	_on: function( element, handlers ) {
+		// no element argument, shuffle and use this.element
+		if ( !handlers ) {
+			handlers = element;
+			element = this.element;
+		} else {
+			// accept selectors, DOM elements
+			element = $( element );
+			this.bindings = this.bindings.add( element );
+		}
+
+		var instance = this;
+		$.each( handlers, function( event, handler ) {
+			function handlerProxy() {
+				// allow widgets to customize the disabled handling
+				// - disabled as an array instead of boolean
+				// - disabled class as method for disabling individual parts
+				if ( instance.options.disabled === true ||
+						$( this ).hasClass( "ui-state-disabled" ) ) {
 					return;
 				}
+				return ( typeof handler === "string" ? instance[ handler ] : handler )
+					.apply( instance, arguments );
 			}
-		},
-		/**
-		* @hide
-		* For a list of affected drops, sorts them by which is deepest in the DOM first.
-		*/ 
-		sortByDeepestChild: function( a, b ) {
-			// Use jQuery.compare to compare two elements
-			var compare = a.element.compare(b.element);
-			if(compare & 16 || compare & 4) return 1;
-			if(compare & 8 || compare & 2) return -1;
-			return 0;
-		},
-		/**
-		 * @hide
-		 * Tests if a drop is within the point.
-		 */
-		isAffected: function( point, moveable, responder ) {
-			return ((responder.element != moveable.element) && (responder.element.within(point[0], point[1], responder._cache).length == 1));
-		},
-		/**
-		 * @hide
-		 * Calls dropout and sets last active to null
-		 * @param {Object} drop
-		 * @param {Object} drag
-		 * @param {Object} event
-		 */
-		deactivate: function( responder, mover, event ) {
-			mover.out(event, responder)
-			responder.callHandlers(this.lowerName+'out',responder.element[0], event, mover)
-		}, 
-		/**
-		 * @hide
-		 * Calls dropover
-		 * @param {Object} drop
-		 * @param {Object} drag
-		 * @param {Object} event
-		 */
-		activate: function( responder, mover, event ) { //this is where we should call over
-			mover.over(event, responder)
-			responder.callHandlers(this.lowerName+'over',responder.element[0], event, mover);
-		},
-		move: function( responder, mover, event ) {
-			responder.callHandlers(this.lowerName+'move',responder.element[0], event, mover)
-		},
-		/**
-		 * `$.Drop.compile()` gets all elements that are droppable and adds them to a list.
-		 * 
-		 * This should be called if and when new drops are added to the page
-		 * during the motion of a single drag.
-		 * 
-		 * This is called by default when a drag motion starts.
-		 * 
-		 * ## Use
-		 * 
-		 * After adding an element or drop, call compile.
-		 * 
-		 *      $("#midpoint").bind("dropover",function(){
-		 * 		    // when a drop hovers over midpoint,
-		 *          // make drop a drop.
-		 * 		    $("#drop").bind("dropover", function(){
-		 * 			
-		 * 		    });
-		 * 		    $.Drop.compile();
-		 * 	    });
-		 */
-		compile: function( event, drag ) {
-			// if we called compile w/o a current drag
-			if(!this.dragging && !drag){
-				return;
-			}else if(!this.dragging){
-				this.dragging = drag;
-				this.last_active = [];
-			}
-			var el, 
-				drops, 
-				selector, 
-				dropResponders, 
-				newEls = [],
-				dragging = this.dragging;
-			
-			// go to each root element and look for drop elements
-			for(var i=0; i < this._rootElements.length; i++){ //for each element
-				el = this._rootElements[i]
-				
-				// gets something like {"": ["dropinit"], ".foo" : ["dropover","dropmove"] }
-				var drops = $.event.findBySelector(el, eventNames)
 
-				// get drop elements by selector
-				for(selector in drops){ 
-					dropResponders = selector ? jQuery(selector, el) : [el];
-					
-					// for each drop element
-					for(var e= 0; e < dropResponders.length; e++){ 
-						
-						// add the callbacks to the element's Data
-						// there already might be data, so we merge it
-						if( this.addCallbacks(dropResponders[e], drops[selector], dragging) ){
-							newEls.push(dropResponders[e])
-						};
-					}
+			// copy the guid so direct unbinding works
+			if ( typeof handler !== "string" ) {
+				handlerProxy.guid = handler.guid =
+					handler.guid || handlerProxy.guid || $.guid++;
+			}
+
+			var match = event.match( /^(\w+)\s*(.*)$/ ),
+				eventName = match[1] + instance.eventNamespace,
+				selector = match[2];
+			if ( selector ) {
+				instance.widget().delegate( selector, eventName, handlerProxy );
+			} else {
+				element.bind( eventName, handlerProxy );
+			}
+		});
+	},
+
+	_off: function( element, eventName ) {
+		eventName = (eventName || "").split( " " ).join( this.eventNamespace + " " ) + this.eventNamespace;
+		element.unbind( eventName ).undelegate( eventName );
+	},
+
+	_delay: function( handler, delay ) {
+		function handlerProxy() {
+			return ( typeof handler === "string" ? instance[ handler ] : handler )
+				.apply( instance, arguments );
+		}
+		var instance = this;
+		return setTimeout( handlerProxy, delay || 0 );
+	},
+
+	_hoverable: function( element ) {
+		this.hoverable = this.hoverable.add( element );
+		this._on( element, {
+			mouseenter: function( event ) {
+				$( event.currentTarget ).addClass( "ui-state-hover" );
+			},
+			mouseleave: function( event ) {
+				$( event.currentTarget ).removeClass( "ui-state-hover" );
+			}
+		});
+	},
+
+	_focusable: function( element ) {
+		this.focusable = this.focusable.add( element );
+		this._on( element, {
+			focusin: function( event ) {
+				$( event.currentTarget ).addClass( "ui-state-focus" );
+			},
+			focusout: function( event ) {
+				$( event.currentTarget ).removeClass( "ui-state-focus" );
+			}
+		});
+	},
+
+	_trigger: function( type, event, data ) {
+		var prop, orig,
+			callback = this.options[ type ];
+
+		data = data || {};
+		event = $.Event( event );
+		event.type = ( type === this.widgetEventPrefix ?
+			type :
+			this.widgetEventPrefix + type ).toLowerCase();
+		// the original event may come from any element
+		// so we need to reset the target on the new event
+		event.target = this.element[ 0 ];
+
+		// copy original event properties over to the new event
+		orig = event.originalEvent;
+		if ( orig ) {
+			for ( prop in orig ) {
+				if ( !( prop in event ) ) {
+					event[ prop ] = orig[ prop ];
 				}
 			}
-			// once all callbacks are added, call init on everything ...
-			this.add(newEls, event, dragging)
-		},
+		}
 
-		// adds the drag callbacks object to the element or merges other callbacks ...
-		// returns true or false if the element is new ...
-		// onlyNew lets only new elements add themselves
-		addCallbacks : function(el, callbacks, onlyNew){
-			var origData = $.data(el,"_dropData");
-			if(!origData){
-				$.data(el,"_dropData", new $.Drop(callbacks, el));
+		this.element.trigger( event, data );
+		return !( $.isFunction( callback ) &&
+			callback.apply( this.element[0], [ event ].concat( data ) ) === false ||
+			event.isDefaultPrevented() );
+	}
+};
+
+$.each( { show: "fadeIn", hide: "fadeOut" }, function( method, defaultEffect ) {
+	$.Widget.prototype[ "_" + method ] = function( element, options, callback ) {
+		if ( typeof options === "string" ) {
+			options = { effect: options };
+		}
+		var hasOptions,
+			effectName = !options ?
+				method :
+				options === true || typeof options === "number" ?
+					defaultEffect :
+					options.effect || defaultEffect;
+		options = options || {};
+		if ( typeof options === "number" ) {
+			options = { duration: options };
+		}
+		hasOptions = !$.isEmptyObject( options );
+		options.complete = callback;
+		if ( options.delay ) {
+			element.delay( options.delay );
+		}
+		if ( hasOptions && $.effects && ( $.effects.effect[ effectName ] || $.uiBackCompat !== false && $.effects[ effectName ] ) ) {
+			element[ method ]( options );
+		} else if ( effectName !== method && element[ effectName ] ) {
+			element[ effectName ]( options.duration, options.easing, callback );
+		} else {
+			element.queue(function( next ) {
+				$( this )[ method ]();
+				if ( callback ) {
+					callback.call( element[ 0 ] );
+				}
+				next();
+			});
+		}
+	};
+});
+
+// DEPRECATED
+if ( $.uiBackCompat !== false ) {
+	$.Widget.prototype._getCreateOptions = function() {
+		return $.metadata && $.metadata.get( this.element[0] )[ this.widgetName ];
+	};
+}
+
+})( jQuery );
+;
+
+/*!
+ * jQuery UI Mouse 1.9.0
+ * http://jqueryui.com
+ *
+ * Copyright 2012 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://api.jqueryui.com/mouse/
+ *
+ * Depends:
+ *	jquery.ui.widget.js
+ */
+(function( $, undefined ) {
+
+var mouseHandled = false;
+$( document ).mouseup( function( e ) {
+	mouseHandled = false;
+});
+
+$.widget("ui.mouse", {
+	version: "1.9.0",
+	options: {
+		cancel: 'input,textarea,button,select,option',
+		distance: 1,
+		delay: 0
+	},
+	_mouseInit: function() {
+		var that = this;
+
+		this.element
+			.bind('mousedown.'+this.widgetName, function(event) {
+				return that._mouseDown(event);
+			})
+			.bind('click.'+this.widgetName, function(event) {
+				if (true === $.data(event.target, that.widgetName + '.preventClickEvent')) {
+					$.removeData(event.target, that.widgetName + '.preventClickEvent');
+					event.stopImmediatePropagation();
+					return false;
+				}
+			});
+
+		this.started = false;
+	},
+
+	// TODO: make sure destroying one instance of mouse doesn't mess with
+	// other instances of mouse
+	_mouseDestroy: function() {
+		this.element.unbind('.'+this.widgetName);
+		if ( this._mouseMoveDelegate ) {
+			$(document)
+				.unbind('mousemove.'+this.widgetName, this._mouseMoveDelegate)
+				.unbind('mouseup.'+this.widgetName, this._mouseUpDelegate);
+		}
+	},
+
+	_mouseDown: function(event) {
+		// don't let more than one widget handle mouseStart
+		if( mouseHandled ) { return; }
+
+		// we may have missed mouseup (out of window)
+		(this._mouseStarted && this._mouseUp(event));
+
+		this._mouseDownEvent = event;
+
+		var that = this,
+			btnIsLeft = (event.which === 1),
+			// event.target.nodeName works around a bug in IE 8 with
+			// disabled inputs (#7620)
+			elIsCancel = (typeof this.options.cancel === "string" && event.target.nodeName ? $(event.target).closest(this.options.cancel).length : false);
+		if (!btnIsLeft || elIsCancel || !this._mouseCapture(event)) {
+			return true;
+		}
+
+		this.mouseDelayMet = !this.options.delay;
+		if (!this.mouseDelayMet) {
+			this._mouseDelayTimer = setTimeout(function() {
+				that.mouseDelayMet = true;
+			}, this.options.delay);
+		}
+
+		if (this._mouseDistanceMet(event) && this._mouseDelayMet(event)) {
+			this._mouseStarted = (this._mouseStart(event) !== false);
+			if (!this._mouseStarted) {
+				event.preventDefault();
 				return true;
-			}else if(!onlyNew){
-				var origCbs = origData;
-				// merge data
-				for(var eventName in callbacks){
-					origCbs[eventName] = origCbs[eventName] ?
-							origCbs[eventName].concat(callbacks[eventName]) :
-							callbacks[eventName];
-				}
+			}
+		}
+
+		// Click event may never have fired (Gecko & Opera)
+		if (true === $.data(event.target, this.widgetName + '.preventClickEvent')) {
+			$.removeData(event.target, this.widgetName + '.preventClickEvent');
+		}
+
+		// these delegates are required to keep context
+		this._mouseMoveDelegate = function(event) {
+			return that._mouseMove(event);
+		};
+		this._mouseUpDelegate = function(event) {
+			return that._mouseUp(event);
+		};
+		$(document)
+			.bind('mousemove.'+this.widgetName, this._mouseMoveDelegate)
+			.bind('mouseup.'+this.widgetName, this._mouseUpDelegate);
+
+		event.preventDefault();
+		
+		mouseHandled = true;
+		return true;
+	},
+
+	_mouseMove: function(event) {
+		// IE mouseup check - mouseup happened when mouse was out of window
+		if ($.browser.msie && !(document.documentMode >= 9) && !event.button) {
+			return this._mouseUp(event);
+		}
+
+		if (this._mouseStarted) {
+			this._mouseDrag(event);
+			return event.preventDefault();
+		}
+
+		if (this._mouseDistanceMet(event) && this._mouseDelayMet(event)) {
+			this._mouseStarted =
+				(this._mouseStart(this._mouseDownEvent, event) !== false);
+			(this._mouseStarted ? this._mouseDrag(event) : this._mouseUp(event));
+		}
+
+		return !this._mouseStarted;
+	},
+
+	_mouseUp: function(event) {
+		$(document)
+			.unbind('mousemove.'+this.widgetName, this._mouseMoveDelegate)
+			.unbind('mouseup.'+this.widgetName, this._mouseUpDelegate);
+
+		if (this._mouseStarted) {
+			this._mouseStarted = false;
+
+			if (event.target === this._mouseDownEvent.target) {
+				$.data(event.target, this.widgetName + '.preventClickEvent', true);
+			}
+
+			this._mouseStop(event);
+		}
+
+		return false;
+	},
+
+	_mouseDistanceMet: function(event) {
+		return (Math.max(
+				Math.abs(this._mouseDownEvent.pageX - event.pageX),
+				Math.abs(this._mouseDownEvent.pageY - event.pageY)
+			) >= this.options.distance
+		);
+	},
+
+	_mouseDelayMet: function(event) {
+		return this.mouseDelayMet;
+	},
+
+	// These are placeholder methods, to be overriden by extending plugin
+	_mouseStart: function(event) {},
+	_mouseDrag: function(event) {},
+	_mouseStop: function(event) {},
+	_mouseCapture: function(event) { return true; }
+});
+
+})(jQuery);
+;
+
+/*!
+ * jQuery UI Draggable 1.9.0
+ * http://jqueryui.com
+ *
+ * Copyright 2012 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://api.jqueryui.com/draggable/
+ *
+ * Depends:
+ *	jquery.ui.core.js
+ *	jquery.ui.mouse.js
+ *	jquery.ui.widget.js
+ */
+(function( $, undefined ) {
+
+$.widget("ui.draggable", $.ui.mouse, {
+	version: "1.9.0",
+	widgetEventPrefix: "drag",
+	options: {
+		addClasses: true,
+		appendTo: "parent",
+		axis: false,
+		connectToSortable: false,
+		containment: false,
+		cursor: "auto",
+		cursorAt: false,
+		grid: false,
+		handle: false,
+		helper: "original",
+		iframeFix: false,
+		opacity: false,
+		refreshPositions: false,
+		revert: false,
+		revertDuration: 500,
+		scope: "default",
+		scroll: true,
+		scrollSensitivity: 20,
+		scrollSpeed: 20,
+		snap: false,
+		snapMode: "both",
+		snapTolerance: 20,
+		stack: false,
+		zIndex: false
+	},
+	_create: function() {
+
+		if (this.options.helper == 'original' && !(/^(?:r|a|f)/).test(this.element.css("position")))
+			this.element[0].style.position = 'relative';
+
+		(this.options.addClasses && this.element.addClass("ui-draggable"));
+		(this.options.disabled && this.element.addClass("ui-draggable-disabled"));
+
+		this._mouseInit();
+
+	},
+
+	_destroy: function() {
+		this.element.removeClass( "ui-draggable ui-draggable-dragging ui-draggable-disabled" );
+		this._mouseDestroy();
+	},
+
+	_mouseCapture: function(event) {
+
+		var o = this.options;
+
+		// among others, prevent a drag on a resizable-handle
+		if (this.helper || o.disabled || $(event.target).is('.ui-resizable-handle'))
+			return false;
+
+		//Quit if we're not on a valid handle
+		this.handle = this._getHandle(event);
+		if (!this.handle)
+			return false;
+		
+		$(o.iframeFix === true ? "iframe" : o.iframeFix).each(function() {
+			$('<div class="ui-draggable-iframeFix" style="background: #fff;"></div>')
+			.css({
+				width: this.offsetWidth+"px", height: this.offsetHeight+"px",
+				position: "absolute", opacity: "0.001", zIndex: 1000
+			})
+			.css($(this).offset())
+			.appendTo("body");
+		});
+
+		return true;
+
+	},
+
+	_mouseStart: function(event) {
+
+		var o = this.options;
+
+		//Create and append the visible helper
+		this.helper = this._createHelper(event);
+
+		this.helper.addClass("ui-draggable-dragging");
+
+		//Cache the helper size
+		this._cacheHelperProportions();
+
+		//If ddmanager is used for droppables, set the global draggable
+		if($.ui.ddmanager)
+			$.ui.ddmanager.current = this;
+
+		/*
+		 * - Position generation -
+		 * This block generates everything position related - it's the core of draggables.
+		 */
+
+		//Cache the margins of the original element
+		this._cacheMargins();
+
+		//Store the helper's css position
+		this.cssPosition = this.helper.css("position");
+		this.scrollParent = this.helper.scrollParent();
+
+		//The element's absolute position on the page minus margins
+		this.offset = this.positionAbs = this.element.offset();
+		this.offset = {
+			top: this.offset.top - this.margins.top,
+			left: this.offset.left - this.margins.left
+		};
+
+		$.extend(this.offset, {
+			click: { //Where the click happened, relative to the element
+				left: event.pageX - this.offset.left,
+				top: event.pageY - this.offset.top
+			},
+			parent: this._getParentOffset(),
+			relative: this._getRelativeOffset() //This is a relative to absolute position minus the actual position calculation - only used for relative positioned helper
+		});
+
+		//Generate the original position
+		this.originalPosition = this.position = this._generatePosition(event);
+		this.originalPageX = event.pageX;
+		this.originalPageY = event.pageY;
+
+		//Adjust the mouse offset relative to the helper if 'cursorAt' is supplied
+		(o.cursorAt && this._adjustOffsetFromHelper(o.cursorAt));
+
+		//Set a containment if given in the options
+		if(o.containment)
+			this._setContainment();
+
+		//Trigger event + callbacks
+		if(this._trigger("start", event) === false) {
+			this._clear();
+			return false;
+		}
+
+		//Recache the helper size
+		this._cacheHelperProportions();
+
+		//Prepare the droppable offsets
+		if ($.ui.ddmanager && !o.dropBehaviour)
+			$.ui.ddmanager.prepareOffsets(this, event);
+
+		
+		this._mouseDrag(event, true); //Execute the drag once - this causes the helper not to be visible before getting its correct position
+		
+		//If the ddmanager is used for droppables, inform the manager that dragging has started (see #5003)
+		if ( $.ui.ddmanager ) $.ui.ddmanager.dragStart(this, event);
+		
+		return true;
+	},
+
+	_mouseDrag: function(event, noPropagation) {
+
+		//Compute the helpers position
+		this.position = this._generatePosition(event);
+		this.positionAbs = this._convertPositionTo("absolute");
+
+		//Call plugins and callbacks and use the resulting position if something is returned
+		if (!noPropagation) {
+			var ui = this._uiHash();
+			if(this._trigger('drag', event, ui) === false) {
+				this._mouseUp({});
 				return false;
 			}
-		},
-		// calls init on each element's drags. 
-		// if its cancelled it's removed
-		// adds to the current elements ...
-		add: function( newEls, event, drag , dragging) {
-			var i = 0,
-				drop;
-			
-			while(i < newEls.length){
-				drop = $.data(newEls[i],"_dropData");
-				drop.callHandlers(this.lowerName+'init', newEls[i], event, drag)
-				if(drop._canceled){
-					newEls.splice(i,1)
-				}else{
-					i++;
-				}
-			}
-			this._elements.push.apply(this._elements, newEls)
-		},
-		show: function( point, moveable, event ) {
-			var element = moveable.element;
-			if(!this._elements.length) return;
-			
-			var respondable, 
-				affected = [], 
-				propagate = true, 
-				i = 0, 
-				j, 
-				la, 
-				toBeActivated, 
-				aff, 
-				oldLastActive = this.last_active,
-				responders = [],
-				self = this,
-				drag;
-				
-			// what's still affected ... we can also move element out here
-			while( i < this._elements.length){
-				drag = $.data(this._elements[i],"_dropData");
-				
-				if (!drag) {
-					this._elements.splice(i, 1)
-				}
-				else {
-					i++;
-					if (self.isAffected(point, moveable, drag)) {
-						affected.push(drag);
-					}
-				}
-			}
-
-			// we should only trigger on lowest children
-			affected.sort(this.sortByDeepestChild);
-			event.stopRespondPropagate = function(){
-				propagate = false;
-			}
-			
-			toBeActivated = affected.slice();
-
-			// all these will be active
-			this.last_active = affected;
-			
-			// deactivate everything in last_active that isn't active
-			for (j = 0; j < oldLastActive.length; j++) {
-				la = oldLastActive[j];
-				i = 0;
-				while((aff = toBeActivated[i])){
-					if(la == aff){
-						toBeActivated.splice(i,1);break;
-					}else{
-						i++;
-					}
-				}
-				if(!aff){
-					this.deactivate(la, moveable, event);
-				}
-				if(!propagate) return;
-			}
-			for(var i =0; i < toBeActivated.length; i++){
-				this.activate(toBeActivated[i], moveable, event);
-				if(!propagate) return;
-			}
-
-			// activate everything in affected that isn't in last_active
-			for (i = 0; i < affected.length; i++) {
-				this.move(affected[i], moveable, event);
-				
-				if(!propagate) return;
-			}
-		},
-		end: function( event, moveable ) {
-			var responder, la, 
-				endName = this.lowerName+'end',
-				dropData;
-			
-			// call dropon
-			// go through the actives ... if you are over one, call dropped on it
-			for(var i = 0; i < this.last_active.length; i++){
-				la = this.last_active[i]
-				if( this.isAffected(event.vector(), moveable, la)  && la[this.endName]){
-					la.callHandlers(this.endName, null, event, moveable);
-				}
-			}
-			// call dropend
-			for(var r =0; r<this._elements.length; r++){
-				dropData = $.data(this._elements[r],"_dropData");
-				dropData && dropData.callHandlers(endName, null, event, moveable);
-			}
-
-			this.clear();
-		},
-		/**
-		 * Called after dragging has stopped.
-		 * @hide
-		 */
-		clear: function() {
-		  this._elements.each(function(){
-			 // remove temporary drop data
-		  	$.removeData(this,"_dropData")
-		  })
-		  this._elements = $();
-		  delete this.dragging;
+			this.position = ui.position;
 		}
-	})
-	$.Drag.responder = $.Drop;
+
+		if(!this.options.axis || this.options.axis != "y") this.helper[0].style.left = this.position.left+'px';
+		if(!this.options.axis || this.options.axis != "x") this.helper[0].style.top = this.position.top+'px';
+		if($.ui.ddmanager) $.ui.ddmanager.drag(this, event);
+
+		return false;
+	},
+
+	_mouseStop: function(event) {
+
+		//If we are using droppables, inform the manager about the drop
+		var dropped = false;
+		if ($.ui.ddmanager && !this.options.dropBehaviour)
+			dropped = $.ui.ddmanager.drop(this, event);
+
+		//if a drop comes from outside (a sortable)
+		if(this.dropped) {
+			dropped = this.dropped;
+			this.dropped = false;
+		}
+		
+		//if the original element is no longer in the DOM don't bother to continue (see #8269)
+		var element = this.element[0], elementInDom = false;
+		while ( element && (element = element.parentNode) ) {
+			if (element == document ) {
+				elementInDom = true;
+			}
+		}
+		if ( !elementInDom && this.options.helper === "original" )
+			return false;
+
+		if((this.options.revert == "invalid" && !dropped) || (this.options.revert == "valid" && dropped) || this.options.revert === true || ($.isFunction(this.options.revert) && this.options.revert.call(this.element, dropped))) {
+			var that = this;
+			$(this.helper).animate(this.originalPosition, parseInt(this.options.revertDuration, 10), function() {
+				if(that._trigger("stop", event) !== false) {
+					that._clear();
+				}
+			});
+		} else {
+			if(this._trigger("stop", event) !== false) {
+				this._clear();
+			}
+		}
+
+		return false;
+	},
 	
-	$.extend($.Drop.prototype,{
-		/**
-		 * @prototype
-		 */
-		callHandlers: function( method, el, ev, drag ) {
-			var length = this[method] ? this[method].length : 0
-			for(var i =0; i < length; i++){
-				this[method][i].call(el || this.element[0], ev, this, drag)
-			}
-		},
-		/**
-		 * `drop.cache(value)` sets the drop to cache positions of draggable elements.
-		 * This should be called on `dropinit`. For example:
-		 *
-		 *      $('#dropable').on('dropinit', function( el, ev, drop ) {
-		 *          drop.cache();
-		 *      });
-		 *
-		 * @param {Boolean} [value=true] Whether to cache drop elements or not.
-		 */
-		cache: function( value ) {
-			this._cache = value != null ? value : true;
-		},
-		/**
-		 * `drop.cancel()` prevents this drop from being dropped on.
-		 *
-		 *      $('.droparea').on('dropover', function(ev, drop, drag) {
-		 *          if(drag.element.hasClass('not-me')) {
-		 *            drop.cancel();
-		 *          }
-		 *      });
-		 */
-		cancel: function() {
-			this._canceled = true;
+	_mouseUp: function(event) {
+		//Remove frame helpers
+		$("div.ui-draggable-iframeFix").each(function() { 
+			this.parentNode.removeChild(this); 
+		});
+		
+		//If the ddmanager is used for droppables, inform the manager that dragging has stopped (see #5003)
+		if( $.ui.ddmanager ) $.ui.ddmanager.dragStop(this, event);
+		
+		return $.ui.mouse.prototype._mouseUp.call(this, event);
+	},
+	
+	cancel: function() {
+		
+		if(this.helper.is(".ui-draggable-dragging")) {
+			this._mouseUp({});
+		} else {
+			this._clear();
 		}
-	} )
+		
+		return this;
+		
+	},
+
+	_getHandle: function(event) {
+
+		var handle = !this.options.handle || !$(this.options.handle, this.element).length ? true : false;
+		$(this.options.handle, this.element)
+			.find("*")
+			.andSelf()
+			.each(function() {
+				if(this == event.target) handle = true;
+			});
+
+		return handle;
+
+	},
+
+	_createHelper: function(event) {
+
+		var o = this.options;
+		var helper = $.isFunction(o.helper) ? $(o.helper.apply(this.element[0], [event])) : (o.helper == 'clone' ? this.element.clone().removeAttr('id') : this.element);
+
+		if(!helper.parents('body').length)
+			helper.appendTo((o.appendTo == 'parent' ? this.element[0].parentNode : o.appendTo));
+
+		if(helper[0] != this.element[0] && !(/(fixed|absolute)/).test(helper.css("position")))
+			helper.css("position", "absolute");
+
+		return helper;
+
+	},
+
+	_adjustOffsetFromHelper: function(obj) {
+		if (typeof obj == 'string') {
+			obj = obj.split(' ');
+		}
+		if ($.isArray(obj)) {
+			obj = {left: +obj[0], top: +obj[1] || 0};
+		}
+		if ('left' in obj) {
+			this.offset.click.left = obj.left + this.margins.left;
+		}
+		if ('right' in obj) {
+			this.offset.click.left = this.helperProportions.width - obj.right + this.margins.left;
+		}
+		if ('top' in obj) {
+			this.offset.click.top = obj.top + this.margins.top;
+		}
+		if ('bottom' in obj) {
+			this.offset.click.top = this.helperProportions.height - obj.bottom + this.margins.top;
+		}
+	},
+
+	_getParentOffset: function() {
+
+		//Get the offsetParent and cache its position
+		this.offsetParent = this.helper.offsetParent();
+		var po = this.offsetParent.offset();
+
+		// This is a special case where we need to modify a offset calculated on start, since the following happened:
+		// 1. The position of the helper is absolute, so it's position is calculated based on the next positioned parent
+		// 2. The actual offset parent is a child of the scroll parent, and the scroll parent isn't the document, which means that
+		//    the scroll is included in the initial calculation of the offset of the parent, and never recalculated upon drag
+		if(this.cssPosition == 'absolute' && this.scrollParent[0] != document && $.contains(this.scrollParent[0], this.offsetParent[0])) {
+			po.left += this.scrollParent.scrollLeft();
+			po.top += this.scrollParent.scrollTop();
+		}
+
+		if((this.offsetParent[0] == document.body) //This needs to be actually done for all browsers, since pageX/pageY includes this information
+		|| (this.offsetParent[0].tagName && this.offsetParent[0].tagName.toLowerCase() == 'html' && $.browser.msie)) //Ugly IE fix
+			po = { top: 0, left: 0 };
+
+		return {
+			top: po.top + (parseInt(this.offsetParent.css("borderTopWidth"),10) || 0),
+			left: po.left + (parseInt(this.offsetParent.css("borderLeftWidth"),10) || 0)
+		};
+
+	},
+
+	_getRelativeOffset: function() {
+
+		if(this.cssPosition == "relative") {
+			var p = this.element.position();
+			return {
+				top: p.top - (parseInt(this.helper.css("top"),10) || 0) + this.scrollParent.scrollTop(),
+				left: p.left - (parseInt(this.helper.css("left"),10) || 0) + this.scrollParent.scrollLeft()
+			};
+		} else {
+			return { top: 0, left: 0 };
+		}
+
+	},
+
+	_cacheMargins: function() {
+		this.margins = {
+			left: (parseInt(this.element.css("marginLeft"),10) || 0),
+			top: (parseInt(this.element.css("marginTop"),10) || 0),
+			right: (parseInt(this.element.css("marginRight"),10) || 0),
+			bottom: (parseInt(this.element.css("marginBottom"),10) || 0)
+		};
+	},
+
+	_cacheHelperProportions: function() {
+		this.helperProportions = {
+			width: this.helper.outerWidth(),
+			height: this.helper.outerHeight()
+		};
+	},
+
+	_setContainment: function() {
+
+		var o = this.options;
+		if(o.containment == 'parent') o.containment = this.helper[0].parentNode;
+		if(o.containment == 'document' || o.containment == 'window') this.containment = [
+			o.containment == 'document' ? 0 : $(window).scrollLeft() - this.offset.relative.left - this.offset.parent.left,
+			o.containment == 'document' ? 0 : $(window).scrollTop() - this.offset.relative.top - this.offset.parent.top,
+			(o.containment == 'document' ? 0 : $(window).scrollLeft()) + $(o.containment == 'document' ? document : window).width() - this.helperProportions.width - this.margins.left,
+			(o.containment == 'document' ? 0 : $(window).scrollTop()) + ($(o.containment == 'document' ? document : window).height() || document.body.parentNode.scrollHeight) - this.helperProportions.height - this.margins.top
+		];
+
+		if(!(/^(document|window|parent)$/).test(o.containment) && o.containment.constructor != Array) {
+			var c = $(o.containment);
+			var ce = c[0]; if(!ce) return;
+			var co = c.offset();
+			var over = ($(ce).css("overflow") != 'hidden');
+
+			this.containment = [
+				(parseInt($(ce).css("borderLeftWidth"),10) || 0) + (parseInt($(ce).css("paddingLeft"),10) || 0),
+				(parseInt($(ce).css("borderTopWidth"),10) || 0) + (parseInt($(ce).css("paddingTop"),10) || 0),
+				(over ? Math.max(ce.scrollWidth,ce.offsetWidth) : ce.offsetWidth) - (parseInt($(ce).css("borderLeftWidth"),10) || 0) - (parseInt($(ce).css("paddingRight"),10) || 0) - this.helperProportions.width - this.margins.left - this.margins.right,
+				(over ? Math.max(ce.scrollHeight,ce.offsetHeight) : ce.offsetHeight) - (parseInt($(ce).css("borderTopWidth"),10) || 0) - (parseInt($(ce).css("paddingBottom"),10) || 0) - this.helperProportions.height - this.margins.top  - this.margins.bottom
+			];
+			this.relative_container = c;
+
+		} else if(o.containment.constructor == Array) {
+			this.containment = o.containment;
+		}
+
+	},
+
+	_convertPositionTo: function(d, pos) {
+
+		if(!pos) pos = this.position;
+		var mod = d == "absolute" ? 1 : -1;
+		var o = this.options, scroll = this.cssPosition == 'absolute' && !(this.scrollParent[0] != document && $.contains(this.scrollParent[0], this.offsetParent[0])) ? this.offsetParent : this.scrollParent, scrollIsRootNode = (/(html|body)/i).test(scroll[0].tagName);
+
+		return {
+			top: (
+				pos.top																	// The absolute mouse position
+				+ this.offset.relative.top * mod										// Only for relative positioned nodes: Relative offset from element to offset parent
+				+ this.offset.parent.top * mod											// The offsetParent's offset without borders (offset + border)
+				- ( ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ) * mod)
+			),
+			left: (
+				pos.left																// The absolute mouse position
+				+ this.offset.relative.left * mod										// Only for relative positioned nodes: Relative offset from element to offset parent
+				+ this.offset.parent.left * mod											// The offsetParent's offset without borders (offset + border)
+				- ( ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ) * mod)
+			)
+		};
+
+	},
+
+	_generatePosition: function(event) {
+
+		var o = this.options, scroll = this.cssPosition == 'absolute' && !(this.scrollParent[0] != document && $.contains(this.scrollParent[0], this.offsetParent[0])) ? this.offsetParent : this.scrollParent, scrollIsRootNode = (/(html|body)/i).test(scroll[0].tagName);
+		var pageX = event.pageX;
+		var pageY = event.pageY;
+
+		/*
+		 * - Position constraining -
+		 * Constrain the position to a mix of grid, containment.
+		 */
+
+		if(this.originalPosition) { //If we are not dragging yet, we won't check for options
+			var containment;
+			if(this.containment) {
+			if (this.relative_container){
+				var co = this.relative_container.offset();
+				containment = [ this.containment[0] + co.left,
+					this.containment[1] + co.top,
+					this.containment[2] + co.left,
+					this.containment[3] + co.top ];
+			}
+			else {
+				containment = this.containment;
+			}
+
+				if(event.pageX - this.offset.click.left < containment[0]) pageX = containment[0] + this.offset.click.left;
+				if(event.pageY - this.offset.click.top < containment[1]) pageY = containment[1] + this.offset.click.top;
+				if(event.pageX - this.offset.click.left > containment[2]) pageX = containment[2] + this.offset.click.left;
+				if(event.pageY - this.offset.click.top > containment[3]) pageY = containment[3] + this.offset.click.top;
+			}
+
+			if(o.grid) {
+				//Check for grid elements set to 0 to prevent divide by 0 error causing invalid argument errors in IE (see ticket #6950)
+				var top = o.grid[1] ? this.originalPageY + Math.round((pageY - this.originalPageY) / o.grid[1]) * o.grid[1] : this.originalPageY;
+				pageY = containment ? (!(top - this.offset.click.top < containment[1] || top - this.offset.click.top > containment[3]) ? top : (!(top - this.offset.click.top < containment[1]) ? top - o.grid[1] : top + o.grid[1])) : top;
+
+				var left = o.grid[0] ? this.originalPageX + Math.round((pageX - this.originalPageX) / o.grid[0]) * o.grid[0] : this.originalPageX;
+				pageX = containment ? (!(left - this.offset.click.left < containment[0] || left - this.offset.click.left > containment[2]) ? left : (!(left - this.offset.click.left < containment[0]) ? left - o.grid[0] : left + o.grid[0])) : left;
+			}
+
+		}
+
+		return {
+			top: (
+				pageY																// The absolute mouse position
+				- this.offset.click.top													// Click offset (relative to the element)
+				- this.offset.relative.top												// Only for relative positioned nodes: Relative offset from element to offset parent
+				- this.offset.parent.top												// The offsetParent's offset without borders (offset + border)
+				+ ( ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollTop() : ( scrollIsRootNode ? 0 : scroll.scrollTop() ) ))
+			),
+			left: (
+				pageX																// The absolute mouse position
+				- this.offset.click.left												// Click offset (relative to the element)
+				- this.offset.relative.left												// Only for relative positioned nodes: Relative offset from element to offset parent
+				- this.offset.parent.left												// The offsetParent's offset without borders (offset + border)
+				+ ( ( this.cssPosition == 'fixed' ? -this.scrollParent.scrollLeft() : scrollIsRootNode ? 0 : scroll.scrollLeft() ))
+			)
+		};
+
+	},
+
+	_clear: function() {
+		this.helper.removeClass("ui-draggable-dragging");
+		if(this.helper[0] != this.element[0] && !this.cancelHelperRemoval) this.helper.remove();
+		//if($.ui.ddmanager) $.ui.ddmanager.current = null;
+		this.helper = null;
+		this.cancelHelperRemoval = false;
+	},
+
+	// From now on bulk stuff - mainly helpers
+
+	_trigger: function(type, event, ui) {
+		ui = ui || this._uiHash();
+		$.ui.plugin.call(this, type, [event, ui]);
+		if(type == "drag") this.positionAbs = this._convertPositionTo("absolute"); //The absolute position has to be recalculated after plugins
+		return $.Widget.prototype._trigger.call(this, type, event, ui);
+	},
+
+	plugins: {},
+
+	_uiHash: function(event) {
+		return {
+			helper: this.helper,
+			position: this.position,
+			originalPosition: this.originalPosition,
+			offset: this.positionAbs
+		};
+	}
+
+});
+
+$.ui.plugin.add("draggable", "connectToSortable", {
+	start: function(event, ui) {
+
+		var inst = $(this).data("draggable"), o = inst.options,
+			uiSortable = $.extend({}, ui, { item: inst.element });
+		inst.sortables = [];
+		$(o.connectToSortable).each(function() {
+			var sortable = $.data(this, 'sortable');
+			if (sortable && !sortable.options.disabled) {
+				inst.sortables.push({
+					instance: sortable,
+					shouldRevert: sortable.options.revert
+				});
+				sortable.refreshPositions();	// Call the sortable's refreshPositions at drag start to refresh the containerCache since the sortable container cache is used in drag and needs to be up to date (this will ensure it's initialised as well as being kept in step with any changes that might have happened on the page).
+				sortable._trigger("activate", event, uiSortable);
+			}
+		});
+
+	},
+	stop: function(event, ui) {
+
+		//If we are still over the sortable, we fake the stop event of the sortable, but also remove helper
+		var inst = $(this).data("draggable"),
+			uiSortable = $.extend({}, ui, { item: inst.element });
+
+		$.each(inst.sortables, function() {
+			if(this.instance.isOver) {
+
+				this.instance.isOver = 0;
+
+				inst.cancelHelperRemoval = true; //Don't remove the helper in the draggable instance
+				this.instance.cancelHelperRemoval = false; //Remove it in the sortable instance (so sortable plugins like revert still work)
+
+				//The sortable revert is supported, and we have to set a temporary dropped variable on the draggable to support revert: 'valid/invalid'
+				if(this.shouldRevert) this.instance.options.revert = true;
+
+				//Trigger the stop of the sortable
+				this.instance._mouseStop(event);
+
+				this.instance.options.helper = this.instance.options._helper;
+
+				//If the helper has been the original item, restore properties in the sortable
+				if(inst.options.helper == 'original')
+					this.instance.currentItem.css({ top: 'auto', left: 'auto' });
+
+			} else {
+				this.instance.cancelHelperRemoval = false; //Remove the helper in the sortable instance
+				this.instance._trigger("deactivate", event, uiSortable);
+			}
+
+		});
+
+	},
+	drag: function(event, ui) {
+
+		var inst = $(this).data("draggable"), that = this;
+
+		var checkPos = function(o) {
+			var dyClick = this.offset.click.top, dxClick = this.offset.click.left;
+			var helperTop = this.positionAbs.top, helperLeft = this.positionAbs.left;
+			var itemHeight = o.height, itemWidth = o.width;
+			var itemTop = o.top, itemLeft = o.left;
+
+			return $.ui.isOver(helperTop + dyClick, helperLeft + dxClick, itemTop, itemLeft, itemHeight, itemWidth);
+		};
+
+		$.each(inst.sortables, function(i) {
+			
+			//Copy over some variables to allow calling the sortable's native _intersectsWith
+			this.instance.positionAbs = inst.positionAbs;
+			this.instance.helperProportions = inst.helperProportions;
+			this.instance.offset.click = inst.offset.click;
+			
+			if(this.instance._intersectsWith(this.instance.containerCache)) {
+
+				//If it intersects, we use a little isOver variable and set it once, so our move-in stuff gets fired only once
+				if(!this.instance.isOver) {
+
+					this.instance.isOver = 1;
+					//Now we fake the start of dragging for the sortable instance,
+					//by cloning the list group item, appending it to the sortable and using it as inst.currentItem
+					//We can then fire the start event of the sortable with our passed browser event, and our own helper (so it doesn't create a new one)
+					this.instance.currentItem = $(that).clone().removeAttr('id').appendTo(this.instance.element).data("sortable-item", true);
+					this.instance.options._helper = this.instance.options.helper; //Store helper option to later restore it
+					this.instance.options.helper = function() { return ui.helper[0]; };
+
+					event.target = this.instance.currentItem[0];
+					this.instance._mouseCapture(event, true);
+					this.instance._mouseStart(event, true, true);
+
+					//Because the browser event is way off the new appended portlet, we modify a couple of variables to reflect the changes
+					this.instance.offset.click.top = inst.offset.click.top;
+					this.instance.offset.click.left = inst.offset.click.left;
+					this.instance.offset.parent.left -= inst.offset.parent.left - this.instance.offset.parent.left;
+					this.instance.offset.parent.top -= inst.offset.parent.top - this.instance.offset.parent.top;
+
+					inst._trigger("toSortable", event);
+					inst.dropped = this.instance.element; //draggable revert needs that
+					//hack so receive/update callbacks work (mostly)
+					inst.currentItem = inst.element;
+					this.instance.fromOutside = inst;
+
+				}
+
+				//Provided we did all the previous steps, we can fire the drag event of the sortable on every draggable drag, when it intersects with the sortable
+				if(this.instance.currentItem) this.instance._mouseDrag(event);
+
+			} else {
+
+				//If it doesn't intersect with the sortable, and it intersected before,
+				//we fake the drag stop of the sortable, but make sure it doesn't remove the helper by using cancelHelperRemoval
+				if(this.instance.isOver) {
+
+					this.instance.isOver = 0;
+					this.instance.cancelHelperRemoval = true;
+					
+					//Prevent reverting on this forced stop
+					this.instance.options.revert = false;
+					
+					// The out event needs to be triggered independently
+					this.instance._trigger('out', event, this.instance._uiHash(this.instance));
+					
+					this.instance._mouseStop(event, true);
+					this.instance.options.helper = this.instance.options._helper;
+
+					//Now we remove our currentItem, the list group clone again, and the placeholder, and animate the helper back to it's original size
+					this.instance.currentItem.remove();
+					if(this.instance.placeholder) this.instance.placeholder.remove();
+
+					inst._trigger("fromSortable", event);
+					inst.dropped = false; //draggable revert needs that
+				}
+
+			};
+
+		});
+
+	}
+});
+
+$.ui.plugin.add("draggable", "cursor", {
+	start: function(event, ui) {
+		var t = $('body'), o = $(this).data('draggable').options;
+		if (t.css("cursor")) o._cursor = t.css("cursor");
+		t.css("cursor", o.cursor);
+	},
+	stop: function(event, ui) {
+		var o = $(this).data('draggable').options;
+		if (o._cursor) $('body').css("cursor", o._cursor);
+	}
+});
+
+$.ui.plugin.add("draggable", "opacity", {
+	start: function(event, ui) {
+		var t = $(ui.helper), o = $(this).data('draggable').options;
+		if(t.css("opacity")) o._opacity = t.css("opacity");
+		t.css('opacity', o.opacity);
+	},
+	stop: function(event, ui) {
+		var o = $(this).data('draggable').options;
+		if(o._opacity) $(ui.helper).css('opacity', o._opacity);
+	}
+});
+
+$.ui.plugin.add("draggable", "scroll", {
+	start: function(event, ui) {
+		var i = $(this).data("draggable");
+		if(i.scrollParent[0] != document && i.scrollParent[0].tagName != 'HTML') i.overflowOffset = i.scrollParent.offset();
+	},
+	drag: function(event, ui) {
+
+		var i = $(this).data("draggable"), o = i.options, scrolled = false;
+
+		if(i.scrollParent[0] != document && i.scrollParent[0].tagName != 'HTML') {
+
+			if(!o.axis || o.axis != 'x') {
+				if((i.overflowOffset.top + i.scrollParent[0].offsetHeight) - event.pageY < o.scrollSensitivity)
+					i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop + o.scrollSpeed;
+				else if(event.pageY - i.overflowOffset.top < o.scrollSensitivity)
+					i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop - o.scrollSpeed;
+			}
+
+			if(!o.axis || o.axis != 'y') {
+				if((i.overflowOffset.left + i.scrollParent[0].offsetWidth) - event.pageX < o.scrollSensitivity)
+					i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft + o.scrollSpeed;
+				else if(event.pageX - i.overflowOffset.left < o.scrollSensitivity)
+					i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft - o.scrollSpeed;
+			}
+
+		} else {
+
+			if(!o.axis || o.axis != 'x') {
+				if(event.pageY - $(document).scrollTop() < o.scrollSensitivity)
+					scrolled = $(document).scrollTop($(document).scrollTop() - o.scrollSpeed);
+				else if($(window).height() - (event.pageY - $(document).scrollTop()) < o.scrollSensitivity)
+					scrolled = $(document).scrollTop($(document).scrollTop() + o.scrollSpeed);
+			}
+
+			if(!o.axis || o.axis != 'y') {
+				if(event.pageX - $(document).scrollLeft() < o.scrollSensitivity)
+					scrolled = $(document).scrollLeft($(document).scrollLeft() - o.scrollSpeed);
+				else if($(window).width() - (event.pageX - $(document).scrollLeft()) < o.scrollSensitivity)
+					scrolled = $(document).scrollLeft($(document).scrollLeft() + o.scrollSpeed);
+			}
+
+		}
+
+		if(scrolled !== false && $.ui.ddmanager && !o.dropBehaviour)
+			$.ui.ddmanager.prepareOffsets(i, event);
+
+	}
+});
+
+$.ui.plugin.add("draggable", "snap", {
+	start: function(event, ui) {
+
+		var i = $(this).data("draggable"), o = i.options;
+		i.snapElements = [];
+
+		$(o.snap.constructor != String ? ( o.snap.items || ':data(draggable)' ) : o.snap).each(function() {
+			var $t = $(this); var $o = $t.offset();
+			if(this != i.element[0]) i.snapElements.push({
+				item: this,
+				width: $t.outerWidth(), height: $t.outerHeight(),
+				top: $o.top, left: $o.left
+			});
+		});
+
+	},
+	drag: function(event, ui) {
+
+		var inst = $(this).data("draggable"), o = inst.options;
+		var d = o.snapTolerance;
+
+		var x1 = ui.offset.left, x2 = x1 + inst.helperProportions.width,
+			y1 = ui.offset.top, y2 = y1 + inst.helperProportions.height;
+
+		for (var i = inst.snapElements.length - 1; i >= 0; i--){
+
+			var l = inst.snapElements[i].left, r = l + inst.snapElements[i].width,
+				t = inst.snapElements[i].top, b = t + inst.snapElements[i].height;
+
+			//Yes, I know, this is insane ;)
+			if(!((l-d < x1 && x1 < r+d && t-d < y1 && y1 < b+d) || (l-d < x1 && x1 < r+d && t-d < y2 && y2 < b+d) || (l-d < x2 && x2 < r+d && t-d < y1 && y1 < b+d) || (l-d < x2 && x2 < r+d && t-d < y2 && y2 < b+d))) {
+				if(inst.snapElements[i].snapping) (inst.options.snap.release && inst.options.snap.release.call(inst.element, event, $.extend(inst._uiHash(), { snapItem: inst.snapElements[i].item })));
+				inst.snapElements[i].snapping = false;
+				continue;
+			}
+
+			if(o.snapMode != 'inner') {
+				var ts = Math.abs(t - y2) <= d;
+				var bs = Math.abs(b - y1) <= d;
+				var ls = Math.abs(l - x2) <= d;
+				var rs = Math.abs(r - x1) <= d;
+				if(ts) ui.position.top = inst._convertPositionTo("relative", { top: t - inst.helperProportions.height, left: 0 }).top - inst.margins.top;
+				if(bs) ui.position.top = inst._convertPositionTo("relative", { top: b, left: 0 }).top - inst.margins.top;
+				if(ls) ui.position.left = inst._convertPositionTo("relative", { top: 0, left: l - inst.helperProportions.width }).left - inst.margins.left;
+				if(rs) ui.position.left = inst._convertPositionTo("relative", { top: 0, left: r }).left - inst.margins.left;
+			}
+
+			var first = (ts || bs || ls || rs);
+
+			if(o.snapMode != 'outer') {
+				var ts = Math.abs(t - y1) <= d;
+				var bs = Math.abs(b - y2) <= d;
+				var ls = Math.abs(l - x1) <= d;
+				var rs = Math.abs(r - x2) <= d;
+				if(ts) ui.position.top = inst._convertPositionTo("relative", { top: t, left: 0 }).top - inst.margins.top;
+				if(bs) ui.position.top = inst._convertPositionTo("relative", { top: b - inst.helperProportions.height, left: 0 }).top - inst.margins.top;
+				if(ls) ui.position.left = inst._convertPositionTo("relative", { top: 0, left: l }).left - inst.margins.left;
+				if(rs) ui.position.left = inst._convertPositionTo("relative", { top: 0, left: r - inst.helperProportions.width }).left - inst.margins.left;
+			}
+
+			if(!inst.snapElements[i].snapping && (ts || bs || ls || rs || first))
+				(inst.options.snap.snap && inst.options.snap.snap.call(inst.element, event, $.extend(inst._uiHash(), { snapItem: inst.snapElements[i].item })));
+			inst.snapElements[i].snapping = (ts || bs || ls || rs || first);
+
+		};
+
+	}
+});
+
+$.ui.plugin.add("draggable", "stack", {
+	start: function(event, ui) {
+
+		var o = $(this).data("draggable").options;
+
+		var group = $.makeArray($(o.stack)).sort(function(a,b) {
+			return (parseInt($(a).css("zIndex"),10) || 0) - (parseInt($(b).css("zIndex"),10) || 0);
+		});
+		if (!group.length) { return; }
+		
+		var min = parseInt(group[0].style.zIndex) || 0;
+		$(group).each(function(i) {
+			this.style.zIndex = min + i;
+		});
+
+		this[0].style.zIndex = min + group.length;
+
+	}
+});
+
+$.ui.plugin.add("draggable", "zIndex", {
+	start: function(event, ui) {
+		var t = $(ui.helper), o = $(this).data("draggable").options;
+		if(t.css("zIndex")) o._zIndex = t.css("zIndex");
+		t.css('zIndex', o.zIndex);
+	},
+	stop: function(event, ui) {
+		var o = $(this).data("draggable").options;
+		if(o._zIndex) $(ui.helper).css('zIndex', o._zIndex);
+	}
+});
+
 })(jQuery);
+;
+
+/*!
+ * jQuery UI Droppable 1.9.0
+ * http://jqueryui.com
+ *
+ * Copyright 2012 jQuery Foundation and other contributors
+ * Released under the MIT license.
+ * http://jquery.org/license
+ *
+ * http://api.jqueryui.com/droppable/
+ *
+ * Depends:
+ *	jquery.ui.core.js
+ *	jquery.ui.widget.js
+ *	jquery.ui.mouse.js
+ *	jquery.ui.draggable.js
+ */
+(function( $, undefined ) {
+
+$.widget("ui.droppable", {
+	version: "1.9.0",
+	widgetEventPrefix: "drop",
+	options: {
+		accept: '*',
+		activeClass: false,
+		addClasses: true,
+		greedy: false,
+		hoverClass: false,
+		scope: 'default',
+		tolerance: 'intersect'
+	},
+	_create: function() {
+
+		var o = this.options, accept = o.accept;
+		this.isover = 0; this.isout = 1;
+
+		this.accept = $.isFunction(accept) ? accept : function(d) {
+			return d.is(accept);
+		};
+
+		//Store the droppable's proportions
+		this.proportions = { width: this.element[0].offsetWidth, height: this.element[0].offsetHeight };
+
+		// Add the reference and positions to the manager
+		$.ui.ddmanager.droppables[o.scope] = $.ui.ddmanager.droppables[o.scope] || [];
+		$.ui.ddmanager.droppables[o.scope].push(this);
+
+		(o.addClasses && this.element.addClass("ui-droppable"));
+
+	},
+
+	_destroy: function() {
+		var drop = $.ui.ddmanager.droppables[this.options.scope];
+		for ( var i = 0; i < drop.length; i++ )
+			if ( drop[i] == this )
+				drop.splice(i, 1);
+
+		this.element.removeClass("ui-droppable ui-droppable-disabled");
+	},
+
+	_setOption: function(key, value) {
+
+		if(key == 'accept') {
+			this.accept = $.isFunction(value) ? value : function(d) {
+				return d.is(value);
+			};
+		}
+		$.Widget.prototype._setOption.apply(this, arguments);
+	},
+
+	_activate: function(event) {
+		var draggable = $.ui.ddmanager.current;
+		if(this.options.activeClass) this.element.addClass(this.options.activeClass);
+		(draggable && this._trigger('activate', event, this.ui(draggable)));
+	},
+
+	_deactivate: function(event) {
+		var draggable = $.ui.ddmanager.current;
+		if(this.options.activeClass) this.element.removeClass(this.options.activeClass);
+		(draggable && this._trigger('deactivate', event, this.ui(draggable)));
+	},
+
+	_over: function(event) {
+
+		var draggable = $.ui.ddmanager.current;
+		if (!draggable || (draggable.currentItem || draggable.element)[0] == this.element[0]) return; // Bail if draggable and droppable are same element
+
+		if (this.accept.call(this.element[0],(draggable.currentItem || draggable.element))) {
+			if(this.options.hoverClass) this.element.addClass(this.options.hoverClass);
+			this._trigger('over', event, this.ui(draggable));
+		}
+
+	},
+
+	_out: function(event) {
+
+		var draggable = $.ui.ddmanager.current;
+		if (!draggable || (draggable.currentItem || draggable.element)[0] == this.element[0]) return; // Bail if draggable and droppable are same element
+
+		if (this.accept.call(this.element[0],(draggable.currentItem || draggable.element))) {
+			if(this.options.hoverClass) this.element.removeClass(this.options.hoverClass);
+			this._trigger('out', event, this.ui(draggable));
+		}
+
+	},
+
+	_drop: function(event,custom) {
+
+		var draggable = custom || $.ui.ddmanager.current;
+		if (!draggable || (draggable.currentItem || draggable.element)[0] == this.element[0]) return false; // Bail if draggable and droppable are same element
+
+		var childrenIntersection = false;
+		this.element.find(":data(droppable)").not(".ui-draggable-dragging").each(function() {
+			var inst = $.data(this, 'droppable');
+			if(
+				inst.options.greedy
+				&& !inst.options.disabled
+				&& inst.options.scope == draggable.options.scope
+				&& inst.accept.call(inst.element[0], (draggable.currentItem || draggable.element))
+				&& $.ui.intersect(draggable, $.extend(inst, { offset: inst.element.offset() }), inst.options.tolerance)
+			) { childrenIntersection = true; return false; }
+		});
+		if(childrenIntersection) return false;
+
+		if(this.accept.call(this.element[0],(draggable.currentItem || draggable.element))) {
+			if(this.options.activeClass) this.element.removeClass(this.options.activeClass);
+			if(this.options.hoverClass) this.element.removeClass(this.options.hoverClass);
+			this._trigger('drop', event, this.ui(draggable));
+			return this.element;
+		}
+
+		return false;
+
+	},
+
+	ui: function(c) {
+		return {
+			draggable: (c.currentItem || c.element),
+			helper: c.helper,
+			position: c.position,
+			offset: c.positionAbs
+		};
+	}
+
+});
+
+$.ui.intersect = function(draggable, droppable, toleranceMode) {
+
+	if (!droppable.offset) return false;
+
+	var x1 = (draggable.positionAbs || draggable.position.absolute).left, x2 = x1 + draggable.helperProportions.width,
+		y1 = (draggable.positionAbs || draggable.position.absolute).top, y2 = y1 + draggable.helperProportions.height;
+	var l = droppable.offset.left, r = l + droppable.proportions.width,
+		t = droppable.offset.top, b = t + droppable.proportions.height;
+
+	switch (toleranceMode) {
+		case 'fit':
+			return (l <= x1 && x2 <= r
+				&& t <= y1 && y2 <= b);
+			break;
+		case 'intersect':
+			return (l < x1 + (draggable.helperProportions.width / 2) // Right Half
+				&& x2 - (draggable.helperProportions.width / 2) < r // Left Half
+				&& t < y1 + (draggable.helperProportions.height / 2) // Bottom Half
+				&& y2 - (draggable.helperProportions.height / 2) < b ); // Top Half
+			break;
+		case 'pointer':
+			var draggableLeft = ((draggable.positionAbs || draggable.position.absolute).left + (draggable.clickOffset || draggable.offset.click).left),
+				draggableTop = ((draggable.positionAbs || draggable.position.absolute).top + (draggable.clickOffset || draggable.offset.click).top),
+				isOver = $.ui.isOver(draggableTop, draggableLeft, t, l, droppable.proportions.height, droppable.proportions.width);
+			return isOver;
+			break;
+		case 'touch':
+			return (
+					(y1 >= t && y1 <= b) ||	// Top edge touching
+					(y2 >= t && y2 <= b) ||	// Bottom edge touching
+					(y1 < t && y2 > b)		// Surrounded vertically
+				) && (
+					(x1 >= l && x1 <= r) ||	// Left edge touching
+					(x2 >= l && x2 <= r) ||	// Right edge touching
+					(x1 < l && x2 > r)		// Surrounded horizontally
+				);
+			break;
+		default:
+			return false;
+			break;
+		}
+
+};
+
+/*
+	This manager tracks offsets of draggables and droppables
+*/
+$.ui.ddmanager = {
+	current: null,
+	droppables: { 'default': [] },
+	prepareOffsets: function(t, event) {
+
+		var m = $.ui.ddmanager.droppables[t.options.scope] || [];
+		var type = event ? event.type : null; // workaround for #2317
+		var list = (t.currentItem || t.element).find(":data(droppable)").andSelf();
+
+		droppablesLoop: for (var i = 0; i < m.length; i++) {
+
+			if(m[i].options.disabled || (t && !m[i].accept.call(m[i].element[0],(t.currentItem || t.element)))) continue;	//No disabled and non-accepted
+			for (var j=0; j < list.length; j++) { if(list[j] == m[i].element[0]) { m[i].proportions.height = 0; continue droppablesLoop; } }; //Filter out elements in the current dragged item
+			m[i].visible = m[i].element.css("display") != "none"; if(!m[i].visible) continue; 									//If the element is not visible, continue
+
+			if(type == "mousedown") m[i]._activate.call(m[i], event); //Activate the droppable if used directly from draggables
+
+			m[i].offset = m[i].element.offset();
+			m[i].proportions = { width: m[i].element[0].offsetWidth, height: m[i].element[0].offsetHeight };
+
+		}
+
+	},
+	drop: function(draggable, event) {
+
+		var dropped = false;
+		$.each($.ui.ddmanager.droppables[draggable.options.scope] || [], function() {
+
+			if(!this.options) return;
+			if (!this.options.disabled && this.visible && $.ui.intersect(draggable, this, this.options.tolerance))
+				dropped = this._drop.call(this, event) || dropped;
+
+			if (!this.options.disabled && this.visible && this.accept.call(this.element[0],(draggable.currentItem || draggable.element))) {
+				this.isout = 1; this.isover = 0;
+				this._deactivate.call(this, event);
+			}
+
+		});
+		return dropped;
+
+	},
+	dragStart: function( draggable, event ) {
+		//Listen for scrolling so that if the dragging causes scrolling the position of the droppables can be recalculated (see #5003)
+		draggable.element.parentsUntil( "body" ).bind( "scroll.droppable", function() {
+			if( !draggable.options.refreshPositions ) $.ui.ddmanager.prepareOffsets( draggable, event );
+		});
+	},
+	drag: function(draggable, event) {
+
+		//If you have a highly dynamic page, you might try this option. It renders positions every time you move the mouse.
+		if(draggable.options.refreshPositions) $.ui.ddmanager.prepareOffsets(draggable, event);
+
+		//Run through all droppables and check their positions based on specific tolerance options
+		$.each($.ui.ddmanager.droppables[draggable.options.scope] || [], function() {
+
+			if(this.options.disabled || this.greedyChild || !this.visible) return;
+			var intersects = $.ui.intersect(draggable, this, this.options.tolerance);
+
+			var c = !intersects && this.isover == 1 ? 'isout' : (intersects && this.isover == 0 ? 'isover' : null);
+			if(!c) return;
+
+			var parentInstance;
+			if (this.options.greedy) {
+				// find droppable parents with same scope
+				var scope = this.options.scope;
+				var parent = this.element.parents(':data(droppable)').filter(function () {
+					return $.data(this, 'droppable').options.scope === scope;
+				});
+
+				if (parent.length) {
+					parentInstance = $.data(parent[0], 'droppable');
+					parentInstance.greedyChild = (c == 'isover' ? 1 : 0);
+				}
+			}
+
+			// we just moved into a greedy child
+			if (parentInstance && c == 'isover') {
+				parentInstance['isover'] = 0;
+				parentInstance['isout'] = 1;
+				parentInstance._out.call(parentInstance, event);
+			}
+
+			this[c] = 1; this[c == 'isout' ? 'isover' : 'isout'] = 0;
+			this[c == "isover" ? "_over" : "_out"].call(this, event);
+
+			// we just moved out of a greedy child
+			if (parentInstance && c == 'isout') {
+				parentInstance['isout'] = 0;
+				parentInstance['isover'] = 1;
+				parentInstance._over.call(parentInstance, event);
+			}
+		});
+
+	},
+	dragStop: function( draggable, event ) {
+		draggable.element.parentsUntil( "body" ).unbind( "scroll.droppable" );
+		//Call prepareOffsets one final time since IE does not fire return scroll events when overflow was caused by drag (see #5003)
+		if( !draggable.options.refreshPositions ) $.ui.ddmanager.prepareOffsets( draggable, event );
+	}
+};
+
+})(jQuery);
+;
 
 /* =============================================================
  * bootstrap-collapse.js v2.1.2
@@ -15241,126 +15560,6 @@ Handlebars.template = Handlebars.VM.template;
 		}
 	};
 }(DOMParser));
-;
-
-(function( $ ) {
-
-	var getComputedStyle = document.defaultView && document.defaultView.getComputedStyle,
-		rupper = /([A-Z])/g,
-		rdashAlpha = /-([a-z])/ig,
-		fcamelCase = function( all, letter ) {
-			return letter.toUpperCase();
-		},
-		getStyle = function( elem ) {
-			if ( getComputedStyle ) {
-				return getComputedStyle(elem, null);
-			}
-			else if ( elem.currentStyle ) {
-				return elem.currentStyle;
-			}
-		},
-		rfloat = /float/i,
-		rnumpx = /^-?\d+(?:px)?$/i,
-		rnum = /^-?\d/;
-	/**
-	 * @add jQuery
-	 */
-	//
-	/**
-	 * @function curStyles
-	 * @param {HTMLElement} el
-	 * @param {Array} styles An array of style names like <code>['marginTop','borderLeft']</code>
-	 * @return {Object} an object of style:value pairs.  Style names are camelCase.
-	 */
-	$.curStyles = function( el, styles ) {
-		if (!el ) {
-			return null;
-		}
-		var currentS = getStyle(el),
-			oldName, val, style = el.style,
-			results = {},
-			i = 0,
-			left, rsLeft, camelCase, name;
-
-		for (; i < styles.length; i++ ) {
-			name = styles[i];
-			oldName = name.replace(rdashAlpha, fcamelCase);
-
-			if ( rfloat.test(name) ) {
-				name = jQuery.support.cssFloat ? "float" : "styleFloat";
-				oldName = "cssFloat";
-			}
-
-			if ( getComputedStyle ) {
-				name = name.replace(rupper, "-$1").toLowerCase();
-				val = currentS.getPropertyValue(name);
-				if ( name === "opacity" && val === "" ) {
-					val = "1";
-				}
-				results[oldName] = val;
-			} else {
-				camelCase = name.replace(rdashAlpha, fcamelCase);
-				results[oldName] = currentS[name] || currentS[camelCase];
-
-
-				if (!rnumpx.test(results[oldName]) && rnum.test(results[oldName]) ) { //convert to px
-					// Remember the original values
-					left = style.left;
-					rsLeft = el.runtimeStyle.left;
-
-					// Put in the new values to get a computed value out
-					el.runtimeStyle.left = el.currentStyle.left;
-					style.left = camelCase === "fontSize" ? "1em" : (results[oldName] || 0);
-					results[oldName] = style.pixelLeft + "px";
-
-					// Revert the changed values
-					style.left = left;
-					el.runtimeStyle.left = rsLeft;
-				}
-
-			}
-		}
-
-		return results;
-	};
-	/**
-	 *  @add jQuery.fn
-	 */
-
-
-	$.fn
-	/**
-	 * @parent dom
-	 * @plugin jquery/dom/cur_styles
-	 * @download http://jmvcsite.heroku.com/pluginify?plugins[]=jquery/dom/cur_styles/cur_styles.js
-	 * @test jquery/dom/cur_styles/qunit.html
-	 * Use curStyles to rapidly get a bunch of computed styles from an element.
-	 * <h3>Quick Example</h3>
-	 * @codestart
-	 * $("#foo").curStyles('float','display') //->
-	 * // {
-	 * //  cssFloat: "left", display: "block"
-	 * // }
-	 * @codeend
-	 * <h2>Use</h2>
-	 * <p>An element's <b>computed</b> style is the current calculated style of the property.
-	 * This is different than the values on <code>element.style</code> as
-	 * <code>element.style</code> doesn't reflect styles provided by css or the browser's default
-	 * css properties.</p>
-	 * <p>Getting computed values individually is expensive! This plugin lets you get all
-	 * the style properties you need all at once.</p>
-	 * <h2>Demo</h2>
-	 * <p>The following demo illustrates the performance improvement curStyle provides by providing
-	 * a faster 'height' jQuery function called 'fastHeight'.</p>
-	 * @demo jquery/dom/cur_styles/cur_styles.html
-	 * @param {String} style pass style names as arguments
-	 * @return {Object} an object of style:value pairs
-	 */
-	.curStyles = function() {
-		return $.curStyles(this[0], $.makeArray(arguments));
-	};
-})(jQuery);;
-
 ;
 
 // Underscore.string

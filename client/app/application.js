@@ -22,6 +22,9 @@ _.extend(Application, {
     // Set per-view body classes
     this.setBodyClasses();
 
+    // Set editor width
+    this.setEditorWidth();
+
     // Holds editor settings and data
     this.editor = {};
 
@@ -62,6 +65,19 @@ _.extend(Application, {
   , setBodyClasses: function () {
     Backbone.history.on("route", function (router, name) {
       document.body.className = name;
+    });
+  }
+
+  , setEditorWidth: function () {
+    Backbone.history.on("route", function (router, name) {
+      if (name === "theme") {
+        $("#theme")
+          .width($(window).width() - 250)
+          .height($(window).height() - 60);
+      } else {
+        $("#x-layout-editor").remove();
+        $("#main").removeAttr("style");
+      }
     });
   }
 

@@ -27,18 +27,12 @@ exports.config =
           'vendor/scripts/backbone-validation.js',
           'vendor/scripts/backbone-validation-bootstrap.coffee',
 
-          # jQuery++
-          'vendor/scripts/jquerypp/jquery.compare.js',
-          'vendor/scripts/jquerypp/jquery.within.js',
-          'vendor/scripts/jquerypp/jquery.lang.vector.js',
-          'vendor/scripts/jquerypp/jquery.event.livehack.js',
-          'vendor/scripts/jquerypp/jquery.event.dom.js',
-          'vendor/scripts/jquerypp/jquery.event.dom.cur_styles.js',
-          'vendor/scripts/jquerypp/jquery.event.drag.js',
-          'vendor/scripts/jquerypp/jquery.event.drag.limit.js',
-          'vendor/scripts/jquerypp/jquery.event.drop.js',
+          'vendor/scripts/jqueryui/jquery.ui.core.js',
+          'vendor/scripts/jqueryui/jquery.ui.widget.js',
+          'vendor/scripts/jqueryui/jquery.ui.mouse.js',
+          'vendor/scripts/jqueryui/jquery.ui.draggable.js',
+          'vendor/scripts/jqueryui/jquery.ui.droppable.js',
 
-          # Bootstrap from Twitter
           'vendor/scripts/bootstrap/bootstrap-collapse.js',
           'vendor/scripts/bootstrap/bootstrap-modal.js'
           'vendor/scripts/bootstrap/bootstrap-alert.js'

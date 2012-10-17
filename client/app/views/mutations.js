@@ -105,7 +105,7 @@ module.exports = View.extend({
 
   , cleanupNode: function(node) {
     $(node)
-      .removeClass("x-current")
+      .removeClass("x-current x-full x-not-full x-empty")
       .children(".x-resize, .x-remove")
         .remove()
         .end()

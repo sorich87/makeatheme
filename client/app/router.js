@@ -6,11 +6,7 @@ module.exports = Backbone.Router.extend({
       "": "index"
     , "me/themes": "your_themes"
     , "themes/:id": "theme"
-    , "themes/:id/edit": "theme_edit"
-    , "themes/:id/fork": "theme_fork"
     , "preview/:id": "preview"
-    , "editor/:id": "editor"
-    , "editor/:id/:fork": "editor"
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
@@ -46,24 +42,7 @@ module.exports = Backbone.Router.extend({
 
   , theme: function (id) {
     $("#main").empty().append(app.createView("theme", {
-        themeID: id
-      , route: "preview"
-    }).render().$el);
-  }
-
-  , theme_edit: function (id) {
-    $("#main").empty().append(app.createView("theme", {
-        themeID: id
-      , route: "editor"
-      , action: "edit"
-    }).render().$el);
-  }
-
-  , theme_fork: function (id) {
-    $("#main").empty().append(app.createView("theme", {
-        themeID: id
-      , route: "editor"
-      , action: "fork"
+      themeID: id
     }).render().$el);
   }
 
@@ -74,18 +53,6 @@ module.exports = Backbone.Router.extend({
     }
 
     app.createView("preview").render();
-  }
-
-  , editor: function (id, action) {
-    if (app.data.theme === void 0) {
-      window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
-      return;
-    }
-
-    // Initialize editor view
-    app.createView("editor", {
-      fork: action === "fork" ? true : false
-    }).render();
   }
 
   , login: function () {

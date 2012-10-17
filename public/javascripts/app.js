@@ -99,6 +99,9 @@ window.require.define({"application": function(exports, require, module) {
       // Set per-view body classes
       this.setBodyClasses();
 
+      // Set editor width
+      this.setEditorWidth();
+
       // Holds editor settings and data
       this.editor = {};
 
@@ -139,6 +142,19 @@ window.require.define({"application": function(exports, require, module) {
     , setBodyClasses: function () {
       Backbone.history.on("route", function (router, name) {
         document.body.className = name;
+      });
+    }
+
+    , setEditorWidth: function () {
+      Backbone.history.on("route", function (router, name) {
+        if (name === "theme") {
+          $("#theme")
+            .width($(window).width() - 250)
+            .height($(window).height() - 60);
+        } else {
+          $("#x-layout-editor").remove();
+          $("#main").removeAttr("style");
+        }
       });
     }
 
@@ -1054,11 +1070,7 @@ window.require.define({"router": function(exports, require, module) {
         "": "index"
       , "me/themes": "your_themes"
       , "themes/:id": "theme"
-      , "themes/:id/edit": "theme_edit"
-      , "themes/:id/fork": "theme_fork"
       , "preview/:id": "preview"
-      , "editor/:id": "editor"
-      , "editor/:id/:fork": "editor"
       , "login": "login"
       , "register": "register"
       , "reset_password": "reset_password"
@@ -1094,24 +1106,7 @@ window.require.define({"router": function(exports, require, module) {
 
     , theme: function (id) {
       $("#main").empty().append(app.createView("theme", {
-          themeID: id
-        , route: "preview"
-      }).render().$el);
-    }
-
-    , theme_edit: function (id) {
-      $("#main").empty().append(app.createView("theme", {
-          themeID: id
-        , route: "editor"
-        , action: "edit"
-      }).render().$el);
-    }
-
-    , theme_fork: function (id) {
-      $("#main").empty().append(app.createView("theme", {
-          themeID: id
-        , route: "editor"
-        , action: "fork"
+        themeID: id
       }).render().$el);
     }
 
@@ -1122,18 +1117,6 @@ window.require.define({"router": function(exports, require, module) {
       }
 
       app.createView("preview").render();
-    }
-
-    , editor: function (id, action) {
-      if (app.data.theme === void 0) {
-        window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
-        return;
-      }
-
-      // Initialize editor view
-      app.createView("editor", {
-        fork: action === "fork" ? true : false
-      }).render();
     }
 
     , login: function () {
@@ -1249,9 +1232,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     , collection: app.editor.blocks
 
     , events: {
-        "draginit #x-block-insert .x-drag": "dragInit"
-      , "dragend #x-block-insert .x-drag": "dragEnd"
-      , "click .x-new-block": "showForm"
+        "click .x-new-block": "showForm"
       , "click .x-new-block-add": "addBlock"
       , "click .x-remove": "removeBlock"
     }
@@ -1263,6 +1244,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       app.on("mutations:started", this.makeMutable.bind(this));
       app.on("save:before", this.addThemeAttributes.bind(this));
+      app.on("block:inserted", this.insertBlock.bind(this));
 
       this.allBlocks = _.map(app.data.blocks, function (block) {
         block.label = _.str.titleize(_.str.humanize(block.name));
@@ -1275,6 +1257,17 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       this.collection.reset(this.collection.models);
 
+      this.$(".x-drag").draggable({
+          addClasses: false
+        , helper: function() {
+          // Append a clone to the body to avoid overflow on parent accordion.
+          return $(this).clone().appendTo("body");
+        }
+        , revert: "invalid"
+        , scroll: false
+        , zIndex: 9999
+      });
+
       return this;
     }
 
@@ -1285,8 +1278,8 @@ window.require.define({"views/blocks": function(exports, require, module) {
         remove = " <span class='x-remove' title='Delete block'>&times;</span>";
       }
 
-      this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
-                          "<span>&Dagger;</span> " + block.label() + remove + "</span></li>");
+      this.$("ul").append("<li class='x-drag' data-cid='" + block.cid + "'>" +
+                          "<span>&Dagger;</span> " + block.label() + remove + "</li>");
     }
 
     , addAll: function () {
@@ -1301,17 +1294,15 @@ window.require.define({"views/blocks": function(exports, require, module) {
       this.$("span[data-cid='" + block.cid + "']").closest("li").remove();
     }
 
-    // Replace the drag element by its clone
-    , dragInit: function (e, drag) {
-      drag.element = drag.ghost();
-    }
-
     // If the element is inserted in a row,
     // load the actual template chuck to insert
-    , dragEnd: function (e, drag) {
-      var block = this.collection.getByCid(drag.element.data("cid"));
+    , insertBlock: function (element, id) {
+      var block = this.collection.getByCid($(element).data("cid"));
 
-      app.trigger("block:inserted", block, drag.element);
+      element.outerHTML = "<div id='" + id + "' class='columns " +
+        block.className() + "'>" + block.get("build") + "</div>";
+
+      app.trigger("node:added", window.document.getElementById(id));
     }
 
     , makeMutable: function (pieces) {
@@ -1391,9 +1382,9 @@ window.require.define({"views/download_button": function(exports, require, modul
       var button;
 
       if (app.currentUser.id === void 0) {
-        button = "<button class='x-btn x-btn-success x-login'>Login to Save</button>";
+        button = "<button class='btn btn-success x-login'>Login to Save</button>";
       } else {
-        button = "<button class='x-btn x-btn-success x-download'>Download Theme</button>";
+        button = "<button class='btn btn-success x-download'>Download Theme</button>";
       }
 
       this.$el.empty().append(button);
@@ -1454,103 +1445,6 @@ window.require.define({"views/download_button": function(exports, require, modul
   
 }});
 
-window.require.define({"views/editor": function(exports, require, module) {
-  var app = require("application")
-    , View = require("views/base/view")
-    , data = require("lib/editor_data");
-
-  module.exports = View.extend({
-    el: "<div id='x-layout-editor'>" +
-        "<div class='x-handle'></div>" +
-        "</div>"
-
-    , events: {
-        "draginit #x-layout-editor .x-handle": "dragInit"
-      , "dragmove #x-layout-editor .x-handle": "dragMove"
-      , "click h4": "showSection"
-    }
-
-    , initialize: function () {
-      _.extend(app.editor, {
-          preview_only: !!app.data.preview_only
-        , templates: data.templates
-        , regions: data.regions
-        , blocks: data.blocks
-        , style: data.style
-        , fork: this.options.fork
-      });
-    }
-
-    // Show editor when "template:loaded" event is triggered
-    , render: function () {
-      var regionsView = app.reuseView("regions")
-        , blocksView = app.reuseView("blocks")
-        , styleView = app.reuseView("style_edit")
-        , shareView = app.reuseView("share_link")
-        , saveView = app.reuseView("save_button")
-        , downloadView = app.reuseView("download_button");
-
-      this.$el
-        .children(".x-handle").empty()
-          .append("&Dagger; <span>Theme: " + app.data.theme.name + "</span>")
-          .end()
-        .append("<h4>Current Template <span>&and;</span></h4>")
-        .append(app.reuseView("templates").render().$el);
-
-      if (!app.editor.preview_only) {
-        this.$el
-          .append("<h4>Header &amp; Footer <span>&and;</span></h4>")
-          .append(regionsView.render().$el)
-          .append("<h4>Blocks <span>&or;</span></h4>")
-          .append(blocksView.render().$el)
-          .append("<h4>Style <span>&or;</span></h4>")
-          .append(styleView.render().$el)
-          .append("<h4>Share <span>&or;</span></h4>")
-          .append(shareView.render().$el)
-          .append(saveView.render().$el)
-          .append(downloadView.render().$el);
-
-        app.reuseView("mutations");
-
-        // Setup drag and drop and resize
-        app.createView("layout").render();
-
-        this.$(".x-section:not(#x-templates-select, #x-region-select)").hide();
-      }
-
-      this.$el.appendTo($("body"));
-
-      return this;
-    }
-
-    , showSection: function (e) {
-      $(e.target).next().slideToggle("slow", function () {
-        var $this = $(this)
-          , $handle = $this.prev().children("span");
-
-        if ($this.is(":hidden")) {
-          $handle.empty().append("&or;");
-        } else {
-          $handle.empty().append("&and;");
-        }
-      });
-    }
-
-    // Drag the editor box
-    , dragInit: function (e, drag) {
-      var mouse = drag.mouseElementPosition;
-
-      drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
-    }
-
-    // Keep the editor box above other elements when moving
-    , dragMove: function (e, drag) {
-      $(drag.element).parent().css("zIndex", 9999);
-    }
-  });
-  
-}});
-
 window.require.define({"views/faq": function(exports, require, module) {
   var View = require("views/base/view");
 
@@ -1589,8 +1483,6 @@ window.require.define({"views/layout": function(exports, require, module) {
   module.exports = View.extend({
       el: $("body")
 
-    , currentAction: null
-
     , events: {
         // Highlight columns.
         "click .columns": "highlightColumns"
@@ -1604,22 +1496,14 @@ window.require.define({"views/layout": function(exports, require, module) {
         // Forms shouldn't be submittable
       , "submit .columns form": "preventDefault"
 
-        // Drag
-      , "draginit .columns": "dragInit"
-      , "dragend .columns": "dragEnd"
-
-        // Drop
-      , "dropover .row": "dropOver"
-      , "dropout .row": "dropOut"
-      , "dropon .row": "dropOn"
-
-        // Resize
-      , "draginit .x-resize": "resizeInit"
-      , "dragmove .x-resize": "resizeMove"
-      , "dragend .x-resize": "resizeEnd"
-
         // Remove column
       , "click .columns .x-remove": "removeColumn"
+
+      , "mouseover .column, .columns": "makeDraggable"
+
+      , "mouseover .row": "makeDroppable"
+
+      , "mouseover .x-resize": "makeResizeable"
     }
 
     , initialize: function () {
@@ -1632,7 +1516,38 @@ window.require.define({"views/layout": function(exports, require, module) {
       app.on("save:error", this.addDataBypass);
       app.on("template:loaded", this.addDataBypass);
 
-      app.on("block:inserted", this.insertColumn.bind(this));
+      this.makeDroppable();
+    }
+
+    , makeDraggable: function (e) {
+      this.$(".column, .columns").draggable({
+          addClasses: false
+        , containment: this.$el.children()
+        , revert: "invalid"
+        , drag: this.dragOn
+        , start: this.dragStart
+        , stop: this.dragStop
+      });
+    }
+
+    , makeDroppable: function (e) {
+      this.$(".row").droppable({
+          accept: ".column, .columns, .x-drag"
+        , addClasses: false
+        , drop: this.dropOn
+        , out: this.dropOut
+        , over: this.dropOver
+      });
+    }
+
+    , makeResizeable: function (e) {
+      $(e.currentTarget).draggable({
+          addClasses: false
+        , axis: "x"
+        , containment: this.$el.children()
+        , drag: this.resizeOn
+        , stop: this.resizeStop
+      });
     }
 
     , removeDataBypass: function () {
@@ -1652,10 +1567,6 @@ window.require.define({"views/layout": function(exports, require, module) {
     , highlightColumns: function (e) {
       var $column, name, slug;
 
-      if (this.currentAction !== null) {
-        return;
-      }
-
       app.trigger("editor:columnHighlight", e.currentTarget);
 
       $column = $(e.currentTarget);
@@ -1665,7 +1576,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       if ($column.children(".x-resize").length === 0) {
         $column.html(function (i, html) {
-          return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+          return html + "<div class='x-resize' title='Resize element'>&rang;</div>";
         });
       }
 
@@ -1691,34 +1602,25 @@ window.require.define({"views/layout": function(exports, require, module) {
       }
     }
 
-    // Start drag and limit it to direct children of body.
-    // If released, revert to original position.
-    , dragInit: function (e, drag) {
-      this.currentAction = "drag";
+    , dragStart: function (e, ui) {
+      app.trigger("node:removed", ui.helper[0], ui.helper[0].parentNode);
+    }
 
-      drag.limit(this.$el.children()).revert();
-
-      app.trigger("node:removed", drag.element[0], drag.element[0].parentNode);
+    , dragOn: function(e, ui) {
+      ui.helper.css("z-index", 9999);
     }
 
     // Reset position of dragged element.
-    , dragEnd: function (e, drag) {
-      drag.element.css({
-        top: drag.startPosition.top() + "px",
-        left: drag.startPosition.left() + "px"
-      });
+    , dragStop: function (e, ui) {
+      ui.helper.removeAttr("style");
 
-      drag.element.removeAttr("style");
-
-      this.currentAction = null;
-
-      app.trigger("node:added", drag.element[0]);
+      app.trigger("node:added", ui.helper[0]);
     }
 
     // Mark the row as full or not.
-    , dropOver: function (e, drop, drag) {
-      $(drop.element).addClass(function () {
-        if (isRowFull(this, drag.element)) {
+    , dropOver: function (e, ui) {
+      $(this).addClass(function () {
+        if (isRowFull(this, ui.draggable)) {
           $(this).addClass("x-full");
         } else {
           $(this).addClass("x-not-full");
@@ -1727,19 +1629,19 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     // Remove x-full or x-not-full class if previously added.
-    , dropOut: function (e, drop, drag) {
-      $(drop.element).removeClass("x-full x-not-full");
+    , dropOut: function (e, ui) {
+      $(this).removeClass("x-full x-not-full");
     }
 
     // Add column to row. If the row is full, add a new row.
     // If original parent row doesn't have any more children
     // and is not a <header> or <footer> and has no id attribute, remove it.
     // Remove x-full and x-not-full classes if one was previously added.
-    , dropOn: function (e, drop, drag) {
+    , dropOn: function (e, ui) {
       var row, $drag, $dragParent, $dragGrandParent;
 
-      $drag = $(drag.element);
-      $drop = $(drop.element);
+      $drag = ui.helper;
+      $drop = $(this);
 
       $dragParent = $drag.parent();
 
@@ -1752,70 +1654,56 @@ window.require.define({"views/layout": function(exports, require, module) {
       }
       $drag.appendTo($row);
 
-      $drop.removeClass("x-empty");
+      $drop.removeClass("x-empty x-full x-not-full");
 
-      if ($dragParent.children().length === 0 ) {
-        $dragGrandParent = $dragParent.parent();
+      if ($drag.data("cid")) {
+        app.trigger("block:inserted", $drag[0], "y-" + idIncrement);
+        idIncrement++;
+      } else {
+        if ($dragParent.children().length === 0) {
+          $dragGrandParent = $dragParent.parent();
 
-        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
-            $dragParent.attr("id").indexOf("x-") !== 0) {
-          $dragParent.addClass("x-empty");
-        } else {
-          $dragParent.remove();
-          app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
+          if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
+              $dragParent.attr("id").indexOf("x-") !== 0) {
+            $dragParent.addClass("x-empty");
+          } else {
+            $dragParent.remove();
+            app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
+          }
         }
       }
-
-      $drop.removeClass("x-full x-not-full");
-    }
-
-    // Init drag of resize handle horizontally and don't notify drops.
-    , resizeInit: function (e, drag) {
-      this.currentAction = "resize";
-
-      drag.horizontal().only();
     }
 
     // Resize the column.
     // Sum of column widths in the row should never be larger than row.
-    , resizeMove: function (e, drag) {
-      var $drag = $(drag.element)
+    , resizeOn: function (e, ui) {
+      var $drag = ui.helper
       , $column = $drag.parent()
       , $row = $column.parent();
 
-      width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+      width = ui.position.left + $drag.width();
 
       if (width >= $row.width()) {
         width = $row.width();
-        e.preventDefault();
       } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
         width = $row.width() - totalColumnsWidth($row, $column);
         // When width is a float, calculation is incorrect because browsers use integers
         // The following line fixes that. Replace as soon as you find a cleaner solution
         width = width - 1;
-        e.preventDefault();
       }
 
       $column.attr("style", "width: " + width + "px !important");
-      drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
     }
 
     // Reset position of resize handle
-    , resizeEnd: function (e, drag) {
-      var $drag = $(drag.element)
+    , resizeStop: function (e, ui) {
+      var $drag = ui.helper
         , $column = $drag.parent();
 
       app.trigger("resize:end", "#" + $column[0].id, $column[0].style.width);
 
-      $drag.css({
-          position: "absolute"
-        , right: "-12px"
-        , left: "auto"
-      });
-
+      $drag.removeAttr("style");
       $column.removeAttr("style");
-
-      this.currentAction = null;
     }
 
     // Remove column if confirmed.
@@ -1841,24 +1729,6 @@ window.require.define({"views/layout": function(exports, require, module) {
       nodeToRemove.parentNode.removeChild(nodeToRemove);
 
       app.trigger("node:removed", nodeToRemove, window.document.getElementById(parentNodeId), type);
-    }
-
-    // Insert column when a block is dragged into the layout.
-    , insertColumn: function (block, $element) {
-      var id;
-
-      if ($element[0].parentNode.className.indexOf("row") === false) {
-        return;
-      }
-
-      nodeId = "y-" + idIncrement;
-
-      $element[0].outerHTML = "<div id='" + nodeId + "' class='columns " +
-        block.className() + "'>" + block.get("build") + "</div>";
-
-      app.trigger("node:added", window.document.getElementById(nodeId));
-
-      idIncrement++;
     }
   });
   
@@ -2056,7 +1926,7 @@ window.require.define({"views/mutations": function(exports, require, module) {
 
     , cleanupNode: function(node) {
       $(node)
-        .removeClass("x-current")
+        .removeClass("x-current x-full x-not-full x-empty")
         .children(".x-resize, .x-remove")
           .remove()
           .end()
@@ -2181,16 +2051,40 @@ window.require.define({"views/password_reset": function(exports, require, module
 window.require.define({"views/preview": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
-    , data = require("lib/editor_data");
+    , data = require("lib/editor_data")
+    , accordion_group = require("views/templates/accordion_group");
 
   module.exports = View.extend({
-    el: $("body")
+    id: "x-layout-editor"
+
+    , panels: [
+        {
+          id: "templates"
+        , title: "Current Template"
+      }
+      , {
+          id: "regions"
+        , title: "Header &amp; Footer"
+      }
+      , {
+          id: "blocks"
+        , title: "Blocks"
+      }
+      , {
+          id: "style_edit"
+        , title: "Style"
+      }
+      , {
+          id: "share_link"
+        , title: "Share"
+      }
+    ]
+
 
     , events: {
-        "draginit #x-layout-editor .x-handle": "dragInit"
-      , "dragmove #x-layout-editor .x-handle": "dragMove"
-      , "click a:not(#x-customize-button a)": "stopPropagation"
-      , "click #x-customize-button a": "loadEditor"
+        //"click a": "stopPropagation"
+        "click h4": "showSection"
+      , "click #x-customize-button button": "showEditor"
     }
 
     , initialize: function () {
@@ -2201,47 +2095,109 @@ window.require.define({"views/preview": function(exports, require, module) {
         , blocks: data.blocks
         , style: data.style
       });
+
+      _.bindAll(this, "accordionGroups");
     }
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      var $editor;
-
-      this.$el.append("<div id='x-layout-editor'>" +
-        "<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>" +
-        "<h4>Current Template <span>&and;</span></h4>" +
-        "</div>");
-
-      $editor = this.$("#x-layout-editor");
-
-      $editor.append(app.reuseView("templates_select").render().$el)
-        .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize Theme</a></div>");
-
-      if (!app.editor.preview_only) {
-        $editor.append(app.reuseView("download_button").render().$el);
+      if (this.editor) {
+        this.render_editor();
+      } else {
+        this.render_preview();
       }
+
+      this.$el.appendTo($("body", window.top.document));
 
       return this;
     }
 
-    // Drag the editor box
-    , dragInit: function (e, drag) {
-      var mouse = drag.mouseElementPosition;
+    , render_preview: function () {
+      this.$el
+        .empty()
+        .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
+        .append(app.reuseView("templates_select").render().$el)
+        .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
 
-      drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+      if (!app.editor.preview_only) {
+        this.$el.append(app.reuseView("download_button").render().$el);
+      }
     }
 
-    // Keep the editor box above other elements when moving
-    , dragMove: function (e, drag) {
-      $(drag.element).parent().css("zIndex", 9999);
+    , render_editor: function () {
+      var regionsView = app.reuseView("regions")
+        , blocksView = app.reuseView("blocks")
+        , styleView = app.reuseView("style_edit")
+        , shareView = app.reuseView("share_link")
+        , saveView = app.reuseView("save_button")
+        , downloadView = app.reuseView("download_button")
+        , accordionGroups;
+
+      this.$el
+        .empty()
+        .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
+        .append("<div class='accordion' id='accordion2'>" + this.accordionGroups() + "</div>")
+        .append(saveView.render().$el)
+        .append(downloadView.render().$el);
+
+      for (var i in this.panels) {
+        if (!this.panels.hasOwnProperty(i)) {
+          return;
+        }
+
+        this.$("#editor-" + this.panels[i].id + " .accordion-inner")
+          .empty()
+          .append(app.reuseView(this.panels[i].id).render().$el);
+      }
+
+      app.reuseView("mutations");
+
+      // Setup drag and drop and resize
+      app.createView("layout").render();
+    }
+
+    , showSection: function (e) {
+      $(e.target).next().slideToggle("slow", function () {
+        var $this = $(this)
+          , $handle = $this.prev().children("span");
+
+        if ($this.is(":hidden")) {
+          $handle.empty().append("&or;");
+        } else {
+          $handle.empty().append("&and;");
+        }
+      });
+    }
+
+    , showEditor: function (e) {
+      this.editor = true;
+
+      this.render();
+    }
+
+    , accordionGroups: function () {
+      var groups = "";
+
+      for (var i in this.panels) {
+        if (this.panels.hasOwnProperty(i)) {
+          groups += this.buildAccordionGroup(this.panels[i]);
+        }
+      }
+
+      return groups;
+    }
+
+    , buildAccordionGroup: function (attributes) {
+      return accordion_group({
+          parent: "editor-accordion"
+        , id: "editor-" + attributes.id
+        , title: attributes.title
+        , content: ""
+      });
     }
 
     , stopPropagation: function () {
       return false;
-    }
-
-    , loadEditor: function (e) {
-      window.top.Backbone.history.navigate(window.top.Backbone.history.fragment + "/fork", true);
     }
   });
   
@@ -2464,7 +2420,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
       var button;
 
       if (app.currentUser.id) {
-        button = "<button class='x-btn x-btn-primary x-save'>Save Theme</button>";
+        button = "<button class='btn btn-primary x-save'>Save Theme</button>";
       }
 
       this.$el.empty().append(button);
@@ -2858,6 +2814,41 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
   });
   
+}});
+
+window.require.define({"views/templates/accordion_group": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div class=\"accordion-group\">\n  <div class=\"accordion-heading\">\n    <h4 class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#";
+    foundHelper = helpers.parent;
+    stack1 = foundHelper || depth0.parent;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "parent", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" data-target=\"#";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      ";
+    foundHelper = helpers.title;
+    stack1 = foundHelper || depth0.title;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "title", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n    </h4>\n  </div>\n  <div id=\"";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" class=\"accordion-body collapse\">\n    <div class=\"accordion-inner\">\n      ";
+    foundHelper = helpers.content;
+    stack1 = foundHelper || depth0.content;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "content", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n    </div>\n  </div>\n</div>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/auth_links": function(exports, require, module) {
@@ -3311,40 +3302,15 @@ window.require.define({"views/templates/templates_select": function(exports, req
 window.require.define({"views/templates/theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "/";
-    foundHelper = helpers.action;
-    stack1 = foundHelper || depth0.action;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "action", { hash: {} }); }
-    buffer += escapeExpression(stack1);
-    return buffer;}
 
-    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/";
-    foundHelper = helpers.route;
-    stack1 = foundHelper || depth0.route;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "route", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/";
+    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/preview/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1);
-    foundHelper = helpers.action;
-    stack1 = foundHelper || depth0.action;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
+    buffer += escapeExpression(stack1) + "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
     return buffer;});
 }});
 

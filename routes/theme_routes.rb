@@ -61,9 +61,5 @@ post '/theme_upload' do
 end
 
 get '/preview/:id', provides: 'html' do
-  respond_with_editor!
-end
-
-get '/editor/:id/?:action?', provides: 'html' do
-  respond_with_editor!
+  respond_with_preview!
 end

@@ -9,9 +9,7 @@ module.exports = View.extend({
   , collection: app.editor.blocks
 
   , events: {
-      "draginit #x-block-insert .x-drag": "dragInit"
-    , "dragend #x-block-insert .x-drag": "dragEnd"
-    , "click .x-new-block": "showForm"
+      "click .x-new-block": "showForm"
     , "click .x-new-block-add": "addBlock"
     , "click .x-remove": "removeBlock"
   }
@@ -23,6 +21,7 @@ module.exports = View.extend({
 
     app.on("mutations:started", this.makeMutable.bind(this));
     app.on("save:before", this.addThemeAttributes.bind(this));
+    app.on("block:inserted", this.insertBlock.bind(this));
 
     this.allBlocks = _.map(app.data.blocks, function (block) {
       block.label = _.str.titleize(_.str.humanize(block.name));
@@ -35,6 +34,17 @@ module.exports = View.extend({
 
     this.collection.reset(this.collection.models);
 
+    this.$(".x-drag").draggable({
+        addClasses: false
+      , helper: function() {
+        // Append a clone to the body to avoid overflow on parent accordion.
+        return $(this).clone().appendTo("body");
+      }
+      , revert: "invalid"
+      , scroll: false
+      , zIndex: 9999
+    });
+
     return this;
   }
 
@@ -45,8 +55,8 @@ module.exports = View.extend({
       remove = " <span class='x-remove' title='Delete block'>&times;</span>";
     }
 
-    this.$("ul").append("<li><span class='x-drag' data-cid='" + block.cid + "'>" +
-                        "<span>&Dagger;</span> " + block.label() + remove + "</span></li>");
+    this.$("ul").append("<li class='x-drag' data-cid='" + block.cid + "'>" +
+                        "<span>&Dagger;</span> " + block.label() + remove + "</li>");
   }
 
   , addAll: function () {
@@ -61,17 +71,15 @@ module.exports = View.extend({
     this.$("span[data-cid='" + block.cid + "']").closest("li").remove();
   }
 
-  // Replace the drag element by its clone
-  , dragInit: function (e, drag) {
-    drag.element = drag.ghost();
-  }
-
   // If the element is inserted in a row,
   // load the actual template chuck to insert
-  , dragEnd: function (e, drag) {
-    var block = this.collection.getByCid(drag.element.data("cid"));
+  , insertBlock: function (element, id) {
+    var block = this.collection.getByCid($(element).data("cid"));
 
-    app.trigger("block:inserted", block, drag.element);
+    element.outerHTML = "<div id='" + id + "' class='columns " +
+      block.className() + "'>" + block.get("build") + "</div>";
+
+    app.trigger("node:added", window.document.getElementById(id));
   }
 
   , makeMutable: function (pieces) {

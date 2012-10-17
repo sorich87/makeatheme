@@ -25,8 +25,6 @@ isRowFull = function (dropElement, dragElement) {
 module.exports = View.extend({
     el: $("body")
 
-  , currentAction: null
-
   , events: {
       // Highlight columns.
       "click .columns": "highlightColumns"
@@ -40,22 +38,14 @@ module.exports = View.extend({
       // Forms shouldn't be submittable
     , "submit .columns form": "preventDefault"
 
-      // Drag
-    , "draginit .columns": "dragInit"
-    , "dragend .columns": "dragEnd"
-
-      // Drop
-    , "dropover .row": "dropOver"
-    , "dropout .row": "dropOut"
-    , "dropon .row": "dropOn"
-
-      // Resize
-    , "draginit .x-resize": "resizeInit"
-    , "dragmove .x-resize": "resizeMove"
-    , "dragend .x-resize": "resizeEnd"
-
       // Remove column
     , "click .columns .x-remove": "removeColumn"
+
+    , "mouseover .column, .columns": "makeDraggable"
+
+    , "mouseover .row": "makeDroppable"
+
+    , "mouseover .x-resize": "makeResizeable"
   }
 
   , initialize: function () {
@@ -68,7 +58,38 @@ module.exports = View.extend({
     app.on("save:error", this.addDataBypass);
     app.on("template:loaded", this.addDataBypass);
 
-    app.on("block:inserted", this.insertColumn.bind(this));
+    this.makeDroppable();
+  }
+
+  , makeDraggable: function (e) {
+    this.$(".column, .columns").draggable({
+        addClasses: false
+      , containment: this.$el.children()
+      , revert: "invalid"
+      , drag: this.dragOn
+      , start: this.dragStart
+      , stop: this.dragStop
+    });
+  }
+
+  , makeDroppable: function (e) {
+    this.$(".row").droppable({
+        accept: ".column, .columns, .x-drag"
+      , addClasses: false
+      , drop: this.dropOn
+      , out: this.dropOut
+      , over: this.dropOver
+    });
+  }
+
+  , makeResizeable: function (e) {
+    $(e.currentTarget).draggable({
+        addClasses: false
+      , axis: "x"
+      , containment: this.$el.children()
+      , drag: this.resizeOn
+      , stop: this.resizeStop
+    });
   }
 
   , removeDataBypass: function () {
@@ -88,10 +109,6 @@ module.exports = View.extend({
   , highlightColumns: function (e) {
     var $column, name, slug;
 
-    if (this.currentAction !== null) {
-      return;
-    }
-
     app.trigger("editor:columnHighlight", e.currentTarget);
 
     $column = $(e.currentTarget);
@@ -101,7 +118,7 @@ module.exports = View.extend({
 
     if ($column.children(".x-resize").length === 0) {
       $column.html(function (i, html) {
-        return html + "<div class='x-resize' title='Resize element'>&harr;</div>";
+        return html + "<div class='x-resize' title='Resize element'>&rang;</div>";
       });
     }
 
@@ -127,34 +144,25 @@ module.exports = View.extend({
     }
   }
 
-  // Start drag and limit it to direct children of body.
-  // If released, revert to original position.
-  , dragInit: function (e, drag) {
-    this.currentAction = "drag";
+  , dragStart: function (e, ui) {
+    app.trigger("node:removed", ui.helper[0], ui.helper[0].parentNode);
+  }
 
-    drag.limit(this.$el.children()).revert();
-
-    app.trigger("node:removed", drag.element[0], drag.element[0].parentNode);
+  , dragOn: function(e, ui) {
+    ui.helper.css("z-index", 9999);
   }
 
   // Reset position of dragged element.
-  , dragEnd: function (e, drag) {
-    drag.element.css({
-      top: drag.startPosition.top() + "px",
-      left: drag.startPosition.left() + "px"
-    });
+  , dragStop: function (e, ui) {
+    ui.helper.removeAttr("style");
 
-    drag.element.removeAttr("style");
-
-    this.currentAction = null;
-
-    app.trigger("node:added", drag.element[0]);
+    app.trigger("node:added", ui.helper[0]);
   }
 
   // Mark the row as full or not.
-  , dropOver: function (e, drop, drag) {
-    $(drop.element).addClass(function () {
-      if (isRowFull(this, drag.element)) {
+  , dropOver: function (e, ui) {
+    $(this).addClass(function () {
+      if (isRowFull(this, ui.draggable)) {
         $(this).addClass("x-full");
       } else {
         $(this).addClass("x-not-full");
@@ -163,19 +171,19 @@ module.exports = View.extend({
   }
 
   // Remove x-full or x-not-full class if previously added.
-  , dropOut: function (e, drop, drag) {
-    $(drop.element).removeClass("x-full x-not-full");
+  , dropOut: function (e, ui) {
+    $(this).removeClass("x-full x-not-full");
   }
 
   // Add column to row. If the row is full, add a new row.
   // If original parent row doesn't have any more children
   // and is not a <header> or <footer> and has no id attribute, remove it.
   // Remove x-full and x-not-full classes if one was previously added.
-  , dropOn: function (e, drop, drag) {
+  , dropOn: function (e, ui) {
     var row, $drag, $dragParent, $dragGrandParent;
 
-    $drag = $(drag.element);
-    $drop = $(drop.element);
+    $drag = ui.helper;
+    $drop = $(this);
 
     $dragParent = $drag.parent();
 
@@ -188,70 +196,56 @@ module.exports = View.extend({
     }
     $drag.appendTo($row);
 
-    $drop.removeClass("x-empty");
+    $drop.removeClass("x-empty x-full x-not-full");
 
-    if ($dragParent.children().length === 0 ) {
-      $dragGrandParent = $dragParent.parent();
+    if ($drag.data("cid")) {
+      app.trigger("block:inserted", $drag[0], "y-" + idIncrement);
+      idIncrement++;
+    } else {
+      if ($dragParent.children().length === 0) {
+        $dragGrandParent = $dragParent.parent();
 
-      if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
-          $dragParent.attr("id").indexOf("x-") !== 0) {
-        $dragParent.addClass("x-empty");
-      } else {
-        $dragParent.remove();
-        app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
+        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
+            $dragParent.attr("id").indexOf("x-") !== 0) {
+          $dragParent.addClass("x-empty");
+        } else {
+          $dragParent.remove();
+          app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
+        }
       }
     }
-
-    $drop.removeClass("x-full x-not-full");
-  }
-
-  // Init drag of resize handle horizontally and don't notify drops.
-  , resizeInit: function (e, drag) {
-    this.currentAction = "resize";
-
-    drag.horizontal().only();
   }
 
   // Resize the column.
   // Sum of column widths in the row should never be larger than row.
-  , resizeMove: function (e, drag) {
-    var $drag = $(drag.element)
+  , resizeOn: function (e, ui) {
+    var $drag = ui.helper
     , $column = $drag.parent()
     , $row = $column.parent();
 
-    width = drag.location.x() + $drag.width() / 2 - $column.offset().left;
+    width = ui.position.left + $drag.width();
 
     if (width >= $row.width()) {
       width = $row.width();
-      e.preventDefault();
     } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
       width = $row.width() - totalColumnsWidth($row, $column);
       // When width is a float, calculation is incorrect because browsers use integers
       // The following line fixes that. Replace as soon as you find a cleaner solution
       width = width - 1;
-      e.preventDefault();
     }
 
     $column.attr("style", "width: " + width + "px !important");
-    drag.position(new $.Vector(width - $drag.width() / 2 + $column.offset().left, drag.location.y()));
   }
 
   // Reset position of resize handle
-  , resizeEnd: function (e, drag) {
-    var $drag = $(drag.element)
+  , resizeStop: function (e, ui) {
+    var $drag = ui.helper
       , $column = $drag.parent();
 
     app.trigger("resize:end", "#" + $column[0].id, $column[0].style.width);
 
-    $drag.css({
-        position: "absolute"
-      , right: "-12px"
-      , left: "auto"
-    });
-
+    $drag.removeAttr("style");
     $column.removeAttr("style");
-
-    this.currentAction = null;
   }
 
   // Remove column if confirmed.
@@ -277,23 +271,5 @@ module.exports = View.extend({
     nodeToRemove.parentNode.removeChild(nodeToRemove);
 
     app.trigger("node:removed", nodeToRemove, window.document.getElementById(parentNodeId), type);
-  }
-
-  // Insert column when a block is dragged into the layout.
-  , insertColumn: function (block, $element) {
-    var id;
-
-    if ($element[0].parentNode.className.indexOf("row") === false) {
-      return;
-    }
-
-    nodeId = "y-" + idIncrement;
-
-    $element[0].outerHTML = "<div id='" + nodeId + "' class='columns " +
-      block.className() + "'>" + block.get("build") + "</div>";
-
-    app.trigger("node:added", window.document.getElementById(nodeId));
-
-    idIncrement++;
   }
 });

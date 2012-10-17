@@ -1,15 +1,37 @@
 var app = require("application")
   , View = require("views/base/view")
-  , data = require("lib/editor_data");
+  , data = require("lib/editor_data")
+  , accordion_group = require("views/templates/accordion_group");
 
 module.exports = View.extend({
-  el: $("body")
+  id: "x-layout-editor"
+
+  , panels: [
+      {
+        id: "templates"
+      , title: "Current Template"
+    }
+    , {
+        id: "regions"
+      , title: "Header &amp; Footer"
+    }
+    , {
+        id: "blocks"
+      , title: "Blocks"
+    }
+    , {
+        id: "style_edit"
+      , title: "Style"
+    }
+    , {
+        id: "share_link"
+      , title: "Share"
+    }
+  ]
+
 
   , events: {
-      "draginit #x-layout-editor .x-handle": "dragInit"
-    , "dragmove #x-layout-editor .x-handle": "dragMove"
-    , "click a:not(#x-customize-button a)": "stopPropagation"
-    , "click #x-customize-button a": "loadEditor"
+    , "click #x-customize-button button": "showEditor"
   }
 
   , initialize: function () {
@@ -20,46 +42,104 @@ module.exports = View.extend({
       , blocks: data.blocks
       , style: data.style
     });
+
+    _.bindAll(this, "accordionGroups");
   }
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    var $editor;
-
-    this.$el.append("<div id='x-layout-editor'>" +
-      "<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>" +
-      "<h4>Current Template <span>&and;</span></h4>" +
-      "</div>");
-
-    $editor = this.$("#x-layout-editor");
-
-    $editor.append(app.reuseView("templates_select").render().$el)
-      .append("<div id='x-customize-button'><a class='x-btn x-btn-primary'>Customize Theme</a></div>");
-
-    if (!app.editor.preview_only) {
-      $editor.append(app.reuseView("download_button").render().$el);
+    if (this.editor) {
+      this.render_editor();
+    } else {
+      this.render_preview();
     }
+
+    this.$el.appendTo($("body", window.top.document));
 
     return this;
   }
 
-  // Drag the editor box
-  , dragInit: function (e, drag) {
-    var mouse = drag.mouseElementPosition;
+  , render_preview: function () {
+    this.$el
+      .empty()
+      .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
+      .append(app.reuseView("templates_select").render().$el)
+      .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
 
-    drag.representative($(drag.element).parent(), mouse.left(), mouse.top()).only();
+    if (!app.editor.preview_only) {
+      this.$el.append(app.reuseView("download_button").render().$el);
+    }
   }
 
-  // Keep the editor box above other elements when moving
-  , dragMove: function (e, drag) {
-    $(drag.element).parent().css("zIndex", 9999);
+  , render_editor: function () {
+    var regionsView = app.reuseView("regions")
+      , blocksView = app.reuseView("blocks")
+      , styleView = app.reuseView("style_edit")
+      , shareView = app.reuseView("share_link")
+      , saveView = app.reuseView("save_button")
+      , downloadView = app.reuseView("download_button")
+      , accordionGroups;
+
+    this.$el
+      .empty()
+      .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
+      .append("<div class='accordion' id='accordion2'>" + this.accordionGroups() + "</div>")
+      .append(saveView.render().$el)
+      .append(downloadView.render().$el);
+
+    for (var i in this.panels) {
+      if (!this.panels.hasOwnProperty(i)) {
+        return;
+      }
+
+      this.$("#editor-" + this.panels[i].id + " .accordion-inner")
+        .empty()
+        .append(app.reuseView(this.panels[i].id).render().$el);
+    }
+
+    app.reuseView("mutations");
+
+    // Setup drag and drop and resize
+    app.createView("layout").render();
   }
 
-  , stopPropagation: function () {
-    return false;
+  , showSection: function (e) {
+    $(e.target).next().slideToggle("slow", function () {
+      var $this = $(this)
+        , $handle = $this.prev().children("span");
+
+      if ($this.is(":hidden")) {
+        $handle.empty().append("&or;");
+      } else {
+        $handle.empty().append("&and;");
+      }
+    });
   }
 
-  , loadEditor: function (e) {
-    window.top.Backbone.history.navigate(window.top.Backbone.history.fragment + "/fork", true);
+  , showEditor: function (e) {
+    this.editor = true;
+
+    this.render();
+  }
+
+  , accordionGroups: function () {
+    var groups = "";
+
+    for (var i in this.panels) {
+      if (this.panels.hasOwnProperty(i)) {
+        groups += this.buildAccordionGroup(this.panels[i]);
+      }
+    }
+
+    return groups;
+  }
+
+  , buildAccordionGroup: function (attributes) {
+    return accordion_group({
+        parent: "editor-accordion"
+      , id: "editor-" + attributes.id
+      , title: attributes.title
+      , content: ""
+    });
   }
 });
