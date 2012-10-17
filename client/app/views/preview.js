@@ -31,7 +31,7 @@ module.exports = View.extend({
 
 
   , events: {
-    , "click #x-customize-button button": "showEditor"
+    "click #x-customize-button button": "showEditor"
   }
 
   , initialize: function () {

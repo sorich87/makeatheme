@@ -2082,9 +2082,7 @@ window.require.define({"views/preview": function(exports, require, module) {
 
 
     , events: {
-        //"click a": "stopPropagation"
-        "click h4": "showSection"
-      , "click #x-customize-button button": "showEditor"
+      "click #x-customize-button button": "showEditor"
     }
 
     , initialize: function () {
@@ -2194,10 +2192,6 @@ window.require.define({"views/preview": function(exports, require, module) {
         , title: attributes.title
         , content: ""
       });
-    }
-
-    , stopPropagation: function () {
-      return false;
     }
   });
   
