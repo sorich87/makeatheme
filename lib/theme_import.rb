@@ -42,6 +42,8 @@ module ThemeImport
   end
 
   class ThemeImport
+    attr_accessor :templates, :regions, :static_files, :attributes
+
     def initialize(zip_file)
       @zip_file = zip_file
       @templates = []
@@ -131,22 +133,6 @@ module ThemeImport
           template: template
         }
       end
-    end
-
-    def regions
-      @regions
-    end
-
-    def templates
-      @templates
-    end
-
-    def static_files
-      @static_files
-    end
-
-    def attributes
-      @attributes
     end
 
     private
