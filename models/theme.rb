@@ -24,7 +24,6 @@ class Theme
   field :tags,        type: Array,      default: []
   field :listed,      type: Boolean,    default: false
   field :style,       type: Hash,       default: {}
-  field :processed,   type: Boolean,    default: false
 
   default_scope where(listed: true)
 
