@@ -324,138 +324,174 @@ window.require.define({"initialize": function(exports, require, module) {
 }});
 
 window.require.define({"lib/custom_css": function(exports, require, module) {
-  // Manage custom css in the document <head>
-  // and a 'rules' hash for easy access
-
+  /**
+   * Manage custom css in the document <head>
+   * and two 'values' and 'indexes' hashes for easy access.
+   */
   var CustomCSS = function (rules) {
-    var node = document.createElement("style");
-
-    node.type = "text/css";
-    node.rel = "stylesheet";
-
-    document.head.appendChild(node);
-
-    this.node = node;
-    this.sheet = node.sheet;
+    this.sheets = {};
+    this.values = {};
+    this.indexes = {};
 
     this.insertRules(rules);
   };
 
-  CustomCSS.prototype.insertRule = function (selector, property, value, index) {
-    if (index !== null && index !== void 0) {
-      this.deleteRule(index);
-    } else if (this.rules[selector] && this.rules[selector][property]) {
-      index = this.rules[selector][property].index;
-      this.deleteRule(index);
-    } else {
-      index = this.sheet.cssRules.length;
-    }
+  /**
+   * Create a stylesheet for the media type passed as argument.
+   *
+   * Create empty hash in values and indexes as well.
+   */
+  CustomCSS.prototype.createSheet = function (media) {
+    var node = document.createElement("style");
 
-    if (!selector || !property || !value) {
+    node.type = "text/css";
+    node.rel = "stylesheet";
+    node.media = media;
+
+    document.head.appendChild(node);
+
+    this.sheets[media] = {
+        node: node
+      , sheet: node.sheet
+      , rules: node.sheet.cssRules
+    };
+
+    this.values[media] = {};
+    this.indexes[media] = {};
+
+    return this.sheets[media];
+  };
+
+  /**
+   * Insert a rule in the specified media stylesheet
+   * and in the values and indexes hashes.
+   *
+   * Create the stylesheet if didn't exist.
+   *
+   * Take an a hash containing:
+   * selector, property and value as required attributes
+   * media and index as optional attributes
+   *
+   * Default media is "all".
+   * Default index is taken from the indexes hash if the rule previously existed
+   * or the stylesheet rules length if not.
+   */
+  CustomCSS.prototype.insertRule = function (rule) {
+    var index
+      , media = rule.media || "all";
+
+    if (!rule.selector || !rule.property || rule.value === void 0) {
       return;
     }
 
-    this.rules[selector] = this.rules[selector] || {};
-    this.rules[selector][property] = {
-        value: value
-      , index: index
-    };
+    this.sheets[media] = this.sheets[media] || this.createSheet(media);
 
-    this.sheet.insertRule(selector + " {" + property + ": " + value + " !important}", index);
+    if (rule.index !== null && rule.index !== void 0) {
+      index = rule.index;
+      this.deleteRule(index);
+
+    } else if (this.indexes[media][rule.selector] &&
+               this.indexes[media][rule.selector][rule.property]) {
+      index = this.indexes[media][rule.selector][rule.property];
+      this.deleteRule(index);
+
+    } else {
+      index = this.sheets[media].rules.length;
+    }
+
+    this.sheets[media].sheet.insertRule(
+      rule.selector + " {" + rule.property + ": " + rule.value + "}", index);
+
+    this.values[media][rule.selector] = this.values[media][rule.selector] || {};
+    this.values[media][rule.selector][rule.property] = rule.value;
+
+    this.indexes[media][rule.selector] = this.indexes[media][rule.selector] || {};
+    this.indexes[media][rule.selector][rule.property] = index;
 
     return index;
   };
 
-  CustomCSS.prototype.insertRules = function (rules) {
-    var rule, selector, property, length;
+  /**
+   * Insert several routes at once in stylesheets.
+   *
+   * Take an hash of media => rules hashes.
+   *
+   * Call insertRule to actually insert individual rules.
+   */
+  CustomCSS.prototype.insertRules = function (css) {
+    var media, selector, property;
 
-    rules = rules || {};
-
-    for (selector in rules) {
-      if (!rules.hasOwnProperty(selector)) {
+    for (media in css) {
+      if (!css.hasOwnProperty(media)) {
         continue;
       }
 
-      for (property in rules[selector]) {
-        if (!rules[selector].hasOwnProperty(property)) {
+      for (selector in css[media]) {
+        if (!css[media].hasOwnProperty(selector)) {
           continue;
         }
 
-        rule = rules[selector][property];
-        length = this.sheet.rules ? this.sheet.rules.length : 0;
+        for (property in css[media][selector]) {
+          if (!css[media][selector].hasOwnProperty(property)) {
+            continue;
+          }
 
-        this.sheet.insertRule(selector + " {" + property + ": " + rule.value + " !important}", length);
+          this.insertRule({
+              selector: selector
+            , property: property
+            , value: css[media][selector][property]
+            , media: media
+          });
+        }
       }
     }
-
-    this.rules = rules;
   };
 
-  CustomCSS.prototype.getRule = function (selector, property) {
+  /**
+   * Get a value from a selector, property and media.
+   *
+   * If media is not specified, default is "all".
+   */
+  CustomCSS.prototype.getValue = function (selector, property, media) {
     if (!selector || !property) {
       return;
     }
 
-    if (!this.rules[selector] || !this.rules[selector][property]) {
-      return;
-    }
+    media = media || "all";
 
-    return this.rules[selector][property].value;
+    if (!this.values[media][selector] ||
+        !this.values[media][selector][property]) {
+      return this.values[media][selector][property];
+    }
   };
 
-  CustomCSS.prototype.deleteRule = function (index) {
+  /**
+   * Delete a rule by its index.
+   *
+   * Delete from stylesheet as well as indexes and values hashes.
+   */
+  CustomCSS.prototype.deleteRule = function (index, media) {
     var selector, property;
 
     if (index === null || index === void 0) {
       return;
     }
 
-    this.sheet.deleteRule(index);
+    media = media || "all";
 
-    for (selector in this.rules) {
-      if (!this.rules.hasOwnProperty(selector)) {
+    this.sheets[media].deleteRule(index);
+
+    for (property in this.indexes[media][selector]) {
+      if (!this.indexes[media][selector].hasOwnProperty(property)) {
         continue;
       }
 
-      for (property in this.rules[selector]) {
-        if (!this.rules[selector].hasOwnProperty(property)) {
-          continue;
-        }
-
-        if (this.rules[selector][property].index === index) {
-          return delete this.rules[selector][property];
-        }
+      if (this.indexes[media][selector][property] === index) {
+        delete this.indexes[media][selector][property];
+        delete this.values[media][selector][property];
+        return;
       }
     }
-  };
-
-  CustomCSS.prototype.toString = function () {
-    var selector, property
-      , string = "";
-
-    if (!this.rules || this.rules.length === 0) {
-      return;
-    }
-
-    for (selector in this.rules) {
-      if (!this.rules.hasOwnProperty(selector)) {
-        continue;
-      }
-
-      string += selector + " {\n";
-
-      for (property in this.rules[selector]) {
-        if (!this.rules[selector].hasOwnProperty(property)) {
-          continue;
-        }
-
-        string += property + ": " + this.rules[selector][property].value + ";\n";
-      }
-
-      string += "}\n";
-    }
-
-    return string;
   };
 
   module.exports = CustomCSS;
@@ -496,7 +532,7 @@ window.require.define({"lib/editor_data": function(exports, require, module) {
       templates: data.templates.toJSON()
       , regions: data.regions.toJSON()
       , blocks: data.blocks.toJSON()
-      , style: data.style.rules
+      , style: data.style.values
     };
 
     store = JSON.stringify(store);
@@ -2539,9 +2575,9 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       var rules;
 
       if (this.tag) {
-        rules = this.customCSS.rules[this.selector + " " + this.tag];
+        rules = this.customCSS.values.all[this.selector + " " + this.tag];
       } else {
-        rules = this.customCSS.rules[this.selector];
+        rules = this.customCSS.values.all[this.selector];
       }
 
       rules = _.map(rules, function (rule, property) {

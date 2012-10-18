@@ -102,7 +102,6 @@ module ThemeHelper
       theme: theme.to_json,
       style: theme.style.to_json,
       pieces: pieces.to_json,
-      static_files_dir: theme.static_files_dir,
       blocks: all_blocks(theme).to_json,
       preview_only: preview_only,
       template: index[:full]

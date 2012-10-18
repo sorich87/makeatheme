@@ -2,6 +2,7 @@ require 'zip/zip'
 require 'yaml'
 require 'csv'
 require 'nokogiri'
+require 'sass_to_hash'
 
 module ThemeImport
   def self.included receiver
@@ -64,6 +65,8 @@ module ThemeImport
         add_stored_file(zip_file)
       elsif filename =~ /\Atheme\.info\z/
         read_theme_info_file(zip_file)
+      elsif filename =~ /\Astyle\.css\z/
+        read_css_file(zip_file)
       elsif filename =~ /\A[^_\.](?>\/?[a-zA-Z0-9_-]+)+\.\w+\z/ # Ignore dotted files or __MACOSX files & such
         add_static_file(zip_file)
       end
@@ -120,7 +123,14 @@ module ThemeImport
 
     def read_theme_info_file(entry)
       entry.get_input_stream do |entry_file|
-        @attributes = filter_attributes(YAML::load(entry_file.read).symbolize_keys)
+        @attributes.merge!(filter_attributes(YAML::load(entry_file.read).symbolize_keys))
+      end
+    end
+
+    def read_css_file(entry)
+      entry.get_input_stream do |entry_file|
+        engine = Sass::Engine.new(entry_file.read, :syntax => :scss)
+        @attributes[:style] = engine.to_tree.to_h
       end
     end
 

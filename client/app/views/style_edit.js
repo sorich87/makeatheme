@@ -64,9 +64,9 @@ module.exports = View.extend({
     var rules;
 
     if (this.tag) {
-      rules = this.customCSS.rules[this.selector + " " + this.tag];
+      rules = this.customCSS.values.all[this.selector + " " + this.tag];
     } else {
-      rules = this.customCSS.rules[this.selector];
+      rules = this.customCSS.values.all[this.selector];
     }
 
     rules = _.map(rules, function (rule, property) {
