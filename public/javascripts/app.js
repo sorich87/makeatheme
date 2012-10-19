@@ -328,10 +328,11 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
    * Manage custom css in the document <head>
    * and two 'values' and 'indexes' hashes for easy access.
    */
-  var CustomCSS = function (rules) {
+  var CustomCSS = function (rules, baseURI) {
     this.sheets = {};
     this.values = {};
     this.indexes = {};
+    this.baseURI = baseURI;
 
     this.insertRules(rules);
   };
@@ -377,7 +378,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
    * or the stylesheet rules length if not.
    */
   CustomCSS.prototype.insertRule = function (rule) {
-    var index
+    var index, value
       , media = rule.media || "all";
 
     if (!rule.selector || !rule.property || rule.value === void 0) {
@@ -399,8 +400,10 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       index = this.sheets[media].rules.length;
     }
 
+    value = rule.value.replace(/url\(([^)]+)\)/g, 'url("' + this.baseURI + '/$1")');
+
     this.sheets[media].sheet.insertRule(
-      rule.selector + " {" + rule.property + ": " + rule.value + "}", index);
+      rule.selector + " {" + rule.property + ": " + value + "}", index);
 
     this.values[media][rule.selector] = this.values[media][rule.selector] || {};
     this.values[media][rule.selector][rule.property] = rule.value;
@@ -523,7 +526,7 @@ window.require.define({"lib/editor_data": function(exports, require, module) {
     templates: new Templates(data.templates)
     , regions: new Regions(data.regions)
     , blocks: new Blocks(data.blocks)
-    , style: new CustomCSS(data.style)
+    , style: new CustomCSS(data.style, app.data.base_uri)
   };
 
   // Save data in sessionStorage every 1s.

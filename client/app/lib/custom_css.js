@@ -2,10 +2,11 @@
  * Manage custom css in the document <head>
  * and two 'values' and 'indexes' hashes for easy access.
  */
-var CustomCSS = function (rules) {
+var CustomCSS = function (rules, baseURI) {
   this.sheets = {};
   this.values = {};
   this.indexes = {};
+  this.baseURI = baseURI;
 
   this.insertRules(rules);
 };
@@ -51,7 +52,7 @@ CustomCSS.prototype.createSheet = function (media) {
  * or the stylesheet rules length if not.
  */
 CustomCSS.prototype.insertRule = function (rule) {
-  var index
+  var index, value
     , media = rule.media || "all";
 
   if (!rule.selector || !rule.property || rule.value === void 0) {
@@ -73,8 +74,10 @@ CustomCSS.prototype.insertRule = function (rule) {
     index = this.sheets[media].rules.length;
   }
 
+  value = rule.value.replace(/url\(([^)]+)\)/g, 'url("' + this.baseURI + '/$1")');
+
   this.sheets[media].sheet.insertRule(
-    rule.selector + " {" + rule.property + ": " + rule.value + "}", index);
+    rule.selector + " {" + rule.property + ": " + value + "}", index);
 
   this.values[media][rule.selector] = this.values[media][rule.selector] || {};
   this.values[media][rule.selector][rule.property] = rule.value;
