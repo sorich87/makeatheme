@@ -451,21 +451,40 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   /**
-   * Get a value from a selector, property and media.
+   * Get all declarations for an element.
    *
    * If media is not specified, default is "all".
    */
-  CustomCSS.prototype.getValue = function (selector, property, media) {
-    if (!selector || !property) {
+  CustomCSS.prototype.getDeclarations = function (element) {
+    var media, selector, l
+      , declarations = {};
+
+    if (!element) {
       return;
     }
 
-    media = media || "all";
+    element = $(element);
 
-    if (!this.values[media][selector] ||
-        !this.values[media][selector][property]) {
-      return this.values[media][selector][property];
+    for (media in this.values) {
+      if (!this.values.hasOwnProperty(media)) {
+        continue;
+      }
+
+      declarations[media] = [];
+
+      for (selector in this.values[media]) {
+        if (!this.values[media].hasOwnProperty(selector)) {
+          continue;
+        }
+
+        if (element.is(selector)) {
+          l = declarations[media].length;
+          declarations[media][l] = this.values[media][selector];
+        }
+      }
     }
+
+    return declarations;
   };
 
   /**
@@ -1304,7 +1323,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
         }
         , revert: "invalid"
         , scroll: false
-        , zIndex: 9999
+        , zIndex: 99999
       });
 
       return this;
@@ -1606,7 +1625,7 @@ window.require.define({"views/layout": function(exports, require, module) {
     , highlightColumns: function (e) {
       var $column, name, slug;
 
-      app.trigger("editor:columnHighlight", e.currentTarget);
+      app.trigger("column:highlight", e.currentTarget);
 
       $column = $(e.currentTarget);
 
@@ -2502,7 +2521,7 @@ window.require.define({"views/share_link": function(exports, require, module) {
 
   module.exports = View.extend({
       id: "x-share-link"
-    , className: "x-section"
+    , className: "x-section well well-small"
     , template: "share_link"
     , data: {
       theme: app.data.theme._id
@@ -2522,8 +2541,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , className: "x-section"
 
     , events: {
-        "change .x-element": "setSelector"
-      , "change .x-tag": "setTag"
+        "change .x-tag": "setTag"
       , "click button": "addInputs"
       , "keyup input": "addStyle"
       , "blur input": "addStyle"
@@ -2531,32 +2549,12 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "setColumn", "addThemeAttributes");
-
-      app.on("editor:columnHighlight", this.setColumn);
-      app.on("save:before", this.addThemeAttributes);
+      app.on("column:highlight", this.setColumn.bind(this));
+      app.on("save:before", this.addThemeAttributes.bind(this));
       app.on("resize:end", this.changeWidth.bind(this));
 
       this.selector = "body";
       this.customCSS = app.editor.style;
-    }
-
-    , setSelector: function (e) {
-      var val = $(e.target).val();
-
-      switch (val) {
-        case "body":
-        case "#page > header":
-        case "#page > footer":
-          this.selector = val;
-        break;
-
-        case "column":
-          this.selector = this.column;
-        break;
-      }
-
-      this.render();
     }
 
     , setTag: function (e) {
@@ -2566,16 +2564,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , setColumn: function (element) {
-      this.column = "#" + element.id;
-
-      if (this.$("select").val() === "column") {
-        this.selector = this.column;
-        this.render();
-      }
+      this.selector = "#" + element.id;
+      this.render();
     }
 
     , render: function () {
       var rules;
+      console.log(this.customCSS.getDeclarations(this.selector));
 
       if (this.tag) {
         rules = this.customCSS.values.all[this.selector + " " + this.tag];
@@ -2589,8 +2584,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       });
 
       this.$el.html(template({
-          elements: this.elementOptions()
-        , htmlTags: this.tagOptions()
+          htmlTags: this.tagOptions()
         , selector: this.selector
         , rules: rules
       }));
@@ -2600,31 +2594,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       }
 
       return this;
-    }
-
-    , elementOptions: function () {
-      return [
-        {
-            label: "Whole Document"
-          , value: "body"
-          , selected: this.selector === "body" ? " selected" : ""
-        }
-        , {
-            label: "Header"
-          , value: "#page > header"
-          , selected: this.selector === "#page > header" ? " selected" : ""
-        }
-        , {
-            label: "Footer"
-          , value: "#page > footer"
-          , selected: this.selector === "#page > footer" ? " selected" : ""
-        }
-        , {
-            label: "Selected Element"
-          , value: "column"
-          , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
-        }
-      ];
     }
 
     , tagOptions: function () {
@@ -2697,7 +2666,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       , "click .x-remove": "removeTemplate"
       , "click .x-new-template": "showForm"
       , "change .x-new-template-select select": "selectTemplate"
-      , "click .x-new-template-add": "addTemplate"
+      , "submit .x-new-template-select": "addTemplate"
     }
 
     , initialize: function (options) {
@@ -2791,6 +2760,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       if (confirm("Are you sure you want to delete this template?")) {
         var cid = $(e.currentTarget).parent().find("input").val();
         this.collection.remove(cid);
+        this.render();
       }
     }
 
@@ -2806,14 +2776,16 @@ window.require.define({"views/templates": function(exports, require, module) {
 
     , selectTemplate: function (e) {
       if ($(e.currentTarget).val() === "") {
-        this.$(".x-new-template-name").show();
+        this.$(".x-new-template-name").show().css("display", "block");
       } else {
         this.$(".x-new-template-name").hide();
       }
     }
 
-    , addTemplate: function () {
+    , addTemplate: function (e) {
       var name, attributes, template;
+
+      e.preventDefault();
 
       name = this.$(".x-new-template-select select").val() ||
              this.$(".x-new-template-name").val();
@@ -3044,7 +3016,7 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     buffer += escapeExpression(stack1) + "</option>\n  ";
     return buffer;}
 
-    buffer += "<label>Header:</label>\n<select class=\"x-header-select\">\n  ";
+    buffer += "<label for=\"template-header\">Header:</label>\n<select class=\"x-header-select\" id=\"template-header\">\n  ";
     foundHelper = helpers.headers;
     stack1 = foundHelper || depth0.headers;
     stack2 = helpers.each;
@@ -3054,7 +3026,7 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <option value=\"\">new header</option>\n</select>\n<div class=\"x-header-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter header name\" />\n  <button class=\"x-header-add\">Add</button>\n</div>\n\n<label>Footer:</label>\n<select class=\"x-footer-select\">\n  ";
+    buffer += "\n  <option value=\"\">new header</option>\n</select>\n<div class=\"x-header-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter header name\" />\n  <button class=\"x-header-add btn\">Add header</button>\n</div>\n\n<label for=\"template-footer\">Footer:</label>\n<select class=\"x-footer-select\" id=\"template-footer\">\n  ";
     foundHelper = helpers.footers;
     stack1 = foundHelper || depth0.footers;
     stack2 = helpers.each;
@@ -3064,7 +3036,7 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <option value=\"\">new footer</option>\n</select>\n<div class=\"x-footer-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter footer name\" />\n  <button class=\"x-footer-add\">Add</button>\n</div>\n";
+    buffer += "\n  <option value=\"\">new footer</option>\n</select>\n<div class=\"x-footer-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter footer name\" />\n  <button class=\"x-footer-add btn\">Add footer</button>\n</div>\n";
     return buffer;});
 }});
 
@@ -3100,25 +3072,20 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n    <option value=\"";
-    foundHelper = helpers.value;
-    stack1 = foundHelper || depth0.value;
+    buffer += "\n  Element: <b>";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"";
-    foundHelper = helpers.selected;
-    stack1 = foundHelper || depth0.selected;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
-    buffer += escapeExpression(stack1) + ">";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n    ";
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</b>\n  ";
     return buffer;}
 
   function program3(depth0,data) {
+    
+    
+    return "\n  Click on an element in the design to customize it.\n  ";}
+
+  function program5(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n    <optgroup label=\"";
@@ -3130,7 +3097,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.tags;
     stack1 = foundHelper || depth0.tags;
     stack2 = helpers.each;
-    tmp1 = self.program(4, program4, data);
+    tmp1 = self.program(6, program6, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -3138,7 +3105,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n    </optgroup>\n    ";
     return buffer;}
-  function program4(depth0,data) {
+  function program6(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n      <option value=\"";
@@ -3164,23 +3131,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n      ";
     return buffer;}
 
-  function program6(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n  Selected Element: <b>";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth0.selector;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  ";
-    return buffer;}
-
   function program8(depth0,data) {
-    
-    
-    return "\n  Click on an element in the design to customize it.\n  ";}
-
-  function program10(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n    <li>\n      <input name=\"property\" value=\"";
@@ -3201,41 +3152,31 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
     return buffer;}
 
-    buffer += "<form>\n  <select class=\"x-element\">\n    ";
-    foundHelper = helpers.elements;
-    stack1 = foundHelper || depth0.elements;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </select>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
-    foundHelper = helpers.htmlTags;
-    stack1 = foundHelper || depth0.htmlTags;
-    stack2 = helpers.each;
-    tmp1 = self.program(3, program3, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </select>\n\n  <p class=\"x-choice\">\n  ";
+    buffer += "<form>\n  <p class=\"x-choice\">\n  ";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     stack2 = helpers['if'];
-    tmp1 = self.program(6, program6, data);
+    tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.program(8, program8, data);
+    tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </p>\n\n  <ul class=\"x-rules\">\n    ";
+    buffer += "\n  </p>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    foundHelper = helpers.htmlTags;
+    stack1 = foundHelper || depth0.htmlTags;
+    stack2 = helpers.each;
+    tmp1 = self.program(5, program5, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </select>\n\n  <ul class=\"x-rules\">\n    ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
-    tmp1 = self.program(10, program10, data);
+    tmp1 = self.program(8, program8, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -3253,7 +3194,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
   function program1(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n<button class=\"x-new-template\">&plus; New Template</button>\n<div class=\"x-new-template-select\">\n  <label>Choose:\n    <select>\n      ";
+    buffer += "\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select id=\"template-type\">\n    ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;
@@ -3263,12 +3204,12 @@ window.require.define({"views/templates/templates": function(exports, require, m
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      <option value=\"\">Other</option>\n    </select>\n  </label>\n  <input class=\"x-new-template-name\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add\">Add</button>\n</div>\n";
+    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"x-new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add btn\">Add template</button>\n</div>\n";
     return buffer;}
   function program2(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n      <option value=\"";
+    buffer += "\n    <option value=\"";
     foundHelper = helpers.name;
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -3278,7 +3219,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     stack1 = foundHelper || depth0.label;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n      ";
+    buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
     buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n";

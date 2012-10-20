@@ -1,3 +1,18 @@
+black =               #000
+grayDarker =          #1c1c1c
+grayDark =            #2c2c2c
+gray =                #4c4c4c
+grayLight =           #999
+grayLighter =         #c1c1c1
+white =               #fff
+
+blueLight =           #f0f8ff
+blue =                #049cdb
+blueDark =            #0064cd
+green =               #46a546
+red =                 #dd261d
+yellowLight =         #ffffe0
+
 .btn-primary {
   background-image: none;
   letter-spacing: 0.09em;
@@ -65,9 +80,10 @@ body {
 
 /* Notification */
 #notifications {
-  left: 10px;
-  top: 60px;
+  right: 15px;
+  top: 75px;
   position: fixed;
+  z-index: 99999;
   width: 300px;
 }
 
@@ -97,40 +113,7 @@ body.theme_fork #main {
   text-align: center;
 }
 
-black =               #000
-grayDarker =          #1c1c1c
-grayDark =            #2c2c2c
-gray =                #4c4c4c
-grayLight =           #999
-grayLighter =         #c1c1c1
-white =               #fff
-
-blueLight =           #f0f8ff
-blue =                #049cdb
-blueDark =            #0064cd
-green =               #46a546
-red =                 #dd261d
-yellowLight =         #ffffe0
-
-.x-name,
-.x-remove,
-.x-resize {
-  font-size: 12px;
-  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
-}
-.columns.x-current {
-  cursor: move;
-  box-shadow: 0px 0px 1px 1px blue;
-}
-.columns .x-resize {
-  position: absolute;
-  top: 0;
-  display: none;
-  right: -12px;
-  font-size: 24px;
-  margin-top: 9px;
-  color: blue;
-}
+/* Editor */
 .x-remove {
   font-size: 12px;
   line-height: 12px;
@@ -141,45 +124,6 @@ yellowLight =         #ffffe0
   background-color: yellowLight;
   cursor: pointer;
   display: block;
-}
-.columns .x-remove {
-  position: absolute;
-  right: 0;
-  top: 0;
-  display: none;
-}
-.columns.x-current .x-resize {
-  display: block;
-  cursor: col-resize;
-}
-.x-current .x-remove {
-  display: block;
-}
-.columns.x-current a {
-  cursor: move;
-}
-.columns .x-name {
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 2px 5px;
-  color: blue;
-  background-color: yellowLight;
-  display: none;
-}
-.columns.x-current .x-name {
-  display: block;
-}
-.x-full:after, .x-empty:after {
-  content: "+";
-  font-size: 18px;
-  text-align: center;
-  background-color: blueLight;
-  color: black;
-  width: 100%;
-}
-.x-not-full {
-  background-color: blueLight;
 }
 #x-layout-editor {
   background-color: #fcfcfc;
@@ -194,10 +138,6 @@ yellowLight =         #ffffe0
   padding: 0;
   margin: 30px 0;
 }
-#x-layout-editor * {
-   -moz-box-sizing: border-box;
-        box-sizing: border-box;
-}
 #x-layout-editor .x-handle {
   padding: 5px 5px 5px 10px;
   border-bottom: 1px solid grayLight;
@@ -206,7 +146,6 @@ yellowLight =         #ffffe0
   margin-left: 5px;
 }
 #x-style-edit div {
-  box-sizing: border-box;
   border: 1px solid grayDarker;
   border-top: 0px;
   padding: 5px;
@@ -228,23 +167,11 @@ yellowLight =         #ffffe0
 #x-style-edit div h5 span {
   padding: 0 5px 0 10px;
 }
-#x-layout-editor p {
-  margin: 0;
-}
-#x-layout-editor input {
-  padding: 0 3px;
-  height: 18px;
-  line-height: 18px;
-}
 #x-layout-editor .x-pixels {
   width: 26px;
 }
 #x-layout-editor .x-color {
   width: 58px;
-}
-.x-section {
-  margin: 0;
-  padding: 0 10px;
 }
 #x-layout-editor ul {
   margin: 0;
@@ -282,6 +209,11 @@ yellowLight =         #ffffe0
 #x-layout-editor ul.x-rules li input {
   width: 45%;
 }
+#x-layout-editor legend {
+  margin: 4px 0;
+  line-height: 26px;
+  font-size: 14px;
+}
 .x-drag {
   display: block;
   cursor: move;
@@ -298,29 +230,9 @@ yellowLight =         #ffffe0
   background-color: grayDarker;
   color: grayLighter;
 }
-.x-new-template-select,
-.x-new-template-name,
-.x-new-block-select {
-  display: none;
-}
-
-#x-customize-button,
-#x-save-button,
-#x-download-button {
-  margin: 10px auto;
-  text-align: center;
-}
-
-#x-share-link {
-  padding: 10px;
-}
 #x-share-link p {
-  padding: 5px;
   word-wrap: break-word;
-  background-color: #eee;
-  border: 1px solid #e3e3e3;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
 }
-.collapse.in {
-  
+input.hide {
+  display: none;
 }

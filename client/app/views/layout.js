@@ -109,7 +109,7 @@ module.exports = View.extend({
   , highlightColumns: function (e) {
     var $column, name, slug;
 
-    app.trigger("editor:columnHighlight", e.currentTarget);
+    app.trigger("column:highlight", e.currentTarget);
 
     $column = $(e.currentTarget);
 

@@ -8,8 +8,7 @@ module.exports = View.extend({
   , className: "x-section"
 
   , events: {
-      "change .x-element": "setSelector"
-    , "change .x-tag": "setTag"
+      "change .x-tag": "setTag"
     , "click button": "addInputs"
     , "keyup input": "addStyle"
     , "blur input": "addStyle"
@@ -17,32 +16,12 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "setColumn", "addThemeAttributes");
-
-    app.on("editor:columnHighlight", this.setColumn);
-    app.on("save:before", this.addThemeAttributes);
+    app.on("column:highlight", this.setColumn.bind(this));
+    app.on("save:before", this.addThemeAttributes.bind(this));
     app.on("resize:end", this.changeWidth.bind(this));
 
     this.selector = "body";
     this.customCSS = app.editor.style;
-  }
-
-  , setSelector: function (e) {
-    var val = $(e.target).val();
-
-    switch (val) {
-      case "body":
-      case "#page > header":
-      case "#page > footer":
-        this.selector = val;
-      break;
-
-      case "column":
-        this.selector = this.column;
-      break;
-    }
-
-    this.render();
   }
 
   , setTag: function (e) {
@@ -52,16 +31,13 @@ module.exports = View.extend({
   }
 
   , setColumn: function (element) {
-    this.column = "#" + element.id;
-
-    if (this.$("select").val() === "column") {
-      this.selector = this.column;
-      this.render();
-    }
+    this.selector = "#" + element.id;
+    this.render();
   }
 
   , render: function () {
     var rules;
+    console.log(this.customCSS.getDeclarations(this.selector));
 
     if (this.tag) {
       rules = this.customCSS.values.all[this.selector + " " + this.tag];
@@ -75,8 +51,7 @@ module.exports = View.extend({
     });
 
     this.$el.html(template({
-        elements: this.elementOptions()
-      , htmlTags: this.tagOptions()
+        htmlTags: this.tagOptions()
       , selector: this.selector
       , rules: rules
     }));
@@ -86,31 +61,6 @@ module.exports = View.extend({
     }
 
     return this;
-  }
-
-  , elementOptions: function () {
-    return [
-      {
-          label: "Whole Document"
-        , value: "body"
-        , selected: this.selector === "body" ? " selected" : ""
-      }
-      , {
-          label: "Header"
-        , value: "#page > header"
-        , selected: this.selector === "#page > header" ? " selected" : ""
-      }
-      , {
-          label: "Footer"
-        , value: "#page > footer"
-        , selected: this.selector === "#page > footer" ? " selected" : ""
-      }
-      , {
-          label: "Selected Element"
-        , value: "column"
-        , selected: ["body", "#page > header", "#page > footer"].indexOf(this.selector) === -1 ? " selected" : ""
-      }
-    ];
   }
 
   , tagOptions: function () {

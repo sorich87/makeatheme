@@ -1,5 +1,5 @@
-<label>Header:</label>
-<select class="x-header-select">
+<label for="template-header">Header:</label>
+<select class="x-header-select" id="template-header">
   {{#each headers}}
   <option value="{{slug}}">{{slug}}</option>
   {{/each}}
@@ -7,11 +7,11 @@
 </select>
 <div class="x-header-new">
   <input type="text" value="" placeholder="Enter header name" />
-  <button class="x-header-add">Add</button>
+  <button class="x-header-add btn">Add header</button>
 </div>
 
-<label>Footer:</label>
-<select class="x-footer-select">
+<label for="template-footer">Footer:</label>
+<select class="x-footer-select" id="template-footer">
   {{#each footers}}
   <option value="{{slug}}">{{slug}}</option>
   {{/each}}
@@ -19,5 +19,5 @@
 </select>
 <div class="x-footer-new">
   <input type="text" value="" placeholder="Enter footer name" />
-  <button class="x-footer-add">Add</button>
+  <button class="x-footer-add btn">Add footer</button>
 </div>

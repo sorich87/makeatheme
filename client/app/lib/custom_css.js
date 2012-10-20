@@ -125,21 +125,40 @@ CustomCSS.prototype.insertRules = function (css) {
 };
 
 /**
- * Get a value from a selector, property and media.
+ * Get all declarations for an element.
  *
  * If media is not specified, default is "all".
  */
-CustomCSS.prototype.getValue = function (selector, property, media) {
-  if (!selector || !property) {
+CustomCSS.prototype.getDeclarations = function (element) {
+  var media, selector, l
+    , declarations = {};
+
+  if (!element) {
     return;
   }
 
-  media = media || "all";
+  element = $(element);
 
-  if (!this.values[media][selector] ||
-      !this.values[media][selector][property]) {
-    return this.values[media][selector][property];
+  for (media in this.values) {
+    if (!this.values.hasOwnProperty(media)) {
+      continue;
+    }
+
+    declarations[media] = [];
+
+    for (selector in this.values[media]) {
+      if (!this.values[media].hasOwnProperty(selector)) {
+        continue;
+      }
+
+      if (element.is(selector)) {
+        l = declarations[media].length;
+        declarations[media][l] = this.values[media][selector];
+      }
+    }
   }
+
+  return declarations;
 };
 
 /**

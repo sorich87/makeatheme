@@ -74,6 +74,7 @@
   background-color: #fcfcfc;
   color: #1c1c1c;
   width: 198px;
+  z-index: 99999;
 }
 .x-drag span {
   padding: 0 5px;

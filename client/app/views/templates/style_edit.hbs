@@ -1,9 +1,11 @@
 <form>
-  <select class="x-element">
-    {{#each elements}}
-    <option value="{{value}}"{{selected}}>{{label}}</option>
-    {{/each}}
-  </select>
+  <p class="x-choice">
+  {{#if selector}}
+  Element: <b>{{selector}}</b>
+  {{else}}
+  Click on an element in the design to customize it.
+  {{/if}}
+  </p>
 
   <select class="x-tag">
     <option value="">Every Tag</option>
@@ -15,14 +17,6 @@
     </optgroup>
     {{/each}}
   </select>
-
-  <p class="x-choice">
-  {{#if selector}}
-  Selected Element: <b>{{selector}}</b>
-  {{else}}
-  Click on an element in the design to customize it.
-  {{/if}}
-  </p>
 
   <ul class="x-rules">
     {{#each rules}}

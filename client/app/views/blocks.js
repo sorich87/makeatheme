@@ -42,7 +42,7 @@ module.exports = View.extend({
       }
       , revert: "invalid"
       , scroll: false
-      , zIndex: 9999
+      , zIndex: 99999
     });
 
     return this;

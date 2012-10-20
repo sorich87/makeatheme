@@ -15,7 +15,7 @@ module.exports = View.extend({
     , "click .x-remove": "removeTemplate"
     , "click .x-new-template": "showForm"
     , "change .x-new-template-select select": "selectTemplate"
-    , "click .x-new-template-add": "addTemplate"
+    , "submit .x-new-template-select": "addTemplate"
   }
 
   , initialize: function (options) {
@@ -109,6 +109,7 @@ module.exports = View.extend({
     if (confirm("Are you sure you want to delete this template?")) {
       var cid = $(e.currentTarget).parent().find("input").val();
       this.collection.remove(cid);
+      this.render();
     }
   }
 
@@ -124,14 +125,16 @@ module.exports = View.extend({
 
   , selectTemplate: function (e) {
     if ($(e.currentTarget).val() === "") {
-      this.$(".x-new-template-name").show();
+      this.$(".x-new-template-name").show().css("display", "block");
     } else {
       this.$(".x-new-template-name").hide();
     }
   }
 
-  , addTemplate: function () {
+  , addTemplate: function (e) {
     var name, attributes, template;
+
+    e.preventDefault();
 
     name = this.$(".x-new-template-select select").val() ||
            this.$(".x-new-template-name").val();

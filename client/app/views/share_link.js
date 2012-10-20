@@ -3,7 +3,7 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     id: "x-share-link"
-  , className: "x-section"
+  , className: "x-section well well-small"
   , template: "share_link"
   , data: {
     theme: app.data.theme._id
