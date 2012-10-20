@@ -1,6 +1,6 @@
-.x-name,
-.x-remove,
-.x-resize {
+div.x-name,
+div.x-remove,
+div.x-resize {
   font-size: 12px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
@@ -8,7 +8,7 @@
   cursor: move;
   box-shadow: 0px 0px 1px 1px #049cdb;
 }
-.columns .x-resize {
+.columns div.x-resize {
   position: absolute;
   top: 0;
   display: none;
@@ -17,7 +17,7 @@
   margin-top: 9px;
   color: #049cdb;
 }
-.x-remove {
+div.x-remove {
   font-size: 12px;
   line-height: 12px;
   width: 12px;
@@ -28,23 +28,23 @@
   cursor: pointer;
   display: block;
 }
-.columns .x-remove {
+.columns div.x-remove {
   position: absolute;
   right: 0;
   top: 0;
   display: none;
 }
-.columns.x-current .x-resize {
+.columns.x-current div.x-resize {
   display: block;
   cursor: col-resize;
 }
-.x-current .x-remove {
+.x-current div.x-remove {
   display: block;
 }
 .columns.x-current a {
   cursor: move;
 }
-.columns .x-name {
+.columns div.x-name {
   position: absolute;
   top: 0;
   left: 0;
@@ -53,11 +53,11 @@
   background-color: #ffffe0;
   display: none;
 }
-.columns.x-current .x-name {
+.columns.x-current div.x-name {
   display: block;
 }
-.x-full:after,
-.x-empty:after {
+div.x-full:after,
+div.x-empty:after {
   content: "+";
   font-size: 18px;
   text-align: center;
@@ -65,10 +65,10 @@
   color: #000;
   width: 100%;
 }
-.x-not-full {
+div.x-not-full {
   background-color: #f0f8ff;
 }
-.x-drag {
+li.x-drag {
   display: block;
   cursor: move;
   background-color: #fcfcfc;
@@ -76,6 +76,6 @@
   width: 198px;
   z-index: 99999;
 }
-.x-drag span {
+li.x-drag span {
   padding: 0 5px;
 }
