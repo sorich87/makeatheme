@@ -1291,8 +1291,9 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
     , events: {
         "click .x-new-block": "showForm"
-      , "click .x-new-block-add": "addBlock"
+      , "submit .x-new-block-select": "addBlock"
       , "click .x-remove": "removeBlock"
+      , "mouseover .x-drag": "makeDraggable"
     }
 
     , initialize: function () {
@@ -1315,7 +1316,11 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       this.collection.reset(this.collection.models);
 
-      this.$(".x-drag").draggable({
+      return this;
+    }
+
+    , makeDraggable: function (e) {
+      this.$(e.currentTarget).draggable({
           addClasses: false
         , helper: function() {
           // Append a clone to the body to avoid overflow on parent accordion.
@@ -1325,8 +1330,6 @@ window.require.define({"views/blocks": function(exports, require, module) {
         , scroll: false
         , zIndex: 99999
       });
-
-      return this;
     }
 
     , addOne: function (block) {
@@ -1377,8 +1380,10 @@ window.require.define({"views/blocks": function(exports, require, module) {
       }
     }
 
-    , addBlock: function () {
+    , addBlock: function (e) {
       var name, label, attributes, block, build;
+
+      e.preventDefault();
 
       name = this.$(".x-new-block-select select").val();
       label = this.$(".x-new-block-name").val();
@@ -1400,6 +1405,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
       attributes.label = label;
 
       this.collection.add(attributes);
+      this.render();
 
       app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
     }
@@ -1408,6 +1414,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
       if (confirm("Are you sure you want to delete this block?")) {
         var cid = $(e.currentTarget).parent().data("cid");
         this.collection.remove(cid);
+        this.render();
       }
     }
 
@@ -2909,7 +2916,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Drag and drop to insert</p>\n<ul class='x-rects'></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<div class=\"x-new-block-select\">\n  <label>Type:\n    <select>\n      ";
+    buffer += "<p>Drag and drop to insert</p>\n<ul class='x-rects'></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<form class=\"x-new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
@@ -2919,7 +2926,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </select>\n  </label>\n  <input class=\"x-new-block-name\" type=\"text\" value=\"\" placeholder=\"Name\" />\n  <button class=\"x-new-block-add\">Add</button>\n</div>\n";
+    buffer += "\n    </select>\n  </label>\n  <input class=\"x-new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"x-new-block-add btn\">Add block</button>\n</form>\n";
     return buffer;});
 }});
 
@@ -3193,21 +3200,6 @@ window.require.define({"views/templates/templates": function(exports, require, m
 
   function program1(depth0,data) {
     
-    var buffer = "", stack1, stack2;
-    buffer += "\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select id=\"template-type\">\n    ";
-    foundHelper = helpers.standards;
-    stack1 = foundHelper || depth0.standards;
-    stack2 = helpers.each;
-    tmp1 = self.program(2, program2, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"x-new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add btn\">Add template</button>\n</div>\n";
-    return buffer;}
-  function program2(depth0,data) {
-    
     var buffer = "", stack1;
     buffer += "\n    <option value=\"";
     foundHelper = helpers.name;
@@ -3222,17 +3214,17 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n";
-    foundHelper = helpers.edit;
-    stack1 = foundHelper || depth0.edit;
-    stack2 = helpers['if'];
+    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
+    foundHelper = helpers.standards;
+    stack1 = foundHelper || depth0.standards;
+    stack2 = helpers.each;
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"x-new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add btn\">Add template</button>\n</form>\n";
     return buffer;});
 }});
 
@@ -3262,7 +3254,7 @@ window.require.define({"views/templates/templates_select": function(exports, req
     buffer += escapeExpression(stack1) + "</option>\n  ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<select>\n  ";
+    buffer += "<label>Previewing template:</label>\n<select>\n  ";
     foundHelper = helpers.templates;
     stack1 = foundHelper || depth0.templates;
     stack2 = helpers.each;
@@ -3362,7 +3354,7 @@ window.require.define({"views/templates_select": function(exports, require, modu
     , template = require("views/templates/templates");
 
   module.exports = View.extend({
-      id: "x-templates-select"
+      id: "x-templates-preview"
     , className: "x-section"
     , template: "templates_select"
     , collection: app.editor.templates

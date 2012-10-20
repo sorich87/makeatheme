@@ -4,7 +4,7 @@ var View = require("views/base/view")
   , template = require("views/templates/templates");
 
 module.exports = View.extend({
-    id: "x-templates-select"
+    id: "x-templates-preview"
   , className: "x-section"
   , template: "templates_select"
   , collection: app.editor.templates

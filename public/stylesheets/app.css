@@ -6001,7 +6001,7 @@ a.badge:hover {
     overflow: visible !important;
   }
 }
-.btn-primary {
+.btn {
   background-image: none;
   letter-spacing: 0.09em;
   font-weight: 300;
@@ -6217,4 +6217,18 @@ body.theme_fork #main {
 }
 input.hide {
   display: none;
+}
+#x-customize-button,
+#x-download-button {
+  margin: 10px 0;
+  text-align: center;
+}
+#x-customize-button .btn,
+#x-download-button .btn {
+  width: 200px;
+}
+#x-templates-preview {
+  padding: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #1c1c1c;
 }

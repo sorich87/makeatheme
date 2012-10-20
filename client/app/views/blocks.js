@@ -10,8 +10,9 @@ module.exports = View.extend({
 
   , events: {
       "click .x-new-block": "showForm"
-    , "click .x-new-block-add": "addBlock"
+    , "submit .x-new-block-select": "addBlock"
     , "click .x-remove": "removeBlock"
+    , "mouseover .x-drag": "makeDraggable"
   }
 
   , initialize: function () {
@@ -34,7 +35,11 @@ module.exports = View.extend({
 
     this.collection.reset(this.collection.models);
 
-    this.$(".x-drag").draggable({
+    return this;
+  }
+
+  , makeDraggable: function (e) {
+    this.$(e.currentTarget).draggable({
         addClasses: false
       , helper: function() {
         // Append a clone to the body to avoid overflow on parent accordion.
@@ -44,8 +49,6 @@ module.exports = View.extend({
       , scroll: false
       , zIndex: 99999
     });
-
-    return this;
   }
 
   , addOne: function (block) {
@@ -96,8 +99,10 @@ module.exports = View.extend({
     }
   }
 
-  , addBlock: function () {
+  , addBlock: function (e) {
     var name, label, attributes, block, build;
+
+    e.preventDefault();
 
     name = this.$(".x-new-block-select select").val();
     label = this.$(".x-new-block-name").val();
@@ -119,6 +124,7 @@ module.exports = View.extend({
     attributes.label = label;
 
     this.collection.add(attributes);
+    this.render();
 
     app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
   }
@@ -127,6 +133,7 @@ module.exports = View.extend({
     if (confirm("Are you sure you want to delete this block?")) {
       var cid = $(e.currentTarget).parent().data("cid");
       this.collection.remove(cid);
+      this.render();
     }
   }
 

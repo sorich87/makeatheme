@@ -1,10 +1,9 @@
 <p>Click to change</p>
 <ul class="x-rects"></ul>
-{{#if edit}}
 <button class="x-new-template">&plus; New Template</button>
 <form class="x-new-template-select hide">
   <legend>Add New Template</legend>
-  <select id="template-type">
+  <select>
     {{#each standards}}
     <option value="{{name}}">{{label}}</option>
     {{/each}}
@@ -12,5 +11,4 @@
   </select>
   <input class="x-new-template-name hide" type="text" value="" placeholder="Enter template name" />
   <button class="x-new-template-add btn">Add template</button>
-</div>
-{{/if}}
+</form>
