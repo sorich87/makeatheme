@@ -2170,6 +2170,10 @@ window.require.define({"views/preview": function(exports, require, module) {
         this.render_preview();
       }
 
+      if (!app.editor.preview_only) {
+        this.$el.append(app.createView("download_button").render().$el);
+      }
+
       this.$el.appendTo($("body", window.top.document));
 
       return this;
@@ -2181,10 +2185,6 @@ window.require.define({"views/preview": function(exports, require, module) {
         .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
         .append(app.reuseView("templates_select").render().$el)
         .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
-
-      if (!app.editor.preview_only) {
-        this.$el.append(app.reuseView("download_button").render().$el);
-      }
     }
 
     , render_editor: function () {
