@@ -1,11 +1,13 @@
 /**
  * Manage custom css in the document <head>
- * and two 'values' and 'indexes' hashes for easy access.
+ * and maintain a rules object for easy access.
+ *
+ * Takes a rules argument with rules as an object
+ * and a baseURI argument to append before assets directories.
  */
 var CustomCSS = function (rules, baseURI) {
   this.sheets = {};
-  this.values = {};
-  this.indexes = {};
+  this.rules = {};
   this.baseURI = baseURI;
 
   this.insertRules(rules);
@@ -25,31 +27,24 @@ CustomCSS.prototype.createSheet = function (media) {
 
   document.head.appendChild(node);
 
-  this.sheets[media] = {
-      node: node
-    , sheet: node.sheet
-    , rules: node.sheet.cssRules
-  };
-
-  this.values[media] = {};
-  this.indexes[media] = {};
+  this.sheets[media] = node.sheet;
 
   return this.sheets[media];
 };
 
 /**
  * Insert a rule in the specified media stylesheet
- * and in the values and indexes hashes.
+ * and in the rules hash.
  *
- * Create the stylesheet if didn't exist.
+ * Create the stylesheet if it doesn't exist.
  *
- * Take an a hash containing:
+ * Take a hash containing:
  * selector, property and value as required attributes
  * media and index as optional attributes
  *
  * Default media is "all".
- * Default index is taken from the indexes hash if the rule previously existed
- * or the stylesheet rules length if not.
+ * Default index is taken from the stylesheet rules length
+ * if it is not provided.
  */
 CustomCSS.prototype.insertRule = function (rule) {
   var index, value
@@ -64,26 +59,22 @@ CustomCSS.prototype.insertRule = function (rule) {
   if (rule.index !== null && rule.index !== void 0) {
     index = rule.index;
     this.deleteRule(index);
-
-  } else if (this.indexes[media][rule.selector] &&
-             this.indexes[media][rule.selector][rule.property]) {
-    index = this.indexes[media][rule.selector][rule.property];
-    this.deleteRule(index);
-
   } else {
-    index = this.sheets[media].rules.length;
+    index = this.sheets[media].cssRules.length;
   }
 
   value = rule.value.replace(/url\(([^)]+)\)/g, 'url("' + this.baseURI + '/$1")');
 
-  this.sheets[media].sheet.insertRule(
-    rule.selector + " {" + rule.property + ": " + value + "}", index);
+  declaration = rule.selector + " {" + rule.property + ": " + value + "}";
 
-  this.values[media][rule.selector] = this.values[media][rule.selector] || {};
-  this.values[media][rule.selector][rule.property] = rule.value;
+  this.sheets[media].insertRule(declaration, index);
 
-  this.indexes[media][rule.selector] = this.indexes[media][rule.selector] || {};
-  this.indexes[media][rule.selector][rule.property] = index;
+  this.rules[media] = this.rules[media] || {};
+  this.rules[media][index] = {
+      selector: rule.selector
+    , property: rule.property
+    , value: value
+  };
 
   return index;
 };
@@ -125,13 +116,13 @@ CustomCSS.prototype.insertRules = function (css) {
 };
 
 /**
- * Get all declarations for an element.
- *
- * If media is not specified, default is "all".
+ * Get all declarations for an element, grouped per media and selector.
  */
 CustomCSS.prototype.getDeclarations = function (element) {
-  var media, selector, l
-    , declarations = {};
+  var media, rule, value, index, i, l
+    , allDeclarations = {}
+    , mediaDeclarations = {}
+    , returnValues = function (v) { return v; };
 
   if (!element) {
     return;
@@ -139,36 +130,58 @@ CustomCSS.prototype.getDeclarations = function (element) {
 
   element = $(element);
 
-  for (media in this.values) {
-    if (!this.values.hasOwnProperty(media)) {
+  for (media in this.rules) {
+    if (!this.rules.hasOwnProperty(media)) {
       continue;
     }
 
-    declarations[media] = [];
+    mediaDeclarations = {};
 
-    for (selector in this.values[media]) {
-      if (!this.values[media].hasOwnProperty(selector)) {
+    for (index in this.rules[media]) {
+      rule = this.rules[media][index];
+
+      if (!element.is(rule.selector)) {
         continue;
       }
 
-      if (element.is(selector)) {
-        l = declarations[media].length;
-        declarations[media][l] = this.values[media][selector];
+      if (!mediaDeclarations[rule.selector]) {
+        mediaDeclarations[rule.selector] = {
+            selector: rule.selector
+          , rules: []
+        };
       }
+
+      l = mediaDeclarations[rule.selector].rules.length;
+
+      mediaDeclarations[rule.selector].rules[l] = {
+          property: rule.property
+        , value: rule.value
+        , index: index
+      };
+    }
+
+    allDeclarations[media] = [];
+
+    for (i in mediaDeclarations) {
+      if (!mediaDeclarations.hasOwnProperty(i)) {
+        continue;
+      }
+
+      l = allDeclarations[media].length;
+
+      allDeclarations[media][l] = mediaDeclarations[i];
     }
   }
 
-  return declarations;
+  return allDeclarations;
 };
 
 /**
- * Delete a rule by its index.
+ * Delete a rule from a stylesheet by its index.
  *
- * Delete from stylesheet as well as indexes and values hashes.
+ * Default stylesheet is "all".
  */
 CustomCSS.prototype.deleteRule = function (index, media) {
-  var selector, property;
-
   if (index === null || index === void 0) {
     return;
   }
@@ -176,18 +189,6 @@ CustomCSS.prototype.deleteRule = function (index, media) {
   media = media || "all";
 
   this.sheets[media].deleteRule(index);
-
-  for (property in this.indexes[media][selector]) {
-    if (!this.indexes[media][selector].hasOwnProperty(property)) {
-      continue;
-    }
-
-    if (this.indexes[media][selector][property] === index) {
-      delete this.indexes[media][selector][property];
-      delete this.values[media][selector][property];
-      return;
-    }
-  }
 };
 
 module.exports = CustomCSS;

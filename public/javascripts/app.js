@@ -326,12 +326,14 @@ window.require.define({"initialize": function(exports, require, module) {
 window.require.define({"lib/custom_css": function(exports, require, module) {
   /**
    * Manage custom css in the document <head>
-   * and two 'values' and 'indexes' hashes for easy access.
+   * and maintain a rules object for easy access.
+   *
+   * Takes a rules argument with rules as an object
+   * and a baseURI argument to append before assets directories.
    */
   var CustomCSS = function (rules, baseURI) {
     this.sheets = {};
-    this.values = {};
-    this.indexes = {};
+    this.rules = {};
     this.baseURI = baseURI;
 
     this.insertRules(rules);
@@ -351,31 +353,24 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
     document.head.appendChild(node);
 
-    this.sheets[media] = {
-        node: node
-      , sheet: node.sheet
-      , rules: node.sheet.cssRules
-    };
-
-    this.values[media] = {};
-    this.indexes[media] = {};
+    this.sheets[media] = node.sheet;
 
     return this.sheets[media];
   };
 
   /**
    * Insert a rule in the specified media stylesheet
-   * and in the values and indexes hashes.
+   * and in the rules hash.
    *
-   * Create the stylesheet if didn't exist.
+   * Create the stylesheet if it doesn't exist.
    *
-   * Take an a hash containing:
+   * Take a hash containing:
    * selector, property and value as required attributes
    * media and index as optional attributes
    *
    * Default media is "all".
-   * Default index is taken from the indexes hash if the rule previously existed
-   * or the stylesheet rules length if not.
+   * Default index is taken from the stylesheet rules length
+   * if it is not provided.
    */
   CustomCSS.prototype.insertRule = function (rule) {
     var index, value
@@ -390,26 +385,22 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     if (rule.index !== null && rule.index !== void 0) {
       index = rule.index;
       this.deleteRule(index);
-
-    } else if (this.indexes[media][rule.selector] &&
-               this.indexes[media][rule.selector][rule.property]) {
-      index = this.indexes[media][rule.selector][rule.property];
-      this.deleteRule(index);
-
     } else {
-      index = this.sheets[media].rules.length;
+      index = this.sheets[media].cssRules.length;
     }
 
     value = rule.value.replace(/url\(([^)]+)\)/g, 'url("' + this.baseURI + '/$1")');
 
-    this.sheets[media].sheet.insertRule(
-      rule.selector + " {" + rule.property + ": " + value + "}", index);
+    declaration = rule.selector + " {" + rule.property + ": " + value + "}";
 
-    this.values[media][rule.selector] = this.values[media][rule.selector] || {};
-    this.values[media][rule.selector][rule.property] = rule.value;
+    this.sheets[media].insertRule(declaration, index);
 
-    this.indexes[media][rule.selector] = this.indexes[media][rule.selector] || {};
-    this.indexes[media][rule.selector][rule.property] = index;
+    this.rules[media] = this.rules[media] || {};
+    this.rules[media][index] = {
+        selector: rule.selector
+      , property: rule.property
+      , value: value
+    };
 
     return index;
   };
@@ -451,13 +442,13 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   /**
-   * Get all declarations for an element.
-   *
-   * If media is not specified, default is "all".
+   * Get all declarations for an element, grouped per media and selector.
    */
   CustomCSS.prototype.getDeclarations = function (element) {
-    var media, selector, l
-      , declarations = {};
+    var media, rule, value, index, i, l
+      , allDeclarations = {}
+      , mediaDeclarations = {}
+      , returnValues = function (v) { return v; };
 
     if (!element) {
       return;
@@ -465,36 +456,58 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
     element = $(element);
 
-    for (media in this.values) {
-      if (!this.values.hasOwnProperty(media)) {
+    for (media in this.rules) {
+      if (!this.rules.hasOwnProperty(media)) {
         continue;
       }
 
-      declarations[media] = [];
+      mediaDeclarations = {};
 
-      for (selector in this.values[media]) {
-        if (!this.values[media].hasOwnProperty(selector)) {
+      for (index in this.rules[media]) {
+        rule = this.rules[media][index];
+
+        if (!element.is(rule.selector)) {
           continue;
         }
 
-        if (element.is(selector)) {
-          l = declarations[media].length;
-          declarations[media][l] = this.values[media][selector];
+        if (!mediaDeclarations[rule.selector]) {
+          mediaDeclarations[rule.selector] = {
+              selector: rule.selector
+            , rules: []
+          };
         }
+
+        l = mediaDeclarations[rule.selector].rules.length;
+
+        mediaDeclarations[rule.selector].rules[l] = {
+            property: rule.property
+          , value: rule.value
+          , index: index
+        };
+      }
+
+      allDeclarations[media] = [];
+
+      for (i in mediaDeclarations) {
+        if (!mediaDeclarations.hasOwnProperty(i)) {
+          continue;
+        }
+
+        l = allDeclarations[media].length;
+
+        allDeclarations[media][l] = mediaDeclarations[i];
       }
     }
 
-    return declarations;
+    return allDeclarations;
   };
 
   /**
-   * Delete a rule by its index.
+   * Delete a rule from a stylesheet by its index.
    *
-   * Delete from stylesheet as well as indexes and values hashes.
+   * Default stylesheet is "all".
    */
   CustomCSS.prototype.deleteRule = function (index, media) {
-    var selector, property;
-
     if (index === null || index === void 0) {
       return;
     }
@@ -502,18 +515,6 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     media = media || "all";
 
     this.sheets[media].deleteRule(index);
-
-    for (property in this.indexes[media][selector]) {
-      if (!this.indexes[media][selector].hasOwnProperty(property)) {
-        continue;
-      }
-
-      if (this.indexes[media][selector][property] === index) {
-        delete this.indexes[media][selector][property];
-        delete this.values[media][selector][property];
-        return;
-      }
-    }
   };
 
   module.exports = CustomCSS;
@@ -2576,29 +2577,19 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var rules;
-      console.log(this.customCSS.getDeclarations(this.selector));
+      var selector, declarations;
 
-      if (this.tag) {
-        rules = this.customCSS.values.all[this.selector + " " + this.tag];
-      } else {
-        rules = this.customCSS.values.all[this.selector];
-      }
+      this.media = "all";
 
-      rules = _.map(rules, function (rule, property) {
-        rule.property = property;
-        return rule;
-      });
+      selector = this.tag ? this.selector + " " + this.tag : this.selector;
+      declarations = this.customCSS.getDeclarations(selector);
 
       this.$el.html(template({
           htmlTags: this.tagOptions()
         , selector: this.selector
-        , rules: rules
+        , parents: $(this.selector).parents().get().reverse()
+        , declarations: declarations[this.media]
       }));
-
-      if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
-        this.$(".x-choice").hide();
-      }
 
       return this;
     }
@@ -2618,7 +2609,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , addInputs: function (e) {
       e.preventDefault();
 
-      this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+      this.$("ul").append("<li><input name='property' value='' placeholder='property' />: " +
                           "<input name='value' value='' placeholder='value' />" +
                           "<input type='hidden' name='index' /></li>");
     }
@@ -3078,21 +3069,67 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 
   function program1(depth0,data) {
     
-    var buffer = "", stack1;
-    buffer += "\n  Element: <b>";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth0.selector;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  ";
+    var buffer = "", stack1, stack2;
+    buffer += "\n  ";
+    foundHelper = helpers.parents;
+    stack1 = foundHelper || depth0.parents;
+    stack2 = helpers.each;
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  ";
     return buffer;}
-
+  function program2(depth0,data) {
+    
+    var buffer = "", stack1, stack2;
+    buffer += "\n  ";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    stack2 = helpers['if'];
+    tmp1 = self.program(3, program3, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(5, program5, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  ";
+    return buffer;}
   function program3(depth0,data) {
     
-    
-    return "\n  Click on an element in the design to customize it.\n  ";}
+    var buffer = "", stack1;
+    buffer += "\n  <a href=\"#\" data-el=\"#";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">#";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a> &gt;\n  ";
+    return buffer;}
 
   function program5(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <a href=\"#\" data-el=\"";
+    foundHelper = helpers.localName;
+    stack1 = foundHelper || depth0.localName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "localName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.localName;
+    stack1 = foundHelper || depth0.localName;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "localName", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a> &gt;\n  ";
+    return buffer;}
+
+  function program7(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n    <optgroup label=\"";
@@ -3104,7 +3141,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.tags;
     stack1 = foundHelper || depth0.tags;
     stack2 = helpers.each;
-    tmp1 = self.program(6, program6, data);
+    tmp1 = self.program(8, program8, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -3112,7 +3149,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n    </optgroup>\n    ";
     return buffer;}
-  function program6(depth0,data) {
+  function program8(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n      <option value=\"";
@@ -3138,7 +3175,27 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n      ";
     return buffer;}
 
-  function program8(depth0,data) {
+  function program10(depth0,data) {
+    
+    var buffer = "", stack1, stack2;
+    buffer += "\n  <p class=\"x-selector\"><input value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />&nbsp; {</p>\n  <ul class=\"x-rules\">\n    ";
+    foundHelper = helpers.rules;
+    stack1 = foundHelper || depth0.rules;
+    stack2 = helpers.each;
+    tmp1 = self.program(11, program11, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </ul>\n  <button class=\"btn btn-mini\">Add rule</button>\n  <p>}</p>\n  ";
+    return buffer;}
+  function program11(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n    <li>\n      <input name=\"property\" value=\"";
@@ -3159,37 +3216,42 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
     return buffer;}
 
-    buffer += "<form>\n  <p class=\"x-choice\">\n  ";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth0.selector;
+    buffer += "<form>\n  <p class=\"x-choice\">\n  Element:\n  ";
+    foundHelper = helpers.parents;
+    stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.program(3, program3, data);
+    tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </p>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    buffer += "\n  <b>";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</b>\n  </p>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
     foundHelper = helpers.htmlTags;
     stack1 = foundHelper || depth0.htmlTags;
     stack2 = helpers.each;
-    tmp1 = self.program(5, program5, data);
+    tmp1 = self.program(7, program7, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </select>\n\n  <ul class=\"x-rules\">\n    ";
-    foundHelper = helpers.rules;
-    stack1 = foundHelper || depth0.rules;
+    buffer += "\n  </select>\n\n  ";
+    foundHelper = helpers.declarations;
+    stack1 = foundHelper || depth0.declarations;
     stack2 = helpers.each;
-    tmp1 = self.program(8, program8, data);
+    tmp1 = self.program(10, program10, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </ul>\n  <button>Add custom style</button>\n</form>\n";
+    buffer += "\n  <button class=\"btn\">Add declaration</button>\n</form>\n";
     return buffer;});
 }});
 

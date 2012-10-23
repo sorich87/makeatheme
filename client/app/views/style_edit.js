@@ -36,29 +36,19 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var rules;
-    console.log(this.customCSS.getDeclarations(this.selector));
+    var selector, declarations;
 
-    if (this.tag) {
-      rules = this.customCSS.values.all[this.selector + " " + this.tag];
-    } else {
-      rules = this.customCSS.values.all[this.selector];
-    }
+    this.media = "all";
 
-    rules = _.map(rules, function (rule, property) {
-      rule.property = property;
-      return rule;
-    });
+    selector = this.tag ? this.selector + " " + this.tag : this.selector;
+    declarations = this.customCSS.getDeclarations(selector);
 
     this.$el.html(template({
         htmlTags: this.tagOptions()
       , selector: this.selector
-      , rules: rules
+      , parents: $(this.selector).parents().get().reverse()
+      , declarations: declarations[this.media]
     }));
-
-    if (["body", "#page > header", "#page > footer"].indexOf(this.$("select").val()) !== -1) {
-      this.$(".x-choice").hide();
-    }
 
     return this;
   }
@@ -78,7 +68,7 @@ module.exports = View.extend({
   , addInputs: function (e) {
     e.preventDefault();
 
-    this.$("ul").append("<li><input name='property' value='' placeholder='property' />:" +
+    this.$("ul").append("<li><input name='property' value='' placeholder='property' />: " +
                         "<input name='value' value='' placeholder='value' />" +
                         "<input type='hidden' name='index' /></li>");
   }

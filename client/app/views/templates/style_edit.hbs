@@ -1,10 +1,16 @@
 <form>
   <p class="x-choice">
-  {{#if selector}}
-  Element: <b>{{selector}}</b>
+  Element:
+  {{#if parents}}
+  {{#each parents}}
+  {{#if id}}
+  <a href="#" data-el="#{{id}}">#{{id}}</a> &gt;
   {{else}}
-  Click on an element in the design to customize it.
+  <a href="#" data-el="{{localName}}">{{localName}}</a> &gt;
   {{/if}}
+  {{/each}}
+  {{/if}}
+  <b>{{selector}}</b>
   </p>
 
   <select class="x-tag">
@@ -18,6 +24,8 @@
     {{/each}}
   </select>
 
+  {{#each declarations}}
+  <p class="x-selector"><input value="{{selector}}" />&nbsp; {</p>
   <ul class="x-rules">
     {{#each rules}}
     <li>
@@ -27,5 +35,8 @@
     </li>
     {{/each}}
   </ul>
-  <button>Add custom style</button>
+  <button class="btn btn-mini">Add rule</button>
+  <p>}</p>
+  {{/each}}
+  <button class="btn">Add declaration</button>
 </form>

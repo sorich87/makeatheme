@@ -6156,7 +6156,7 @@ body.theme_fork #main {
   width: 58px;
 }
 #x-layout-editor ul {
-  margin: 0;
+  margin: 0 0 10px;
   padding: 0;
   list-style: none;
 }
@@ -6188,8 +6188,28 @@ body.theme_fork #main {
 #x-layout-editor select.x-tag {
   width: 100%;
 }
+#x-layout-editor ul.x-rules {
+  margin: 0 0 0 10px;
+}
 #x-layout-editor ul.x-rules li input {
   width: 45%;
+  background-color: transparent;
+  border: none;
+}
+.x-selector {
+  margin: 0;
+  background-color: #f0f8ff;
+}
+.x-selector input {
+  max-width: 90%;
+  float: left;
+  background-color: transparent;
+  border: none;
+  text-overflow: ellipsis;
+}
+.x-selector input:hover,
+#x-layout-editor ul.x-rules li input:hover {
+  background-color: #ffffe0;
 }
 #x-layout-editor legend {
   margin: 4px 0;
@@ -6231,4 +6251,8 @@ input.hide {
   padding: 10px;
   margin-bottom: 20px;
   border-bottom: 1px solid #1c1c1c;
+}
+#x-layout-editor .accordion-inner {
+  overflow-y: scroll;
+  max-height: 200px;
 }
