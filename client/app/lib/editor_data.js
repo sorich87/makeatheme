@@ -31,7 +31,7 @@ setInterval(function () {
     templates: data.templates.toJSON()
     , regions: data.regions.toJSON()
     , blocks: data.blocks.toJSON()
-    , style: data.style.values
+    , style: data.style.getRules()
   };
 
   store = JSON.stringify(store);

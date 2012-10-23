@@ -502,6 +502,32 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     return allDeclarations;
   };
 
+  CustomCSS.prototype.getRules = function () {
+    var media, index, selector, property, value
+      , rules = {};
+
+    for (media in this.rules) {
+      if (!this.rules.hasOwnProperty(media)) {
+        continue;
+      }
+
+      rules[media] = rules[media] || {};
+
+      for (index in this.rules[media]) {
+        if (!this.rules[media].hasOwnProperty(index)) {
+          continue;
+        }
+
+        rule = this.rules[media][index];
+
+        rules[media][rule.selector] = rules[media][rule.selector] || {};
+        rules[media][rule.selector][rule.property] = rule.value;
+      }
+    }
+
+    return rules;
+  };
+
   /**
    * Delete a rule from a stylesheet by its index.
    *
@@ -515,6 +541,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     media = media || "all";
 
     this.sheets[media].deleteRule(index);
+
+    delete this.rules[media][index];
   };
 
   module.exports = CustomCSS;
@@ -555,7 +583,7 @@ window.require.define({"lib/editor_data": function(exports, require, module) {
       templates: data.templates.toJSON()
       , regions: data.regions.toJSON()
       , blocks: data.blocks.toJSON()
-      , style: data.style.values
+      , style: data.style.getRules()
     };
 
     store = JSON.stringify(store);
@@ -2550,10 +2578,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , events: {
         "change .x-tag": "setTag"
-      , "click button": "addInputs"
-      , "keyup input": "addStyle"
-      , "blur input": "addStyle"
-      , "change input": "addStyle"
+      , "click .add-rule": "addInputs"
+      , "keyup .x-rules input": "addStyle"
+      , "change .x-rules input": "addStyle"
+      , "blur .x-rules input": "addStyle"
     }
 
     , initialize: function () {
@@ -2607,38 +2635,53 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , addInputs: function (e) {
+      var $button = $(e.currentTarget)
+        , $ul = $button.siblings("ul")
+        , selector = $button.siblings(".x-selector").find("input").val();
+
       e.preventDefault();
 
-      this.$("ul").append("<li><input name='property' value='' placeholder='property' />: " +
+      $ul.append("<li><input name='property' value='' placeholder='property' />: " +
                           "<input name='value' value='' placeholder='value' />" +
+                          "<input type='hidden' name='selector' value='" + selector + "' />" +
                           "<input type='hidden' name='index' /></li>");
     }
 
     , addStyle: function (e) {
-      var selector, property, value, index
+      var selector, index
         , $li = $(e.target).parent();
 
-      selector = this.selector;
-      if (this.tag) {
-        selector += " " + this.tag;
+      property = $li.find("input[name=property]").val();
+      value = $li.find("input[name=value]").val();
+      index = $li.find("input[name=index]").val() || null;
+
+      if (property && value) {
+        index = this.customCSS.insertRule({
+            selector: $li.find("input[name=selector]").val()
+          , property: property
+          , value: value
+          , index: index
+          , media: this.media
+        });
+      } else if (index) {
+        this.customCSS.deleteRule(index, this.media);
+        index = "";
       }
-
-      property  = $li.find("input[name=property]").val();
-      value  = $li.find("input[name=value]").val();
-      index  = $li.find("input[name=index]").val() || null;
-
-      index = this.customCSS.insertRule(selector, property, value, index);
 
       $li.find("input[name=index]").val(index);
     }
 
     , addThemeAttributes: function (attributes) {
-      attributes.style = this.customCSS.rules;
+      attributes.style = this.customCSS.getRules();
     }
 
     , changeWidth: function (selector, width) {
-      width =  parseInt(width, 10) / $(selector).parent().width() * 100;
-      this.customCSS.insertRule(selector, "width", width + "%");
+      this.customCSS.insertRule({
+          selector: selector
+        , property: "width"
+        , value: (parseInt(width, 10) / $(selector).parent().width() * 100) + "%"
+        , media: "all"
+      });
 
       this.render();
     }
@@ -3178,42 +3221,47 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program10(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n  <p class=\"x-selector\"><input value=\"";
+    buffer += "\n  <div>\n    <p class=\"x-selector\"><input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />&nbsp; {</p>\n  <ul class=\"x-rules\">\n    ";
+    buffer += escapeExpression(stack1) + "\" />&nbsp; {</p>\n    <ul class=\"x-rules\">\n      ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
-    tmp1 = self.program(11, program11, data);
+    tmp1 = self.programWithDepth(program11, data, depth0);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </ul>\n  <button class=\"btn btn-mini\">Add rule</button>\n  <p>}</p>\n  ";
+    buffer += "\n    </ul>\n    <button class=\"btn btn-mini add-rule\">Add rule</button>\n    <p>}</p>\n  </div>\n  ";
     return buffer;}
-  function program11(depth0,data) {
+  function program11(depth0,data,depth1) {
     
     var buffer = "", stack1;
-    buffer += "\n    <li>\n      <input name=\"property\" value=\"";
+    buffer += "\n      <li>\n        <input name=\"property\" value=\"";
     foundHelper = helpers.property;
     stack1 = foundHelper || depth0.property;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />:\n      <input name=\"value\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />:\n        <input name=\"value\" value=\"";
     foundHelper = helpers.value;
     stack1 = foundHelper || depth0.value;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n      <input type=\"hidden\" name=\"index\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />\n        <input type=\"hidden\" name=\"index\" value=\"";
     foundHelper = helpers.index;
     stack1 = foundHelper || depth0.index;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "index", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
+    buffer += escapeExpression(stack1) + "\" />\n        <input type=\"hidden\" name=\"selector\" value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth1.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "...selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n      </li>\n      ";
     return buffer;}
 
     buffer += "<form>\n  <p class=\"x-choice\">\n  Element:\n  ";

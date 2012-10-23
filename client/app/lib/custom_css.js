@@ -176,6 +176,32 @@ CustomCSS.prototype.getDeclarations = function (element) {
   return allDeclarations;
 };
 
+CustomCSS.prototype.getRules = function () {
+  var media, index, selector, property, value
+    , rules = {};
+
+  for (media in this.rules) {
+    if (!this.rules.hasOwnProperty(media)) {
+      continue;
+    }
+
+    rules[media] = rules[media] || {};
+
+    for (index in this.rules[media]) {
+      if (!this.rules[media].hasOwnProperty(index)) {
+        continue;
+      }
+
+      rule = this.rules[media][index];
+
+      rules[media][rule.selector] = rules[media][rule.selector] || {};
+      rules[media][rule.selector][rule.property] = rule.value;
+    }
+  }
+
+  return rules;
+};
+
 /**
  * Delete a rule from a stylesheet by its index.
  *
@@ -189,6 +215,8 @@ CustomCSS.prototype.deleteRule = function (index, media) {
   media = media || "all";
 
   this.sheets[media].deleteRule(index);
+
+  delete this.rules[media][index];
 };
 
 module.exports = CustomCSS;

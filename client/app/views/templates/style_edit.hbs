@@ -25,18 +25,21 @@
   </select>
 
   {{#each declarations}}
-  <p class="x-selector"><input value="{{selector}}" />&nbsp; {</p>
-  <ul class="x-rules">
-    {{#each rules}}
-    <li>
-      <input name="property" value="{{property}}" />:
-      <input name="value" value="{{value}}" />
-      <input type="hidden" name="index" value="{{index}}" />
-    </li>
-    {{/each}}
-  </ul>
-  <button class="btn btn-mini">Add rule</button>
-  <p>}</p>
+  <div>
+    <p class="x-selector"><input value="{{selector}}" />&nbsp; {</p>
+    <ul class="x-rules">
+      {{#each rules}}
+      <li>
+        <input name="property" value="{{property}}" />:
+        <input name="value" value="{{value}}" />
+        <input type="hidden" name="index" value="{{index}}" />
+        <input type="hidden" name="selector" value="{{../selector}}" />
+      </li>
+      {{/each}}
+    </ul>
+    <button class="btn btn-mini add-rule">Add rule</button>
+    <p>}</p>
+  </div>
   {{/each}}
   <button class="btn">Add declaration</button>
 </form>
