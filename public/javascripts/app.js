@@ -2588,9 +2588,12 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , events: {
         "change .x-tag": "setTag"
       , "click .add-rule": "addInputs"
-      , "keyup .x-rules input": "addStyle"
-      , "change .x-rules input": "addStyle"
-      , "blur .x-rules input": "addStyle"
+      , "keyup .x-rules input": "editRule"
+      , "change .x-rules input": "editRule"
+      , "blur .x-rules input": "editRule"
+      , "keyup .x-selector input": "editDeclaration"
+      , "change .x-selector input": "editDeclaration"
+      , "blur .x-selector input": "editDeclaration"
     }
 
     , initialize: function () {
@@ -2656,17 +2659,22 @@ window.require.define({"views/style_edit": function(exports, require, module) {
                           "<input type='hidden' name='index' /></li>");
     }
 
-    , addStyle: function (e) {
+    , editRule: function (e, element) {
       var selector, index
         , $li = $(e.target).parent();
 
       property = $li.find("input[name=property]").val();
       value = $li.find("input[name=value]").val();
       index = $li.find("input[name=index]").val() || null;
+      selector = $li.find("input[name=selector]").val();
+
+      // Trim whitespace and comma from selector to avoid DOM exception 12
+      selector = selector.trim().replace(/^\W+|\W+$/g, "");
+      console.log(selector);
 
       if (property && value) {
         index = this.customCSS.insertRule({
-            selector: $li.find("input[name=selector]").val()
+            selector: selector
           , property: property
           , value: value
           , index: index
@@ -2678,6 +2686,17 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       }
 
       $li.find("input[name=index]").val(index);
+    }
+
+    , editDeclaration: function (e) {
+      var $input = $(e.currentTarget);
+
+      $input
+        .parent()
+          .siblings("ul")
+            .find("input[name=selector]")
+              .val($input.val())
+              .trigger("change");
     }
 
     , addThemeAttributes: function (attributes) {
