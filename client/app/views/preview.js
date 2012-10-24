@@ -66,7 +66,7 @@ module.exports = View.extend({
   , render_preview: function () {
     this.$el
       .empty()
-      .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
+      .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append(app.reuseView("templates_select").render().$el)
       .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
   }
@@ -82,8 +82,8 @@ module.exports = View.extend({
 
     this.$el
       .empty()
-      .append("<div class='x-handle'>&Dagger; <span>Theme: " + app.data.theme.name + "</span></div>")
-      .append("<div class='accordion' id='accordion2'>" + this.accordionGroups() + "</div>")
+      .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
+      .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
       .append(saveView.render().$el)
       .append(downloadView.render().$el);
 
