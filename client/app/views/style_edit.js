@@ -145,12 +145,15 @@ module.exports = View.extend({
   }
 
   , changeWidth: function (selector, width) {
+    width = parseInt(width, 10) / $(selector).parent().width() * 100;
+    width = (Math.round(width * 100) / 100) + "%";
+
     this.customCSS.insertRule({
         selector: selector
       , property: "width"
-      , value: (parseInt(width, 10) / $(selector).parent().width() * 100) + "%"
+      , value: width
       , media: "all"
-    });
+    }, true);
 
     this.render();
   }

@@ -372,7 +372,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
    * Default index is taken from the stylesheet rules length
    * if it is not provided.
    */
-  CustomCSS.prototype.insertRule = function (rule) {
+  CustomCSS.prototype.insertRule = function (rule, overwrite) {
     var index, value
       , media = rule.media || "all";
 
@@ -384,6 +384,9 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
     if (rule.index !== null && rule.index !== void 0) {
       index = rule.index;
+      this.deleteRule(index);
+    } else if (overwrite) {
+      index = this.getIndex(rule);
       this.deleteRule(index);
     } else {
       index = this.sheets[media].cssRules.length;
@@ -403,6 +406,23 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     };
 
     return index;
+  };
+
+  /**
+   * Get the index for a specific selector, property and media.
+   */
+  CustomCSS.prototype.getIndex = function (rule) {
+    var index;
+
+    for (index in this.rules[rule.media]) {
+      if (!this.rules[rule.media].hasOwnProperty(index)) {
+        continue;
+      }
+
+      if (this.rules[rule.media][index].selector === rule.selector) {
+        return index;
+      }
+    }
   };
 
   /**
@@ -2748,12 +2768,15 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , changeWidth: function (selector, width) {
+      width = parseInt(width, 10) / $(selector).parent().width() * 100;
+      width = (Math.round(width * 100) / 100) + "%";
+
       this.customCSS.insertRule({
           selector: selector
         , property: "width"
-        , value: (parseInt(width, 10) / $(selector).parent().width() * 100) + "%"
+        , value: width
         , media: "all"
-      });
+      }, true);
 
       this.render();
     }

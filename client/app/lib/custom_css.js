@@ -46,7 +46,7 @@ CustomCSS.prototype.createSheet = function (media) {
  * Default index is taken from the stylesheet rules length
  * if it is not provided.
  */
-CustomCSS.prototype.insertRule = function (rule) {
+CustomCSS.prototype.insertRule = function (rule, overwrite) {
   var index, value
     , media = rule.media || "all";
 
@@ -58,6 +58,9 @@ CustomCSS.prototype.insertRule = function (rule) {
 
   if (rule.index !== null && rule.index !== void 0) {
     index = rule.index;
+    this.deleteRule(index);
+  } else if (overwrite) {
+    index = this.getIndex(rule);
     this.deleteRule(index);
   } else {
     index = this.sheets[media].cssRules.length;
@@ -77,6 +80,23 @@ CustomCSS.prototype.insertRule = function (rule) {
   };
 
   return index;
+};
+
+/**
+ * Get the index for a specific selector, property and media.
+ */
+CustomCSS.prototype.getIndex = function (rule) {
+  var index;
+
+  for (index in this.rules[rule.media]) {
+    if (!this.rules[rule.media].hasOwnProperty(index)) {
+      continue;
+    }
+
+    if (this.rules[rule.media][index].selector === rule.selector) {
+      return index;
+    }
+  }
 };
 
 /**
