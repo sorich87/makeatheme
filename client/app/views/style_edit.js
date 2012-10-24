@@ -6,21 +6,21 @@ var View = require("views/base/view")
   , html_tags = require("lib/html_tags");
 
 module.exports = View.extend({
-    id: "x-style-edit"
+    id: "style-edit"
   , className: "x-section"
 
   , events: {
-      "change .x-tag": "setTag"
+      "change .tag": "setTag"
 
     , "click .add-rule": "addRuleInputs"
-    , "keyup .x-rules input": "editRule"
-    , "change .x-rules input": "editRule"
-    , "blur .x-rules input": "editRule"
+    , "keyup .rules input": "editRule"
+    , "change .rules input": "editRule"
+    , "blur .rules input": "editRule"
 
     , "click .add-declaration": "addDeclarationInputs"
-    , "keyup .x-selector input": "editDeclaration"
-    , "change .x-selector input": "editDeclaration"
-    , "blur .x-selector input": "editDeclaration"
+    , "keyup .selector input": "editDeclaration"
+    , "change .selector input": "editDeclaration"
+    , "blur .selector input": "editDeclaration"
   }
 
   , initialize: function () {
@@ -80,7 +80,7 @@ module.exports = View.extend({
     e.preventDefault();
 
     $ul.append(rule_template({
-      selector: $button.siblings(".x-selector").find("input").val()
+      selector: $button.siblings(".selector").find("input").val()
     }));
   }
 

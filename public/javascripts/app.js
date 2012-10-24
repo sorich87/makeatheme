@@ -152,7 +152,7 @@ window.require.define({"application": function(exports, require, module) {
             .width($(window).width() - 250)
             .height($(window).height() - 60);
         } else {
-          $("#x-layout-editor").remove();
+          $("#layout-editor").remove();
           $("#main").removeAttr("style");
         }
       });
@@ -1330,7 +1330,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     , events: {
         "click .x-new-block": "showForm"
       , "submit .x-new-block-select": "addBlock"
-      , "click .x-remove": "removeBlock"
+      , "click .close": "removeBlock"
       , "mouseover .x-drag": "makeDraggable"
     }
 
@@ -1374,7 +1374,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
       var remove = "";
 
       if (block.get("label") != "Default") {
-        remove = " <span class='x-remove' title='Delete block'>&times;</span>";
+        remove = " <span class='close' title='Delete block'>&times;</span>";
       }
 
       this.$("ul").append("<li class='x-drag' data-cid='" + block.cid + "'>" +
@@ -2158,7 +2158,7 @@ window.require.define({"views/preview": function(exports, require, module) {
     , accordion_group = require("views/templates/accordion_group");
 
   module.exports = View.extend({
-    id: "x-layout-editor"
+    id: "layout-editor"
 
     , panels: [
         {
@@ -2584,21 +2584,21 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , html_tags = require("lib/html_tags");
 
   module.exports = View.extend({
-      id: "x-style-edit"
+      id: "style-edit"
     , className: "x-section"
 
     , events: {
-        "change .x-tag": "setTag"
+        "change .tag": "setTag"
 
       , "click .add-rule": "addRuleInputs"
-      , "keyup .x-rules input": "editRule"
-      , "change .x-rules input": "editRule"
-      , "blur .x-rules input": "editRule"
+      , "keyup .rules input": "editRule"
+      , "change .rules input": "editRule"
+      , "blur .rules input": "editRule"
 
       , "click .add-declaration": "addDeclarationInputs"
-      , "keyup .x-selector input": "editDeclaration"
-      , "change .x-selector input": "editDeclaration"
-      , "blur .x-selector input": "editDeclaration"
+      , "keyup .selector input": "editDeclaration"
+      , "change .selector input": "editDeclaration"
+      , "blur .selector input": "editDeclaration"
     }
 
     , initialize: function () {
@@ -2658,7 +2658,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       e.preventDefault();
 
       $ul.append(rule_template({
-        selector: $button.siblings(".x-selector").find("input").val()
+        selector: $button.siblings(".selector").find("input").val()
       }));
     }
 
@@ -2751,7 +2751,7 @@ window.require.define({"views/templates": function(exports, require, module) {
         "change ul input": "switchTemplate"
       , "focus ul input": "switchTemplate"
       , "blur ul input": "switchTemplate"
-      , "click .x-remove": "removeTemplate"
+      , "click .close": "removeTemplate"
       , "click .x-new-template": "showForm"
       , "change .x-new-template-select select": "selectTemplate"
       , "submit .x-new-template-select": "addTemplate"
@@ -2793,11 +2793,11 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       if (template.cid === this.collection.getCurrent().cid) {
         checked = " checked='checked'";
-        current = " class='x-current'";
+        current = " class='current'";
       }
 
       if (template.get("name") != "index") {
-        remove = "<span class='x-remove' title='Delete template'>&times;</span>";
+        remove = "<span class='close' title='Delete template'>&times;</span>";
       }
 
       this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
@@ -2820,8 +2820,8 @@ window.require.define({"views/templates": function(exports, require, module) {
     , switchTemplate: function () {
       var template = this.collection.getByCid(this.$("ul input:checked").val());
 
-      this.$("ul li").removeClass("x-current");
-      this.$("ul input:checked").closest("li").addClass("x-current");
+      this.$("ul li").removeClass("current");
+      this.$("ul input:checked").closest("li").addClass("current");
 
       this.loadTemplate(template);
     }
@@ -2997,7 +2997,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Drag and drop to insert</p>\n<ul class='x-rects'></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<form class=\"x-new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
+    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<form class=\"x-new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
@@ -3017,12 +3017,12 @@ window.require.define({"views/templates/declaration": function(exports, require,
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div>\n  <p class=\"x-selector\">\n    <input value=\"";
+    buffer += "<div>\n  <p class=\"selector\">\n    <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"x-rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</div>\n";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</div>\n";
     return buffer;});
 }});
 
@@ -3298,12 +3298,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program10(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n  <div>\n    <p class=\"x-selector\">\n      <input value=\"";
+    buffer += "\n  <div>\n    <p class=\"selector\">\n      <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n    </p>\n    <ul class=\"x-rules\">\n      ";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n    </p>\n    <ul class=\"rules\">\n      ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
@@ -3356,7 +3356,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  </p>\n\n  <select class=\"x-tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    buffer += escapeExpression(stack1) + "</b>\n  </p>\n\n  <select class=\"tag\">\n    <option value=\"\">Every Tag</option>\n    ";
     foundHelper = helpers.htmlTags;
     stack1 = foundHelper || depth0.htmlTags;
     stack2 = helpers.each;
@@ -3401,7 +3401,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"x-rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
+    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;

@@ -12,7 +12,7 @@ module.exports = View.extend({
       "change ul input": "switchTemplate"
     , "focus ul input": "switchTemplate"
     , "blur ul input": "switchTemplate"
-    , "click .x-remove": "removeTemplate"
+    , "click .close": "removeTemplate"
     , "click .x-new-template": "showForm"
     , "change .x-new-template-select select": "selectTemplate"
     , "submit .x-new-template-select": "addTemplate"
@@ -54,11 +54,11 @@ module.exports = View.extend({
 
     if (template.cid === this.collection.getCurrent().cid) {
       checked = " checked='checked'";
-      current = " class='x-current'";
+      current = " class='current'";
     }
 
     if (template.get("name") != "index") {
-      remove = "<span class='x-remove' title='Delete template'>&times;</span>";
+      remove = "<span class='close' title='Delete template'>&times;</span>";
     }
 
     this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
@@ -81,8 +81,8 @@ module.exports = View.extend({
   , switchTemplate: function () {
     var template = this.collection.getByCid(this.$("ul input:checked").val());
 
-    this.$("ul li").removeClass("x-current");
-    this.$("ul input:checked").closest("li").addClass("x-current");
+    this.$("ul li").removeClass("current");
+    this.$("ul input:checked").closest("li").addClass("current");
 
     this.loadTemplate(template);
   }

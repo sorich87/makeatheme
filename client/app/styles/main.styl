@@ -114,18 +114,7 @@ body.theme_fork #main {
 }
 
 /* Editor */
-.x-remove {
-  font-size: 12px;
-  line-height: 12px;
-  width: 12px;
-  height: 12px;
-  text-align: center;
-  color: red;
-  background-color: yellowLight;
-  cursor: pointer;
-  display: block;
-}
-#x-layout-editor {
+#layout-editor {
   background-color: #fcfcfc;
   color: grayDarker;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
@@ -137,134 +126,104 @@ body.theme_fork #main {
   z-index: 9999;
   padding: 0;
   margin: 30px 0;
-}
-#theme-name {
-  padding: 10px;
-  border-bottom: 1px solid grayDarker;
-}
-#x-layout-editor .x-handle {
-  padding: 5px 5px 5px 10px;
-  border-bottom: 1px solid grayLight;
-}
-#x-layout-editor .x-handle span {
-  margin-left: 5px;
-}
-#x-style-edit div h5 {
-  border-bottom: 1px solid grayDarker;
-  color: grayDarker;
-  text-decoration: none;
-  padding: 0 0 2px;
-  height: 27px;
-  margin: 0;
-  font-size: 1em;
-}
-#x-style-edit div h5 span {
-  padding: 0 5px 0 10px;
-}
-#x-layout-editor .x-pixels {
-  width: 26px;
-}
-#x-layout-editor .x-color {
-  width: 58px;
-}
-#x-layout-editor ul {
-  margin: 0 0 10px;
-  padding: 0;
-  list-style: none;
-}
-#x-layout-editor ul.x-rects li {
-  margin: 1px 0;
-  padding: 2px 0;
-  border: 1px solid grayLighter;
-}
-#x-layout-editor ul.x-rects li label {
-  cursor: pointer;
-  display: inline-block;
-}
-#x-layout-editor ul.x-rects input[type=radio] {
-  float: left;
-  margin-top: 3px;
-}
-#x-layout-editor ul.x-rects li .x-remove {
-  float: right;
-  padding: 0;
-  background-color: inherit;
-}
-#x-layout-editor ul.x-rects li.x-current {
-  background-color: grayLighter;
-}
-#x-layout-editor ul.x-rects li input {
-  margin: 0 5px;
-}
-#x-layout-editor select.x-element,
-#x-layout-editor select.x-tag {
-  width: 100%;
-}
-#x-layout-editor ul.x-rules {
-  margin: 0 0 0 10px;
-}
-#x-layout-editor ul.x-rules li input {
-  width: 45%;
-  background-color: transparent;
-  border: none;
-}
-.x-selector {
-  margin: 0;
-  background-color: blueLight;
-}
-.x-selector input {
-  max-width: 90%;
-  float: left;
-  background-color: transparent;
-  border: none;
-  text-overflow: ellipsis;
-}
-.x-selector input:hover,
-#x-layout-editor ul.x-rules li input:hover {
-  background-color: yellowLight;
-}
-#x-layout-editor legend {
-  margin: 4px 0;
-  line-height: 26px;
-  font-size: 14px;
-}
-.x-drag {
-  display: block;
-  cursor: move;
-}
-.x-drag span {
-  padding: 0 5px;
-}
-.x-new-template,
-.x-new-block {
-  text-align: center;
-  border: none;
-  width: 100%;
-  display: block;
-  background-color: grayDarker;
-  color: grayLighter;
-}
-#x-share-link p {
-  word-wrap: break-word;
-}
-input.hide {
-  display: none;
-}
-#x-customize-button,
-#x-download-button {
-  margin: 10px 0;
-  text-align: center;
-}
-#x-customize-button .btn,
-#x-download-button .btn {
-  width: 200px;
-}
-#x-templates-preview {
-  padding: 10px;
-  margin-bottom: 20px;
-  border-bottom: 1px solid grayDarker;
-}
-#x-layout-editor .accordion-inner {
-  overflow-y: scroll;
-  max-height: 200px;
+
+  #theme-name {
+    padding: 10px;
+    border-bottom: 1px solid grayDarker;
+  }
+  ul {
+    margin: 0 0 10px;
+    padding: 0;
+    list-style: none;
+  }
+  .rects li {
+    margin: 1px 0;
+    padding: 2px 0;
+    border: 1px solid grayLighter;
+  }
+  .rects li label {
+    cursor: pointer;
+    display: inline-block;
+  }
+  .rects input[type=radio] {
+    float: left;
+    margin-top: 3px;
+  }
+  .rects .current {
+    background-color: grayLighter;
+  }
+  .rects li input {
+    margin: 0 5px;
+  }
+  select.tag {
+    width: 100%;
+  }
+  .rules {
+    margin: 0 0 0 10px;
+  }
+  .rules li input {
+    width: 45%;
+    background-color: transparent;
+    border: none;
+  }
+  .selector {
+    margin: 0;
+    background-color: blueLight;
+  }
+  .selector input {
+    max-width: 90%;
+    float: left;
+    background-color: transparent;
+    border: none;
+    text-overflow: ellipsis;
+  }
+  .selector input:hover,
+  .rules li input:hover {
+    background-color: yellowLight;
+  }
+  legend {
+    margin: 4px 0;
+    line-height: 26px;
+    font-size: 14px;
+  }
+  .x-drag {
+    display: block;
+    cursor: move;
+  }
+  .x-drag span {
+    padding: 0 5px;
+  }
+  .x-new-template,
+  .x-new-block {
+    text-align: center;
+    border: none;
+    width: 100%;
+    display: block;
+    background-color: grayDarker;
+    color: grayLighter;
+  }
+  #x-share-link p {
+    word-wrap: break-word;
+  }
+  input.hide {
+    display: none;
+  }
+  #x-customize-button,
+  #x-download-button {
+    margin: 10px 0;
+    text-align: center;
+  }
+  #x-customize-button .btn,
+  #x-download-button .btn {
+    width: 200px;
+  }
+  #x-templates-preview {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid grayDarker;
+  }
+  .accordion-inner {
+    overflow-y: scroll;
+    max-height: 200px;
+  }
 }

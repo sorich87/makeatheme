@@ -75,7 +75,7 @@ _.extend(Application, {
           .width($(window).width() - 250)
           .height($(window).height() - 60);
       } else {
-        $("#x-layout-editor").remove();
+        $("#layout-editor").remove();
         $("#main").removeAttr("style");
       }
     });

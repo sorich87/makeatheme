@@ -11,7 +11,7 @@ module.exports = View.extend({
   , events: {
       "click .x-new-block": "showForm"
     , "submit .x-new-block-select": "addBlock"
-    , "click .x-remove": "removeBlock"
+    , "click .close": "removeBlock"
     , "mouseover .x-drag": "makeDraggable"
   }
 
@@ -55,7 +55,7 @@ module.exports = View.extend({
     var remove = "";
 
     if (block.get("label") != "Default") {
-      remove = " <span class='x-remove' title='Delete block'>&times;</span>";
+      remove = " <span class='close' title='Delete block'>&times;</span>";
     }
 
     this.$("ul").append("<li class='x-drag' data-cid='" + block.cid + "'>" +

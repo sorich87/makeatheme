@@ -13,7 +13,7 @@
   <b>{{selector}}</b>
   </p>
 
-  <select class="x-tag">
+  <select class="tag">
     <option value="">Every Tag</option>
     {{#each htmlTags}}
     <optgroup label="{{group}}">
@@ -26,10 +26,10 @@
 
   {{#each declarations}}
   <div>
-    <p class="x-selector">
+    <p class="selector">
       <input value="{{selector}}" placeholder="selector" />&nbsp; {
     </p>
-    <ul class="x-rules">
+    <ul class="rules">
       {{#each rules}}
       <li>
         <input name="property" value="{{property}}" placeholder="property" />:

@@ -4,7 +4,7 @@ var app = require("application")
   , accordion_group = require("views/templates/accordion_group");
 
 module.exports = View.extend({
-  id: "x-layout-editor"
+  id: "layout-editor"
 
   , panels: [
       {
