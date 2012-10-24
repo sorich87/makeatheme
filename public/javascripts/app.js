@@ -2593,12 +2593,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       , "click .add-rule": "addRuleInputs"
       , "keyup .rules input": "editRule"
       , "change .rules input": "editRule"
-      , "blur .rules input": "editRule"
 
       , "click .add-declaration": "addDeclarationInputs"
       , "keyup .selector input": "editDeclaration"
       , "change .selector input": "editDeclaration"
-      , "blur .selector input": "editDeclaration"
     }
 
     , initialize: function () {
@@ -2688,7 +2686,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           index = "";
         }
 
-        if (!property && !value && ["blur", "change"].indexOf(e.type) !== -1) {
+        if (!property && !value && e.type === "change") {
           $li.remove();
         }
       }
@@ -2706,7 +2704,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       var $input = $(e.currentTarget)
         , value = $input.val();
 
-      if (!value && ["blur", "change"].indexOf(e.type) !== -1) {
+      if (!value && e.type === "change") {
         $input.closest("div").remove();
       }
 

@@ -15,12 +15,10 @@ module.exports = View.extend({
     , "click .add-rule": "addRuleInputs"
     , "keyup .rules input": "editRule"
     , "change .rules input": "editRule"
-    , "blur .rules input": "editRule"
 
     , "click .add-declaration": "addDeclarationInputs"
     , "keyup .selector input": "editDeclaration"
     , "change .selector input": "editDeclaration"
-    , "blur .selector input": "editDeclaration"
   }
 
   , initialize: function () {
@@ -110,7 +108,7 @@ module.exports = View.extend({
         index = "";
       }
 
-      if (!property && !value && ["blur", "change"].indexOf(e.type) !== -1) {
+      if (!property && !value && e.type === "change") {
         $li.remove();
       }
     }
@@ -128,7 +126,7 @@ module.exports = View.extend({
     var $input = $(e.currentTarget)
       , value = $input.val();
 
-    if (!value && ["blur", "change"].indexOf(e.type) !== -1) {
+    if (!value && e.type === "change") {
       $input.closest("div").remove();
     }
 
