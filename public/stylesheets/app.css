@@ -6196,12 +6196,14 @@ body.theme_fork #main {
   display: none;
 }
 #layout-editor #customize-button,
-#layout-editor #download-button {
+#layout-editor #download-button,
+#layout-editor #save-button {
   margin: 10px 0;
   text-align: center;
 }
 #layout-editor #customize-button .btn,
-#layout-editor #download-button .btn {
+#layout-editor #download-button .btn,
+#layout-editor #save-button .btn {
   width: 200px;
 }
 #layout-editor #templates-preview {

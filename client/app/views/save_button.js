@@ -2,17 +2,17 @@ var View = require("views/base/view")
   , app = require("application");
 
 module.exports = View.extend({
-    id: "x-save-button"
+    id: "save-button"
 
   , events: {
-    "click button.x-save": "save"
+    "click button.save": "save"
   }
 
   , render: function () {
     var button;
 
     if (app.currentUser.id) {
-      button = "<button class='btn btn-primary x-save'>Save Theme</button>";
+      button = "<button class='btn btn-primary save'>Save Theme</button>";
     }
 
     this.$el.empty().append(button);
@@ -23,7 +23,7 @@ module.exports = View.extend({
   , save: function (e) {
     var attrs = _.clone(app.data.theme);
 
-    if (app.editor.fork) {
+    if (app.data.theme.author_id !== app.currentUser.id) {
       attrs.parent_id = attrs._id;
       attrs._id = null;
     }
@@ -40,7 +40,7 @@ module.exports = View.extend({
 
         app.trigger("notification", "success", "Theme saved.");
 
-        window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
+        window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }
       , error: function (theme, response) {
         app.trigger("save:error");

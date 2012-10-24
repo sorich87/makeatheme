@@ -59,7 +59,7 @@ module.exports = View.extend({
 
     this.$el.modal("hide");
 
-    Backbone.history.navigate("/themes/" + theme._id + "/edit", true);
+    Backbone.history.navigate("/themes/" + theme._id, true);
   }
 
   , themeErrors: function (e) {

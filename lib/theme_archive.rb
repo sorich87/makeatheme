@@ -40,6 +40,7 @@ module ThemeArchive
         compile_templates(zipfile)
         compile_sidebars(zipfile)
         compile_php_files(zipfile)
+        compile_stylesheet(zipfile)
         compile_static_files(zipfile)
         compile_screenshot(zipfile)
       end
@@ -108,12 +109,31 @@ module ThemeArchive
     def compile_static_files(zipfile)
       @theme.needed_theme_files.each do |static_file|
         zipfile.get_output_stream(static_file.file_name) do |f|
-          insert_wordpress_headers(f) if static_file.file_name == "style.css"
-
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
+        end
+      end
+    end
 
-          insert_custom_style(f) if static_file.file_name == "style.css"
+    # Insert custom style at the bottom of stylesheet
+    def compile_stylesheet(zipfile)
+      zipfile.get_output_stream('style.css') do |f|
+        insert_wordpress_headers(f)
+
+        @theme.style.each do |media, rules|
+          f.puts "@media #{media} {" if media != "all"
+
+          rules.each do |selector, declarations|
+            f.puts "#{selector} {\n"
+
+            declarations.each do |property, value|
+              f.puts "\t#{property}: #{value};\n"
+            end
+
+            f.puts "}\n";
+          end
+
+          f.puts '}' if media != "all"
         end
       end
     end
@@ -124,7 +144,7 @@ module ThemeArchive
       wordpress_headers.each do |key, value|
         f.puts "#{key}: #{value}"
       end
-      f.puts "*/\n"
+      f.puts "*/\n\n"
     end
 
     # Headers needed for Wordpress CSS
@@ -140,20 +160,6 @@ module ThemeArchive
         'License' => 'GNU General Public License v2',
         'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
       }
-    end
-
-    # Insert custom style at the bottom of stylesheet
-    def insert_custom_style(f)
-      f.puts "\n/* Custom Style */\n"
-      @theme.style.each do |selector, rules|
-        f.puts "#{selector} {\n"
-
-        rules.each do |property, rule|
-          f.puts "\t#{property}: #{rule['value']} !important;\n"
-        end
-
-        f.puts "}\n";
-      end
     end
 
     def compile_php_files(zipfile)

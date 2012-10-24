@@ -1840,7 +1840,7 @@ window.require.define({"views/layout": function(exports, require, module) {
         width = width - 1;
       }
 
-      $column.attr("style", "width: " + width + "px !important");
+      $column.attr("style", "width: " + width + "px");
     }
 
     // Reset position of resize handle
@@ -2552,17 +2552,17 @@ window.require.define({"views/save_button": function(exports, require, module) {
     , app = require("application");
 
   module.exports = View.extend({
-      id: "x-save-button"
+      id: "save-button"
 
     , events: {
-      "click button.x-save": "save"
+      "click button.save": "save"
     }
 
     , render: function () {
       var button;
 
       if (app.currentUser.id) {
-        button = "<button class='btn btn-primary x-save'>Save Theme</button>";
+        button = "<button class='btn btn-primary save'>Save Theme</button>";
       }
 
       this.$el.empty().append(button);
@@ -2573,7 +2573,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
     , save: function (e) {
       var attrs = _.clone(app.data.theme);
 
-      if (app.editor.fork) {
+      if (app.data.theme.author_id !== app.currentUser.id) {
         attrs.parent_id = attrs._id;
         attrs._id = null;
       }
@@ -2590,7 +2590,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
 
           app.trigger("notification", "success", "Theme saved.");
 
-          window.top.Backbone.history.navigate("/themes/" + theme.id + "/edit", true);
+          window.top.Backbone.history.navigate("/themes/" + theme.id, true);
         }
         , error: function (theme, response) {
           app.trigger("save:error");
@@ -3687,7 +3687,7 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       var currentUserIsOwner = theme.get("author_id") === app.currentUser.id;
 
       this.$el.append(template({
-          uri: "/themes/" + theme.id + (currentUserIsOwner ? "/edit": "")
+          uri: "/themes/" + theme.id
         , screenshot_uri: theme.get("screenshot_uri")
         , name: theme.get("name")
         , author: theme.get("author")
@@ -3768,7 +3768,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       this.$el.modal("hide");
 
-      Backbone.history.navigate("/themes/" + theme._id + "/edit", true);
+      Backbone.history.navigate("/themes/" + theme._id, true);
     }
 
     , themeErrors: function (e) {

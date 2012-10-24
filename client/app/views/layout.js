@@ -234,7 +234,7 @@ module.exports = View.extend({
       width = width - 1;
     }
 
-    $column.attr("style", "width: " + width + "px !important");
+    $column.attr("style", "width: " + width + "px");
   }
 
   // Reset position of resize handle

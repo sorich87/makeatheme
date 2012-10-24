@@ -24,7 +24,7 @@ module.exports = View.extend({
     var currentUserIsOwner = theme.get("author_id") === app.currentUser.id;
 
     this.$el.append(template({
-        uri: "/themes/" + theme.id + (currentUserIsOwner ? "/edit": "")
+        uri: "/themes/" + theme.id
       , screenshot_uri: theme.get("screenshot_uri")
       , name: theme.get("name")
       , author: theme.get("author")
