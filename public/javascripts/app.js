@@ -2633,7 +2633,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , className: "x-section"
 
     , events: {
-        "change .tag": "setTag"
+        "click .selector-choice a": "highlightElement"
+      , "change .tag": "setTag"
 
       , "click .add-rule": "addRuleInputs"
       , "keyup .rules input": "editRule"
@@ -2790,6 +2791,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           applied[applied.length] = this.value;
         }
       });
+    }
+
+    , highlightElement: function (e) {
+      var selector = e.currentTarget.getAttribute("data-selector");
+
+      e.preventDefault();
+
+      $(".x-current").removeClass("x-current");
+      $(selector).addClass("x-current");
+
+      this.selector = selector;
+      this.render();
     }
   });
   
@@ -3279,12 +3292,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program3(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <a href=\"#\" data-el=\"#";
+    buffer += "\n  <a href=\"#\" data-selector=\"#";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">#";
+    buffer += escapeExpression(stack1) + "\" data-bypass=\"true\">#";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -3295,12 +3308,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program5(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <a href=\"#\" data-el=\"";
+    buffer += "\n  <a href=\"#\" data-selector=\"";
     foundHelper = helpers.localName;
     stack1 = foundHelper || depth0.localName;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "localName", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
+    buffer += escapeExpression(stack1) + "\" data-bypass=\"true\">";
     foundHelper = helpers.localName;
     stack1 = foundHelper || depth0.localName;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -3400,7 +3413,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "\" />\n      </li>\n      ";
     return buffer;}
 
-    buffer += "<form>\n  <p class=\"x-choice\">\n  Element:\n  ";
+    buffer += "<form>\n  <p class=\"selector-choice\">\n  Element:\n  ";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];

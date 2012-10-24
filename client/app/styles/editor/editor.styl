@@ -19,9 +19,11 @@ div.x-resize {
   font-size: 12px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
+.x-current {
+  box-shadow: 0px 0px 0px 2px blue;
+}
 .columns.x-current {
   cursor: move;
-  box-shadow: 0px 0px 1px 1px blue;
 }
 .columns div.x-resize {
   position: absolute;
@@ -53,7 +55,7 @@ div.x-remove {
   display: block;
   cursor: col-resize;
 }
-.x-current div.x-remove {
+.columns.x-current div.x-remove {
   display: block;
 }
 .columns.x-current a {

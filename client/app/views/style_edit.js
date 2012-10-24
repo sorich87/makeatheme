@@ -10,7 +10,8 @@ module.exports = View.extend({
   , className: "x-section"
 
   , events: {
-      "change .tag": "setTag"
+      "click .selector-choice a": "highlightElement"
+    , "change .tag": "setTag"
 
     , "click .add-rule": "addRuleInputs"
     , "keyup .rules input": "editRule"
@@ -167,5 +168,17 @@ module.exports = View.extend({
         applied[applied.length] = this.value;
       }
     });
+  }
+
+  , highlightElement: function (e) {
+    var selector = e.currentTarget.getAttribute("data-selector");
+
+    e.preventDefault();
+
+    $(".x-current").removeClass("x-current");
+    $(selector).addClass("x-current");
+
+    this.selector = selector;
+    this.render();
   }
 });

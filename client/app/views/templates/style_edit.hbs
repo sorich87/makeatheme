@@ -1,12 +1,12 @@
 <form>
-  <p class="x-choice">
+  <p class="selector-choice">
   Element:
   {{#if parents}}
   {{#each parents}}
   {{#if id}}
-  <a href="#" data-el="#{{id}}">#{{id}}</a> &gt;
+  <a href="#" data-selector="#{{id}}" data-bypass="true">#{{id}}</a> &gt;
   {{else}}
-  <a href="#" data-el="{{localName}}">{{localName}}</a> &gt;
+  <a href="#" data-selector="{{localName}}" data-bypass="true">{{localName}}</a> &gt;
   {{/if}}
   {{/each}}
   {{/if}}
