@@ -2579,6 +2579,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
     , declaration_template = require("views/templates/declaration")
+    , rule_template = require("views/templates/rule")
     , app = require("application")
     , html_tags = require("lib/html_tags");
 
@@ -2652,15 +2653,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , addRuleInputs: function (e) {
       var $button = $(e.currentTarget)
-        , $ul = $button.siblings("ul")
-        , selector = $button.siblings(".x-selector").find("input").val();
+        , $ul = $button.siblings("ul");
 
       e.preventDefault();
 
-      $ul.append("<li><input name='property' value='' placeholder='property' />: " +
-                          "<input name='value' value='' placeholder='value' />" +
-                          "<input type='hidden' name='selector' value='" + selector + "' />" +
-                          "<input type='hidden' name='index' /></li>");
+      $ul.append(rule_template({
+        selector: $button.siblings(".x-selector").find("input").val()
+      }));
     }
 
     , editRule: function (e, element) {
@@ -3142,6 +3141,21 @@ window.require.define({"views/templates/register": function(exports, require, mo
     return "<div class=\"modal-header\">\n  <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n  <h3>Create a free account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n  </ul>\n</div>\n";});
 }});
 
+window.require.define({"views/templates/rule": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<li>\n  <input name=\"property\" value=\"\" placeholder=\"property\" />:\n  <input name=\"value\" value=\"\" placeholder=\"value\" />\n  <input type=\"hidden\" name=\"selector\" value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n  <input type=\"hidden\" name=\"index\" />\n</li>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/share_link": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -3298,12 +3312,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     stack1 = foundHelper || depth0.property;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />:\n        <input name=\"value\" value=\"";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"property\" />:\n        <input name=\"value\" value=\"";
     foundHelper = helpers.value;
     stack1 = foundHelper || depth0.value;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n        <input type=\"hidden\" name=\"index\" value=\"";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"value\" />\n        <input type=\"hidden\" name=\"index\" value=\"";
     foundHelper = helpers.index;
     stack1 = foundHelper || depth0.index;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }

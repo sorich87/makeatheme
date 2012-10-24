@@ -1,6 +1,7 @@
 var View = require("views/base/view")
   , template = require("views/templates/style_edit")
   , declaration_template = require("views/templates/declaration")
+  , rule_template = require("views/templates/rule")
   , app = require("application")
   , html_tags = require("lib/html_tags");
 
@@ -74,15 +75,13 @@ module.exports = View.extend({
 
   , addRuleInputs: function (e) {
     var $button = $(e.currentTarget)
-      , $ul = $button.siblings("ul")
-      , selector = $button.siblings(".x-selector").find("input").val();
+      , $ul = $button.siblings("ul");
 
     e.preventDefault();
 
-    $ul.append("<li><input name='property' value='' placeholder='property' />: " +
-                        "<input name='value' value='' placeholder='value' />" +
-                        "<input type='hidden' name='selector' value='" + selector + "' />" +
-                        "<input type='hidden' name='index' /></li>");
+    $ul.append(rule_template({
+      selector: $button.siblings(".x-selector").find("input").val()
+    }));
   }
 
   , editRule: function (e, element) {
