@@ -474,6 +474,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
           mediaDeclarations[rule.selector] = {
               selector: rule.selector
             , rules: []
+            , specificity: this.calculateSpecificity(rule.selector, element)
           };
         }
 
@@ -552,6 +553,25 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     this.sheets[media].deleteRule(index);
 
     delete this.rules[media][index];
+  };
+
+  /**
+   * Calculate the specificity of a selector applied to an element.
+   */
+  CustomCSS.prototype.calculateSpecificity = function (selector, element) {
+    var specificity;
+
+    element = $(element);
+
+    selector.split(",").forEach(function (selector) {
+      if (element.is(selector)) {
+        specificity = SPECIFICITY.calculate(selector)[0].specificity;
+        specificity = parseInt(specificity.split(",").join(""), 10);
+        return;
+      }
+    });
+
+    return specificity;
   };
 
   module.exports = CustomCSS;
