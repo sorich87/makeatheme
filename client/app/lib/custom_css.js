@@ -63,7 +63,7 @@ CustomCSS.prototype.insertRule = function (rule) {
     index = this.sheets[media].cssRules.length;
   }
 
-  value = rule.value.replace(/url\(([^)]+)\)/g, 'url("' + this.baseURI + '/$1")');
+  value = rule.value.replace(/url\("?([^"?)]+)"?\)/g, 'url("' + this.baseURI + '/$1")');
 
   declaration = rule.selector + " {" + rule.property + ": " + value + "}";
 
