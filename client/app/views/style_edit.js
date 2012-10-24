@@ -56,6 +56,8 @@ module.exports = View.extend({
       , declarations: declarations[this.media]
     }));
 
+    this.markNonAppliedRules();
+
     return this;
   }
 
@@ -151,5 +153,16 @@ module.exports = View.extend({
     });
 
     this.render();
+  }
+
+  , markNonAppliedRules: function () {
+    var applied = [];
+    this.$(".rules input[name=property]").each(function () {
+      if (applied.indexOf(this.value) !== -1) {
+        $(this).parent().addClass("inactive");
+      } else {
+        applied[applied.length] = this.value;
+      }
+    });
   }
 });

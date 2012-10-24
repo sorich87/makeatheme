@@ -122,7 +122,10 @@ CustomCSS.prototype.getDeclarations = function (element) {
   var media, rule, value, index, i, l
     , allDeclarations = {}
     , mediaDeclarations = {}
-    , returnValues = function (v) { return v; };
+    , returnValues = function (v) { return v; }
+    , sortBySpecificity = function (a, b) {
+      return b.specificity - a.specificity;
+    };
 
   if (!element) {
     return;
@@ -172,6 +175,8 @@ CustomCSS.prototype.getDeclarations = function (element) {
 
       allDeclarations[media][l] = mediaDeclarations[i];
     }
+
+    allDeclarations[media].reverse().sort(sortBySpecificity);
   }
 
   return allDeclarations;

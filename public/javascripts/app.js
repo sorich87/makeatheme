@@ -448,7 +448,10 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     var media, rule, value, index, i, l
       , allDeclarations = {}
       , mediaDeclarations = {}
-      , returnValues = function (v) { return v; };
+      , returnValues = function (v) { return v; }
+      , sortBySpecificity = function (a, b) {
+        return b.specificity - a.specificity;
+      };
 
     if (!element) {
       return;
@@ -498,6 +501,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
         allDeclarations[media][l] = mediaDeclarations[i];
       }
+
+      allDeclarations[media].reverse().sort(sortBySpecificity);
     }
 
     return allDeclarations;
@@ -2654,6 +2659,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         , declarations: declarations[this.media]
       }));
 
+      this.markNonAppliedRules();
+
       return this;
     }
 
@@ -2749,6 +2756,17 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       });
 
       this.render();
+    }
+
+    , markNonAppliedRules: function () {
+      var applied = [];
+      this.$(".rules input[name=property]").each(function () {
+        if (applied.indexOf(this.value) !== -1) {
+          $(this).parent().addClass("inactive");
+        } else {
+          applied[applied.length] = this.value;
+        }
+      });
     }
   });
   

@@ -6151,6 +6151,9 @@ body.theme_fork #main {
 #layout-editor .rules li input:hover {
   background-color: #ffffe0;
 }
+#layout-editor .rules li.inactive input {
+  text-decoration: line-through;
+}
 #layout-editor .selector {
   margin: 0;
   background-color: #f0f8ff;
