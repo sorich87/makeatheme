@@ -2682,9 +2682,15 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           , index: index
           , media: this.media
         });
-      } else if (index) {
-        this.customCSS.deleteRule(index, this.media);
-        index = "";
+      } else {
+        if (index) {
+          this.customCSS.deleteRule(index, this.media);
+          index = "";
+        }
+
+        if (!property && !value && ["blur", "change"].indexOf(e.type) !== -1) {
+          $li.remove();
+        }
       }
 
       $li.find("input[name=index]").val(index);
@@ -2697,13 +2703,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , editDeclaration: function (e) {
-      var $input = $(e.currentTarget);
+      var $input = $(e.currentTarget)
+        , value = $input.val();
+
+      if (!value && ["blur", "change"].indexOf(e.type) !== -1) {
+        $input.closest("div").remove();
+      }
 
       $input
         .parent()
           .siblings("ul")
             .find("input[name=selector]")
-              .val($input.val())
+              .val(value)
               .trigger("change");
     }
 
