@@ -2578,6 +2578,7 @@ window.require.define({"views/share_link": function(exports, require, module) {
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
+    , declaration_template = require("views/templates/declaration")
     , app = require("application")
     , html_tags = require("lib/html_tags");
 
@@ -2587,10 +2588,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , events: {
         "change .x-tag": "setTag"
-      , "click .add-rule": "addInputs"
+
+      , "click .add-rule": "addRuleInputs"
       , "keyup .x-rules input": "editRule"
       , "change .x-rules input": "editRule"
       , "blur .x-rules input": "editRule"
+
+      , "click .add-declaration": "addDeclarationInputs"
       , "keyup .x-selector input": "editDeclaration"
       , "change .x-selector input": "editDeclaration"
       , "blur .x-selector input": "editDeclaration"
@@ -2646,7 +2650,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       });
     }
 
-    , addInputs: function (e) {
+    , addRuleInputs: function (e) {
       var $button = $(e.currentTarget)
         , $ul = $button.siblings("ul")
         , selector = $button.siblings(".x-selector").find("input").val();
@@ -2670,7 +2674,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       // Trim whitespace and comma from selector to avoid DOM exception 12
       selector = selector.trim().replace(/^\W+|\W+$/g, "");
-      console.log(selector);
 
       if (property && value) {
         index = this.customCSS.insertRule({
@@ -2686,6 +2689,12 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       }
 
       $li.find("input[name=index]").val(index);
+    }
+
+    , addDeclarationInputs: function (e) {
+      e.preventDefault();
+
+      $(e.currentTarget).before(declaration_template({selector: this.selector}));
     }
 
     , editDeclaration: function (e) {
@@ -2992,6 +3001,21 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     return buffer;});
 }});
 
+window.require.define({"views/templates/declaration": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div>\n  <p class=\"x-selector\">\n    <input value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth0.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"x-rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</div>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/faq": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -3249,12 +3273,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program10(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n  <div>\n    <p class=\"x-selector\"><input value=\"";
+    buffer += "\n  <div>\n    <p class=\"x-selector\">\n      <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />&nbsp; {</p>\n    <ul class=\"x-rules\">\n      ";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n    </p>\n    <ul class=\"x-rules\">\n      ";
     foundHelper = helpers.rules;
     stack1 = foundHelper || depth0.rules;
     stack2 = helpers.each;
@@ -3327,7 +3351,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <button class=\"btn\">Add declaration</button>\n</form>\n";
+    buffer += "\n  <button class=\"btn add-declaration\">Add declaration</button>\n</form>\n";
     return buffer;});
 }});
 

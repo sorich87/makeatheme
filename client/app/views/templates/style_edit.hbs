@@ -26,7 +26,9 @@
 
   {{#each declarations}}
   <div>
-    <p class="x-selector"><input value="{{selector}}" />&nbsp; {</p>
+    <p class="x-selector">
+      <input value="{{selector}}" placeholder="selector" />&nbsp; {
+    </p>
     <ul class="x-rules">
       {{#each rules}}
       <li>
@@ -41,5 +43,5 @@
     <p>}</p>
   </div>
   {{/each}}
-  <button class="btn">Add declaration</button>
+  <button class="btn add-declaration">Add declaration</button>
 </form>

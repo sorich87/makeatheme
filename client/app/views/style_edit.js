@@ -1,5 +1,6 @@
 var View = require("views/base/view")
   , template = require("views/templates/style_edit")
+  , declaration_template = require("views/templates/declaration")
   , app = require("application")
   , html_tags = require("lib/html_tags");
 
@@ -9,10 +10,13 @@ module.exports = View.extend({
 
   , events: {
       "change .x-tag": "setTag"
-    , "click .add-rule": "addInputs"
+
+    , "click .add-rule": "addRuleInputs"
     , "keyup .x-rules input": "editRule"
     , "change .x-rules input": "editRule"
     , "blur .x-rules input": "editRule"
+
+    , "click .add-declaration": "addDeclarationInputs"
     , "keyup .x-selector input": "editDeclaration"
     , "change .x-selector input": "editDeclaration"
     , "blur .x-selector input": "editDeclaration"
@@ -68,7 +72,7 @@ module.exports = View.extend({
     });
   }
 
-  , addInputs: function (e) {
+  , addRuleInputs: function (e) {
     var $button = $(e.currentTarget)
       , $ul = $button.siblings("ul")
       , selector = $button.siblings(".x-selector").find("input").val();
@@ -92,7 +96,6 @@ module.exports = View.extend({
 
     // Trim whitespace and comma from selector to avoid DOM exception 12
     selector = selector.trim().replace(/^\W+|\W+$/g, "");
-    console.log(selector);
 
     if (property && value) {
       index = this.customCSS.insertRule({
@@ -108,6 +111,12 @@ module.exports = View.extend({
     }
 
     $li.find("input[name=index]").val(index);
+  }
+
+  , addDeclarationInputs: function (e) {
+    e.preventDefault();
+
+    $(e.currentTarget).before(declaration_template({selector: this.selector}));
   }
 
   , editDeclaration: function (e) {
