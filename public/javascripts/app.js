@@ -2995,7 +2995,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<button class=\"new-block\">&plus; New Block</button>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
+    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
@@ -3005,7 +3005,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </select>\n  </label>\n  <input class=\"new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn\">Add block</button>\n</form>\n";
+    buffer += "\n    </select>\n  </label>\n  <input class=\"new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
     return buffer;});
 }});
 
@@ -3399,7 +3399,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<button class=\"new-template\">&plus; New Template</button>\n<form class=\"new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
+    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;
@@ -3409,7 +3409,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"new-template-add btn\">Add template</button>\n</form>\n";
+    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"new-template-add btn\">Add template</button>\n</form>\n<button class=\"new-template\">&plus; New Template</button>\n";
     return buffer;});
 }});
 
