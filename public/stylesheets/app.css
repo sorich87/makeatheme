@@ -6213,5 +6213,5 @@ body.theme_fork #main {
 }
 #layout-editor .accordion-inner {
   overflow-y: scroll;
-  max-height: 200px;
+  max-height: 500px;
 }
