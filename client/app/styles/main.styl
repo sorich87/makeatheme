@@ -136,50 +136,63 @@ body.theme_fork #main {
     padding: 0;
     list-style: none;
   }
-  .rects li {
-    margin: 1px 0;
-    padding: 2px 0;
-    border: 1px solid grayLighter;
-  }
-  .rects li label {
-    cursor: pointer;
-    display: inline-block;
-  }
-  .rects input[type=radio] {
-    float: left;
-    margin-top: 3px;
-  }
-  .rects .current {
-    background-color: grayLighter;
-  }
-  .rects li input {
-    margin: 0 5px;
+  .rects {
+    li {
+      margin: 1px 0;
+      padding: 2px 0;
+      border: 1px solid grayLighter;
+
+      label {
+        cursor: pointer;
+        display: inline-block;
+      }
+
+      input {
+        margin: 0 5px;
+      }
+    }
+
+    input[type=radio] {
+      float: left;
+      margin-top: 3px;
+    }
+    .current {
+      background-color: grayLighter;
+    }
   }
   select.tag {
     width: 100%;
   }
   .rules {
     margin: 0 0 0 10px;
-  }
-  .rules li input {
-    width: 45%;
-    background-color: transparent;
-    border: none;
+
+    li {
+      input {
+        width: 45%;
+        background-color: transparent;
+        border: none;
+      }
+
+      input:hover {
+        background-color: yellowLight;
+      }
+    }
   }
   .selector {
     margin: 0;
     background-color: blueLight;
-  }
-  .selector input {
-    max-width: 90%;
-    float: left;
-    background-color: transparent;
-    border: none;
-    text-overflow: ellipsis;
-  }
-  .selector input:hover,
-  .rules li input:hover {
-    background-color: yellowLight;
+
+    input {
+      max-width: 90%;
+      float: left;
+      background-color: transparent;
+      border: none;
+      text-overflow: ellipsis;
+    }
+
+    input:hover {
+      background-color: yellowLight;
+    }
   }
   legend {
     margin: 4px 0;
@@ -189,12 +202,13 @@ body.theme_fork #main {
   .x-drag {
     display: block;
     cursor: move;
+
+    span {
+      padding: 0 5px;
+    }
   }
-  .x-drag span {
-    padding: 0 5px;
-  }
-  .x-new-template,
-  .x-new-block {
+  .new-template,
+  .new-block {
     text-align: center;
     border: none;
     width: 100%;
@@ -202,22 +216,22 @@ body.theme_fork #main {
     background-color: grayDarker;
     color: grayLighter;
   }
-  #x-share-link p {
+  #share-link p {
     word-wrap: break-word;
   }
   input.hide {
     display: none;
   }
-  #x-customize-button,
-  #x-download-button {
+  #customize-button,
+  #download-button {
     margin: 10px 0;
     text-align: center;
+
+    .btn {
+      width: 200px;
+    }
   }
-  #x-customize-button .btn,
-  #x-download-button .btn {
-    width: 200px;
-  }
-  #x-templates-preview {
+  #templates-preview {
     padding: 10px;
     margin-bottom: 20px;
     border-bottom: 1px solid grayDarker;

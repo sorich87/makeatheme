@@ -31,7 +31,7 @@ module.exports = View.extend({
 
 
   , events: {
-    "click #x-customize-button button": "showEditor"
+    "click #customize-button button": "showEditor"
   }
 
   , initialize: function () {
@@ -68,7 +68,7 @@ module.exports = View.extend({
       .empty()
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append(app.reuseView("templates_select").render().$el)
-      .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
+      .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
   }
 
   , render_editor: function () {

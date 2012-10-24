@@ -4,7 +4,7 @@ var View = require("views/base/view")
   , template = require("views/templates/templates");
 
 module.exports = View.extend({
-    id: "x-templates-select"
+    id: "templates-select"
   , className: "x-section"
   , collection: app.editor.templates
 
@@ -13,9 +13,9 @@ module.exports = View.extend({
     , "focus ul input": "switchTemplate"
     , "blur ul input": "switchTemplate"
     , "click .close": "removeTemplate"
-    , "click .x-new-template": "showForm"
-    , "change .x-new-template-select select": "selectTemplate"
-    , "submit .x-new-template-select": "addTemplate"
+    , "click .new-template": "showForm"
+    , "change .new-template-select select": "selectTemplate"
+    , "submit .new-template-select": "addTemplate"
   }
 
   , initialize: function (options) {
@@ -114,7 +114,7 @@ module.exports = View.extend({
   }
 
   , showForm: function (e) {
-    var $div = this.$(".x-new-template-select");
+    var $div = this.$(".new-template-select");
 
     if ($div.is(":hidden")) {
       $div.show("normal");
@@ -125,9 +125,9 @@ module.exports = View.extend({
 
   , selectTemplate: function (e) {
     if ($(e.currentTarget).val() === "") {
-      this.$(".x-new-template-name").show().css("display", "block");
+      this.$(".new-template-name").show().css("display", "block");
     } else {
-      this.$(".x-new-template-name").hide();
+      this.$(".new-template-name").hide();
     }
   }
 
@@ -136,8 +136,8 @@ module.exports = View.extend({
 
     e.preventDefault();
 
-    name = this.$(".x-new-template-select select").val() ||
-           this.$(".x-new-template-name").val();
+    name = this.$(".new-template-select select").val() ||
+           this.$(".new-template-name").val();
 
     if (!name) {
       app.trigger("notification", "error", "Please, enter a template name.");

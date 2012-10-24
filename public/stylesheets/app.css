@@ -6127,15 +6127,15 @@ body.theme_fork #main {
   cursor: pointer;
   display: inline-block;
 }
+#layout-editor .rects li input {
+  margin: 0 5px;
+}
 #layout-editor .rects input[type=radio] {
   float: left;
   margin-top: 3px;
 }
 #layout-editor .rects .current {
   background-color: #c1c1c1;
-}
-#layout-editor .rects li input {
-  margin: 0 5px;
 }
 #layout-editor select.tag {
   width: 100%;
@@ -6148,6 +6148,9 @@ body.theme_fork #main {
   background-color: transparent;
   border: none;
 }
+#layout-editor .rules li input:hover {
+  background-color: #ffffe0;
+}
 #layout-editor .selector {
   margin: 0;
   background-color: #f0f8ff;
@@ -6159,8 +6162,7 @@ body.theme_fork #main {
   border: none;
   text-overflow: ellipsis;
 }
-#layout-editor .selector input:hover,
-#layout-editor .rules li input:hover {
+#layout-editor .selector input:hover {
   background-color: #ffffe0;
 }
 #layout-editor legend {
@@ -6175,8 +6177,8 @@ body.theme_fork #main {
 #layout-editor .x-drag span {
   padding: 0 5px;
 }
-#layout-editor .x-new-template,
-#layout-editor .x-new-block {
+#layout-editor .new-template,
+#layout-editor .new-block {
   text-align: center;
   border: none;
   width: 100%;
@@ -6184,22 +6186,22 @@ body.theme_fork #main {
   background-color: #1c1c1c;
   color: #c1c1c1;
 }
-#layout-editor #x-share-link p {
+#layout-editor #share-link p {
   word-wrap: break-word;
 }
 #layout-editor input.hide {
   display: none;
 }
-#layout-editor #x-customize-button,
-#layout-editor #x-download-button {
+#layout-editor #customize-button,
+#layout-editor #download-button {
   margin: 10px 0;
   text-align: center;
 }
-#layout-editor #x-customize-button .btn,
-#layout-editor #x-download-button .btn {
+#layout-editor #customize-button .btn,
+#layout-editor #download-button .btn {
   width: 200px;
 }
-#layout-editor #x-templates-preview {
+#layout-editor #templates-preview {
   padding: 10px;
   margin-bottom: 20px;
   border-bottom: 1px solid #1c1c1c;

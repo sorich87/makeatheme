@@ -2,10 +2,10 @@ var View = require("views/base/view")
   , app = require("application");
 
 module.exports = View.extend({
-    id: "x-download-button"
+    id: "download-button"
 
   , events: {
-      "click button.x-download": "download"
+      "click button.download": "download"
     , "click button.x-login": "login"
   }
 
@@ -19,7 +19,7 @@ module.exports = View.extend({
     if (app.currentUser.id === void 0) {
       button = "<button class='btn btn-success x-login'>Login to Save</button>";
     } else {
-      button = "<button class='btn btn-success x-download'>Download Theme</button>";
+      button = "<button class='btn btn-success download'>Download Theme</button>";
     }
 
     this.$el.empty().append(button);

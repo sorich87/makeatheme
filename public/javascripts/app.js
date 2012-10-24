@@ -1328,8 +1328,8 @@ window.require.define({"views/blocks": function(exports, require, module) {
     , collection: app.editor.blocks
 
     , events: {
-        "click .x-new-block": "showForm"
-      , "submit .x-new-block-select": "addBlock"
+        "click .new-block": "showForm"
+      , "submit .new-block-select": "addBlock"
       , "click .close": "removeBlock"
       , "mouseover .x-drag": "makeDraggable"
     }
@@ -1409,7 +1409,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , showForm: function (e) {
-      var $div = this.$(".x-new-block-select");
+      var $div = this.$(".new-block-select");
 
       if ($div.is(":hidden")) {
         $div.show("normal");
@@ -1423,8 +1423,8 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       e.preventDefault();
 
-      name = this.$(".x-new-block-select select").val();
-      label = this.$(".x-new-block-name").val();
+      name = this.$(".new-block-select select").val();
+      label = this.$(".new-block-name").val();
 
       if (!label) {
         app.trigger("notification", "error", "Please, enter a block name.");
@@ -1470,10 +1470,10 @@ window.require.define({"views/download_button": function(exports, require, modul
     , app = require("application");
 
   module.exports = View.extend({
-      id: "x-download-button"
+      id: "download-button"
 
     , events: {
-        "click button.x-download": "download"
+        "click button.download": "download"
       , "click button.x-login": "login"
     }
 
@@ -1487,7 +1487,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       if (app.currentUser.id === void 0) {
         button = "<button class='btn btn-success x-login'>Login to Save</button>";
       } else {
-        button = "<button class='btn btn-success x-download'>Download Theme</button>";
+        button = "<button class='btn btn-success download'>Download Theme</button>";
       }
 
       this.$el.empty().append(button);
@@ -2185,7 +2185,7 @@ window.require.define({"views/preview": function(exports, require, module) {
 
 
     , events: {
-      "click #x-customize-button button": "showEditor"
+      "click #customize-button button": "showEditor"
     }
 
     , initialize: function () {
@@ -2222,7 +2222,7 @@ window.require.define({"views/preview": function(exports, require, module) {
         .empty()
         .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
         .append(app.reuseView("templates_select").render().$el)
-        .append("<div id='x-customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
+        .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
     }
 
     , render_editor: function () {
@@ -2565,7 +2565,7 @@ window.require.define({"views/share_link": function(exports, require, module) {
     , app = require("application");
 
   module.exports = View.extend({
-      id: "x-share-link"
+      id: "share-link"
     , className: "x-section well well-small"
     , template: "share_link"
     , data: {
@@ -2743,7 +2743,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     , template = require("views/templates/templates");
 
   module.exports = View.extend({
-      id: "x-templates-select"
+      id: "templates-select"
     , className: "x-section"
     , collection: app.editor.templates
 
@@ -2752,9 +2752,9 @@ window.require.define({"views/templates": function(exports, require, module) {
       , "focus ul input": "switchTemplate"
       , "blur ul input": "switchTemplate"
       , "click .close": "removeTemplate"
-      , "click .x-new-template": "showForm"
-      , "change .x-new-template-select select": "selectTemplate"
-      , "submit .x-new-template-select": "addTemplate"
+      , "click .new-template": "showForm"
+      , "change .new-template-select select": "selectTemplate"
+      , "submit .new-template-select": "addTemplate"
     }
 
     , initialize: function (options) {
@@ -2853,7 +2853,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , showForm: function (e) {
-      var $div = this.$(".x-new-template-select");
+      var $div = this.$(".new-template-select");
 
       if ($div.is(":hidden")) {
         $div.show("normal");
@@ -2864,9 +2864,9 @@ window.require.define({"views/templates": function(exports, require, module) {
 
     , selectTemplate: function (e) {
       if ($(e.currentTarget).val() === "") {
-        this.$(".x-new-template-name").show().css("display", "block");
+        this.$(".new-template-name").show().css("display", "block");
       } else {
-        this.$(".x-new-template-name").hide();
+        this.$(".new-template-name").hide();
       }
     }
 
@@ -2875,8 +2875,8 @@ window.require.define({"views/templates": function(exports, require, module) {
 
       e.preventDefault();
 
-      name = this.$(".x-new-template-select select").val() ||
-             this.$(".x-new-template-name").val();
+      name = this.$(".new-template-select select").val() ||
+             this.$(".new-template-name").val();
 
       if (!name) {
         app.trigger("notification", "error", "Please, enter a template name.");
@@ -2997,7 +2997,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<button class=\"x-new-block\">&plus; New Block</button>\n<form class=\"x-new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
+    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<button class=\"new-block\">&plus; New Block</button>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
@@ -3007,7 +3007,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </select>\n  </label>\n  <input class=\"x-new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"x-new-block-add btn\">Add block</button>\n</form>\n";
+    buffer += "\n    </select>\n  </label>\n  <input class=\"new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn\">Add block</button>\n</form>\n";
     return buffer;});
 }});
 
@@ -3401,7 +3401,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     buffer += escapeExpression(stack1) + "</option>\n    ";
     return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<button class=\"x-new-template\">&plus; New Template</button>\n<form class=\"x-new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
+    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<button class=\"new-template\">&plus; New Template</button>\n<form class=\"new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
     foundHelper = helpers.standards;
     stack1 = foundHelper || depth0.standards;
     stack2 = helpers.each;
@@ -3411,7 +3411,7 @@ window.require.define({"views/templates/templates": function(exports, require, m
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"x-new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"x-new-template-add btn\">Add template</button>\n</form>\n";
+    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"new-template-add btn\">Add template</button>\n</form>\n";
     return buffer;});
 }});
 
@@ -3541,7 +3541,7 @@ window.require.define({"views/templates_select": function(exports, require, modu
     , template = require("views/templates/templates");
 
   module.exports = View.extend({
-      id: "x-templates-preview"
+      id: "templates-preview"
     , className: "x-section"
     , template: "templates_select"
     , collection: app.editor.templates

@@ -9,8 +9,8 @@ module.exports = View.extend({
   , collection: app.editor.blocks
 
   , events: {
-      "click .x-new-block": "showForm"
-    , "submit .x-new-block-select": "addBlock"
+      "click .new-block": "showForm"
+    , "submit .new-block-select": "addBlock"
     , "click .close": "removeBlock"
     , "mouseover .x-drag": "makeDraggable"
   }
@@ -90,7 +90,7 @@ module.exports = View.extend({
   }
 
   , showForm: function (e) {
-    var $div = this.$(".x-new-block-select");
+    var $div = this.$(".new-block-select");
 
     if ($div.is(":hidden")) {
       $div.show("normal");
@@ -104,8 +104,8 @@ module.exports = View.extend({
 
     e.preventDefault();
 
-    name = this.$(".x-new-block-select select").val();
-    label = this.$(".x-new-block-name").val();
+    name = this.$(".new-block-select select").val();
+    label = this.$(".new-block-name").val();
 
     if (!label) {
       app.trigger("notification", "error", "Please, enter a block name.");
