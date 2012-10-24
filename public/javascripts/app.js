@@ -502,9 +502,17 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     return allDeclarations;
   };
 
+  /**
+   * Get rules in the format used on the server
+   */
   CustomCSS.prototype.getRules = function () {
-    var media, index, selector, property, value
+    var media, index, selector, property, value, replaceURI
       , rules = {};
+
+      replaceURI = function (match, p1) {
+        var url = p1.replace(this.baseURI + '/', '');
+        return 'url(' + url + ')';
+      }.bind(this);
 
     for (media in this.rules) {
       if (!this.rules.hasOwnProperty(media)) {
@@ -519,9 +527,10 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
         }
 
         rule = this.rules[media][index];
+        value = rule.value.replace(/url\(([^)]+)\)/g, replaceURI);
 
         rules[media][rule.selector] = rules[media][rule.selector] || {};
-        rules[media][rule.selector][rule.property] = rule.value;
+        rules[media][rule.selector][rule.property] = value;
       }
     }
 
