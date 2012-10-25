@@ -324,6 +324,8 @@ window.require.define({"initialize": function(exports, require, module) {
 }});
 
 window.require.define({"lib/custom_css": function(exports, require, module) {
+  var match = require("./matches_selector");
+
   /**
    * Manage custom css in the document <head>
    * and maintain a rules object for easy access.
@@ -465,7 +467,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
    * Get all declarations for an element, grouped per media and selector.
    */
   CustomCSS.prototype.getDeclarations = function (element) {
-    var media, rule, value, index, i, l
+    var media, rule, value, index, i, l, selectorWithoutPseudo
       , allDeclarations = {}
       , mediaDeclarations = {}
       , returnValues = function (v) { return v; }
@@ -477,7 +479,9 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       return;
     }
 
-    element = $(element);
+    if (!this.isElement(element)) {
+      element = this.createGhostElement(element);
+    }
 
     for (media in this.rules) {
       if (!this.rules.hasOwnProperty(media)) {
@@ -489,7 +493,13 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       for (index in this.rules[media]) {
         rule = this.rules[media][index];
 
-        if (!element.is(rule.selector)) {
+        selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*\w/g, "").trim();
+
+        if (selectorWithoutPseudo === "") {
+          selectorWithoutPseudo = "*";
+        }
+
+        if (!match(element, selectorWithoutPseudo)) {
           continue;
         }
 
@@ -497,7 +507,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
           mediaDeclarations[rule.selector] = {
               selector: rule.selector
             , rules: []
-            , specificity: this.calculateSpecificity(rule.selector, element)
+            , specificity: this.calculateSpecificity(selectorWithoutPseudo, element)
           };
         }
 
@@ -586,10 +596,10 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   CustomCSS.prototype.calculateSpecificity = function (selector, element) {
     var specificity;
 
-    element = $(element);
-
     selector.split(",").forEach(function (selector) {
-      if (element.is(selector)) {
+      selector = selector.trim();
+
+      if (match(element, selector)) {
         specificity = SPECIFICITY.calculate(selector)[0].specificity;
         specificity = parseInt(specificity.split(",").join(""), 10);
         return;
@@ -597,6 +607,46 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     });
 
     return specificity;
+  };
+
+  /**
+   * Create a ghost element to test selector.
+   */
+  CustomCSS.prototype.createGhostElement = function (selector) {
+    var element
+      , doc = document.implementation.createHTMLDocument("")
+      , selectors = selector.split(" ");
+
+    selectors.forEach(function (selector) {
+      var parent = element;
+
+      if (selector.indexOf("#") === 0) {
+        element = doc.createElement("div");
+        element.id = selector.substring(1);
+      } else if (selector.indexOf(".") === 0) {
+        element = doc.createElement("div");
+        element.classname = selector.substring(1);
+      } else {
+        element = doc.createElement(selector);
+      }
+
+      if (parent) {
+        parent.appendChild(element);
+      }
+    });
+
+    return element;
+  };
+
+  /**
+   * Return true is argument is a DOM element.
+   */
+  CustomCSS.prototype.isElement = function (e) {
+    if (typeof HTMLElement === "object") {
+      return e instanceof HTMLElement;
+    }
+    return e && typeof e === "object" && e.nodeType === 1 &&
+      typeof e.nodeName === "string";
   };
 
   module.exports = CustomCSS;
@@ -996,6 +1046,54 @@ window.require.define({"lib/html_tags": function(exports, require, module) {
       ]
     }
   ];
+  
+}});
+
+window.require.define({"lib/matches_selector": function(exports, require, module) {
+  
+  /**
+   * Element prototype.
+   */
+
+  var proto = Element.prototype;
+
+  /**
+   * Vendor function.
+   */
+
+  var vendor = proto.matchesSelector||
+    proto.webkitMatchesSelector ||
+    proto.mozMatchesSelector ||
+    proto.msMatchesSelector ||
+    proto.oMatchesSelector;
+
+  /**
+   * Expose `match()`.
+   */
+
+  module.exports = match;
+
+  /**
+   * Match `el` to `selector`.
+   *
+   * @param {Element} el
+   * @param {String} selector
+   * @return {Boolean}
+   * @api public
+   */
+
+  function match(el, selector) {
+    if (vendor) {
+      return vendor.call(el, selector);
+    }
+    var nodes = el.parentNode.querySelectorAll(selector);
+    for (var i = 0; i < nodes.length; ++i) {
+      if (nodes[i] == el) {
+        return true;
+      }
+    }
+    return false;
+  }
   
 }});
 
@@ -2666,18 +2764,36 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var selector, declarations;
+      var selector, $element, declarations;
 
       this.media = "all";
 
-      selector = this.tag ? this.selector + " " + this.tag : this.selector;
+      if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
+        selector = this.tag;
+      } else {
+        if (this.tag) {
+          selector = this.selector + " " + this.tag;
+        } else {
+          selector = this.selector;
+        }
+        $element = $(selector);
+        if ($element) {
+          selector = $element[0];
+        }
+      }
+
       declarations = this.customCSS.getDeclarations(selector);
+      if (declarations && declarations[this.media]) {
+        declarations =  declarations[this.media];
+      } else {
+        declarations = [];
+      }
 
       this.$el.html(template({
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
-        , declarations: declarations[this.media]
+        , declarations: declarations
       }));
 
       this.markNonAppliedRules();
@@ -3428,7 +3544,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</b>\n  </p>\n\n  <select class=\"tag\">\n    <option value=\"\">Every Tag</option>\n    ";
+    buffer += escapeExpression(stack1) + "</b>\n  </p>\n\n  <select class=\"tag\">\n    <option value=\"\">Every tag</option>\n    ";
     foundHelper = helpers.htmlTags;
     stack1 = foundHelper || depth0.htmlTags;
     stack2 = helpers.each;

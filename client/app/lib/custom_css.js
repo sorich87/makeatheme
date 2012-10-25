@@ -1,3 +1,5 @@
+var match = require("./matches_selector");
+
 /**
  * Manage custom css in the document <head>
  * and maintain a rules object for easy access.
@@ -139,7 +141,7 @@ CustomCSS.prototype.insertRules = function (css) {
  * Get all declarations for an element, grouped per media and selector.
  */
 CustomCSS.prototype.getDeclarations = function (element) {
-  var media, rule, value, index, i, l
+  var media, rule, value, index, i, l, selectorWithoutPseudo
     , allDeclarations = {}
     , mediaDeclarations = {}
     , returnValues = function (v) { return v; }
@@ -151,7 +153,9 @@ CustomCSS.prototype.getDeclarations = function (element) {
     return;
   }
 
-  element = $(element);
+  if (!this.isElement(element)) {
+    element = this.createGhostElement(element);
+  }
 
   for (media in this.rules) {
     if (!this.rules.hasOwnProperty(media)) {
@@ -163,7 +167,13 @@ CustomCSS.prototype.getDeclarations = function (element) {
     for (index in this.rules[media]) {
       rule = this.rules[media][index];
 
-      if (!element.is(rule.selector)) {
+      selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*\w/g, "").trim();
+
+      if (selectorWithoutPseudo === "") {
+        selectorWithoutPseudo = "*";
+      }
+
+      if (!match(element, selectorWithoutPseudo)) {
         continue;
       }
 
@@ -171,7 +181,7 @@ CustomCSS.prototype.getDeclarations = function (element) {
         mediaDeclarations[rule.selector] = {
             selector: rule.selector
           , rules: []
-          , specificity: this.calculateSpecificity(rule.selector, element)
+          , specificity: this.calculateSpecificity(selectorWithoutPseudo, element)
         };
       }
 
@@ -260,10 +270,10 @@ CustomCSS.prototype.deleteRule = function (index, media) {
 CustomCSS.prototype.calculateSpecificity = function (selector, element) {
   var specificity;
 
-  element = $(element);
-
   selector.split(",").forEach(function (selector) {
-    if (element.is(selector)) {
+    selector = selector.trim();
+
+    if (match(element, selector)) {
       specificity = SPECIFICITY.calculate(selector)[0].specificity;
       specificity = parseInt(specificity.split(",").join(""), 10);
       return;
@@ -271,6 +281,46 @@ CustomCSS.prototype.calculateSpecificity = function (selector, element) {
   });
 
   return specificity;
+};
+
+/**
+ * Create a ghost element to test selector.
+ */
+CustomCSS.prototype.createGhostElement = function (selector) {
+  var element
+    , doc = document.implementation.createHTMLDocument("")
+    , selectors = selector.split(" ");
+
+  selectors.forEach(function (selector) {
+    var parent = element;
+
+    if (selector.indexOf("#") === 0) {
+      element = doc.createElement("div");
+      element.id = selector.substring(1);
+    } else if (selector.indexOf(".") === 0) {
+      element = doc.createElement("div");
+      element.classname = selector.substring(1);
+    } else {
+      element = doc.createElement(selector);
+    }
+
+    if (parent) {
+      parent.appendChild(element);
+    }
+  });
+
+  return element;
+};
+
+/**
+ * Return true is argument is a DOM element.
+ */
+CustomCSS.prototype.isElement = function (e) {
+  if (typeof HTMLElement === "object") {
+    return e instanceof HTMLElement;
+  }
+  return e && typeof e === "object" && e.nodeType === 1 &&
+    typeof e.nodeName === "string";
 };
 
 module.exports = CustomCSS;

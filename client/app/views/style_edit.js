@@ -43,18 +43,36 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var selector, declarations;
+    var selector, $element, declarations;
 
     this.media = "all";
 
-    selector = this.tag ? this.selector + " " + this.tag : this.selector;
+    if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
+      selector = this.tag;
+    } else {
+      if (this.tag) {
+        selector = this.selector + " " + this.tag;
+      } else {
+        selector = this.selector;
+      }
+      $element = $(selector);
+      if ($element) {
+        selector = $element[0];
+      }
+    }
+
     declarations = this.customCSS.getDeclarations(selector);
+    if (declarations && declarations[this.media]) {
+      declarations =  declarations[this.media];
+    } else {
+      declarations = [];
+    }
 
     this.$el.html(template({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
-      , declarations: declarations[this.media]
+      , declarations: declarations
     }));
 
     this.markNonAppliedRules();
