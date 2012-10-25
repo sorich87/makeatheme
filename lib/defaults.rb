@@ -4,6 +4,7 @@ module Defaults
       {
         site_title: 'Theme Preview',
         site_description: 'Just another beautiful theme',
+        home_url: '',
         header_image_url: theme.header_images.first.file.url
       }
     end
