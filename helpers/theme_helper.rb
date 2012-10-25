@@ -53,6 +53,12 @@ module ThemeHelper
             end
           end
           piece[:template] = template.to_html
+
+          # Put back the tags messed up by Nokogiri percent encoding.
+          piece[:template].gsub!('%7B%7B%20', '{{ ')
+          piece[:template].gsub!('%20%7D%7D', ' }}')
+          piece[:template].gsub!('%7B%7B', '{{')
+          piece[:template].gsub!('%7D%7D', '}}')
         end
 
         piece[:build] = liquid(piece[:template], locals: locals, scope: theme_context)
