@@ -88,20 +88,21 @@ body {
 }
 
 /* Theme page */
-body.theme,
-body.theme_edit,
-body.theme_fork {
+body.theme {
   padding-top: 60px;
   padding-bottom: 0;
 }
-body.theme #main,
-body.theme_edit #main,
-body.theme_fork #main {
+body.theme #main {
   padding: 0;
   margin: 0;
   overflow: hidden;
+  float: left;
+  position: absolute;
+}
+#theme {
   width: 100%;
   height: 100%;
+  position: absolute;
 }
 
 #download-iframe {
@@ -120,12 +121,11 @@ body.theme_fork #main {
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.25), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   width: 250px;
   height: 100%;
-  position: fixed;
-  top: 30px;
-  right: 0;
   z-index: 9999;
   padding: 0;
-  margin: 30px 0;
+  margin: 0;
+  overflow: auto;
+  float: right;
 
   #theme-name {
     padding: 10px;

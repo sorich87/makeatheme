@@ -58,7 +58,8 @@ module.exports = View.extend({
       this.$el.append(app.createView("download_button").render().$el);
     }
 
-    this.$el.appendTo($("body", window.top.document));
+    this.$el.insertAfter($("#main", window.top.document))
+      .height($(window.top).height() - 60);
 
     return this;
   }

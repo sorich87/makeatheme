@@ -148,7 +148,7 @@ window.require.define({"application": function(exports, require, module) {
     , setEditorWidth: function () {
       Backbone.history.on("route", function (router, name) {
         if (name === "theme") {
-          $("#theme")
+          $("#main")
             .width($(window).width() - 250)
             .height($(window).height() - 60);
         } else {
@@ -2355,7 +2355,8 @@ window.require.define({"views/preview": function(exports, require, module) {
         this.$el.append(app.createView("download_button").render().$el);
       }
 
-      this.$el.appendTo($("body", window.top.document));
+      this.$el.insertAfter($("#main", window.top.document))
+        .height($(window.top).height() - 60);
 
       return this;
     }

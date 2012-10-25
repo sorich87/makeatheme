@@ -71,7 +71,7 @@ _.extend(Application, {
   , setEditorWidth: function () {
     Backbone.history.on("route", function (router, name) {
       if (name === "theme") {
-        $("#theme")
+        $("#main")
           .width($(window).width() - 250)
           .height($(window).height() - 60);
       } else {
