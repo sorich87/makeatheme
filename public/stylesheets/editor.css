@@ -67,6 +67,14 @@ div.x-empty:after {
   color: #000;
   width: 100%;
 }
+header div.x-full:after,
+header div.x-empty:after {
+  content: "HEADER";
+}
+footer div.x-full:after,
+footer div.x-empty:after {
+  content: "FOOTER";
+}
 div.x-not-full {
   background-color: #f0f8ff;
 }
