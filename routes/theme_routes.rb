@@ -8,6 +8,14 @@ get '/themes/:id' do
   respond_with theme
 end
 
+get '/themes/:id/edit', provides: 'html' do
+  respond_with_editor!
+end
+
+get '/themes/:id/preview', provides: 'html' do
+  respond_with_preview!
+end
+
 get '/themes/:id/download' do
   halt 404 unless theme.archive.file?
 
@@ -58,8 +66,4 @@ post '/theme_upload' do
     status 400
     respond_with intermediate.errors
   end
-end
-
-get '/themes/:id/edit', provides: 'html' do
-  respond_with_editor!
 end

@@ -111,6 +111,29 @@ module ThemeHelper
       preview_only: preview_only
   end
 
+  # Load preview template
+  def respond_with_preview!
+    pieces = theme_pieces(theme)
+    index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
+
+    rules = theme.style.each_with_object({}) do |declaration, memo|
+      memo[declaration['media']] ||= []
+      memo[declaration['media']] << declaration
+    end
+
+    style = ""
+    rules.each do |media, ds|
+      style << "@media #{media} {" unless media == "all"
+      style << ds.inject('') {|memo, d| memo + "#{d['selector']}{#{d['property']}:#{d['value']}}"}
+      style << "}" unless media == "all"
+    end
+
+    respond_with :preview,
+      style: style,
+      static_files_dir: theme.static_files_dir,
+      template: index[:full]
+  end
+
   # Save or fork theme
   def respond_with_saved_theme!(theme, attrs, fork_theme = false)
     theme = theme.fork({

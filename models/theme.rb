@@ -23,7 +23,7 @@ class Theme
   field :description, type: String
   field :tags,        type: Array,      default: []
   field :listed,      type: Boolean,    default: false
-  field :style,       type: Hash,       default: {}
+  field :style,       type: Array,      default: []
 
   default_scope where(listed: true)
 
