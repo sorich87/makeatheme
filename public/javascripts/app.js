@@ -1691,7 +1691,7 @@ window.require.define({"views/layout": function(exports, require, module) {
   // except the one being dragged
   totalColumnsWidth = function (dropElement, dragElement) {
     return _.reduce($(dropElement).children(), function (memo, child) {
-      if ($(child).is(dragElement)) {
+      if (child === dragElement) {
         return memo;
       } else {
         return memo + $(child).outerWidth(true);
@@ -1703,7 +1703,8 @@ window.require.define({"views/layout": function(exports, require, module) {
   // Does total width of all columns children of a drop row
   // allow a new column?
   isRowFull = function (dropElement, dragElement) {
-    return $(dropElement).width() <= totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
+    return $(dropElement).children().length > 0 &&
+      $(dropElement).width() < totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
   };
 
   module.exports = View.extend({
@@ -1725,11 +1726,11 @@ window.require.define({"views/layout": function(exports, require, module) {
         // Remove column
       , "click .columns .x-remove": "removeColumn"
 
-      , "mouseover .column, .columns": "makeDraggable"
+      , "mouseenter .column, .columns": "makeDraggable"
 
-      , "mouseover .row": "makeDroppable"
+      , "mouseenter .row": "makeDroppable"
 
-      , "mouseover .x-resize": "makeResizeable"
+      , "mouseenter .x-resize": "makeResizeable"
     }
 
     , initialize: function () {
@@ -1857,7 +1858,7 @@ window.require.define({"views/layout": function(exports, require, module) {
     // Mark the row as full or not.
     , dropOver: function (e, ui) {
       $(this).addClass(function () {
-        if (isRowFull(this, ui.draggable)) {
+        if (isRowFull(this, ui.draggable.get(0))) {
           $(this).addClass("x-full");
         } else {
           $(this).addClass("x-not-full");
@@ -1882,7 +1883,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       $dragParent = $drag.parent();
 
-      if (isRowFull($drop, $drag)) {
+      if (isRowFull($drop, $drag.get(0))) {
         $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
         idIncrement++;
         app.trigger("node:added", $row[0], "row");

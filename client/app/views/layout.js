@@ -7,7 +7,7 @@ var totalColumnsWidth, isRowFull
 // except the one being dragged
 totalColumnsWidth = function (dropElement, dragElement) {
   return _.reduce($(dropElement).children(), function (memo, child) {
-    if ($(child).is(dragElement)) {
+    if (child === dragElement) {
       return memo;
     } else {
       return memo + $(child).outerWidth(true);
@@ -19,7 +19,8 @@ totalColumnsWidth = function (dropElement, dragElement) {
 // Does total width of all columns children of a drop row
 // allow a new column?
 isRowFull = function (dropElement, dragElement) {
-  return $(dropElement).width() <= totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
+  return $(dropElement).children().length > 0 &&
+    $(dropElement).width() < totalColumnsWidth(dropElement, dragElement) + $(dragElement).width();
 };
 
 module.exports = View.extend({
@@ -41,11 +42,11 @@ module.exports = View.extend({
       // Remove column
     , "click .columns .x-remove": "removeColumn"
 
-    , "mouseover .column, .columns": "makeDraggable"
+    , "mouseenter .column, .columns": "makeDraggable"
 
-    , "mouseover .row": "makeDroppable"
+    , "mouseenter .row": "makeDroppable"
 
-    , "mouseover .x-resize": "makeResizeable"
+    , "mouseenter .x-resize": "makeResizeable"
   }
 
   , initialize: function () {
@@ -173,7 +174,7 @@ module.exports = View.extend({
   // Mark the row as full or not.
   , dropOver: function (e, ui) {
     $(this).addClass(function () {
-      if (isRowFull(this, ui.draggable)) {
+      if (isRowFull(this, ui.draggable.get(0))) {
         $(this).addClass("x-full");
       } else {
         $(this).addClass("x-not-full");
@@ -198,7 +199,7 @@ module.exports = View.extend({
 
     $dragParent = $drag.parent();
 
-    if (isRowFull($drop, $drag)) {
+    if (isRowFull($drop, $drag.get(0))) {
       $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
       idIncrement++;
       app.trigger("node:added", $row[0], "row");
