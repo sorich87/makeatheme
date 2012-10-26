@@ -77,7 +77,7 @@ module.exports = View.extend({
     this.$(".row").droppable({
         accept: ".column, .columns, .x-drag"
       , addClasses: false
-      , drop: this.dropOn
+      , drop: this.dropOn.bind(this)
       , out: this.dropOut
       , over: this.dropOver
     });
@@ -194,7 +194,7 @@ module.exports = View.extend({
     var row, $drag, $dragParent, $dragGrandParent;
 
     $drag = ui.helper;
-    $drop = $(this);
+    $drop = $(e.target);
 
     $dragParent = $drag.parent();
 
@@ -212,18 +212,8 @@ module.exports = View.extend({
     if ($drag.data("cid")) {
       app.trigger("block:inserted", $drag[0], "y-" + idIncrement);
       idIncrement++;
-    } else {
-      if ($dragParent.children().length === 0) {
-        $dragGrandParent = $dragParent.parent();
-
-        if (($dragGrandParent.is("header, footer") && $dragGrandParent.children().length === 1) &&
-            $dragParent.attr("id").indexOf("x-") !== 0) {
-          $dragParent.addClass("x-empty");
-        } else {
-          $dragParent.remove();
-          app.trigger("node:removed", $dragParent[0], $dragGrandParent[0], "row");
-        }
-      }
+    } else if ($dragParent.children().length === 0) {
+      this.maybeRemoveRow($dragParent.get(0));
     }
   }
 
@@ -269,18 +259,34 @@ module.exports = View.extend({
       return;
     }
 
-    if (grandParentNode.children.length === 1) {
-      type = "row";
-      nodeToRemove = grandParentNode;
-    } else {
-      type = "column";
-      nodeToRemove = e.currentTarget.parentNode;
-    }
-
+    nodeToRemove = e.currentTarget.parentNode;
     parentNodeId = nodeToRemove.parentNode.id;
 
     nodeToRemove.parentNode.removeChild(nodeToRemove);
 
-    app.trigger("node:removed", nodeToRemove, window.document.getElementById(parentNodeId), type);
+    app.trigger("node:removed", nodeToRemove,
+                window.document.getElementById(parentNodeId), "column");
+
+    if (grandParentNode.children.length === 0) {
+      this.maybeRemoveRow(grandParentNode);
+    }
+  }
+
+  // Check if a row is the last one in the header or footer
+  // or has a custom ID before removing it.
+  , maybeRemoveRow: function (node) {
+    var parent = node.parentNode
+      , parentId = parent.id;
+
+    if ((["HEADER", "FOOTER"].indexOf(parent.tagName) !== -1 &&
+         parent.children.length === 1) ||
+        (node.id.indexOf("x-") !== 0 && node.id.indexOf("y-") !== 0)) {
+      node.className += " x-empty";
+    } else {
+      parent.removeChild(node);
+
+      app.trigger("node:removed", node,
+                  window.document.getElementById(parentId), "row");
+    }
   }
 });
