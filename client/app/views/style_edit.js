@@ -178,12 +178,17 @@ module.exports = View.extend({
   }
 
   , markNonAppliedRules: function () {
-    var applied = [];
+    var applied = {};
     this.$(".rules input[name=property]").each(function () {
-      if (applied.indexOf(this.value) !== -1) {
-        $(this).parent().addClass("inactive");
-      } else {
-        applied[applied.length] = this.value;
+      var similar = applied[this.value];
+
+      if (similar === void 0) {
+        applied[this.value] = this;
+        return;
+      }
+
+      if (this.parentNode.parentNode !== similar.parentNode.parentNode) {
+        $(this.parentNode).addClass("inactive");
       }
     });
   }
