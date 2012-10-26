@@ -6,7 +6,7 @@ module.exports = Backbone.Router.extend({
       "": "index"
     , "me/themes": "your_themes"
     , "themes/:id": "theme"
-    , "preview/:id": "preview"
+    , "themes/:id/edit": "edit"
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
@@ -46,13 +46,13 @@ module.exports = Backbone.Router.extend({
     }).render().$el);
   }
 
-  , preview: function (id) {
+  , edit: function (id) {
     if (app.data.theme === void 0) {
       window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
       return;
     }
 
-    app.createView("preview").render();
+    app.createView("editor").render();
   }
 
   , login: function () {

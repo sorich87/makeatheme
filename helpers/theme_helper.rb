@@ -96,15 +96,15 @@ module ThemeHelper
     @theme
   end
 
-  # Load preview template
-  def respond_with_preview!
+  # Load editor template
+  def respond_with_editor!
     preview_only = theme.preview_only?(current_user)
 
     pieces = theme_pieces(theme, !preview_only)
 
     index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
-    respond_with :preview,
+    respond_with :editor,
       theme: theme.to_json,
       style: theme.style.to_json,
       pieces: pieces.to_json,

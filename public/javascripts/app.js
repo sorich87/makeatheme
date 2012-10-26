@@ -1289,7 +1289,7 @@ window.require.define({"router": function(exports, require, module) {
         "": "index"
       , "me/themes": "your_themes"
       , "themes/:id": "theme"
-      , "preview/:id": "preview"
+      , "themes/:id/edit": "edit"
       , "login": "login"
       , "register": "register"
       , "reset_password": "reset_password"
@@ -1329,13 +1329,13 @@ window.require.define({"router": function(exports, require, module) {
       }).render().$el);
     }
 
-    , preview: function (id) {
+    , edit: function (id) {
       if (app.data.theme === void 0) {
         window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
         return;
       }
 
-      app.createView("preview").render();
+      app.createView("editor").render();
     }
 
     , login: function () {
@@ -1666,6 +1666,156 @@ window.require.define({"views/download_button": function(exports, require, modul
       this.resetButton(e);
 
       app.trigger("notification", "error", "Error updating the theme archive.");
+    }
+  });
+  
+}});
+
+window.require.define({"views/editor": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view")
+    , data = require("lib/editor_data")
+    , accordion_group = require("views/templates/accordion_group");
+
+  module.exports = View.extend({
+    id: "layout-editor"
+
+    , panels: [
+        {
+          id: "templates"
+        , title: "Current Template"
+      }
+      , {
+          id: "regions"
+        , title: "Header &amp; Footer"
+      }
+      , {
+          id: "blocks"
+        , title: "Blocks"
+      }
+      , {
+          id: "style_edit"
+        , title: "Style"
+      }
+      , {
+          id: "share_link"
+        , title: "Share"
+      }
+    ]
+
+
+    , events: {
+      "click #customize-button button": "showEditor"
+    }
+
+    , initialize: function () {
+      _.extend(app.editor, {
+          preview_only: !!app.data.preview_only
+        , templates: data.templates
+        , regions: data.regions
+        , blocks: data.blocks
+        , style: data.style
+      });
+
+      _.bindAll(this, "accordionGroups");
+    }
+
+    // Show editor when "template:loaded" event is triggered
+    , render: function () {
+      if (this.editor) {
+        this.render_editor();
+      } else {
+        this.render_preview();
+      }
+
+      if (!app.editor.preview_only) {
+        this.$el.append(app.createView("download_button").render().$el);
+      }
+
+      this.$el.insertAfter($("#main", window.top.document))
+        .height($(window.top).height() - 60);
+
+      return this;
+    }
+
+    , render_preview: function () {
+      this.$el
+        .empty()
+        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
+        .append(app.reuseView("templates_select").render().$el)
+        .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
+    }
+
+    , render_editor: function () {
+      var regionsView = app.reuseView("regions")
+        , blocksView = app.reuseView("blocks")
+        , styleView = app.reuseView("style_edit")
+        , shareView = app.reuseView("share_link")
+        , saveView = app.reuseView("save_button")
+        , downloadView = app.reuseView("download_button")
+        , accordionGroups;
+
+      this.$el
+        .empty()
+        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
+        .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
+        .append(saveView.render().$el)
+        .append(downloadView.render().$el);
+
+      for (var i in this.panels) {
+        if (!this.panels.hasOwnProperty(i)) {
+          return;
+        }
+
+        this.$("#editor-" + this.panels[i].id + " .accordion-inner")
+          .empty()
+          .append(app.reuseView(this.panels[i].id).render().$el);
+      }
+
+      app.reuseView("mutations");
+
+      // Setup drag and drop and resize
+      app.createView("layout").render();
+    }
+
+    , showSection: function (e) {
+      $(e.target).next().slideToggle("slow", function () {
+        var $this = $(this)
+          , $handle = $this.prev().children("span");
+
+        if ($this.is(":hidden")) {
+          $handle.empty().append("&or;");
+        } else {
+          $handle.empty().append("&and;");
+        }
+      });
+    }
+
+    , showEditor: function (e) {
+      this.editor = true;
+
+      this.render();
+    }
+
+    , accordionGroups: function () {
+      var groups = "";
+
+      for (var i in this.panels) {
+        if (this.panels.hasOwnProperty(i)) {
+          groups += this.buildAccordionGroup(this.panels[i]);
+        }
+      }
+
+      return groups;
+    }
+
+    , buildAccordionGroup: function (attributes) {
+      return accordion_group({
+          parent: "editor-accordion"
+        , id: "editor-" + attributes.id
+        , title: attributes.title
+        , content: ""
+      });
     }
   });
   
@@ -2285,156 +2435,6 @@ window.require.define({"views/password_reset": function(exports, require, module
             break;
           }
         }.bind(this)
-      });
-    }
-  });
-  
-}});
-
-window.require.define({"views/preview": function(exports, require, module) {
-  var app = require("application")
-    , View = require("views/base/view")
-    , data = require("lib/editor_data")
-    , accordion_group = require("views/templates/accordion_group");
-
-  module.exports = View.extend({
-    id: "layout-editor"
-
-    , panels: [
-        {
-          id: "templates"
-        , title: "Current Template"
-      }
-      , {
-          id: "regions"
-        , title: "Header &amp; Footer"
-      }
-      , {
-          id: "blocks"
-        , title: "Blocks"
-      }
-      , {
-          id: "style_edit"
-        , title: "Style"
-      }
-      , {
-          id: "share_link"
-        , title: "Share"
-      }
-    ]
-
-
-    , events: {
-      "click #customize-button button": "showEditor"
-    }
-
-    , initialize: function () {
-      _.extend(app.editor, {
-          preview_only: !!app.data.preview_only
-        , templates: data.templates
-        , regions: data.regions
-        , blocks: data.blocks
-        , style: data.style
-      });
-
-      _.bindAll(this, "accordionGroups");
-    }
-
-    // Show editor when "template:loaded" event is triggered
-    , render: function () {
-      if (this.editor) {
-        this.render_editor();
-      } else {
-        this.render_preview();
-      }
-
-      if (!app.editor.preview_only) {
-        this.$el.append(app.createView("download_button").render().$el);
-      }
-
-      this.$el.insertAfter($("#main", window.top.document))
-        .height($(window.top).height() - 60);
-
-      return this;
-    }
-
-    , render_preview: function () {
-      this.$el
-        .empty()
-        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
-        .append(app.reuseView("templates_select").render().$el)
-        .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
-    }
-
-    , render_editor: function () {
-      var regionsView = app.reuseView("regions")
-        , blocksView = app.reuseView("blocks")
-        , styleView = app.reuseView("style_edit")
-        , shareView = app.reuseView("share_link")
-        , saveView = app.reuseView("save_button")
-        , downloadView = app.reuseView("download_button")
-        , accordionGroups;
-
-      this.$el
-        .empty()
-        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
-        .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
-        .append(saveView.render().$el)
-        .append(downloadView.render().$el);
-
-      for (var i in this.panels) {
-        if (!this.panels.hasOwnProperty(i)) {
-          return;
-        }
-
-        this.$("#editor-" + this.panels[i].id + " .accordion-inner")
-          .empty()
-          .append(app.reuseView(this.panels[i].id).render().$el);
-      }
-
-      app.reuseView("mutations");
-
-      // Setup drag and drop and resize
-      app.createView("layout").render();
-    }
-
-    , showSection: function (e) {
-      $(e.target).next().slideToggle("slow", function () {
-        var $this = $(this)
-          , $handle = $this.prev().children("span");
-
-        if ($this.is(":hidden")) {
-          $handle.empty().append("&or;");
-        } else {
-          $handle.empty().append("&and;");
-        }
-      });
-    }
-
-    , showEditor: function (e) {
-      this.editor = true;
-
-      this.render();
-    }
-
-    , accordionGroups: function () {
-      var groups = "";
-
-      for (var i in this.panels) {
-        if (this.panels.hasOwnProperty(i)) {
-          groups += this.buildAccordionGroup(this.panels[i]);
-        }
-      }
-
-      return groups;
-    }
-
-    , buildAccordionGroup: function (attributes) {
-      return accordion_group({
-          parent: "editor-accordion"
-        , id: "editor-" + attributes.id
-        , title: attributes.title
-        , content: ""
       });
     }
   });
@@ -3652,12 +3652,12 @@ window.require.define({"views/templates/theme": function(exports, require, modul
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/preview/";
+    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
+    buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
     return buffer;});
 }});
 
