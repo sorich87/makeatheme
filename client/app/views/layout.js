@@ -65,7 +65,6 @@ module.exports = View.extend({
   , makeDraggable: function (e) {
     this.$(".column, .columns").draggable({
         addClasses: false
-      , containment: this.$el.children()
       , revert: "invalid"
       , drag: this.dragOn
       , start: this.dragStart
