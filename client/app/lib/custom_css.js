@@ -85,6 +85,19 @@ CustomCSS.prototype.insertRule = function (rule, overwrite) {
 };
 
 /**
+ * Insert several rules at once in stylesheets.
+ *
+ * Take an array of rules hashes.
+ *
+ * Call insertRule to actually insert individual rules.
+ */
+CustomCSS.prototype.insertRules = function (css) {
+  css.forEach(function (declaration, i) {
+    this.insertRule(declaration);
+  }, this);
+};
+
+/**
  * Get the index for a specific selector, property and media.
  */
 CustomCSS.prototype.getIndex = function (rule) {
@@ -97,42 +110,6 @@ CustomCSS.prototype.getIndex = function (rule) {
 
     if (this.rules[rule.media][index].selector === rule.selector) {
       return index;
-    }
-  }
-};
-
-/**
- * Insert several routes at once in stylesheets.
- *
- * Take an hash of media => rules hashes.
- *
- * Call insertRule to actually insert individual rules.
- */
-CustomCSS.prototype.insertRules = function (css) {
-  var media, selector, property;
-
-  for (media in css) {
-    if (!css.hasOwnProperty(media)) {
-      continue;
-    }
-
-    for (selector in css[media]) {
-      if (!css[media].hasOwnProperty(selector)) {
-        continue;
-      }
-
-      for (property in css[media][selector]) {
-        if (!css[media][selector].hasOwnProperty(property)) {
-          continue;
-        }
-
-        this.insertRule({
-            selector: selector
-          , property: property
-          , value: css[media][selector][property]
-          , media: media
-        });
-      }
     }
   }
 };
@@ -217,12 +194,12 @@ CustomCSS.prototype.getDeclarations = function (element) {
  */
 CustomCSS.prototype.getRules = function () {
   var media, index, selector, property, value, replaceURI
-    , rules = {};
+    , rules = [];
 
-    replaceURI = function (match, p1) {
-      var url = p1.replace(this.baseURI + '/', '');
-      return 'url(' + url + ')';
-    }.bind(this);
+  replaceURI = function (match, p1) {
+    var url = p1.replace(this.baseURI + '/', '');
+    return 'url(' + url + ')';
+  }.bind(this);
 
   for (media in this.rules) {
     if (!this.rules.hasOwnProperty(media)) {
@@ -237,10 +214,13 @@ CustomCSS.prototype.getRules = function () {
       }
 
       rule = this.rules[media][index];
-      value = rule.value.replace(/url\(([^)]+)\)/g, replaceURI);
 
-      rules[media][rule.selector] = rules[media][rule.selector] || {};
-      rules[media][rule.selector][rule.property] = value;
+      rules[rules.length] = {
+          media: media
+        , selector: rule.selector
+        , property: rule.property
+        , value: rule.value.replace(/url\(([^)]+)\)/g, replaceURI)
+      };
     }
   }
 

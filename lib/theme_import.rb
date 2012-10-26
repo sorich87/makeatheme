@@ -130,7 +130,7 @@ module ThemeImport
     def read_css_file(entry)
       entry.get_input_stream do |entry_file|
         engine = Sass::Engine.new(entry_file.read, :syntax => :scss)
-        @attributes[:style] = engine.to_tree.to_h
+        @attributes[:style] = engine.to_tree.to_a
       end
     end
 

@@ -1,10 +1,10 @@
 require 'sass'
 
-class Sass::Tree::Visitors::ToHash < Sass::Tree::Visitors::Base
+class Sass::Tree::Visitors::ToArray < Sass::Tree::Visitors::Base
   protected
 
   def initialize
-    @hash = {"all" => {}}
+    @array = []
   end
 
   def visit(node, parent = false)
@@ -20,7 +20,7 @@ class Sass::Tree::Visitors::ToHash < Sass::Tree::Visitors::Base
       visit_children(node)
     end
 
-    @hash
+    @array
   end
 
   def visit_children(parent)
@@ -33,25 +33,28 @@ class Sass::Tree::Visitors::ToHash < Sass::Tree::Visitors::Base
 
   def visit_media(node)
     @media = node.query.join('')
-    @hash[@media] ||= {}
     visit_children(node)
   end
 
   def visit_rule(node)
     @selector = node.rule[0]
-    @hash[@media][@selector] ||= {}
     visit_children(node)
   end
 
   def visit_prop(node)
-    if node.value
-      @hash[@media][@selector][node.name[0]] = node.value.to_sass
-    end
+    return unless node.value
+
+    @array << {
+      media: @media,
+      selector: @selector,
+      property: node.name[0],
+      value: node.value.to_sass
+    }
   end
 end
 
 class Sass::Tree::Node
-  def to_h
-    Sass::Tree::Visitors::ToHash.visit(self)
+  def to_a
+    Sass::Tree::Visitors::ToArray.visit(self)
   end
 end
