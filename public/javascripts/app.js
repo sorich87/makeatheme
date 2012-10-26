@@ -3737,6 +3737,14 @@ window.require.define({"views/templates_select": function(exports, require, modu
     , template: "templates_select"
     , collection: app.editor.templates
 
+    , initialize: function () {
+      var template = this.collection.getCurrent();
+
+      $("#page").fadeOut().empty()
+        .append(template.get("full"))
+        .fadeIn();
+    }
+
     , data: {
       templates: app.editor.templates.map(function (template) {
         return {

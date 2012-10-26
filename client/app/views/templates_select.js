@@ -9,6 +9,14 @@ module.exports = View.extend({
   , template: "templates_select"
   , collection: app.editor.templates
 
+  , initialize: function () {
+    var template = this.collection.getCurrent();
+
+    $("#page").fadeOut().empty()
+      .append(template.get("full"))
+      .fadeIn();
+  }
+
   , data: {
     templates: app.editor.templates.map(function (template) {
       return {
