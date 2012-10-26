@@ -1753,6 +1753,7 @@ window.require.define({"views/layout": function(exports, require, module) {
         , drag: this.dragOn
         , start: this.dragStart
         , stop: this.dragStop
+        , zIndex: 99999
       });
     }
 
@@ -1829,11 +1830,21 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , dragStart: function (e, ui) {
+      if ($.browser.msie || $.browser.mozilla) {
+        $(this).data("start-scroll", $("html").scrollTop());
+      } else {
+        $(this).data("start-scroll", $("body").scrollTop());
+      }
       app.trigger("node:removed", ui.helper[0], ui.helper[0].parentNode);
     }
 
     , dragOn: function(e, ui) {
-      ui.helper.css("z-index", 9999);
+      var sc = parseInt($(this).data("start-scroll"), 10);
+      if ($.browser.msie || $.browser.mozilla) {
+        ui.position.top -= $("html").scrollTop() - sc;
+      } else {
+        ui.position.top -= $("body").scrollTop() - sc;
+      }
     }
 
     // Reset position of dragged element.
