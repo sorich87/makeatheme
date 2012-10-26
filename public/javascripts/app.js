@@ -1797,7 +1797,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
       $column = $(e.currentTarget);
 
-      this.$(".columns.x-current").removeClass("x-current");
+      this.$(".x-current").removeClass("x-current");
       $column.addClass("x-current");
 
       if ($column.children(".x-resize").length === 0) {
