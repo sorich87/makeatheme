@@ -242,7 +242,7 @@ module.exports = View.extend({
     var $drag = ui.helper
       , $column = $drag.parent();
 
-    app.trigger("resize:end", "#" + $column[0].id, $column[0].style.width);
+    app.trigger("resize:end", "#page #" + $column[0].id, $column[0].style.width);
 
     $drag.removeAttr("style");
     $column.removeAttr("style");
