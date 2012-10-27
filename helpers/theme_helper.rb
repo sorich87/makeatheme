@@ -116,20 +116,8 @@ module ThemeHelper
     pieces = theme_pieces(theme)
     index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
-    rules = theme.style.each_with_object({}) do |declaration, memo|
-      memo[declaration['media']] ||= []
-      memo[declaration['media']] << declaration
-    end
-
-    style = ""
-    rules.each do |media, ds|
-      style << "@media #{media} {" unless media == "all"
-      style << ds.inject('') {|memo, d| memo + "#{d['selector']}{#{d['property']}:#{d['value']}}"}
-      style << "}" unless media == "all"
-    end
-
     respond_with :preview,
-      style: style,
+      style: theme.css(true),
       static_files_dir: theme.static_files_dir,
       template: index[:full]
   end

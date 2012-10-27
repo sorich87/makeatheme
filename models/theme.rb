@@ -78,6 +78,37 @@ class Theme
     self.theme_file_group.static_files_dir
   end
 
+  def css(append_assets_dir = false)
+    rules = self.style.each_with_object({}) do |declaration, memo|
+      memo[declaration['media']] ||= {}
+      memo[declaration['media']][declaration['selector']] ||= []
+      memo[declaration['media']][declaration['selector']] << declaration
+    end
+
+    string = ""
+    rules.each do |media, media_rules|
+      string << "@media #{media} {" if media != "all"
+
+      media_rules.each do |selector, declarations|
+        string << "#{selector} {\n"
+
+        declarations.each do |declaration|
+          if append_assets_dir
+            declaration['value'].gsub!(/url\("?([^"?)]+)"?\)/,
+                                      'url("' + self.static_files_dir + '/\1")')
+          end
+
+          string << "\t#{declaration['property']}: #{declaration['value']};\n"
+        end
+
+        string << "}\n";
+      end
+
+      string << '}' if media != "all"
+    end
+    string
+  end
+
   def as_json(options={})
     {
       :_id => self._id,

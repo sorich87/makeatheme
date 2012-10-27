@@ -119,22 +119,7 @@ module ThemeArchive
     def compile_stylesheet(zipfile)
       zipfile.get_output_stream('style.css') do |f|
         insert_wordpress_headers(f)
-
-        @theme.style.each do |media, rules|
-          f.puts "@media #{media} {" if media != "all"
-
-          rules.each do |selector, declarations|
-            f.puts "#{selector} {\n"
-
-            declarations.each do |property, value|
-              f.puts "\t#{property}: #{value};\n"
-            end
-
-            f.puts "}\n";
-          end
-
-          f.puts '}' if media != "all"
-        end
+        f.puts @theme.css
       end
     end
 
