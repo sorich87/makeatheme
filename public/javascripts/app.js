@@ -152,9 +152,9 @@ window.require.define({"application": function(exports, require, module) {
             .width($(window).width() - 250)
             .height($(window).height() - 60);
         } else {
-          $("#layout-editor").remove();
           $("#main").removeAttr("style");
         }
+        $("#layout-editor").remove();
       });
     }
 
