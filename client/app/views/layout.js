@@ -198,7 +198,7 @@ module.exports = View.extend({
 
     $dragParent = $drag.parent();
 
-    if (isRowFull($drop, $drag.get(0))) {
+    if (isRowFull(e.target, ui.helper.get(0))) {
       $row = $("<div class='row' id='y-" + idIncrement + "'></div>").insertAfter($drop);
       idIncrement++;
       app.trigger("node:added", $row[0], "row");
@@ -220,16 +220,15 @@ module.exports = View.extend({
   // Resize the column.
   // Sum of column widths in the row should never be larger than row.
   , resizeOn: function (e, ui) {
-    var $drag = ui.helper
-    , $column = $drag.parent()
+    var $column = ui.helper.parent()
     , $row = $column.parent();
 
-    width = ui.position.left + $drag.width();
+    width = ui.position.left + 12;
 
     if (width >= $row.width()) {
       width = $row.width();
-    } else if (width >= $row.width() - totalColumnsWidth($row, $column)) {
-      width = $row.width() - totalColumnsWidth($row, $column);
+    } else if (width >= $row.width() - totalColumnsWidth($row.get(0), $column.get(0))) {
+      width = $row.width() - totalColumnsWidth($row.get(0), $column.get(0));
       // When width is a float, calculation is incorrect because browsers use integers
       // The following line fixes that. Replace as soon as you find a cleaner solution
       width = width - 1;
