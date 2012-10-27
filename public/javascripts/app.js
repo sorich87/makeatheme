@@ -2298,14 +2298,18 @@ window.require.define({"views/mutations": function(exports, require, module) {
     }
 
     , getTemplatePiece: function(topNode) {
-      var piece;
+      var piece, template, regions, regionName;
+
+      template = this.pieces.templates.getCurrent();
 
       if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
-        piece = this.pieces.regions.getByName(topNode.tagName.toLowerCase());
+        regionName = topNode.tagName.toLowerCase();
+        regions = template.get("regions");
+        piece = this.pieces.regions.getByName(regionName, regions[regionName]);
 
         piece.set("build", topNode.outerHTML);
       } else {
-        piece = this.pieces.templates.getCurrent();
+        piece = template;
 
         templateClone = window.document.getElementById("page").cloneNode(true);
         $(templateClone).children("header, footer").remove();
