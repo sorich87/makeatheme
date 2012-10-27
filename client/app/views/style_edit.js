@@ -148,7 +148,7 @@ module.exports = View.extend({
       , value = $input.val();
 
     if (!value && e.type === "change") {
-      $input.closest("div").remove();
+      $input.closest(".declaration-inputs").remove();
     }
 
     $input

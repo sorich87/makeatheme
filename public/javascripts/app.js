@@ -2864,7 +2864,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         , value = $input.val();
 
       if (!value && e.type === "change") {
-        $input.closest("div").remove();
+        $input.closest(".declaration-inputs").remove();
       }
 
       $input
@@ -3205,12 +3205,12 @@ window.require.define({"views/templates/declaration": function(exports, require,
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div>\n  <p class=\"selector\">\n    <input value=\"";
+    buffer += "<form class=\"declaration-inputs\">\n  <p class=\"selector\">\n    <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</div>\n";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
     return buffer;});
 }});
 
@@ -3486,7 +3486,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
   function program10(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n  <div>\n    <p class=\"selector\">\n      <input value=\"";
+    buffer += "\n  <form class=\"declaration-inputs\">\n    <p class=\"selector\">\n      <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -3501,7 +3501,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </ul>\n    <button class=\"btn btn-mini add-rule\">Add rule</button>\n    <p>}</p>\n  </div>\n  ";
+    buffer += "\n    </ul>\n    <button class=\"btn btn-mini add-rule\">Add rule</button>\n    <p>}</p>\n  </form>\n  ";
     return buffer;}
   function program11(depth0,data,depth1) {
     
@@ -3529,7 +3529,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "\" />\n      </li>\n      ";
     return buffer;}
 
-    buffer += "<form>\n  <p class=\"selector-choice\">\n  Element:\n  ";
+    buffer += "  <p class=\"selector-choice\">\n  Element:\n  ";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
@@ -3564,7 +3564,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <button class=\"btn add-declaration\">Add declaration</button>\n</form>\n";
+    buffer += "\n  <button class=\"btn add-declaration\">Add declaration</button>\n";
     return buffer;});
 }});
 
