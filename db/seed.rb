@@ -1,7 +1,7 @@
-author = StoreUser.first
+author = User.first
 
 unless author
-  author = StoreUser.create(
+  author = User.create(
     first_name: "Emil",
     last_name: "Ahlbaeck",
     email: "e.ahlback@gmail.com",

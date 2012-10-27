@@ -9,7 +9,7 @@ describe "Theme customization" do
       last_name: "User"
     }
 
-    @user = StoreUser.create(@user_attributes)
+    @user = User.create(@user_attributes)
 
     @theme_attributes = {
       name: "Some theme",

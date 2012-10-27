@@ -9,7 +9,7 @@ describe :session do
       last_name: "User"
     }
 
-    @user = StoreUser.find_or_create_by(@user_attributes)
+    @user = User.find_or_create_by(@user_attributes)
   end
 
   describe 'authentication' do

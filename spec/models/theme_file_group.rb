@@ -9,7 +9,7 @@ describe ThemeFileGroup do
       @valid_attributes = {
         :name => "Some name",
         :description => "Description of some theme",
-        :author => StoreUser.first,
+        :author => User.first,
       }
       @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
       @theme.save

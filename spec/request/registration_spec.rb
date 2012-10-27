@@ -9,7 +9,7 @@ describe "registration" do
   end
 
   before(:each) do
-    user = StoreUser.where(:email => @user_attributes[:email]).first
+    user = User.where(:email => @user_attributes[:email]).first
     user.destroy if user
   end
 
@@ -23,7 +23,7 @@ describe "registration" do
     end
 
     it 'should return the user information' do
-      user = StoreUser.where(:email => @user_attributes[:email]).first
+      user = User.where(:email => @user_attributes[:email]).first
       last_response.body.should == user.to_json
     end
 

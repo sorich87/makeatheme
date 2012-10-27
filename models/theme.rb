@@ -30,7 +30,7 @@ class Theme
   embeds_many :regions
   embeds_many :templates
 
-  belongs_to :author, :class_name => 'StoreUser'
+  belongs_to :author, :class_name => 'User'
   belongs_to :parent, :class_name => 'Theme'
   has_many :forks, :class_name => 'Theme'
 

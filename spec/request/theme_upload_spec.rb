@@ -15,8 +15,8 @@ describe "theme upload" do
       :tags => ["some", "test", "theme"]
     }
 
-    @user = StoreUser.where(:email => @user_attributes[:email]).first
-    @user = StoreUser.create!(@user_attributes) unless @user
+    @user = User.where(:email => @user_attributes[:email]).first
+    @user = User.create!(@user_attributes) unless @user
 
     post '/session', @user_attributes.to_json
   end

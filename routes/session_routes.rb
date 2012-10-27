@@ -2,7 +2,7 @@
 post '/session' do
   session_params = JSON.parse(request.body.read)
   unless session_params.empty?
-    user = StoreUser.authenticate(session_params["email"], session_params["password"])
+    user = User.authenticate(session_params["email"], session_params["password"])
   else
     user = nil
   end

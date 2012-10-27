@@ -2,7 +2,7 @@
 post '/users' do
   user_params = JSON.parse(request.body.read)
   user_params.slice!("first_name", "last_name", "email", "password")
-  user = StoreUser.new(user_params)
+  user = User.new(user_params)
   if user.valid?
     user.save
     authenticate_user!(user)
@@ -24,7 +24,7 @@ end
 
 post '/users/reset_password' do
   params = JSON.parse(request.body.read, symbolize_names: true)
-  user = StoreUser.where(:email => params[:email]).first
+  user = User.where(:email => params[:email]).first
 
   if user
     user.initiate_password_reset!(params[:password])
@@ -45,7 +45,7 @@ post '/users/reset_password' do
 end
 
 get '/users/:user_id/reset_password/:reset_token' do
-  user = StoreUser.where(:id => params[:user_id], :password_reset_token => params[:reset_token]).first
+  user = User.where(:id => params[:user_id], :password_reset_token => params[:reset_token]).first
 
   halt 404 unless user
 

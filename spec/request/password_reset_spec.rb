@@ -7,7 +7,7 @@ describe :password_reset do
       last_name: "User"
     }
 
-    @user = StoreUser.find_or_create_by(@user_attributes)
+    @user = User.find_or_create_by(@user_attributes)
     @user.initiate_password_reset!(12345)
   end
 

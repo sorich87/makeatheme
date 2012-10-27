@@ -3,7 +3,7 @@ class ThemeUpload
   include Mongoid::Timestamps
 
   field :archive_id, type: String
-  belongs_to :author, :class_name => 'StoreUser'
+  belongs_to :author, :class_name => 'User'
 
   attr_accessor :archive, :job_id
   validates_presence_of :archive, :nil => false

@@ -1,7 +1,7 @@
 require 'bcrypt'
 require 'active_support'
 
-class StoreUser
+class User
   include Mongoid::Document
   include Mongoid::Timestamps
 

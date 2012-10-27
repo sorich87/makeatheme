@@ -1,6 +1,6 @@
 describe Theme do
   before do
-    @user = StoreUser.new(
+    @user = User.new(
       email: "test_user@example.com",
       password: "test_password",
       first_name: "Test",
