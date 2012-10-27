@@ -68,25 +68,24 @@ module.exports = View.extend({
     this.$el
       .empty()
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
-      .append(app.reuseView("templates_select").render().$el)
+      .append(app.createView("templates_select").render().$el)
       .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
   }
 
   , render_editor: function () {
-    var regionsView = app.reuseView("regions")
-      , blocksView = app.reuseView("blocks")
-      , styleView = app.reuseView("style_edit")
-      , shareView = app.reuseView("share_link")
-      , saveView = app.reuseView("save_button")
-      , downloadView = app.reuseView("download_button")
-      , accordionGroups;
+    app.createView("regions");
+    app.createView("blocks");
+    app.createView("style_edit");
+    app.createView("share_link");
+    app.createView("save_button");
+    app.createView("download_button");
 
     this.$el
       .empty()
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
-      .append(saveView.render().$el)
-      .append(downloadView.render().$el);
+      .append(app.reuseView("save_button").render().$el)
+      .append(app.reuseView("download_button").render().$el);
 
     for (var i in this.panels) {
       if (!this.panels.hasOwnProperty(i)) {
@@ -98,7 +97,7 @@ module.exports = View.extend({
         .append(app.reuseView(this.panels[i].id).render().$el);
     }
 
-    app.reuseView("mutations");
+    app.createView("mutations");
 
     // Setup drag and drop and resize
     app.createView("layout").render();
