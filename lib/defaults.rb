@@ -6,6 +6,11 @@ module Defaults
         site_description: 'Just another beautiful theme',
         home_url: '',
         header_image_url: theme.header_images.first.file.url,
+        search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
+  <label for="s" class="assistive-text">Search</label>
+  <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
+  <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+</form>),
         widget_search: %q(<aside class="widget widget_search">
   <form method="get" id="searchform">
     <label for="s" class="assistive-text">Search</label>
@@ -79,11 +84,7 @@ Nunc iaculis suscipit dui.</p></pre>
   </ul>
 </nav>),
 
-      search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
-  <label for="s" class="assistive-text">Search</label>
-  <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
-  <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
-</form>),
+      search_form: %q({{search_form}}),
 
       article: %Q(<article class="page hentry">
   <header class="entry-header">
@@ -116,6 +117,18 @@ Nunc iaculis suscipit dui.</p></pre>
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
+</article>),
+
+      "article-404" => %q(<article id="post-0" class="post error404 not-found">
+  <header class="entry-header">
+    <h1 class="entry-title">Oops! That page can&rsquo;t be found.</h1>
+  </header><!-- .entry-header -->
+
+  <div class="entry-content">
+    <p>It looks like nothing was found at this location. Maybe try a search?</p>
+
+    {{search_form}}
+  </div><!-- .entry-content -->
 </article>),
 
       sidebar: %q({{widget_search}}{{widget_text}})

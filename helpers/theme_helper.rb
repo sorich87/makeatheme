@@ -44,7 +44,7 @@ module ThemeHelper
     [:blocks, :regions, :templates].each do |type|
       theme.send(type).each do |piece|
         # Ensure all columns and rows have IDs, for use in the editor
-        if ensure_id && type != :blocks
+        if ensure_id
           template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
           template.css('.row, .columns, .column').each do |node|
             if node['id'].nil?
