@@ -1866,6 +1866,10 @@ window.require.define({"views/layout": function(exports, require, module) {
         // Links in columns shouldn't be clickable.
       , "click .columns a": "preventDefault"
 
+      , "mouseenter .columns a": "addDataBypass"
+
+      , "mouseleave .columns a": "removeDataBypass"
+
         // Links and images in columns shoulnd't be draggable
       , "mousedown .columns a, .columns img": "preventDefault"
 
@@ -1883,15 +1887,6 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , initialize: function () {
-      // Add data-bypass attribute to links so that navigation is not triggered
-      // when clicked on
-      this.addDataBypass();
-      _.bindAll(this, "addDataBypass", "removeDataBypass");
-      app.on("save:before", this.removeDataBypass);
-      app.on("save:after", this.addDataBypass);
-      app.on("save:error", this.addDataBypass);
-      app.on("template:loaded", this.addDataBypass);
-
       this.makeDroppable();
     }
 
