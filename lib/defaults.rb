@@ -6,6 +6,8 @@ module Defaults
         site_description: 'Just another beautiful theme',
         home_url: '',
         header_image_url: theme.header_images.first.file.url,
+        header_image_width: '100%',
+        header_image_height: 'auto',
         search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
   <label for="s" class="assistive-text">Search</label>
   <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
@@ -66,7 +68,7 @@ Nunc iaculis suscipit dui.</p></pre>
 
     BLOCKS = {
       header_image: %q(<a href="{{site_url}}">
-  <img src='{{ header_image_url }}' width='1000' height='288' alt='' />
+  <img src='{{header_image_url}}' width='{{header_image_width}}' height='{{header_image_height}}' alt='' />
 </a>),
 
       navigation: %q(<nav role="navigation">
