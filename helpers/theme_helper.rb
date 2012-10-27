@@ -41,10 +41,10 @@ module ThemeHelper
     theme_context.blocks = pieces[:blocks]
 
     # Build regions and templates
-    [:regions, :templates].each do |type|
+    [:blocks, :regions, :templates].each do |type|
       theme.send(type).each do |piece|
         # Ensure all columns and rows have IDs, for use in the editor
-        if ensure_id
+        if ensure_id && type != :blocks
           template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
           template.css('.row, .columns, .column').each do |node|
             if node['id'].nil?

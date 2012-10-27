@@ -5,25 +5,59 @@ module Defaults
         site_title: 'Theme Preview',
         site_description: 'Just another beautiful theme',
         home_url: '',
-        header_image_url: theme.header_images.first.file.url
+        header_image_url: theme.header_images.first.file.url,
+        widget_search: %q(<aside class="widget widget_search">
+  <form method="get" id="searchform">
+    <label for="s" class="assistive-text">Search</label>
+    <input type="text" class="field" name="s" id="s" placeholder="Search" />
+    <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
+  </form>
+</aside>),
+        widget_text: %q(<aside class="widget widget_text">
+  <h3 class="widget-title">Some Title</h3>
+  <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nullam dignissim
+  convallis est.</p>
+  <ul>
+    <li>List Item 1</li>
+    <li>List Item 2</li>
+    <li>List Item 3</li>
+  </ul>
+</aside>),
+        article_title: 'Sample Content',
+        article_content: %q(<h2>Heading 2</h2>
+<p>Lorem <sup>superscript</sup> dolor <sub>subscript</sub> amet, consectetuer
+ adipiscing <a href="#" title="test link">test link</a>. Nullam dignissim
+ convallis est <em>emphasis</em>. Quisque aliquam. <cite>cite</cite>.
+ Donec sed tellus eget sapien fringilla nonummy.
+ <acronym title="Acronym">ACR</acronym> Mauris a ante.
+ Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi
+ imperdiet augue quis tellus.  <abbr title="Abbreviation">ABBR</abbr></p>
+<h3>Heading 3</h3>
+<pre><p>Pre. Lorem ipsum dolor sit amet,
+ consectetuer adipiscing elit.
+Nunc iaculis suscipit dui.</p></pre>
+<h4>Heading 4</h4>
+<blockquote><p>&#8220;This stylesheet is going to help so freaking much.&#8221;
+ <br />- Blockquote
+</p></blockquote>
+<hr />
+<h5>Heading 5</h5>
+<dl>
+<dt>Definition List Title</dt>
+<dd>This is a definition list division.</dd>
+</dl>
+<h6>Heading 6</h6>
+<ol>
+<li>List Item 1</li>
+<li>List Item 2</li>
+</ol>
+<h6>Heading 6</h6>
+<ul>
+<li>List Item 1</li>
+<li>List Item 2</li>
+</ul>)
       }
     end
-
-    @entry_content = %q(<p>Lorem ipsum dolor sit amet, adipiscing elit. Nullam dignissim
-convallis est. Quisque aliquam. Donec faucibus. Nunc iaculis suscipit dui. Nam
-sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt nec, gravida
-vehicula, nisl. Praesent mattis, massa quis luctus fermentum, turpis mi
-volutpat justo, eu volutpat enim diam eget metus. Maecenas ornare tortor. Donec
-sed tellus eget sapien fringilla nonummy. Mauris a ante. Suspendisse quam sem,
-consequat at, commodo vitae, feugiat in, nunc. Morbi imperdiet augue quis tellus.</p>
-<p>Lorem ipsum dolor sit amet, <em>emphasis</em> consectetuer adipiscing elit.
-Nullam dignissim convallis est. Quisque aliquam. Donec faucibus. Nunc iaculis
-suscipit dui. Nam sit amet sem. Aliquam libero nisi, imperdiet at, tincidunt
-nec, gravida vehicula, nisl. Praesent mattis, massa quis luctus fermentum,
-turpis mi volutpat justo, eu volutpat enim diam eget metus. Maecenas ornare
-tortor. Donec sed tellus eget sapien fringilla nonummy. Mauris a ante.
-Suspendisse quam sem, consequat at, commodo vitae, feugiat in, nunc. Morbi
-imperdiet augue quis tellus.</p>)
 
     BLOCKS = {
       header_image: %q(<a href="{{site_url}}">
@@ -53,10 +87,10 @@ imperdiet augue quis tellus.</p>)
 
       article: %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Content</h1>
+    <h1 class="entry-title">{{article_title}}</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    #{@entry_content}
+    {{article_content}}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
@@ -64,10 +98,10 @@ imperdiet augue quis tellus.</p>)
 
       "article-single" => %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Content</h1>
+    <h1 class="entry-title">{{article_title}}</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    #{@entry_content}
+    {{article_content}}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
@@ -75,32 +109,16 @@ imperdiet augue quis tellus.</p>)
 
       "article-page" => %Q(<article class="page hentry">
   <header class="entry-header">
-    <h1 class="entry-title">Sample Content</h1>
+    <h1 class="entry-title">{{article_title}}</h1>
   </header><!-- .entry-header -->
   <div class="entry-content">
-    #{@entry_content}
+    {{article_content}}
   </div><!-- .entry-content -->
   <footer class="entry-meta">
   </footer><!-- .entry-meta -->
 </article>),
 
-      sidebar: %q(<aside class="widget widget_search">
-  <form method="get" id="searchform">
-    <label for="s" class="assistive-text">Search</label>
-    <input type="text" class="field" name="s" id="s" placeholder="Search" />
-    <input type="submit" class="submit" name="submit" id="searchsubmit" value="Search" />
-  </form>
-</aside>
-<aside class="widget widget_text">
-  <h3 class="widget-title">Some Title</h3>
-  <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nullam dignissim
-  convallis est.</p>
-  <ul>
-    <li>List Item 1</li>
-    <li>List Item 2</li>
-    <li>List Item 3</li>
-  </ul>
-</aside>)
+      sidebar: %q({{widget_search}}{{widget_text}})
     }
   end
 
