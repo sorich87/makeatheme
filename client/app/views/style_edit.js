@@ -113,7 +113,7 @@ module.exports = View.extend({
     selector = $li.find("input[name=selector]").val();
 
     // Trim whitespace and comma from selector to avoid DOM exception 12
-    selector = selector.trim().replace(/^\W+|\W+$/g, "");
+    selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
 
     if (property && value) {
       index = this.customCSS.insertRule({
