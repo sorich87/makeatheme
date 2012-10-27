@@ -20,6 +20,8 @@ module ThemeImport
       theme.write_attributes(import.attributes)
 
       if theme.valid?
+        group = theme.build_theme_file_group
+
         import.static_files.each do |static_file|
           static_file = Asset.new(
             :file_name => static_file[:filename],
@@ -27,11 +29,13 @@ module ThemeImport
           )
           # Pass invalid files
           if static_file.valid?
+            group.assets << static_file
             theme.assets << static_file
             static_file.save
           end
         end
 
+        group.save
         theme.save
       end
       theme

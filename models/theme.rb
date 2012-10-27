@@ -1,5 +1,6 @@
 require 'paperclip'
 require 'fog'
+require 'theme_file_group'
 require 'theme_import'
 require 'theme_archive'
 require 'asset'
@@ -32,7 +33,10 @@ class Theme
 
   belongs_to :author, :class_name => 'User'
   belongs_to :parent, :class_name => 'Theme'
+  belongs_to :theme_file_group, :dependent => :destroy
+
   has_many :forks, :class_name => 'Theme'
+  has_many :assets
 
   # Fields used by Paperclip
   field :screenshot_file_name
@@ -48,8 +52,6 @@ class Theme
 
   validates_presence_of [:name, :author, :description]
   validates_with ThemeValidator
-
-  has_many :assets
 
   has_attached_file :screenshot,
     styles: { thumb: '300x225#' },
@@ -71,9 +73,9 @@ class Theme
     templates.select { |t| t[:name] = name || 'index' }.first[:template]
   end
 
+  # Return path to where static files are stored on AWS
   def static_files_dir
-    s = self.assets.first
-    s.file.url.split(s.file_name).first[0..-2]
+    self.theme_file_group.static_files_dir
   end
 
   def css(append_assets_dir = false)
@@ -147,7 +149,9 @@ class Theme
 
   # Header images
   def header_images
-    self.assets.select { |file| file.file_name.index('images/headers') === 0 }
+    self.theme_file_group.assets.select do |file|
+      file.file_name.index('images/headers') === 0
+    end
   end
 end
 
