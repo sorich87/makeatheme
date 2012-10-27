@@ -72,7 +72,7 @@ describe Theme do
       end
 
       it 'should build that group correctly so that it has static files' do
-        @theme.theme_file_group.static_theme_files.count.should > 0
+        @theme.theme_file_group.assets.count.should > 0
       end
 
       it 'should reference itself in the group' do
@@ -80,7 +80,7 @@ describe Theme do
       end
 
       it 'should be references in the static files' do
-        @theme.theme_file_group.static_theme_files.first.theme.should == @theme
+        @theme.theme_file_group.assets.first.theme.should == @theme
       end
     end
   end
@@ -124,15 +124,15 @@ describe Theme do
 
     describe 'static theme files' do
       it 'should have the same static files' do
-        @fork.static_theme_file_ids == @theme.static_theme_file_ids
+        @fork.asset_ids == @theme.asset_ids
       end
 
       it 'should not have any static files' do
-        @fork.static_theme_files.should be_empty
+        @fork.assets.should be_empty
       end
 
       it 'should have the same needed files as its parent' do
-        @fork.needed_theme_files.should == @theme.static_theme_files
+        @fork.needed_theme_files.should == @theme.assets
       end
     end
   end

@@ -2,7 +2,7 @@ require 'paperclip'
 require 'fog'
 require 'theme_import'
 require 'theme_archive'
-require 'static_theme_file'
+require 'asset'
 require 'set'
 require 'region'
 require 'template'
@@ -49,7 +49,7 @@ class Theme
   validates_presence_of [:name, :author, :description]
   validates_with ThemeValidator
 
-  has_many :static_theme_files
+  has_many :assets
 
   has_attached_file :screenshot,
     styles: { thumb: '300x225#' },
@@ -72,7 +72,7 @@ class Theme
   end
 
   def static_files_dir
-    s = self.static_theme_files.first
+    s = self.assets.first
     s.file.url.split(s.file_name).first[0..-2]
   end
 
@@ -147,7 +147,7 @@ class Theme
 
   # Header images
   def header_images
-    self.static_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+    self.assets.select { |file| file.file_name.index('images/headers') === 0 }
   end
 end
 

@@ -1,4 +1,4 @@
-class StaticThemeFile
+class Asset
   include Mongoid::Document
   include Paperclip::Glue
 

@@ -1,5 +1,5 @@
 describe ThemeFileGroup do
-  it { should have_many(:static_theme_files) }
+  it { should have_many(:assets) }
   it { should have_many(:themes) }
   it { should respond_to(:original_files) }
 
@@ -17,11 +17,11 @@ describe ThemeFileGroup do
     end
 
     specify "should be the same as the Theme's static files" do
-      @group.original_file_ids.should == @theme.static_theme_file_ids
+      @group.original_file_ids.should == @theme.asset_ids
     end
 
     specify "should return instances of the static files" do
-      @group.original_files.should == @theme.static_theme_files
+      @group.original_files.should == @theme.assets
     end
   end
 end

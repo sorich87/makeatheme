@@ -21,13 +21,13 @@ module ThemeImport
 
       if theme.valid?
         import.static_files.each do |static_file|
-          static_file = StaticThemeFile.new(
+          static_file = Asset.new(
             :file_name => static_file[:filename],
             :file => static_file[:tempfile]
           )
           # Pass invalid files
           if static_file.valid?
-            theme.static_theme_files << static_file
+            theme.assets << static_file
             static_file.save
           end
         end

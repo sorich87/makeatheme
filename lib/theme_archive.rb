@@ -107,7 +107,7 @@ module ThemeArchive
     end
 
     def compile_static_files(zipfile)
-      @theme.static_theme_files.each do |static_file|
+      @theme.assets.each do |static_file|
         zipfile.get_output_stream(static_file.file_name) do |f|
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
