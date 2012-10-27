@@ -1,6 +1,5 @@
 require 'paperclip'
 require 'fog'
-require 'theme_file_group'
 require 'theme_import'
 require 'theme_archive'
 require 'static_theme_file'
@@ -50,7 +49,6 @@ class Theme
   validates_presence_of [:name, :author, :description]
   validates_with ThemeValidator
 
-  belongs_to :theme_file_group, :dependent => :destroy
   has_many :static_theme_files
 
   has_attached_file :screenshot,
@@ -73,9 +71,9 @@ class Theme
     templates.select { |t| t[:name] = name || 'index' }.first[:template]
   end
 
-  # Return path to where static files are stored on AWS
   def static_files_dir
-    self.theme_file_group.static_files_dir
+    s = self.static_theme_files.first
+    s.file.url.split(s.file_name).first[0..-2]
   end
 
   def css(append_assets_dir = false)
@@ -133,12 +131,6 @@ class Theme
     !self.parent.nil?
   end
 
-  # Return what files are needed to build this customization
-  # (original theme files + ones added when customizing)
-  def needed_theme_files
-    (self.static_theme_files + self.theme_file_group.original_files).uniq
-  end
-
   # Is the user author of the theme?
   def author?(user)
     user && author.id == user.id
@@ -155,7 +147,7 @@ class Theme
 
   # Header images
   def header_images
-    self.needed_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
+    self.static_theme_files.select { |file| file.file_name.index('images/headers') === 0 }
   end
 end
 
