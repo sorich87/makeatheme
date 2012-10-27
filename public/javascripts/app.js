@@ -390,9 +390,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
     } else if (overwrite) {
       index = this.getIndex(rule);
       this.deleteRule(index);
-    } else {
-      index = this.sheets[media].cssRules.length;
     }
+    index = this.sheets[media].cssRules.length;
 
     value = rule.value.replace(/url\("?([^"?)]+)"?\)/g, 'url("' + this.baseURI + '/$1")');
 
