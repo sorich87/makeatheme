@@ -146,12 +146,5 @@ class Theme
   def slug
     self.name.gsub(/[^0-9A-Za-z]/, '').downcase
   end
-
-  # Header images
-  def header_images
-    self.theme_file_group.assets.select do |file|
-      file.file_name.index('images/headers') === 0
-    end
-  end
 end
 
