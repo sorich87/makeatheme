@@ -138,9 +138,15 @@ module.exports = View.extend({
   }
 
   , addDeclarationInputs: function (e) {
+    var selector = this.selector;
+
     e.preventDefault();
 
-    $(e.currentTarget).before(declaration_template({selector: this.selector}));
+    if (this.tag) {
+      selector = this.selector + " " + this.tag;
+    }
+
+    $(e.currentTarget).before(declaration_template({selector: selector}));
   }
 
   , editDeclaration: function (e) {
