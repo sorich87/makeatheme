@@ -34,4 +34,12 @@ jQuery(function($) {
       });
     }
   });
+
+  // Google Analytics
+  Backbone.history.on("route", function (name, args) {
+    if ("_gaq" in window) {
+      var url = "/" + this.getFragment();
+      _gaq.push(["_trackPageview", url]);
+    }
+  });
 });
