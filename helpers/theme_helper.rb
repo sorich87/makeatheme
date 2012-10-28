@@ -123,11 +123,7 @@ module ThemeHelper
   end
 
   # Save or fork theme
-  def respond_with_saved_theme!(theme, attrs, fork_theme = false)
-    theme = theme.fork({
-      :author => current_user
-    }) if fork_theme
-
+  def respond_with_saved_theme!(theme, attrs)
     theme.blocks = attrs[:blocks].map { |block| Block.new(block) }
     theme.regions = attrs[:regions].map { |region| Region.new(region) }
     theme.templates = attrs[:templates].map { |template| Template.new(template) }

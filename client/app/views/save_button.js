@@ -23,11 +23,6 @@ module.exports = View.extend({
   , save: function (e) {
     var attrs = _.clone(app.data.theme);
 
-    if (app.data.theme.author_id !== app.currentUser.id) {
-      attrs.parent_id = attrs._id;
-      attrs._id = null;
-    }
-
     e.target.setAttribute("disabled", "true");
 
     app.trigger("save:before", attrs);

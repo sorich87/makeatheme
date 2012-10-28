@@ -17,12 +17,16 @@ module.exports = View.extend({
     var button;
 
     if (app.currentUser.id === void 0) {
-      button = "<button class='btn btn-success x-login'>Login to Save</button>";
+      button = "<button class='btn btn-success x-login'>Login to Download</button>";
     } else {
       button = "<button class='btn btn-success download'>Download Theme</button>";
     }
 
     this.$el.empty().append(button);
+
+    if (!app.data.theme.has_archive) {
+      this.$el.hide();
+    }
 
     return this;
   }
@@ -48,6 +52,8 @@ module.exports = View.extend({
   , waitForArchive: function (theme) {
     var button = this.$("button")[0]
       , eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
+
+    this.$el.show();
 
     button.setAttribute("disabled", "true");
     button.innerHTML = "Rebuilding archive...";

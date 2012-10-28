@@ -24,7 +24,7 @@ module.exports = View.extend({
 
     $.ajax({
         type: "POST"
-      , url: "/theme_upload"
+      , url: "/themes"
       , data: new FormData($form[0])
 
       , success: function (data, textStatus, jqXHR) {

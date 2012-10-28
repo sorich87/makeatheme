@@ -1607,12 +1607,16 @@ window.require.define({"views/download_button": function(exports, require, modul
       var button;
 
       if (app.currentUser.id === void 0) {
-        button = "<button class='btn btn-success x-login'>Login to Save</button>";
+        button = "<button class='btn btn-success x-login'>Login to Download</button>";
       } else {
         button = "<button class='btn btn-success download'>Download Theme</button>";
       }
 
       this.$el.empty().append(button);
+
+      if (!app.data.theme.has_archive) {
+        this.$el.hide();
+      }
 
       return this;
     }
@@ -1638,6 +1642,8 @@ window.require.define({"views/download_button": function(exports, require, modul
     , waitForArchive: function (theme) {
       var button = this.$("button")[0]
         , eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
+
+      this.$el.show();
 
       button.setAttribute("disabled", "true");
       button.innerHTML = "Rebuilding archive...";
@@ -1721,7 +1727,9 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      if (this.editor) {
+      this.$el.empty();
+
+      if (app.data.theme.author_id === app.currentUser.id) {
         this.render_editor();
       } else {
         this.render_preview();
@@ -1738,11 +1746,19 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
 
     , render_preview: function () {
+      var button;
+
+      if (app.currentUser.id === void 0) {
+        button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
+      } else {
+        button = "<a class='btn btn-primary' data-bypass='true'" +
+          " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
+      }
+
       this.$el
-        .empty()
         .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
         .append(app.createView("templates_select").render().$el)
-        .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
+        .append("<div id='customize-button'>" + button + "</div>");
     }
 
     , render_editor: function () {
@@ -1754,7 +1770,6 @@ window.require.define({"views/editor": function(exports, require, module) {
       app.createView("download_button");
 
       this.$el
-        .empty()
         .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
         .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
         .append(app.reuseView("save_button").render().$el)
@@ -2664,11 +2679,6 @@ window.require.define({"views/save_button": function(exports, require, module) {
 
     , save: function (e) {
       var attrs = _.clone(app.data.theme);
-
-      if (app.data.theme.author_id !== app.currentUser.id) {
-        attrs.parent_id = attrs._id;
-        attrs._id = null;
-      }
 
       e.target.setAttribute("disabled", "true");
 
@@ -3856,7 +3866,7 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
 
       $.ajax({
           type: "POST"
-        , url: "/theme_upload"
+        , url: "/themes"
         , data: new FormData($form[0])
 
         , success: function (data, textStatus, jqXHR) {

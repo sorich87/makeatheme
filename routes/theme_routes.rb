@@ -8,6 +8,15 @@ get '/themes/:id' do
   respond_with theme
 end
 
+get '/themes/:id/fork' do
+  protect!
+
+  fork = theme.fork(author: current_user)
+  fork.save
+
+  redirect to "/themes/#{fork.id}"
+end
+
 get '/themes/:id/edit', provides: 'html' do
   respond_with_editor!
 end
@@ -24,20 +33,6 @@ get '/themes/:id/download' do
   redirect theme.archive.expiring_url
 end
 
-post '/themes' do
-  protect!
-
-  params = JSON.parse(request.body.read, symbolize_names: true)
-
-  parent_theme = Theme.unscoped.where(:id => params[:parent_id]).first
-
-  halt 404 if parent_theme.nil?
-
-  halt 401 if parent_theme.preview_only?(current_user)
-
-  respond_with_saved_theme!(parent_theme, params, true)
-end
-
 put '/themes/:id' do
   protect!
 
@@ -48,7 +43,7 @@ put '/themes/:id' do
   respond_with_saved_theme!(theme, params)
 end
 
-post '/theme_upload' do
+post '/themes' do
   protect!
 
   file = params[:file]

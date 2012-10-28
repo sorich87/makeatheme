@@ -48,7 +48,9 @@ module.exports = View.extend({
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    if (this.editor) {
+    this.$el.empty();
+
+    if (app.data.theme.author_id === app.currentUser.id) {
       this.render_editor();
     } else {
       this.render_preview();
@@ -65,11 +67,19 @@ module.exports = View.extend({
   }
 
   , render_preview: function () {
+    var button;
+
+    if (app.currentUser.id === void 0) {
+      button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
+    } else {
+      button = "<a class='btn btn-primary' data-bypass='true'" +
+        " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
+    }
+
     this.$el
-      .empty()
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append(app.createView("templates_select").render().$el)
-      .append("<div id='customize-button'><button class='btn btn-primary'>Customize Theme</button></div>");
+      .append("<div id='customize-button'>" + button + "</div>");
   }
 
   , render_editor: function () {
@@ -81,7 +91,6 @@ module.exports = View.extend({
     app.createView("download_button");
 
     this.$el
-      .empty()
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
       .append(app.reuseView("save_button").render().$el)

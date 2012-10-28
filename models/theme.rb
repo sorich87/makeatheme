@@ -117,12 +117,20 @@ class Theme
       :author_id => self.author_id,
       :screenshot_uri => self.screenshot.url(:thumb),
       :fork => self.fork?,
-      :archive_job_id => self.archive_job_id
+      :archive_job_id => self.archive_job_id,
+      :has_archive => self.archive.file?
     }
   end
 
   def fork(attributes={})
-    Theme.new(self.attributes.merge(parent: self, listed: false).merge(attributes))
+    theme = self.clone
+    theme.parent = self
+    theme.assign_attributes({
+      listed: false,
+      screenshot: nil,
+      archive: nil
+    }.merge(attributes))
+    theme
   end
 
   def fork!(attributes={})
