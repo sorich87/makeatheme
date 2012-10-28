@@ -23,7 +23,6 @@
         <% if pieces %>, theme_pieces: <%= pieces %><% end %>
         <% if blocks %>, blocks: <%= blocks %><% end %>
         <% if preview_only %>, preview_only: true<% end %>
-        <% if static_files_dir %>, base_uri: "<%= static_files_dir %>"<% end %>
         <% unless current_user.nil? %>, currentUser: <%= current_user.to_json %><% end %>
       }
     };

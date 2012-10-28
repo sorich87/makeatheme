@@ -22,7 +22,7 @@ data = {
   templates: new Templates(data.templates)
   , regions: new Regions(data.regions)
   , blocks: new Blocks(data.blocks)
-  , style: new CustomCSS(data.style, app.data.base_uri)
+  , style: new CustomCSS(data.style)
 };
 
 // Save data in sessionStorage every 1s.

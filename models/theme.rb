@@ -1,6 +1,5 @@
 require 'paperclip'
 require 'fog'
-require 'theme_file_group'
 require 'theme_import'
 require 'theme_archive'
 require 'asset'
@@ -33,10 +32,10 @@ class Theme
 
   belongs_to :author, :class_name => 'User'
   belongs_to :parent, :class_name => 'Theme'
-  belongs_to :theme_file_group, :dependent => :destroy
 
   has_many :forks, :class_name => 'Theme'
-  has_many :assets
+
+  has_and_belongs_to_many :assets
 
   # Fields used by Paperclip
   field :screenshot_file_name
@@ -57,28 +56,34 @@ class Theme
     styles: { thumb: '300x225#' },
     :convert_options => { :thumb => '-strip' },
     fog_public: true,
-    path: 'themes/:id/screenshot/:basename-:style.:extension',
+    path: ':class/:id/:attachment/:basename-:style.:extension',
     default_url: '/images/screenshot-missing.png'
 
   has_attached_file :archive,
     fog_public: false,
-    path: 'themes/:id/archives/:filename'
+    path: ':class/:id/:attachment/:filename'
 
   validates_attachment :archive,
     :content_type => { :content_type => 'application/zip' },
     :size => { :less_than => 1.megabyte }
+
+  def style
+    super.collect do |rule|
+      rule['value'].gsub!(/url\("?([^"?)]+)"?\)/) do
+        asset_name = $1.split('/').last.strip
+        asset_url = self.assets.where(file_file_name: asset_name).first.file.url
+        "url(\"#{asset_url}\")"
+      end
+      rule
+    end
+  end
 
   # Get template content from name
   def template_content(name)
     templates.select { |t| t[:name] = name || 'index' }.first[:template]
   end
 
-  # Return path to where static files are stored on AWS
-  def static_files_dir
-    self.theme_file_group.static_files_dir
-  end
-
-  def css(append_assets_dir = false)
+  def css(relativize_assets = false)
     rules = self.style.each_with_object({}) do |declaration, memo|
       memo[declaration['media']] ||= {}
       memo[declaration['media']][declaration['selector']] ||= []
@@ -93,11 +98,12 @@ class Theme
         string << "#{selector} {\n"
 
         declarations.each do |declaration|
-          if append_assets_dir
-            declaration['value'].gsub!(/url\("?([^"?)]+)"?\)/,
-                                      'url("' + self.static_files_dir + '/\1")')
+          if relativize_assets
+            declaration['value'].gsub!(/url\("?([^"?)]+)"?\)/) do
+              asset_name = $1.split('/').last.strip
+              "url(\"images/#{asset_name}\")"
+            end
           end
-
           string << "\t#{declaration['property']}: #{declaration['value']};\n"
         end
 

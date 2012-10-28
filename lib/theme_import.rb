@@ -20,22 +20,15 @@ module ThemeImport
       theme.write_attributes(import.attributes)
 
       if theme.valid?
-        group = theme.build_theme_file_group
-
         import.static_files.each do |static_file|
-          static_file = Asset.new(
-            :file_name => static_file[:filename],
-            :file => static_file[:tempfile]
-          )
+          static_file = Asset.new(file: static_file)
           # Pass invalid files
           if static_file.valid?
-            group.assets << static_file
             theme.assets << static_file
             static_file.save
           end
         end
 
-        group.save
         theme.save
       end
       theme
@@ -53,8 +46,6 @@ module ThemeImport
       @attributes = {}
 
       Zip::ZipFile.foreach(zip_file) { |entry| parse_entry(entry) if entry.file? }
-
-      fix_static_filenames
     end
 
 
@@ -115,10 +106,7 @@ module ThemeImport
         tempfile.rewind
       end
 
-      @static_files << {
-        :filename => entry.to_s,
-        :tempfile => tempfile
-      }
+      @static_files << tempfile
     end
 
     def read_theme_info_file(entry)
@@ -165,14 +153,6 @@ module ThemeImport
     def get_region_name(filename)
       match = /\A(header|footer)/.match(filename)
       match[1] if match
-    end
-
-    # Remove eg theme/ from theme/style.css,
-    # but not theme/images/ from theme/images/logo.png
-    def fix_static_filenames
-      @static_files.each_with_index do |file, index|
-        @static_files[index][:filename] = file[:filename].split(@zip_folder).last
-      end
     end
   end
 

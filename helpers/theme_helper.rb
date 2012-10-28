@@ -107,7 +107,6 @@ module ThemeHelper
       style: theme.style.to_json,
       pieces: pieces.to_json,
       blocks: all_blocks(theme).to_json,
-      static_files_dir: theme.static_files_dir,
       preview_only: preview_only
   end
 
@@ -117,8 +116,7 @@ module ThemeHelper
     index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
     respond_with :preview,
-      style: theme.css(true),
-      static_files_dir: theme.static_files_dir,
+      style: theme.css,
       template: index[:full]
   end
 

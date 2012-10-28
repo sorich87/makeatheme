@@ -107,8 +107,10 @@ module ThemeArchive
     end
 
     def compile_static_files(zipfile)
-      @theme.theme_file_group.assets.each do |static_file|
-        zipfile.get_output_stream(static_file.file_name) do |f|
+      @theme.assets.each do |static_file|
+        path = "images/#{static_file.file.original_filename}"
+
+        zipfile.get_output_stream(path) do |f|
           file_io = Kernel.open(static_file.file.url)
           f.puts file_io.read unless file_io.nil?
         end
@@ -119,7 +121,7 @@ module ThemeArchive
     def compile_stylesheet(zipfile)
       zipfile.get_output_stream('style.css') do |f|
         insert_wordpress_headers(f)
-        f.puts @theme.css
+        f.puts @theme.css(true)
       end
     end
 

@@ -4,13 +4,11 @@ var match = require("./matches_selector");
  * Manage custom css in the document <head>
  * and maintain a rules object for easy access.
  *
- * Takes a rules argument with rules as an object
- * and a baseURI argument to append before assets directories.
+ * Takes a rules argument with rules as an object.
  */
-var CustomCSS = function (rules, baseURI) {
+var CustomCSS = function (rules) {
   this.sheets = {};
   this.rules = {};
-  this.baseURI = baseURI;
 
   this.insertRules(rules);
 };
@@ -67,9 +65,7 @@ CustomCSS.prototype.insertRule = function (rule, overwrite) {
   }
   index = this.sheets[media].cssRules.length;
 
-  value = rule.value.replace(/url\("?([^"?)]+)"?\)/g, 'url("' + this.baseURI + '/$1")');
-
-  declaration = rule.selector + " {" + rule.property + ": " + value + "}";
+  declaration = rule.selector + " {" + rule.property + ": " + rule.value + "}";
 
   this.sheets[media].insertRule(declaration, index);
 
@@ -77,7 +73,7 @@ CustomCSS.prototype.insertRule = function (rule, overwrite) {
   this.rules[media][index] = {
       selector: rule.selector
     , property: rule.property
-    , value: value
+    , value: rule.value
   };
 
   return index;
@@ -192,13 +188,8 @@ CustomCSS.prototype.getDeclarations = function (element) {
  * Get rules in the format used on the server
  */
 CustomCSS.prototype.getRules = function () {
-  var media, index, selector, property, value, replaceURI
+  var media, index, selector, property, value
     , rules = [];
-
-  replaceURI = function (match, p1) {
-    var url = p1.replace(this.baseURI + '/', '');
-    return 'url(' + url + ')';
-  }.bind(this);
 
   for (media in this.rules) {
     if (!this.rules.hasOwnProperty(media)) {
@@ -218,7 +209,7 @@ CustomCSS.prototype.getRules = function () {
           media: media
         , selector: rule.selector
         , property: rule.property
-        , value: rule.value.replace(/url\(([^)]+)\)/g, replaceURI)
+        , value: rule.value
       };
     }
   }
