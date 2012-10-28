@@ -1709,7 +1709,7 @@ window.require.define({"views/editor": function(exports, require, module) {
 
 
     , events: {
-      "click #customize-button button": "showEditor"
+      "click #customize-button a.copy": "askForPatience"
     }
 
     , initialize: function () {
@@ -1750,7 +1750,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       if (app.currentUser.id === void 0) {
         button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
       } else {
-        button = "<a class='btn btn-primary' data-bypass='true'" +
+        button = "<a class='btn btn-primary copy' data-bypass='true'" +
           " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
       }
 
@@ -1803,10 +1803,9 @@ window.require.define({"views/editor": function(exports, require, module) {
       });
     }
 
-    , showEditor: function (e) {
-      this.editor = true;
-
-      this.render();
+    , askForPatience: function (e) {
+      e.currentTarget.setAttribute("disabled", "true");
+      e.currentTarget.innerHTML = "Started the Photocopier";
     }
 
     , accordionGroups: function () {

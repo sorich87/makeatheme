@@ -31,7 +31,7 @@ module.exports = View.extend({
 
 
   , events: {
-    "click #customize-button button": "showEditor"
+    "click #customize-button a.copy": "askForPatience"
   }
 
   , initialize: function () {
@@ -72,7 +72,7 @@ module.exports = View.extend({
     if (app.currentUser.id === void 0) {
       button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
     } else {
-      button = "<a class='btn btn-primary' data-bypass='true'" +
+      button = "<a class='btn btn-primary copy' data-bypass='true'" +
         " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
     }
 
@@ -125,10 +125,9 @@ module.exports = View.extend({
     });
   }
 
-  , showEditor: function (e) {
-    this.editor = true;
-
-    this.render();
+  , askForPatience: function (e) {
+    e.currentTarget.setAttribute("disabled", "true");
+    e.currentTarget.innerHTML = "Started the Photocopier";
   }
 
   , accordionGroups: function () {
