@@ -6035,7 +6035,15 @@ a.badge:hover {
 .call-to-action {
   margin: 60px 0;
   padding: 0 60px;
-  font-size: 28px;
+}
+.call-to-action blockquote {
+  margin: 0 0 120px;
+}
+.call-to-action blockquote p {
+  margin: 0 0 20px;
+}
+.call-to-action > p {
+  font-size: 20px;
   line-height: 46px;
 }
 .features {
