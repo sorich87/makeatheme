@@ -64,8 +64,11 @@ _.extend(Application, {
 
   , setBodyClasses: function () {
     Backbone.history.on("route", function (router, name) {
+      if (!this.currentUser.id) {
+        name += " anonymous";
+      }
       document.body.className = name;
-    });
+    }.bind(this));
   }
 
   , setEditorWidth: function () {

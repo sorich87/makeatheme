@@ -23,13 +23,15 @@ module.exports = Backbone.Router.extend({
 
     if (!app.currentUser.id) {
       $main.append(app.reuseView("faq").render().$el);
+    } else {
+      $main
+        .append(alert)
+        .append("<h3 class='page-title'>Try out with a theme below</h3>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el)
+        .append("<p>This is an open platform... If you are a professional web " +
+               "designer, please <a href='javascript:UserVoice.showPopupWidget();'>contact us</a>. " +
+               "We want to hear from you!</p>");
     }
-
-    $main
-      .append(alert)
-      .append("<h3 class='page-title'>Try out with a theme below</h3>")
-      .append(app.createView("theme_list", {collection: collection}).render().$el)
-      .append("<p>This is an open platform... If you are a professional web designer, please <a href='javascript:UserVoice.showPopupWidget();'>contact us</a>. We want to hear from you!</p>");
   }
 
   , your_themes: function () {

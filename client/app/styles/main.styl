@@ -25,20 +25,40 @@ yellowLight =         #ffffe0
 }
 .headline {
   text-align: center;
-  padding: 40px 0 40px;
+  padding: 60px 0;
   border-bottom: 1px solid #EEE;
-}
-h1 {
-  text-transform: uppercase;
+  font-size: 1.6em;
+  line-height: 2em;
+  color: grayDarker;
 }
 .catch-phrase {
+  margin: 0 0 60px;
   text-align: center;
   letter-spacing: 0.09em;
   line-height: 1.4em;
+  font-size: 48px;
   font-weight: bold;
+  color: white;
+  text-shadow: 0px 1px 1px grayDarker;
+
+  small {
+    color: grayDarker;
+  }
 }
 .call-to-action {
-  margin: 30px 0;
+  margin: 60px 0;
+  padding: 0 60px;
+  font-size: 28px;
+  line-height: 46px;
+}
+.features {
+  text-align: center;
+  font-size: 16px;
+  border-bottom: 1px solid #EEE;
+
+  .row {
+    padding: 60px 0;
+  }
 }
 .page-title {
   text-align: center;
@@ -49,11 +69,19 @@ h1 {
 .thumbnail {
   border: 1px solid #08c;
 }
+#footer {
+  border-top: 1px solid #EEE;
+  margin: 60px 0 0;
+  padding: 20px 0;
+}
 
 body {
-  background-color: #fcfcfc;
   padding-top: 60px;
   padding-bottom: 60px;
+  line-height: 1.6em;
+}
+body.index.anonymous {
+  background: white url(/images/bg.jpg) no-repeat top center;
 }
 #back-to-top {
   position: fixed;

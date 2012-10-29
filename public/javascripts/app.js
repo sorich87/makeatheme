@@ -141,8 +141,11 @@ window.require.define({"application": function(exports, require, module) {
 
     , setBodyClasses: function () {
       Backbone.history.on("route", function (router, name) {
+        if (!this.currentUser.id) {
+          name += " anonymous";
+        }
         document.body.className = name;
-      });
+      }.bind(this));
     }
 
     , setEditorWidth: function () {
@@ -1304,13 +1307,15 @@ window.require.define({"router": function(exports, require, module) {
 
       if (!app.currentUser.id) {
         $main.append(app.reuseView("faq").render().$el);
+      } else {
+        $main
+          .append(alert)
+          .append("<h3 class='page-title'>Try out with a theme below</h3>")
+          .append(app.createView("theme_list", {collection: collection}).render().$el)
+          .append("<p>This is an open platform... If you are a professional web " +
+                 "designer, please <a href='javascript:UserVoice.showPopupWidget();'>contact us</a>. " +
+                 "We want to hear from you!</p>");
       }
-
-      $main
-        .append(alert)
-        .append("<h3 class='page-title'>Try out with a theme below</h3>")
-        .append(app.createView("theme_list", {collection: collection}).render().$el)
-        .append("<p>This is an open platform... If you are a professional web designer, please <a href='javascript:UserVoice.showPopupWidget();'>contact us</a>. We want to hear from you!</p>");
     }
 
     , your_themes: function () {
@@ -1836,8 +1841,7 @@ window.require.define({"views/faq": function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
-      className: "headline"
-    , template: "faq"
+    template: "faq"
   });
   
 }});
@@ -3233,7 +3237,7 @@ window.require.define({"views/templates/faq": function(exports, require, module)
     var foundHelper, self=this;
 
 
-    return "<h1 class=\"catch-phrase\">The next generation theme editor<br /> in your browser</h1>\n<p>Build your own responsive HTML5 and WordPress themes in minutes!</p>\n<p class=\"call-to-action\"><a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started Now</a></p>\n<p>ThemeMy makes it easy to build beautiful, professional-grade themes<br />\nyou can use on your website, sell to earn money or share with others for free.</p>\n";});
+    return "<div class=\"headline\">\n  <h1 class=\"catch-phrase\">The Fast Designer Tool\n    <br /><small>for the Web and Mobile</small></h1>\n  <p>Design your beautiful, responsive HTML5 themes in minutes\n  <br />with a powerful drag and drop editor.</p>\n\n  <p class=\"call-to-action\">\n    <a href=\"/register\" class=\"btn btn-large btn-primary\">Get Started Now</a>\n  </p>\n\n  <p>ThemeMy makes it easy to build beautiful, professional-grade themes<br />\n  you can use on your website, sell to earn money or share with others for free.</p>\n</div>\n\n<div class=\"features\">\n  <div class=\"row\">\n    <div class=\"span4\">\n      <img src=\"/images/pencil.png\" height=\"150\" />\n      <h3>Easy to Use.</h3>\n      <p>It's so simple anyone can use it.<br />\n      But it's still powerful enough for the most advanced users.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/photoshop.jpg\" height=\"150\" />\n      <h3>All-in-One Workflow.</h3>\n      <p>Skip Photoshop. Skip your text editor.<br />\n      Build your themes directly in your browser,<br />\n      where they will be used.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/responsive.png\" height=\"150\" />\n      <h3>Responsive. Responsive.</h3>\n      <p>Reach the 2 billions of people<br />\n      browsing the Web from desktops, mobiles,<br />\n      tablets, TVs, (coffee machines?)&hellip;</p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"span4\">\n      <img src=\"/images/html5.png\" height=\"150\" />\n      <h3>Beautiful Code.</h3>\n      <p>No HTML tag soup. No spaghetti PHP code.\n      Well organized CSS. Generated for real people, not robots.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/presets.png\" height=\"150\" />\n      <h3>Preset Themes.</h3>\n      <p>You don't always have to start<br />\n      from scratch. Browse the gallery of pre-built themes,\n      copy and customize.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/wordpress.png\" height=\"150\" />\n      <h3>It haz WordPress!</h3>\n      <p>Exporting to a WordPress theme<br />\n      is just one click away. No PHP mastering required.</p>\n    </div>\n  </div>\n</div>\n\n<div class=\"row call-to-action\">\n  <p>\n    Help us shape the future of Web Design.\n    <a href=\"/register\" class=\"btn btn-large btn-primary pull-right\">\n      Sign Up for the Free Beta\n    </a>\n  </p>\n</div>\n\n<footer id=\"footer\">\n  <p>&copy; 2012 ThemeMy\n  &middot; <a href=\"/register\">Register</a>\n  &middot; <a href=\"/login\">Login</a></p>\n</footer>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {
