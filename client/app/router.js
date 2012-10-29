@@ -16,7 +16,6 @@ module.exports = Backbone.Router.extend({
 
   , index: function () {
     var collection = new Themes(app.data.themes)
-      , alert = ""
       , $main = $("#main");
 
     $main.empty();
@@ -25,12 +24,11 @@ module.exports = Backbone.Router.extend({
       $main.append(app.reuseView("faq").render().$el);
     } else {
       $main
-        .append(alert)
-        .append("<h3 class='page-title'>Try out with a theme below</h3>")
-        .append(app.createView("theme_list", {collection: collection}).render().$el)
-        .append("<p>This is an open platform... If you are a professional web " +
-               "designer, please <a href='javascript:UserVoice.showPopupWidget();'>contact us</a>. " +
-               "We want to hear from you!</p>");
+        .append("<div id='new-button'><a href='/themes/new' " +
+                "class='btn btn-primary btn-large' data-bypass='true'>" +
+                "Create a New Theme</a></div>")
+        .append("<h3 class='page-title'>Or copy a theme below</h3>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
   }
 

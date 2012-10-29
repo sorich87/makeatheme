@@ -49,8 +49,11 @@ class Theme
 
   attr_accessor :archive_job_id
 
-  validates_presence_of [:name, :author, :description]
+  validates_presence_of [:name, :author]
   validates_with ThemeValidator
+
+  after_initialize :add_default_blocks
+  after_initialize :add_default_template
 
   has_attached_file :screenshot,
     styles: { thumb: '300x225#' },
@@ -159,6 +162,43 @@ class Theme
 
   def slug
     self.name.gsub(/[^0-9A-Za-z]/, '').downcase
+  end
+
+  private
+
+  def add_default_blocks
+    return unless self[:blocks].nil?
+
+    self.blocks = ::Defaults::HTML::BLOCKS.collect do |name, template|
+      name = name.to_s.split('-')
+      {
+        name: name[0],
+        label: name[1].nil? ? 'Default' : name[1],
+        template: template
+      }
+    end
+  end
+
+  def add_default_template
+    return unless self[:templates].nil?
+
+    self[:templates] = ::Defaults::HTML::TEMPLATES.collect do |name, template|
+      {
+        name: name,
+        template: template
+      }
+    end
+
+    self[:regions] = ::Defaults::HTML::REGIONS.collect do |name, template|
+      {
+        name: name,
+        slug: 'default',
+        template: template
+      }
+    end
+
+    sass_engine = Sass::Engine.new(::Defaults::HTML::CSS, :syntax => :scss)
+    self[:style] = sass_engine.to_tree.to_a
   end
 end
 

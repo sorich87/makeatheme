@@ -14,7 +14,6 @@ module ThemeImport
       theme = self.new(attributes)
       import = ThemeImport.new(zip_file)
 
-      theme.blocks = import.blocks
       theme.templates = import.templates
       theme.regions = import.regions
       theme.write_attributes(import.attributes)
@@ -119,17 +118,6 @@ module ThemeImport
       entry.get_input_stream do |entry_file|
         engine = Sass::Engine.new(entry_file.read, :syntax => :scss)
         @attributes[:style] = engine.to_tree.to_a
-      end
-    end
-
-    def blocks
-      ::Defaults::HTML::BLOCKS.map do |name, template|
-        name = name.to_s.split('-')
-        {
-          name: name[0],
-          label: name[1].nil? ? 'Default' : name[1],
-          template: template
-        }
       end
     end
 

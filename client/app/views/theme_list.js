@@ -28,7 +28,7 @@ module.exports = View.extend({
       , screenshot_uri: theme.get("screenshot_uri")
       , name: theme.get("name")
       , author: theme.get("author")
-      , edit_text: currentUserIsOwner ? "Edit" : "View & Customise"
+      , edit_text: currentUserIsOwner ? "Edit" : "View & Copy"
     }));
   }
 

@@ -4,6 +4,18 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
+get '/themes/new' do
+  protect!
+
+  new_theme = Theme.new(
+    name: DateTime.now.strftime('%m/%d/%Y at %I:%M%p'),
+    author: current_user
+  )
+  new_theme.save
+
+  redirect to "/themes/#{new_theme.id}"
+end
+
 get '/themes/:id' do
   respond_with theme
 end
