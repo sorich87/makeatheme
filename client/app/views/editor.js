@@ -90,6 +90,9 @@ module.exports = View.extend({
     app.createView("save_button");
     app.createView("download_button");
 
+    // Setup drag and drop and resize
+    app.createView("layout").render();
+
     this.$el
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
       .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
@@ -107,9 +110,6 @@ module.exports = View.extend({
     }
 
     app.createView("mutations");
-
-    // Setup drag and drop and resize
-    app.createView("layout").render();
   }
 
   , showSection: function (e) {

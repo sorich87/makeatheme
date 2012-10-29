@@ -1771,6 +1771,9 @@ window.require.define({"views/editor": function(exports, require, module) {
       app.createView("save_button");
       app.createView("download_button");
 
+      // Setup drag and drop and resize
+      app.createView("layout").render();
+
       this.$el
         .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
         .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
@@ -1788,9 +1791,6 @@ window.require.define({"views/editor": function(exports, require, module) {
       }
 
       app.createView("mutations");
-
-      // Setup drag and drop and resize
-      app.createView("layout").render();
     }
 
     , showSection: function (e) {
@@ -1902,6 +1902,17 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , initialize: function () {
       this.makeDroppable();
+      app.on("template:loaded", this.highLightEmpty.bind(this));
+    }
+
+    , highLightEmpty: function () {
+      this.$(".row").each(function (i, row) {
+        var $row = $(row);
+
+        if ($row.children().length === 0) {
+          $row.addClass("x-empty");
+        }
+      });
     }
 
     , makeDraggable: function (e) {

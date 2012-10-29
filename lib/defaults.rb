@@ -154,7 +154,17 @@ Nunc iaculis suscipit dui.</p></pre>
 .row .row.collapse { margin: 0; }
 .column, .columns { float: left; min-height: 1px; padding: 0 7.6%;
 position: relative; }
-.column.centered, .columns.centered { float: none; margin: 0 auto; })
+.column.centered, .columns.centered { float: none; margin: 0 auto; }
+.row { *zoom: 1; }
+.row:before, .row:after { content: ""; display: table; }
+.row:after { clear: both; }
+@media only screen and (max-width: 650px) {
+  .row { width: auto; min-width: 0; margin-left: 0; margin-right: 0; }
+  .column, .columns { width: auto !important; float: none; }
+  .column:before, .columns:before, .column:after, .columns:after {
+    content: ""; display: table; }
+  .column:after, .columns:after { clear: both; }
+})
   end
 
   module PHP

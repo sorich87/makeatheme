@@ -55,6 +55,17 @@ module.exports = View.extend({
 
   , initialize: function () {
     this.makeDroppable();
+    app.on("template:loaded", this.highLightEmpty.bind(this));
+  }
+
+  , highLightEmpty: function () {
+    this.$(".row").each(function (i, row) {
+      var $row = $(row);
+
+      if ($row.children().length === 0) {
+        $row.addClass("x-empty");
+      }
+    });
   }
 
   , makeDraggable: function (e) {
