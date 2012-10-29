@@ -6074,7 +6074,7 @@ body {
   line-height: 1.6em;
 }
 body.index.anonymous {
-  background: #fff url("/images/bg.jpg") no-repeat top center;
+  background: #fff url("/images/bg.jpeg") no-repeat top center;
 }
 #back-to-top {
   position: fixed;
