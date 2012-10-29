@@ -167,7 +167,7 @@ class Theme
   private
 
   def add_default_blocks
-    return unless self[:blocks].nil?
+    return unless self.blocks.empty?
 
     self.blocks = ::Defaults::HTML::BLOCKS.collect do |name, template|
       name = name.to_s.split('-')
@@ -180,16 +180,16 @@ class Theme
   end
 
   def add_default_template
-    return unless self[:templates].nil?
+    return unless self.templates.empty?
 
-    self[:templates] = ::Defaults::HTML::TEMPLATES.collect do |name, template|
+    self.templates = ::Defaults::HTML::TEMPLATES.collect do |name, template|
       {
         name: name,
         template: template
       }
     end
 
-    self[:regions] = ::Defaults::HTML::REGIONS.collect do |name, template|
+    self.regions = ::Defaults::HTML::REGIONS.collect do |name, template|
       {
         name: name,
         slug: 'default',
@@ -198,7 +198,7 @@ class Theme
     end
 
     sass_engine = Sass::Engine.new(::Defaults::HTML::CSS, :syntax => :scss)
-    self[:style] = sass_engine.to_tree.to_a
+    self.style = sass_engine.to_tree.to_a
   end
 end
 
