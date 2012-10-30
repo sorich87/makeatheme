@@ -68,7 +68,7 @@ module.exports = View.extend({
     e.currentTarget.close();
 
     button.removeAttribute("disabled");
-    button.innerHTML = "Download Theme";
+    button.innerHTML = "Download Theme <span class='caret'></span>";
   }
 
   , archiveSuccess: function (e) {

@@ -1660,7 +1660,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       e.currentTarget.close();
 
       button.removeAttribute("disabled");
-      button.innerHTML = "Download Theme";
+      button.innerHTML = "Download Theme <span class='caret'></span>";
     }
 
     , archiveSuccess: function (e) {
