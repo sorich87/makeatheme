@@ -5,7 +5,7 @@ module Defaults
         site_title: 'Theme Preview',
         site_description: 'Just another beautiful theme',
         home_url: '',
-        header_image_url: '/images/headers/chessboard.jpg',
+        header_image_url: '/images/headers/dandelion.jpeg',
         header_image_width: '100%',
         header_image_height: 'auto',
         search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
