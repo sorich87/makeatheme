@@ -2681,7 +2681,8 @@ window.require.define({"views/save_button": function(exports, require, module) {
       var button;
 
       if (app.currentUser.id) {
-        button = "<button class='btn btn-primary btn-block save'>Save Theme</button>";
+        button = "<button class='btn btn-primary btn-block save'>" +
+          "Save Changes</button>";
       }
 
       this.$el.empty().append(button);
