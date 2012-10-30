@@ -139,9 +139,9 @@ module ThemeArchive
       {
         'Theme Name' => @theme.name,
         'Description' => @theme.description,
-        'Theme URI' => "http://thememy.com/themes/#{@theme.id}",
+        'Theme URI' => "http://makeatheme.com/themes/#{@theme.id}",
         'Author' => @theme.author.to_fullname,
-        'Author URI' => "http://thememy.com/users/#{@theme.author_id}",
+        'Author URI' => "http://makeatheme.com/users/#{@theme.author_id}",
         'Version' => @theme.version,
         'Tags' => @theme.tags.join(', '),
         'License' => 'GNU General Public License v2',

@@ -16,14 +16,14 @@ describe ("User", function () {
     var user = new User({
         first_name: "John"
       , last_name: "Doe"
-      , email: "john.doe@thememy.com"
+      , email: "john.doe@makeatheme.com"
       , password: "12345"
       , password_confirmation: "12345"
     });
 
     expect(user.get("first_name")).to.equal("John");
     expect(user.get("last_name")).to.equal("Doe");
-    expect(user.get("email")).to.equal("john.doe@thememy.com");
+    expect(user.get("email")).to.equal("john.doe@makeatheme.com");
     expect(user.get("password")).to.equal("12345");
     expect(user.get("password_confirmation")).to.equal("12345");
   });
@@ -56,7 +56,7 @@ describe ("User", function () {
     attrs = {
         first_name: "John"
       , last_name: "Doe"
-      , email: "john.doe@thememy.com"
+      , email: "john.doe@makeatheme.com"
       , password: "12345"
       , password_confirmation: "12345"
       , themes: []

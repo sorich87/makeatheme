@@ -1,4 +1,4 @@
-set :domain, 'www.thememy.com'
+set :domain, 'www.makeatheme.com'
 
 Pony.options = {
   :via => :smtp,

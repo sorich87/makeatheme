@@ -8,9 +8,9 @@ post '/users' do
     authenticate_user!(user)
 
     Pony.mail :to => user.email,
-              :subject => 'Getting Started with ThemeMy',
-              :from => 'ThemeMy <notifications@thememy.com>',
-              :reply_to => 'contact@thememy.com',
+              :subject => 'Start Making your Themes',
+              :from => 'Make A Theme <notifications@makeatheme.com>',
+              :reply_to => 'support@makeatheme.com',
               :html_body => erb(:'emails/user_registration.html', :locals => {:user => user}),
               :body => erb(:'emails/user_registration.txt', :locals => {:user => user})
 
@@ -34,9 +34,9 @@ post '/users/reset_password' do
     }
 
     Pony.mail :to => user.email,
-              :subject => 'ThemeMy Password Reset',
-              :from => 'ThemeMy <notifications@thememy.com>',
-              :reply_to => 'contact@thememy.com',
+              :subject => 'Make A Theme - Password Reset',
+              :from => 'Make A Theme <notifications@makeatheme.com>',
+              :reply_to => 'contact@makeatheme.com',
               :html_body => erb(:'emails/password_reset.html', locals: locals),
               :body => erb(:'emails/password_reset.txt', locals: locals)
   end

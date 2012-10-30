@@ -38,7 +38,7 @@ describe "registration" do
       params[:to] == @user_attributes[:email]
       params[:subject].should include('Welcome aboard')
       params[:body].should include(@user_attributes[:first_name])
-      params[:body].should include('http://thememy.com/')
+      params[:body].should include('http://makeatheme.com/')
     end
 
     post '/users', @user_attributes.to_json
