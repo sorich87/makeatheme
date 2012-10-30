@@ -37,12 +37,18 @@ get '/themes/:id/preview', provides: 'html' do
   respond_with_preview!
 end
 
-get '/themes/:id/download' do
-  halt 404 unless theme.archive.file?
+get '/themes/:id/download/:type' do
+  if params[:type] == 'wordpress'
+    archive = theme.wp_archive
+  else
+    archive = theme.html_archive
+  end
+
+  halt 404 unless archive.file?
 
   halt 401 if theme.preview_only?(current_user)
 
-  redirect theme.archive.expiring_url
+  redirect archive.expiring_url
 end
 
 put '/themes/:id' do

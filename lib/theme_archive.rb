@@ -5,7 +5,7 @@ require 'erb'
 module ThemeArchive
 
   def generate_archive
-    File.open(Archive.new(self).path) { |file| self.archive = file }
+    File.open(Archive.new(self).path) { |file| self.wp_archive = file }
   end
 
   def generate_archive!
@@ -14,6 +14,8 @@ module ThemeArchive
   end
 
   class Archive
+    attr_reader :path
+
     def initialize(theme)
       @theme = theme
 
@@ -45,11 +47,6 @@ module ThemeArchive
         compile_screenshot(zipfile)
       end
     end
-
-    def path
-      @path
-    end
-
 
     private
 

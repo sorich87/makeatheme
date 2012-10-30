@@ -1648,7 +1648,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       this.$el.show();
 
       button.setAttribute("disabled", "true");
-      button.innerHTML = "Rebuilding archive...";
+      button.innerHTML = "Rebuilding archives...";
 
       eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
       eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
@@ -1666,13 +1666,13 @@ window.require.define({"views/download_button": function(exports, require, modul
     , archiveSuccess: function (e) {
       this.resetButton(e);
 
-      app.trigger("notification", "success", "Theme archive updated.");
+      app.trigger("notification", "success", "Theme archives updated.");
     }
 
     , archiveErrors: function (e) {
       this.resetButton(e);
 
-      app.trigger("notification", "error", "Error updating the theme archive.");
+      app.trigger("notification", "error", "Error updating the theme archives.");
     }
   });
   
@@ -3258,7 +3258,7 @@ window.require.define({"views/templates/download_button": function(exports, requ
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download?format=wordpress\" target=\"_blank\"\n      data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
+    buffer += escapeExpression(stack1) + "/download/wordpress\" target=\"_blank\"\n      data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
     return buffer;});
 }});
 

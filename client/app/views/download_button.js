@@ -56,7 +56,7 @@ module.exports = View.extend({
     this.$el.show();
 
     button.setAttribute("disabled", "true");
-    button.innerHTML = "Rebuilding archive...";
+    button.innerHTML = "Rebuilding archives...";
 
     eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
     eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
@@ -74,12 +74,12 @@ module.exports = View.extend({
   , archiveSuccess: function (e) {
     this.resetButton(e);
 
-    app.trigger("notification", "success", "Theme archive updated.");
+    app.trigger("notification", "success", "Theme archives updated.");
   }
 
   , archiveErrors: function (e) {
     this.resetButton(e);
 
-    app.trigger("notification", "error", "Error updating the theme archive.");
+    app.trigger("notification", "error", "Error updating the theme archives.");
   }
 });
