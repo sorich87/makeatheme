@@ -1902,6 +1902,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , initialize: function () {
       this.makeDroppable();
+      app.on("region:loaded", this.highLightEmpty.bind(this));
       app.on("template:loaded", this.highLightEmpty.bind(this));
     }
 
