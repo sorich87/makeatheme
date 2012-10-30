@@ -1,12 +1,12 @@
 var View = require("views/base/view")
-  , app = require("application");
+  , app = require("application")
+  , download_button = require("views/templates/download_button");
 
 module.exports = View.extend({
     id: "download-button"
 
   , events: {
-      "click button.download": "download"
-    , "click button.x-login": "login"
+    "click button.x-login": "login"
   }
 
   , initialize: function () {
@@ -19,7 +19,7 @@ module.exports = View.extend({
     if (app.currentUser.id === void 0) {
       button = "<button class='btn btn-success x-login'>Login to Download</button>";
     } else {
-      button = "<button class='btn btn-success download'>Download Theme</button>";
+      button = download_button({id: app.data.theme._id});
     }
 
     this.$el.empty().append(button);

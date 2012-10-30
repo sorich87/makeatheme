@@ -34,9 +34,10 @@ exports.config =
           'vendor/scripts/jqueryui/jquery.ui.droppable.js',
 
           'vendor/scripts/bootstrap/bootstrap-collapse.js',
-          'vendor/scripts/bootstrap/bootstrap-modal.js'
-          'vendor/scripts/bootstrap/bootstrap-alert.js'
-          'vendor/scripts/bootstrap/bootstrap-transition.js'
+          'vendor/scripts/bootstrap/bootstrap-modal.js',
+          'vendor/scripts/bootstrap/bootstrap-alert.js',
+          'vendor/scripts/bootstrap/bootstrap-transition.js',
+          'vendor/scripts/bootstrap/bootstrap-dropdown.js'
         ]
 
     stylesheets:

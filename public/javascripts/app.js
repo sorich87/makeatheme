@@ -1591,14 +1591,14 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
 window.require.define({"views/download_button": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application");
+    , app = require("application")
+    , download_button = require("views/templates/download_button");
 
   module.exports = View.extend({
       id: "download-button"
 
     , events: {
-        "click button.download": "download"
-      , "click button.x-login": "login"
+      "click button.x-login": "login"
     }
 
     , initialize: function () {
@@ -1611,7 +1611,7 @@ window.require.define({"views/download_button": function(exports, require, modul
       if (app.currentUser.id === void 0) {
         button = "<button class='btn btn-success x-login'>Login to Download</button>";
       } else {
-        button = "<button class='btn btn-success download'>Download Theme</button>";
+        button = download_button({id: app.data.theme._id});
       }
 
       this.$el.empty().append(button);
@@ -3238,6 +3238,26 @@ window.require.define({"views/templates/declaration": function(exports, require,
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/download_button": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div class=\"btn-group\">\n  <button data-toggle=\"dropdown\"\n    class=\"btn btn-success btn-block dropdown-toggle download\">\n    Download Theme <span class=\"caret\"></span>\n  </button>\n  <ul class=\"dropdown-menu\">\n    <li><a href=\"/themes/";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "/download\" target=\"_blank\" data-bypass=\"true\">\n      Download HTML5</a></li>\n    <li><a href=\"/themes/";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "/download\" target=\"_blank\" data-bypass=\"true\">\n      Download WordPress</a></li>\n  </ul>\n</div>\n";
     return buffer;});
 }});
 
