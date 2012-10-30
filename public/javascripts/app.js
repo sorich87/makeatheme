@@ -1753,7 +1753,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       if (app.currentUser.id === void 0) {
         button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
       } else {
-        button = "<a class='btn btn-primary copy' data-bypass='true'" +
+        button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
           " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
       }
 
@@ -2681,7 +2681,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
       var button;
 
       if (app.currentUser.id) {
-        button = "<button class='btn btn-primary save'>Save Theme</button>";
+        button = "<button class='btn btn-primary btn-block save'>Save Theme</button>";
       }
 
       this.$el.empty().append(button);
@@ -3247,7 +3247,7 @@ window.require.define({"views/templates/download_button": function(exports, requ
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div class=\"btn-group\">\n  <button data-toggle=\"dropdown\"\n    class=\"btn btn-success btn-block dropdown-toggle download\">\n    Download Theme <span class=\"caret\"></span>\n  </button>\n  <ul class=\"dropdown-menu\">\n    <li><a href=\"/themes/";
+    buffer += "<div class=\"btn-group btn-block\">\n  <button data-toggle=\"dropdown\"\n    class=\"btn btn-success btn-block dropdown-toggle download\">\n    Download Theme <span class=\"caret\"></span>\n  </button>\n  <ul class=\"dropdown-menu\">\n    <li><a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }

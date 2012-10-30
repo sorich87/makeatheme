@@ -157,6 +157,20 @@ body.theme #main {
   text-align: center;
 }
 
+.btn-group > .btn:first-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.btn-group > .btn:last-child,
+.btn-group > .dropdown-toggle {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.dropdown-menu {
+  width: 100%;
+  border-radius: 0;
+}
+
 /* Editor */
 #layout-editor {
   background-color: #fcfcfc;
@@ -275,9 +289,8 @@ body.theme #main {
   #customize-button,
   #download-button,
   #save-button {
-    margin: 10px 0;
+    margin: 10px;
     text-align: center;
-    width: 200px;
   }
   #templates-preview {
     padding: 10px;

@@ -72,7 +72,7 @@ module.exports = View.extend({
     if (app.currentUser.id === void 0) {
       button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
     } else {
-      button = "<a class='btn btn-primary copy' data-bypass='true'" +
+      button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
         " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
     }
 
