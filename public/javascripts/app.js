@@ -3258,7 +3258,7 @@ window.require.define({"views/templates/download_button": function(exports, requ
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" target=\"_blank\" data-bypass=\"true\">\n      Download WordPress</a></li>\n  </ul>\n</div>\n";
+    buffer += escapeExpression(stack1) + "/download?format=wordpress\" target=\"_blank\"\n      data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
     return buffer;});
 }});
 
