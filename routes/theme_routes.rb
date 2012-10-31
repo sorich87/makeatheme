@@ -37,7 +37,7 @@ get '/themes/:id/preview', provides: 'html' do
   respond_with_preview!
 end
 
-get '/themes/:id/download/:type' do
+get '/themes/:id/download/?:type?' do
   if params[:type] == 'wordpress'
     archive = theme.wp_archive
   else

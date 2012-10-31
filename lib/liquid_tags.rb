@@ -15,13 +15,17 @@ module LiquidTags
     end
   end
 
-  class PHPBlock < Liquid::Tag
-    def initialize(tag_name, markup, token)
-      super
-      @name = tag_name
-      @label = if markup.blank? then 'Default' else markup.strip end
-    end
+  class HTMLBlock < Block
+    def render(context)
+      blocks = context['blocks'].select do |block|
+        block[:name] == @name && block[:label] == @label
+      end
 
+      blocks.first[:template] unless blocks.empty?
+    end
+  end
+
+  class PHPBlock < Block
     def render(context)
       blocks = context['blocks'].select do |block|
         block[:name] == @name && block[:label] == @label

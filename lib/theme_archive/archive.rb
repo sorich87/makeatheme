@@ -45,9 +45,11 @@ module ThemeArchive
 
     def compile_regions(zipfile)
       @theme.regions.each do |region|
-        zipfile.get_output_stream(region_filename(region)) do |f|
-          data = region_data(region)
-          f.puts data unless data.nil?
+        filename = region_filename(region)
+        return if filename.nil?
+
+        zipfile.get_output_stream(filename) do |f|
+          f.puts region_data(region)
         end
       end
     end
@@ -60,9 +62,11 @@ module ThemeArchive
 
     def compile_templates(zipfile)
       @theme.templates.each do |template|
-        zipfile.get_output_stream(template_filename(template)) do |f|
-          data = template_data(template)
-          f.puts data unless data.nil?
+        filename = template_filename(template)
+        return if filename.nil?
+
+        zipfile.get_output_stream(filename) do |f|
+          f.puts template_data(template)
         end
       end
     end
@@ -75,9 +79,11 @@ module ThemeArchive
 
     def compile_sidebars(zipfile)
       @theme.blocks.where(name: 'sidebar').each do |sidebar|
-        zipfile.get_output_stream(sidebar_filename(sidebar)) do |f|
-          data = sidebar_data(sidebar)
-          f.puts data unless data.nil?
+        filename = sidebar_filename(sidebar)
+        return if filename.nil?
+
+        zipfile.get_output_stream(filename) do |f|
+          f.puts sidebar_data(sidebar)
         end
       end
     end
@@ -90,9 +96,11 @@ module ThemeArchive
 
     def compile_assets(zipfile)
       @theme.assets.each do |asset|
-        zipfile.get_output_stream(asset_filename(asset)) do |f|
-          data = asset_data(asset)
-          f.puts data unless data.nil?
+        filename = asset_filename(asset)
+        return if filename.nil?
+
+        zipfile.get_output_stream(filename) do |f|
+          f.puts asset_data(asset)
         end
       end
     end
@@ -109,8 +117,7 @@ module ThemeArchive
     def compile_stylesheets(zipfile)
       style = @theme.css(true)
       zipfile.get_output_stream('style.css') do |f|
-        data = stylesheet_data(style)
-        f.puts data unless data.nil?
+        f.puts stylesheet_data(style)
       end
     end
 
