@@ -14,9 +14,4 @@ class Template
   def slug
     self[:name].parameterize
   end
-
-  # PHP filename
-  def filename
-    "#{self.slug}.php"
-  end
 end

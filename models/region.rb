@@ -6,15 +6,4 @@ class Region
   field :template, type: String
 
   embedded_in :theme
-
-  # Region PHP filename
-  def filename
-    filename = self[:name]
-
-    unless self[:slug].nil? || self[:slug] == 'default'
-      filename += "-#{self[:slug]}"
-    end
-
-    "#{filename}.php"
-  end
 end
