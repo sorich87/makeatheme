@@ -17,4 +17,10 @@ namespace :db do
   desc "Delete data and seed"
   task :reseed => [ "db:purge", "db:seed" ]
 
+  desc "Make changes to database schema"
+  task :migrate do
+    migration_file = File.join(settings.root, "db", "migrate.rb")
+    load(migration_file) if File.exist?(migration_file)
+  end
+
 end
