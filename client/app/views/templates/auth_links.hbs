@@ -1,9 +1,8 @@
 {{#if currentUser.id}}
   <ul class="nav">
     <li><a href="/me/themes" id="your_themes">Your themes</a></li>
-    <li><a href="/upload" id="upload_theme">Upload</a></li>
+    <li><button class="btn" id="logout">Log out</button></li>
   </ul>
-  <button class="btn" id="logout">Log out</button>
 {{else}}
   <ul class="nav">
     <li><a id="register" href="/register">Register</a></li>
