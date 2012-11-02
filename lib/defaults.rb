@@ -137,7 +137,82 @@ Nunc iaculis suscipit dui.</p></pre>
     }
 
     TEMPLATES = {
-      index: '<div class="row" id="main"></div>'
+      index: %q[<div class="row" id="main">
+<div class="columns">
+<h1>Welcome to Make A Theme!</h1>
+<p>This is a small guide to get you started. Reading it will give you
+an idea of how to build your theme within a few minutes.</p>
+</div>
+
+<div class="columns">
+<h2>How is a theme structured?</h2>
+<p>A theme is made of several templates. You can switch templates and
+add new ones by clicking &quot;Current Template&quot; to the right of
+the screen.</p>
+<p>A template is made of a header, a content area and a footer.
+Do you see the blue areas marked "HEADER" and "FOOTER" above and below?
+These are the header and footer of this template and you can add blocks there.
+More on how to add blocks below.</p>
+<p>Several templates can share the same header and/or footer.</p>
+<p>Click &quot;Header & Footer&quot; to the right of the screen to select
+which header and footer the current template uses or to add a new header
+or footer.</p>
+</div>
+
+<div class="columns">
+<h2>What is a block?</h2>
+<p>Blocks are the components of a theme that you can actually see.
+A block can be an article, a navigation, a header image, a search form.</p>
+<p>To insert a block in the template, drag it and drop it right here.
+Go ahead! Drag the "Navigation" block and drop it right here.</p>
+<p>After droping a block in the template, you can move it to another location,
+resize it or delete it. What are you waiting for? Try it!
+You see how it's funny?</p>
+<p>You can create new blocks as well. By example, you may want to create
+several blocks of the same type to apply different styling to them.</p>
+<p>We will be adding plenty of types of blocks in the future that you can use.
+Like slideshows, galleries, etc. Please be patient. Remember,
+we are in a very early stage...</p>
+</div>
+
+<div class="columns">
+<h2>What is &quot;Style&quot; for?</h2>
+<p>Under &quot;Style&quot;, is where, you guessed it, you can add styling
+to the elements on the page. You can add colors, backgrounds, width, etc.
+In fact, you can add any style supported by the CSS specification.</p>
+<p>Click on the block you just inserted, then click on
+&quot;Add Declaration&quot; under &quot;Style&quot;.
+Click &quot;Add rule&quot;. Now add a rule. By example,
+type &quot;color&quot; in the property field and &quot;#f00&quot;
+in the value field.</p>
+<p>Do you see how the template is now beautiful? Well, not really.
+But it will be when you add your creative touch! ;)</p>
+</div>
+
+<div class="columns">
+<h2>How to share with others?</h2>
+<p>Just copy the URL under &quot;Share&quot; and sent it to them.
+Soon, we will be adding more collaboration tools.</p>
+</div>
+
+<div class="columns">
+<h2>How to download the result?</h2>
+<p>First, you will need to save it. You are too shy!
+Click the &quot;Save Changes&quot; button now.
+Then wait for the archives to be built.</p>
+<p>The download button will appear and you will be able to download
+in HTML5 or WordPress format.</p>
+</div>
+
+<div class="columns">
+<h2>Is that all?</h2>
+<p>Yes, now you know everything to get you started. This tutorial is
+made of several blocks. Delete them and make your next theme!
+<p><b>PS:</b> If you are too busy (or lazy) to make a new theme from scratch,
+you can copy an existing one and modify it. Click "HOME" in the site
+navigation bar to go back to the list of themes.</p>
+</div>
+</div>]
     }
 
     REGIONS = {
