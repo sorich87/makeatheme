@@ -37,7 +37,8 @@ exports.config =
           'vendor/scripts/bootstrap/bootstrap-modal.js',
           'vendor/scripts/bootstrap/bootstrap-alert.js',
           'vendor/scripts/bootstrap/bootstrap-transition.js',
-          'vendor/scripts/bootstrap/bootstrap-dropdown.js'
+          'vendor/scripts/bootstrap/bootstrap-dropdown.js',
+          'vendor/scripts/bootstrap/bootstrap-typeahead.js'
         ]
 
     stylesheets:

@@ -1,5 +1,6 @@
 var View = require("views/base/view")
-  , application = require("application");
+  , application = require("application")
+  , cssProperties = require("lib/css_properties");
 
 module.exports = View.extend({
     template: "theme"
@@ -9,5 +10,13 @@ module.exports = View.extend({
       , id: this.options.themeID
       , action: this.options.action || ""
     };
+  }
+
+  , initialize: function () {
+    $("body").on("mouseenter", "[name=property]", function (e) {
+      $(e.currentTarget).typeahead({
+        source: cssProperties
+      });
+    });
   }
 });
