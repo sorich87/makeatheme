@@ -1,6 +1,6 @@
 
 Theme.all.each do |theme|
-  Theme.collection.find(_id: theme.id).update(
+  theme.update(
     {
       '$unset' => {
         archive_file_name: true,

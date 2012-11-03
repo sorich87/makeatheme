@@ -104,8 +104,8 @@ module ThemeArchive
         'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
       }
 
-      data = "/*"
-      headers.each {|key, value| data += "#{key}: #{value}"}
+      data = "/*\n"
+      headers.each {|key, value| data += "#{key}: #{value}\n"}
       data += "*/\n\n"
     end
 
