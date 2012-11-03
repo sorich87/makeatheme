@@ -286,10 +286,10 @@ window.require.define({"collections/themes": function(exports, require, module) 
 }});
 
 window.require.define({"initialize": function(exports, require, module) {
-  var application = require('application');
+  var app = require('application');
 
   jQuery(function($) {
-    application.initialize();
+    app.initialize();
 
     // Enable HTML5 pushstate
     Backbone.history.start({pushState: true});
@@ -298,14 +298,18 @@ window.require.define({"initialize": function(exports, require, module) {
     // or go to the homepage if no previous page (#main is empty)
     $(document).on("hidden", ".modal", function () {
       if ($("#main").children().length === 0) {
-        Backbone.history.navigate("/", true);
+        if (app.currentUser.id) {
+          Backbone.history.navigate("/themes", true);
+        } else {
+          document.location = "/";
+        }
       } else {
         Backbone.history.back(true);
       }
     });
 
     // All navigation that is relative should be passed through the navigate
-    // method, to be processed by the router.
+    // method, to be processed by the router if the user is not on the homepage.
     // If the link has a `data-bypass` attribute, bypass the delegation completely.
     // If the link has a `data-replace` attribute, update the URL without creating
     // an entry in the browser history.
@@ -313,7 +317,8 @@ window.require.define({"initialize": function(exports, require, module) {
       var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
       , root = location.protocol + "//" + location.host + "/";
 
-      if (href.prop && href.prop.slice(0, root.length) === root) {
+      if (href.prop && href.prop.slice(0, root.length) === root &&
+         Backbone.history.fragment !== "") {
         e.preventDefault();
 
         Backbone.history.navigate(href.attr, {
@@ -1288,6 +1293,7 @@ window.require.define({"router": function(exports, require, module) {
   module.exports = Backbone.Router.extend({
     routes: {
         "": "index"
+      , "themes": "themes"
       , "me/themes": "your_themes"
       , "themes/:id": "theme"
       , "themes/:id/edit": "edit"
@@ -1299,14 +1305,15 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , index: function () {
+    }
+
+    , themes: function () {
       var collection = new Themes(app.data.themes)
         , $main = $("#main");
 
       $main.empty();
 
-      if (!app.currentUser.id) {
-        $main.append(app.reuseView("faq").render().$el);
-      } else {
+      if (app.currentUser.id) {
         $main
           .append("<div id='new-button'><a href='/themes/new' " +
                   "class='btn btn-primary btn-large' data-bypass='true'>" +
@@ -1363,7 +1370,7 @@ window.require.define({"router": function(exports, require, module) {
       $("body").append(app.createView("theme_upload").render().$el.modal("show"));
     }
 
-    , notFound: function () {
+    , notFound: function (action) {
       $("#main").empty()
         .append(app.reuseView("not_found").render().$el);
     }
@@ -1831,15 +1838,6 @@ window.require.define({"views/editor": function(exports, require, module) {
         , content: ""
       });
     }
-  });
-  
-}});
-
-window.require.define({"views/faq": function(exports, require, module) {
-  var View = require("views/base/view");
-
-  module.exports = View.extend({
-    template: "faq"
   });
   
 }});
@@ -3171,7 +3169,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <ul class=\"nav\">\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
+    return "\n  <ul class=\"nav\">\n    <li><a href=\"/themes\" id=\"your_themes\">New theme</a></li>\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
 
   function program3(depth0,data) {
     
@@ -3260,15 +3258,6 @@ window.require.define({"views/templates/download_button": function(exports, requ
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
     buffer += escapeExpression(stack1) + "/download/wordpress\" target=\"_blank\"\n      data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/faq": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<div class=\"headline clearfix\">\n  <h1 class=\"catch-phrase\">Fast Custom Design Tools\n    <br /><small>for Your Web and Mobile Sites</small></h1>\n\n  <div class=\"row\">\n    <div class=\"call-to-action span6\">\n      <p>Design your beautiful, responsive HTML5 themes in minutes\n      with a powerful drag and drop editor.</p>\n\n      <p><small>Use them on your own website, sell them to earn money\n        <br />or share them with others for free.</small></p>\n\n      <p>\n        <a href=\"/register\" class=\"btn btn-large btn-primary\">\n          Get Started Now. It's Free.\n        </a>\n      </p>\n    </div>\n\n    <div class=\"span6\">\n      <img src=\"/images/screenshot.png\" width=\"510\" height=\"322\" />\n    </div>\n  </div>\n</div>\n\n<div class=\"features\">\n  <div class=\"row\">\n    <div class=\"span4\">\n      <img src=\"/images/pencil.png\" height=\"150\" />\n      <h3>Easy to Use.</h3>\n      <p>It's so simple anyone can use it.<br />\n      But it's still powerful enough for the most advanced users.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/photoshop.png\" height=\"150\" />\n      <h3>All-in-One Workflow.</h3>\n      <p>Skip Photoshop. Skip your text editor.<br />\n      Save time and money by building your themes directly in your browser.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/responsive.png\" height=\"150\" />\n      <h3>Responsive. Responsive.</h3>\n      <p>Reach the 2 billions of people<br />\n      browsing the Web from desktops, mobiles,<br />\n      tablets, TVs, (coffee machines?)&hellip;</p>\n    </div>\n  </div>\n\n  <div class=\"row\">\n    <div class=\"span4\">\n      <img src=\"/images/html5.png\" height=\"150\" />\n      <h3>Beautiful Code.</h3>\n      <p>No HTML tag soup. No spaghetti PHP code.\n      Well organized CSS. Generated for real people, not robots.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/presets.png\" height=\"150\" />\n      <h3>Preset Themes.</h3>\n      <p>You don't always have to start<br />\n      from scratch. Browse the gallery of pre-built themes,\n      copy and customize.</p>\n    </div>\n\n    <div class=\"span4\">\n      <img src=\"/images/wordpress.png\" height=\"150\" />\n      <h3>It haz WordPress!</h3>\n      <p>Exporting to a WordPress theme<br />\n      is just one click away. No PHP mastering required.</p>\n    </div>\n  </div>\n</div>\n\n<div class=\"row call-to-action\">\n  <blockquote>\n    <p>Non-desktop computers (phones, tablets, TVs, cars, glasses, etc.) are\n    becoming the primary way to access the Web. The next versions of the Web\n    languages (HTML, JavaScript,...) will be very powerful but more complex\n    and I believe our existing tools are not evolving quickly enough.</p>\n    <p>The goal of Make A Theme is to build the tools to make Web Design easier and\n    faster for the future Web.</p>\n\n    <small>Ulrich Sossou, <cite title=\"Founder / Developer @ Make A Theme\">\n        Founder / Developer @ Make A Theme</cite></small>\n  </blockquote>\n  <p>\n    Help us shape the future of Web Design. Don't be left behind.\n    <a href=\"/register\" class=\"btn btn-large btn-primary pull-right\">\n      Sign Up for the Free Beta.\n    </a>\n  </p>\n</div>\n\n<footer id=\"footer\">\n  <p>&copy; 2012 Make A Theme\n  &middot; <a href=\"/register\">Register</a>\n  &middot; <a href=\"/login\">Login</a>\n  &middot; <a href=\"http://makeatheme.freshdesk.com/\">Support</a>\n  </p>\n</footer>\n";});
 }});
 
 window.require.define({"views/templates/login": function(exports, require, module) {

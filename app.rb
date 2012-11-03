@@ -8,6 +8,7 @@ $LOAD_PATH.unshift(File.join(settings.root, 'helpers'))
 $LOAD_PATH.unshift(File.join(settings.root, 'routes'))
 
 require 'sinatra/session'
+require 'sinatra/content_for'
 require 'sinatra/respond_with'
 require 'mongoid'
 require 'mongoid-grid_fs'

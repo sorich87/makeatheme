@@ -21,7 +21,7 @@ end
 
 # Load index
 get '/', provides: 'html' do
-  load_index
+  respond_with :home
 end
 
 get '/jobs/:job_id', provides: 'text/event-stream' do

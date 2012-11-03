@@ -4,6 +4,7 @@ var app = require("application")
 module.exports = Backbone.Router.extend({
   routes: {
       "": "index"
+    , "themes": "themes"
     , "me/themes": "your_themes"
     , "themes/:id": "theme"
     , "themes/:id/edit": "edit"
@@ -15,14 +16,15 @@ module.exports = Backbone.Router.extend({
   }
 
   , index: function () {
+  }
+
+  , themes: function () {
     var collection = new Themes(app.data.themes)
       , $main = $("#main");
 
     $main.empty();
 
-    if (!app.currentUser.id) {
-      $main.append(app.reuseView("faq").render().$el);
-    } else {
+    if (app.currentUser.id) {
       $main
         .append("<div id='new-button'><a href='/themes/new' " +
                 "class='btn btn-primary btn-large' data-bypass='true'>" +
@@ -79,7 +81,7 @@ module.exports = Backbone.Router.extend({
     $("body").append(app.createView("theme_upload").render().$el.modal("show"));
   }
 
-  , notFound: function () {
+  , notFound: function (action) {
     $("#main").empty()
       .append(app.reuseView("not_found").render().$el);
   }

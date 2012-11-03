@@ -102,7 +102,7 @@ module ThemeHelper
 
     pieces = theme_pieces(theme, !preview_only)
 
-    respond_with :editor,
+    erb :editor, {layout: false},
       theme: theme.to_json,
       style: theme.style.to_json,
       pieces: pieces.to_json,
@@ -115,7 +115,7 @@ module ThemeHelper
     pieces = theme_pieces(theme)
     index = pieces[:templates].select { |t| t[:name] == 'index' }[0]
 
-    respond_with :preview,
+    erb :preview, {layout: false},
       style: theme.css,
       template: index[:full]
   end
