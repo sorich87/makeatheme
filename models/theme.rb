@@ -149,7 +149,8 @@ class Theme
     theme.assign_attributes({
       listed: false,
       screenshot: nil,
-      html_archive: nil
+      html_archive: nil,
+      wp_archive: nil
     }.merge(attributes))
     theme
   end
