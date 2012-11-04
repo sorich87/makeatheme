@@ -2,13 +2,13 @@ var debug
   , app = require("application");
 
 debug = {
-  identify: function (user_id) {
-    console.log("mixpanel.identify");
-    console.log(user_id);
-  }
+  people: {
+    identify: function (user_id) {
+      console.log("mixpanel.identify");
+      console.log(user_id);
+    }
 
-  , people: {
-    increment: function (properties) {
+    , increment: function (properties) {
       console.log("mixpanel.people.increment");
       console.log(properties);
     }
@@ -53,14 +53,14 @@ module.exports = {
       , $first_name: user.get("first_name")
       , $last_name: user.get("last_name")
     });
-    mixpanel.identify(user.id);
+    mixpanel.people.identify(user.id);
 
     mixpanel.track("Registration");
   }
 
   , setUserLastLogin: function (user) {
     mixpanel.people.set({$last_login: new Date()});
-    mixpanel.identify(user.id);
+    mixpanel.people.identify(user.id);
 
     mixpanel.track("Login");
   }
