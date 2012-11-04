@@ -81,7 +81,11 @@ window.require.define({"application": function(exports, require, module) {
 
   _.extend(Application, {
     initialize: function() {
-      var Router = require("router");
+      var Router = require("router")
+        , mixpanel = require("lib/mixpanel");
+
+      // Set debug flag.
+      this.debug = this.data.debug;
 
       // Setup notifications handling
       // Append to top window in case document is in an iframe
@@ -92,6 +96,9 @@ window.require.define({"application": function(exports, require, module) {
 
       // Initialize router
       this.router = new Router();
+
+      // Initialize Mixpanel tracking
+      mixpanel.initialize();
 
       // Render the login and logout links
       this.reuseView("auth_links").render();
@@ -1401,6 +1408,119 @@ window.require.define({"lib/matches_selector": function(exports, require, module
   
 }});
 
+window.require.define({"lib/mixpanel": function(exports, require, module) {
+  var debug
+    , app = require("application");
+
+  debug = {
+    identify: function (user_id) {
+      console.log("mixpanel.track");
+      console.log(user_id);
+    }
+
+    , people: {
+      increment: function (properties) {
+        console.log("mixpanel.people.increment");
+        console.log(properties);
+      }
+      , set: function (properties) {
+        console.log("mixpanel.people.set");
+        console.log(properties);
+      }
+    }
+
+    , track: function (name, properties) {
+      console.log("mixpanel.track");
+      console.log(name);
+      console.log(properties);
+    }
+  };
+
+  module.exports = {
+    initialize: function () {
+      if (app.debug) {
+        window.mixpanel = debug;
+      }
+
+      if (!("mixpanel" in window)) {
+        return;
+      }
+
+      // Update user's attributes on login and registration.
+      app.on("registration", this.setUserAttributes);
+      app.on("login", this.setUserLastLogin);
+
+      // Track click on elements with data-event attribute.
+      $("body").on("click", "[data-event]", this.trackClickEvent.bind(this));
+
+      // Track some routes.
+      Backbone.history.on("route", this.trackRouteChange.bind(this));
+    }
+
+    , setUserAttributes: function (user) {
+      mixpanel.people.set({
+          $created: new Date(user.get("created_at"))
+        , $email: user.get("email")
+        , $first_name: user.get("first_name")
+        , $last_name: user.get("last_name")
+      });
+      mixpanel.identify(user.id);
+
+      mixpanel.track("Registration");
+    }
+
+    , setUserLastLogin: function (user) {
+      mixpanel.people.set({$last_login: new Date()});
+      mixpanel.identify(user.id);
+
+      mixpanel.track("Login");
+    }
+
+    // data-event attribute should be in the format
+    // "eventName:[propertyKey:propertyValue]*"
+    , trackClickEvent: function (e) {
+      var double
+        , properties = {}
+        , details = e.currentTarget.getAttribute("data-event").split(":")
+        , name = details.splice(0, 1)[0]
+        , methodName = "trackUser" + name.replace(/\s/g,"");
+
+      while (details.length > 0) {
+        double = details.splice(0, 2);
+        properties[double[0]] = double[1];
+      }
+
+      mixpanel.track(name, properties);
+
+      // Update user's attributes in relevant cases as well.
+      if (this[methodName] !== void 0) {
+        this[methodName](properties);
+      }
+    }
+
+    , trackUserDownload: function (properties) {
+      mixpanel.people.increment(properties.format + " downloads");
+    }
+
+    , trackUserNewTheme: function (properties) {
+      mixpanel.people.increment("themes " + properties.type);
+    }
+
+    , trackRouteChange: function (router, name) {
+      switch (name) {
+        case "index":
+          mixpanel.track("Home Page Visit");
+          break;
+
+        case "register":
+          mixpanel.track("Registration Form Loaded");
+          break;
+      }
+    }
+  };
+  
+}});
+
 window.require.define({"models/base/model": function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
@@ -1634,6 +1754,7 @@ window.require.define({"router": function(exports, require, module) {
       if (app.currentUser.id) {
         $main
           .append("<div id='new-button'><a href='/themes/new' " +
+                  "data-event='New Theme:type:from scratch'" +
                   "class='btn btn-primary btn-large' data-bypass='true'>" +
                   "Create a New Theme</a></div>")
           .append("<h3 class='page-title'>Or copy a theme below</h3>")
@@ -2079,6 +2200,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
       } else {
         button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
+          " data-event='New Theme:type:copy'" +
           " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
       }
 
@@ -2524,7 +2646,7 @@ window.require.define({"views/login": function(exports, require, module) {
               this.model.set(response);
               this.model.set("themes", new Themes(response.themes));
 
-              app.trigger("login");
+              app.trigger("login", this.model);
 
               this.$el.modal("hide");
 
@@ -2954,6 +3076,8 @@ window.require.define({"views/register": function(exports, require, module) {
       user.save(attrs, {
         success: function (model, res) {
           model.set(res);
+
+          app.trigger("registration", model);
 
           app.trigger("notification", "success", "Your registration was successful. You are now logged in.");
 
@@ -3569,12 +3693,12 @@ window.require.define({"views/templates/download_button": function(exports, requ
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" target=\"_blank\" data-bypass=\"true\">\n      Download HTML5</a></li>\n    <li><a href=\"/themes/";
+    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n      target=\"_blank\" data-bypass=\"true\">Download HTML5</a></li>\n    <li><a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download/wordpress\" target=\"_blank\"\n      data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
+    buffer += escapeExpression(stack1) + "/download/wordpress\"\n      data-event=\"Download:format:WordPress\"\n      target=\"_blank\" data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
     return buffer;});
 }});
 

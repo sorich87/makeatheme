@@ -27,6 +27,7 @@ module.exports = Backbone.Router.extend({
     if (app.currentUser.id) {
       $main
         .append("<div id='new-button'><a href='/themes/new' " +
+                "data-event='New Theme:type:from scratch'" +
                 "class='btn btn-primary btn-large' data-bypass='true'>" +
                 "Create a New Theme</a></div>")
         .append("<h3 class='page-title'>Or copy a theme below</h3>")

@@ -59,7 +59,7 @@ module.exports = View.extend({
             this.model.set(response);
             this.model.set("themes", new Themes(response.themes));
 
-            app.trigger("login");
+            app.trigger("login", this.model);
 
             this.$el.modal("hide");
 

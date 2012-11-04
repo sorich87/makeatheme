@@ -73,6 +73,7 @@ module.exports = View.extend({
       button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
     } else {
       button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
+        " data-event='New Theme:type:copy'" +
         " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
     }
 
