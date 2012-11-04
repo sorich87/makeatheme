@@ -1414,7 +1414,7 @@ window.require.define({"lib/mixpanel": function(exports, require, module) {
 
   debug = {
     identify: function (user_id) {
-      console.log("mixpanel.track");
+      console.log("mixpanel.identify");
       console.log(user_id);
     }
 
