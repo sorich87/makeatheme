@@ -1,3 +1,4 @@
+require 'net/http'
 require 'theme_archive/archive'
 
 module ThemeArchive
@@ -19,10 +20,18 @@ module ThemeArchive
         @locals
       )
 
-      data = before_template + render_template(data, @locals) + after_template
+      beauty_uri = URI('http://beautify.makeatheme.com/')
+
+      body = '<body><div id="page" class="hfeed site">'
+      body += render_template(data, @locals).gsub(/[\t\n]/, '')
+      body += '</div></body>'
+
+      res = Net::HTTP.post_form(beauty_uri, source: body)
+
+      data = before_body + res.body + after_body
 
       # Hacky way to make image URLs relative
-      data.gsub("src='/", "src='")
+      data.gsub("src='/", "src='").gsub('src="/', 'src="')
     end
 
     def template_filename(template)
@@ -43,8 +52,8 @@ module ThemeArchive
       ).first[:template]
     end
 
-    def before_template
-      return %q(<!DOCTYPE html>
+    def before_body
+      return %Q(<!DOCTYPE html>
 
 <!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
 <!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
@@ -60,16 +69,11 @@ module ThemeArchive
   <title></title>
 
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="page" class="hfeed site">
-)
+</head>\n)
     end
 
-    def after_template
-      return %q(</div>
-</body>
-</html>)
+    def after_body
+      return "\n</html>"
     end
 
     def compile_other_files(zipfile)
