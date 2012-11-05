@@ -72,6 +72,10 @@ module ThemeArchive
       return "\n</html>"
     end
 
+    def stylesheet_data(style)
+      beautify(super, 'css')
+    end
+
     def compile_other_files(zipfile)
       headers_dir = File.join(settings.root, 'public', 'images', 'headers', '*')
       Dir[headers_dir].each do |header_path|

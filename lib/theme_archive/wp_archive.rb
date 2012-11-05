@@ -24,7 +24,8 @@ module ThemeArchive
         template = template + Defaults::PHP::REGIONS[:footer]
       end
 
-      render_template(template, @locals)
+      data = render_template(template, @locals)
+      beautify(data, 'html')
     end
 
     def region_filename(region)
@@ -44,10 +45,11 @@ module ThemeArchive
       # Add template name comment before header
       # if template is not a default one.
       unless Defaults::WP::TEMPLATES.include?(template.name)
-        header = "/**\n * Template Name: #{template.name}\n */\n" + header
+        header = "<?php\n/**\n * Template Name: #{template.name}\n */\n?>\n" + header
       end
 
-      render_template(header + template[:template] + footer, @locals)
+      data = beautify(render_template(template[:template], @locals), 'html')
+      header + data + footer
     end
 
     def template_filename(template)
@@ -56,17 +58,17 @@ module ThemeArchive
 
     def header_tag(template)
       if template.regions[:header] == 'default'
-        '<?php get_header(); ?>'
+        "\n<?php get_header(); ?>\n\n"
       else
-        "<?php get_header('#{template.regions[:header]}'); ?>"
+        "\n<?php get_header('#{template.regions[:header]}'); ?>\n\n"
       end
     end
 
     def footer_tag(template)
       if template.regions[:footer] == 'default'
-        '<?php get_footer(); ?>'
+        "\n\n<?php get_footer(); ?>\n"
       else
-        "<?php get_footer('#{template.regions[:footer]}'); ?>"
+        "\n\n<?php get_footer('#{template.regions[:footer]}'); ?>\n"
       end
     end
 
@@ -81,9 +83,10 @@ module ThemeArchive
     end
 
     def sidebar_data(sidebar)
-      render_template(Defaults::PHP::BLOCKS[:sidebar], {
+      data = render_template(Defaults::PHP::BLOCKS[:sidebar], {
         block_slug: sidebar.label.underscore
       })
+      beautify(data, 'html')
     end
 
     def stylesheet_data(style)

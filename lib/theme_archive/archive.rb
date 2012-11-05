@@ -117,7 +117,7 @@ module ThemeArchive
     def compile_stylesheets(zipfile)
       style = @theme.css(true)
       zipfile.get_output_stream('style.css') do |f|
-        f.puts beautify(stylesheet_data(style), 'css')
+        f.puts stylesheet_data(style)
       end
     end
 
