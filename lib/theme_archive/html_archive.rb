@@ -20,15 +20,11 @@ module ThemeArchive
         @locals
       )
 
-      beauty_uri = URI('http://beautify.makeatheme.com/')
-
       body = '<body><div id="page" class="hfeed site">'
-      body += render_template(data, @locals).gsub(/[\t\n]/, '')
+      body += render_template(data, @locals)
       body += '</div></body>'
 
-      res = Net::HTTP.post_form(beauty_uri, source: body)
-
-      data = before_body + res.body + after_body
+      data = before_body + beautify(body, 'html') + after_body
 
       # Hacky way to make image URLs relative
       data.gsub("src='/", "src='").gsub('src="/', 'src="')
