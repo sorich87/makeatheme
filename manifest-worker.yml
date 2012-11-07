@@ -1,0 +1,21 @@
+---
+applications:
+  .:
+    name: mat-resque-worker
+    framework:
+      name: standalone
+      info:
+        mem: 64M
+        description: Standalone Application
+        exec: 
+    runtime: ruby193
+    command: env TERM_CHILD=1 QUEUE=* bundle exec rake resque:work
+    infra: aws
+    url: 
+    mem: 128M
+    instances: 1
+    services:
+      work-queue:
+        type: redis
+      main-database:
+        type: mongodb
