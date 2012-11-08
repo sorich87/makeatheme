@@ -1,6 +1,7 @@
 require 'zip/zip'
 require 'pathname'
 require 'erb'
+require 'open-uri'
 
 module ThemeArchive
 
@@ -110,8 +111,7 @@ module ThemeArchive
     end
 
     def asset_data(asset)
-      file_io = Kernel.open(asset.file.url)
-      file_io.read unless file_io.nil?
+      open(asset.file.url)
     end
 
     def compile_stylesheets(zipfile)
