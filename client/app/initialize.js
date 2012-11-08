@@ -6,20 +6,6 @@ jQuery(function($) {
   // Enable HTML5 pushstate
   Backbone.history.start({pushState: true});
 
-  // When a modal is closed, go back to the previous page
-  // or go to the homepage if no previous page (#main is empty)
-  $(document).on("hidden", ".modal", function () {
-    if ($("#main").children().length === 0) {
-      if (app.currentUser.id) {
-        Backbone.history.navigate("/themes", true);
-      } else {
-        document.location = "/";
-      }
-    } else {
-      Backbone.history.back(true);
-    }
-  });
-
   // All navigation that is relative should be passed through the navigate
   // method, to be processed by the router if the user is not on the homepage.
   // If the link has a `data-bypass` attribute, bypass the delegation completely.

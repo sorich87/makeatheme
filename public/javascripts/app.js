@@ -112,6 +112,9 @@ window.require.define({"application": function(exports, require, module) {
       // Holds editor settings and data
       this.editor = {};
 
+      // When login or registration modal is closed, go back to the previous page
+      this.authRedirect();
+
       // Prevent further modification of the application object
       Object.freeze(this);
     }
@@ -148,9 +151,6 @@ window.require.define({"application": function(exports, require, module) {
 
     , setBodyClasses: function () {
       Backbone.history.on("route", function (router, name) {
-        if (!this.currentUser.id) {
-          name += " anonymous";
-        }
         document.body.className = name;
       }.bind(this));
     }
@@ -184,6 +184,19 @@ window.require.define({"application": function(exports, require, module) {
 
     , updateCurrentUserThemes: function (theme) {
       this.currentUser.get("themes").add(theme);
+    }
+
+    , authRedirect: function () {
+      this.on("login", this.historyBack);
+      this.on("registration", this.historyBack);
+    }
+
+    , historyBack: function () {
+      if ($("#main").children().length === 0) {
+        Backbone.history.navigate("/", true);
+      } else {
+        Backbone.history.back(true);
+      }
     }
   }, Backbone.Events);
 
@@ -300,20 +313,6 @@ window.require.define({"initialize": function(exports, require, module) {
 
     // Enable HTML5 pushstate
     Backbone.history.start({pushState: true});
-
-    // When a modal is closed, go back to the previous page
-    // or go to the homepage if no previous page (#main is empty)
-    $(document).on("hidden", ".modal", function () {
-      if ($("#main").children().length === 0) {
-        if (app.currentUser.id) {
-          Backbone.history.navigate("/themes", true);
-        } else {
-          document.location = "/";
-        }
-      } else {
-        Backbone.history.back(true);
-      }
-    });
 
     // All navigation that is relative should be passed through the navigate
     // method, to be processed by the router if the user is not on the homepage.
@@ -1730,8 +1729,7 @@ window.require.define({"router": function(exports, require, module) {
 
   module.exports = Backbone.Router.extend({
     routes: {
-        "": "index"
-      , "themes": "themes"
+        "": "themes"
       , "me/themes": "your_themes"
       , "themes/:id": "theme"
       , "themes/:id/edit": "edit"
@@ -1742,27 +1740,26 @@ window.require.define({"router": function(exports, require, module) {
       , "*actions": "notFound"
     }
 
-    , index: function () {
-    }
-
     , themes: function () {
+      this.userOnly();
+
       var collection = new Themes(app.data.themes)
         , $main = $("#main");
 
       $main.empty();
 
-      if (app.currentUser.id) {
-        $main
-          .append("<div id='new-button'><a href='/themes/new' " +
-                  "data-event='New Theme:type:from scratch'" +
-                  "class='btn btn-primary btn-large' data-bypass='true'>" +
-                  "Create a New Theme</a></div>")
-          .append("<h3 class='page-title'>Or copy a theme below</h3>")
-          .append(app.createView("theme_list", {collection: collection}).render().$el);
-      }
+      $main
+        .append("<div id='new-button'><a href='/themes/new' " +
+                "data-event='New Theme:type:from scratch'" +
+                "class='btn btn-primary btn-large' data-bypass='true'>" +
+                "Create a New Theme</a></div>")
+        .append("<h3 class='page-title'>Or copy a theme below</h3>")
+        .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
 
     , your_themes: function () {
+      this.userOnly();
+
       var collection = app.currentUser.get("themes");
 
       $("#main").empty()
@@ -1786,18 +1783,24 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , login: function () {
+      this.anonymousOnly();
+
       $(".modal").modal("hide");
 
       $("body").append(app.createView("login").render().$el.modal("show"));
     }
 
     , register: function () {
+      this.anonymousOnly();
+
       $(".modal").modal("hide");
 
       $("body").append(app.createView("register").render().$el.modal("show"));
     }
 
     , reset_password: function () {
+      this.anonymousOnly();
+
       $(".modal").modal("hide");
 
       $("body").append(app.createView("password_reset").render().$el.modal("show"));
@@ -1812,6 +1815,20 @@ window.require.define({"router": function(exports, require, module) {
     , notFound: function (action) {
       $("#main").empty()
         .append(app.reuseView("not_found").render().$el);
+    }
+
+    , userOnly: function () {
+      if (!app.currentUser.id) {
+        document.location = "/login";
+        return true;
+      }
+    }
+
+    , anonymousOnly: function () {
+      if (app.currentUser.id) {
+        document.location = "/";
+        return true;
+      }
     }
   });
   
@@ -2646,10 +2663,9 @@ window.require.define({"views/login": function(exports, require, module) {
               this.model.set(response);
               this.model.set("themes", new Themes(response.themes));
 
-              app.trigger("login", this.model);
-
               this.$el.modal("hide");
 
+              app.trigger("login", this.model);
               app.trigger("notification", "success", "Welcome back, " + this.model.get("first_name") + ".");
             break;
 
@@ -3077,11 +3093,10 @@ window.require.define({"views/register": function(exports, require, module) {
         success: function (model, res) {
           model.set(res);
 
-          app.trigger("registration", model);
-
-          app.trigger("notification", "success", "Your registration was successful. You are now logged in.");
-
           this.$el.modal("hide");
+
+          app.trigger("registration", model);
+          app.trigger("notification", "success", "Your registration was successful. You are now logged in.");
         }.bind(this)
 
         , error: function (model, err) {
@@ -3611,7 +3626,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <ul class=\"nav\">\n    <li><a href=\"/themes\" id=\"your_themes\">New theme</a></li>\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
+    return "\n  <ul class=\"nav\">\n    <li><a href=\"/\" id=\"your_themes\">New theme</a></li>\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
 
   function program3(depth0,data) {
     

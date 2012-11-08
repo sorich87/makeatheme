@@ -3,8 +3,7 @@ var app = require("application")
 
 module.exports = Backbone.Router.extend({
   routes: {
-      "": "index"
-    , "themes": "themes"
+      "": "themes"
     , "me/themes": "your_themes"
     , "themes/:id": "theme"
     , "themes/:id/edit": "edit"
@@ -15,27 +14,26 @@ module.exports = Backbone.Router.extend({
     , "*actions": "notFound"
   }
 
-  , index: function () {
-  }
-
   , themes: function () {
+    this.userOnly();
+
     var collection = new Themes(app.data.themes)
       , $main = $("#main");
 
     $main.empty();
 
-    if (app.currentUser.id) {
-      $main
-        .append("<div id='new-button'><a href='/themes/new' " +
-                "data-event='New Theme:type:from scratch'" +
-                "class='btn btn-primary btn-large' data-bypass='true'>" +
-                "Create a New Theme</a></div>")
-        .append("<h3 class='page-title'>Or copy a theme below</h3>")
-        .append(app.createView("theme_list", {collection: collection}).render().$el);
-    }
+    $main
+      .append("<div id='new-button'><a href='/themes/new' " +
+              "data-event='New Theme:type:from scratch'" +
+              "class='btn btn-primary btn-large' data-bypass='true'>" +
+              "Create a New Theme</a></div>")
+      .append("<h3 class='page-title'>Or copy a theme below</h3>")
+      .append(app.createView("theme_list", {collection: collection}).render().$el);
   }
 
   , your_themes: function () {
+    this.userOnly();
+
     var collection = app.currentUser.get("themes");
 
     $("#main").empty()
@@ -59,18 +57,24 @@ module.exports = Backbone.Router.extend({
   }
 
   , login: function () {
+    this.anonymousOnly();
+
     $(".modal").modal("hide");
 
     $("body").append(app.createView("login").render().$el.modal("show"));
   }
 
   , register: function () {
+    this.anonymousOnly();
+
     $(".modal").modal("hide");
 
     $("body").append(app.createView("register").render().$el.modal("show"));
   }
 
   , reset_password: function () {
+    this.anonymousOnly();
+
     $(".modal").modal("hide");
 
     $("body").append(app.createView("password_reset").render().$el.modal("show"));
@@ -85,5 +89,19 @@ module.exports = Backbone.Router.extend({
   , notFound: function (action) {
     $("#main").empty()
       .append(app.reuseView("not_found").render().$el);
+  }
+
+  , userOnly: function () {
+    if (!app.currentUser.id) {
+      document.location = "/login";
+      return true;
+    }
+  }
+
+  , anonymousOnly: function () {
+    if (app.currentUser.id) {
+      document.location = "/";
+      return true;
+    }
   }
 });

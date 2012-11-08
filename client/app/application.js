@@ -35,6 +35,9 @@ _.extend(Application, {
     // Holds editor settings and data
     this.editor = {};
 
+    // When login or registration modal is closed, go back to the previous page
+    this.authRedirect();
+
     // Prevent further modification of the application object
     Object.freeze(this);
   }
@@ -71,9 +74,6 @@ _.extend(Application, {
 
   , setBodyClasses: function () {
     Backbone.history.on("route", function (router, name) {
-      if (!this.currentUser.id) {
-        name += " anonymous";
-      }
       document.body.className = name;
     }.bind(this));
   }
@@ -107,6 +107,19 @@ _.extend(Application, {
 
   , updateCurrentUserThemes: function (theme) {
     this.currentUser.get("themes").add(theme);
+  }
+
+  , authRedirect: function () {
+    this.on("login", this.historyBack);
+    this.on("registration", this.historyBack);
+  }
+
+  , historyBack: function () {
+    if ($("#main").children().length === 0) {
+      Backbone.history.navigate("/", true);
+    } else {
+      Backbone.history.back(true);
+    }
   }
 }, Backbone.Events);
 

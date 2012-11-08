@@ -19,11 +19,6 @@ error 406 do
   end
 end
 
-# Load index
-get '/', provides: 'html' do
-  respond_with :home
-end
-
 get '/jobs/:job_id', provides: 'text/event-stream' do
   status = Resque::Plugins::Status::Hash.get(params[:job_id])
 

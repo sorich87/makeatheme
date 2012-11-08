@@ -59,10 +59,9 @@ module.exports = View.extend({
             this.model.set(response);
             this.model.set("themes", new Themes(response.themes));
 
-            app.trigger("login", this.model);
-
             this.$el.modal("hide");
 
+            app.trigger("login", this.model);
             app.trigger("notification", "success", "Welcome back, " + this.model.get("first_name") + ".");
           break;
 
