@@ -1,4 +1,5 @@
 require 'resque-lock-timeout'
+require 'open-uri'
 
 module Jobs
   class ThemeArchive
@@ -11,19 +12,15 @@ module Jobs
       theme = Theme.unscoped.where(id: options['theme_id']).first
       return if theme.nil?
 
-      theme_url = "http://#{settings.domain}/themes/#{theme.id}/preview"
-      script = File.join(settings.root, 'script', 'rasterize.js')
+      theme_url = "http://#{settings.editor_domain}/themes/#{theme.id}/preview"
+      screenshot = open("http://#{settings.capture_domain}/?url=#{theme_url}")
 
-      path = File.join(Dir.mktmpdir, 'screenshot.png')
+      if screenshot
+        def screenshot.original_filename; 'screenshot.png'; end
 
-      `phantomjs #{script} #{theme_url} #{path}`
-      if $?.to_i == 0
-        File.open(path) do |file|
-          theme.screenshot = file
-          theme.save
-          theme.generate_archive!
-        end
-        File.delete(path)
+        theme.screenshot = screenshot
+        theme.save
+        theme.generate_archive!
 
         completed theme.to_json
       else

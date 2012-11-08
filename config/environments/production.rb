@@ -1,4 +1,5 @@
-set :domain, 'www.makeatheme.com'
+set :editor_domain, 'www.makeatheme.com'
+set :capture_domain, 'capture.makeatheme.com'
 
 Pony.options = {
   :via => :smtp,
