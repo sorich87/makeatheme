@@ -6089,9 +6089,6 @@ body {
   padding-bottom: 60px;
   line-height: 1.6em;
 }
-body.index {
-  background: #fff url("/images/bg.jpeg") no-repeat top center;
-}
 #back-to-top {
   position: fixed;
   right: 50%;
