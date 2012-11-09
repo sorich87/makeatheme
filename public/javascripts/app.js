@@ -3732,7 +3732,7 @@ window.require.define({"views/templates/not_found": function(exports, require, m
     var foundHelper, self=this;
 
 
-    return "<h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n<p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n<p>Go back to <a href=\"/\" title=\"makeatheme.com\">homepage</a> or\n<a href='http://support.makeatheme.com'>contact us</a> about a problem.</p>\n";});
+    return "<h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n<p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n<p>Go back to <a href=\"/\" title=\"www.makeatheme.com\">homepage</a> or\n<a href='http://support.makeatheme.com'>contact us</a> about a problem.</p>\n";});
 }});
 
 window.require.define({"views/templates/notification": function(exports, require, module) {
