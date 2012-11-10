@@ -6127,6 +6127,9 @@ body.theme {
 body.theme #main {
   padding: 0;
   margin: 0;
+  width: 100%;
+}
+#canvas {
   overflow: hidden;
   float: left;
   position: absolute;
@@ -6165,9 +6168,7 @@ body.theme #main {
 }
 /* Editor */
 #layout-editor {
-  background-color: #fcfcfc;
   color: #1c1c1c;
-  box-shadow: 0 0 3px rgba(0,0,0,0.25), inset 0 -1px 0 rgba(0,0,0,0.1);
   width: 250px;
   height: 100%;
   padding: 0;

@@ -106,9 +106,6 @@ window.require.define({"application": function(exports, require, module) {
       // Set per-view body classes
       this.setBodyClasses();
 
-      // Set editor width
-      this.setEditorWidth();
-
       // Holds editor settings and data
       this.editor = {};
 
@@ -153,19 +150,6 @@ window.require.define({"application": function(exports, require, module) {
       Backbone.history.on("route", function (router, name) {
         document.body.className = name;
       }.bind(this));
-    }
-
-    , setEditorWidth: function () {
-      Backbone.history.on("route", function (router, name) {
-        if (name === "theme") {
-          $("#main")
-            .width($(window).width() - 250)
-            .height($(window).height() - 60);
-        } else {
-          $("#main").removeAttr("style");
-        }
-        $("#layout-editor").remove();
-      });
     }
 
     , setCurrentUser: function () {
@@ -2204,8 +2188,7 @@ window.require.define({"views/editor": function(exports, require, module) {
         this.$el.append(app.createView("download_button").render().$el);
       }
 
-      this.$el.insertAfter($("#main", window.top.document))
-        .height($(window.top).height() - 60);
+      this.$el.appendTo($("#main", window.top.document));
 
       return this;
     }
@@ -4268,6 +4251,9 @@ window.require.define({"views/theme": function(exports, require, module) {
 
   module.exports = View.extend({
       template: "theme"
+
+    , id: "canvas"
+
     , data: function () {
       return {
           route: this.options.route
@@ -4282,6 +4268,14 @@ window.require.define({"views/theme": function(exports, require, module) {
           source: cssProperties
         });
       });
+
+      Backbone.history.on("route", this.fullWidth.bind(this));
+      $(window).on("resize", this.fullWidth.bind(this));
+    }
+
+    , fullWidth: function () {
+      this.$el.width($(window).width() - 250)
+        .height($(window).height() - 60);
     }
   });
   

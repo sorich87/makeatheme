@@ -4,6 +4,9 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     template: "theme"
+
+  , id: "canvas"
+
   , data: function () {
     return {
         route: this.options.route
@@ -18,5 +21,13 @@ module.exports = View.extend({
         source: cssProperties
       });
     });
+
+    Backbone.history.on("route", this.fullWidth.bind(this));
+    $(window).on("resize", this.fullWidth.bind(this));
+  }
+
+  , fullWidth: function () {
+    this.$el.width($(window).width() - 250)
+      .height($(window).height() - 60);
   }
 });
