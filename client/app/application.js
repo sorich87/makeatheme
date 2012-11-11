@@ -12,7 +12,7 @@ _.extend(Application, {
 
     // Setup notifications handling
     // Append to top window in case document is in an iframe
-    this.createView("notifications").render()
+    this.reuseView("notifications").render()
       .$el.appendTo($("body", window.top.document));
 
     this.setCurrentUser();
