@@ -1884,7 +1884,7 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      app.createView("theme", {
+      app.reuseView("theme", {
           themeID: id
         , el: $("#main")
       }).render();

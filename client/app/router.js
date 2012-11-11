@@ -39,7 +39,7 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
-    app.createView("theme", {
+    app.reuseView("theme", {
         themeID: id
       , el: $("#main")
     }).render();
