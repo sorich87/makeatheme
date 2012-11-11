@@ -6180,26 +6180,27 @@ body.theme #main {
 }
 #layout-editor #editor-toggle,
 #layout-editor #device-switch {
-  width: 30px;
   position: absolute;
   margin: 10px 0 0 -30px;
   line-height: 30px;
   background: #fff;
   text-align: center;
   cursor: pointer;
+  border: 1px solid #eee;
 }
 #layout-editor #editor-toggle a,
 #layout-editor #device-switch a {
   color: #000;
 }
 #layout-editor #editor-toggle {
+  width: 28px;
   height: 30px;
 }
 #layout-editor #device-switch {
   font-size: 16px;
   margin-top: 50px;
   padding-left: 4px;
-  width: 26px;
+  width: 25px;
 }
 #layout-editor #device-switch ul {
   margin: 0;
