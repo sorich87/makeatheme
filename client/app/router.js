@@ -17,12 +17,9 @@ module.exports = Backbone.Router.extend({
   , themes: function () {
     this.userOnly();
 
-    var collection = new Themes(app.data.themes)
-      , $main = $("#main");
+    var collection = new Themes(app.data.themes);
 
-    $main.empty();
-
-    $main
+    $("#main").empty()
       .append("<div id='new-button'><a href='/themes/new' " +
               "data-event='New Theme:type:from scratch'" +
               "class='btn btn-primary btn-large' data-bypass='true'>" +
