@@ -27,6 +27,7 @@ module.exports = View.extend({
 
     this.$el.empty()
       .append(app.createView("editor_toggle").render().$el)
+      .append(app.createView("device_switch").render().$el)
       .append(theme_meta({name: app.data.theme.name}));
 
     if (app.data.theme.author_id === app.currentUser.id) {

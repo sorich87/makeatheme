@@ -2170,6 +2170,60 @@ window.require.define({"views/blocks": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/device_switch": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view")
+    , device_switch = require("views/templates/device_switch");
+
+  module.exports = View.extend({
+    id: "device-switch"
+
+    , events: {
+        "click .pc-size": "resizeToPC"
+      , "click .tablet-size": "resizeToTablet"
+      , "click .phone-size": "resizeToPhone"
+    }
+
+    , render: function () {
+      this.el.innerHTML = device_switch();
+
+      return this;
+    }
+
+    , resizeToPC: function (e) {
+      e.preventDefault();
+
+      $("#theme", window.top.document).animate({
+          width: "100%"
+        , left: "50%"
+        , "margin-left": "-50%"
+      });
+    }
+
+    , resizeToTablet: function (e) {
+      e.preventDefault();
+
+      $("#theme", window.top.document).animate({
+          width: "768px"
+        , left: "50%"
+        , "margin-left": "-384px"
+      });
+    }
+
+    , resizeToPhone: function (e) {
+      e.preventDefault();
+
+      $("#theme", window.top.document).animate({
+          width: "480px"
+        , left: "50%"
+        , "margin-left": "-240px"
+      });
+    }
+  });
+
+  
+}});
+
 window.require.define({"views/download_button": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
@@ -2374,6 +2428,7 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       this.$el.empty()
         .append(app.createView("editor_toggle").render().$el)
+        .append(app.createView("device_switch").render().$el)
         .append(theme_meta({name: app.data.theme.name}));
 
       if (app.data.theme.author_id === app.currentUser.id) {
@@ -3761,6 +3816,15 @@ window.require.define({"views/templates/declaration": function(exports, require,
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
     return buffer;});
+}});
+
+window.require.define({"views/templates/device_switch": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<ul>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"f-icon-monitor\"></i></a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"f-icon-tablet\"></i></a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"f-icon-mobile\"></i></a></li>\n</ul>\n";});
 }});
 
 window.require.define({"views/templates/download_button": function(exports, require, module) {

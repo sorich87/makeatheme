@@ -147,6 +147,7 @@ body.theme #main {
   overflow: hidden;
   float: left;
   position: absolute;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #theme {
   width: 100%;
@@ -194,15 +195,40 @@ body.theme #main {
   overflow: auto;
   float: right;
 
-  #editor-toggle {
+  #editor-toggle,
+  #device-switch {
     width: 30px;
-    height: 30px;
-    line-height: 30px;
     position: absolute;
     margin: 10px 0 0 -30px;
+    line-height: 30px;
     background: white;
     text-align: center;
     cursor: pointer;
+
+    a {
+      color: black;
+    }
+  }
+
+  #editor-toggle {
+    height: 30px;
+  }
+
+  #device-switch {
+    font-size: 16px;
+    margin-top: 50px;
+    padding-left: 4px;
+    width: 26px;
+
+    ul {
+      margin: 0;
+    }
+
+    a {
+      height: 30px;
+      line-height: 30px;
+      display: block;
+    }
   }
 
   #theme-name {
@@ -324,3 +350,32 @@ body.theme #main {
     max-height: 500px;
   }
 }
+
+@font-face {
+  font-family: 'fontello';
+  src: url("../font/fontello.eot");
+  src: url("../font/fontello.eot?#iefix") format('embedded-opentype'), url("../font/fontello.woff") format('woff'), url("../font/fontello.ttf") format('truetype'), url("../font/fontello.svg#fontello") format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+[class^="f-icon-"]:before,
+[class*=" f-icon-"]:before {
+  font-family: 'fontello';
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: 0.2em;
+  text-align: center;
+  opacity: 0.7;
+  text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
+  line-height: 1.2em;
+  font-size: 120%;
+}
+
+.f-icon-tablet:before { content: '\e7b1'; } /* '' */
+.f-icon-monitor:before { content: '💻'; } /* '\1f4bb' */
+.f-icon-mobile:before { content: '📱'; } /* '\1f4f1' */
+
