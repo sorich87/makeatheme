@@ -1887,9 +1887,10 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      $("#main").empty().append(app.createView("theme", {
-        themeID: id
-      }).render().$el);
+      app.createView("theme", {
+          themeID: id
+        , el: $("#main")
+      }).render();
     }
 
     , edit: function (id) {
@@ -4216,12 +4217,12 @@ window.require.define({"views/templates/theme": function(exports, require, modul
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/themes/";
+    buffer += "<div id=\"canvas\">\n  <iframe id=\"theme\" name=\"theme\" src=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
+    buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n</div>\n";
     return buffer;});
 }});
 
@@ -4337,22 +4338,11 @@ window.require.define({"views/templates_select": function(exports, require, modu
 window.require.define({"views/theme": function(exports, require, module) {
   var View = require("views/base/view")
     , application = require("application")
-    , cssProperties = require("lib/css_properties");
+    , cssProperties = require("lib/css_properties")
+    , template = require("views/templates/theme");
 
   module.exports = View.extend({
-      template: "theme"
-
-    , id: "canvas"
-
-    , data: function () {
-      return {
-          route: this.options.route
-        , id: this.options.themeID
-        , action: this.options.action || ""
-      };
-    }
-
-    , initialize: function () {
+    initialize: function () {
       $("body").on("mouseenter", "[name=property]", function (e) {
         $(e.currentTarget).typeahead({
           source: cssProperties
@@ -4363,8 +4353,13 @@ window.require.define({"views/theme": function(exports, require, module) {
       $(window).on("resize", this.fullWidth.bind(this));
     }
 
+    , render: function () {
+      this.$el.empty()
+        .append(template({id: this.options.themeID}));
+    }
+
     , fullWidth: function () {
-      this.$el.width($(window).width() - 250)
+      this.$("#canvas").width($(window).width() - 250)
         .height($(window).height() - 60);
     }
   });

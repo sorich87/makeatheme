@@ -42,9 +42,10 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
-    $("#main").empty().append(app.createView("theme", {
-      themeID: id
-    }).render().$el);
+    app.createView("theme", {
+        themeID: id
+      , el: $("#main")
+    }).render();
   }
 
   , edit: function (id) {
