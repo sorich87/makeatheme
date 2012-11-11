@@ -2349,6 +2349,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     , View = require("views/base/view")
     , data = require("lib/editor_data")
     , mutations = require("lib/mutations")
+    , theme_meta = require("views/templates/theme_meta")
     , accordion_group = require("views/templates/accordion_group")
     , copy_button = require("views/templates/copy_button");
 
@@ -2372,7 +2373,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       var actions_view;
 
       this.$el.empty()
-        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>");
+        .append(theme_meta({name: app.data.theme.name}));
 
       if (app.data.theme.author_id === app.currentUser.id) {
         actions_view = "edit_actions";
@@ -4271,6 +4272,21 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "edit_text", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</a>\n      </div>\n    </div>\n  </div>\n</li>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/theme_meta": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div id=\"theme-name\">Theme: ";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</div>\n";
     return buffer;});
 }});
 

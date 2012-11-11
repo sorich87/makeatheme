@@ -2,6 +2,7 @@ var app = require("application")
   , View = require("views/base/view")
   , data = require("lib/editor_data")
   , mutations = require("lib/mutations")
+  , theme_meta = require("views/templates/theme_meta")
   , accordion_group = require("views/templates/accordion_group")
   , copy_button = require("views/templates/copy_button");
 
@@ -25,7 +26,7 @@ module.exports = View.extend({
     var actions_view;
 
     this.$el.empty()
-      .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>");
+      .append(theme_meta({name: app.data.theme.name}));
 
     if (app.data.theme.author_id === app.currentUser.id) {
       actions_view = "edit_actions";
