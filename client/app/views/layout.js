@@ -30,19 +30,6 @@ module.exports = View.extend({
       // Highlight columns.
       "click .columns": "highlightColumns"
 
-      // Links in columns shouldn't be clickable.
-    , "click .columns a": "preventDefault"
-
-    , "mouseenter .columns a": "addDataBypass"
-
-    , "mouseleave .columns a": "removeDataBypass"
-
-      // Links and images in columns shoulnd't be draggable
-    , "mousedown .columns a, .columns img": "preventDefault"
-
-      // Forms shouldn't be submittable
-    , "submit .columns form": "preventDefault"
-
       // Remove column
     , "click .columns .x-remove": "removeColumn"
 
@@ -98,18 +85,6 @@ module.exports = View.extend({
       , drag: this.resizeOn
       , stop: this.resizeStop
     });
-  }
-
-  , removeDataBypass: function () {
-    this.$(".columns a").removeAttr("data-bypass");
-  }
-
-  , addDataBypass: function () {
-    this.$(".columns a").attr("data-bypass", true);
-  }
-
-  , preventDefault: function (e) {
-    e.preventDefault();
   }
 
   // Remove .x-current from previously highlighted column and add to current one.

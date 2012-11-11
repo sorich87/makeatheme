@@ -303,7 +303,7 @@ window.require.define({"initialize": function(exports, require, module) {
     // If the link has a `data-bypass` attribute, bypass the delegation completely.
     // If the link has a `data-replace` attribute, update the URL without creating
     // an entry in the browser history.
-    $(document).on("click", "a:not([data-bypass])", function(e) {
+    $(window.top.document).on("click", "a:not([data-bypass])", function(e) {
       var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
       , root = location.protocol + "//" + location.host + "/";
 
@@ -2389,12 +2389,25 @@ window.require.define({"views/editor": function(exports, require, module) {
       this.$el.appendTo($("#main", window.top.document));
 
       this.resize();
+      this.preventActions();
 
       return this;
     }
 
     , resize: function () {
       this.$el.height($(window.top).height() - 60);
+    }
+
+    // Prevent click, drag and submit on links, images and forms
+    // respectively in the iframe
+    , preventActions: function () {
+      $("body").on("click", ".columns a", this.preventDefault)
+        .on("mousedown", ".columns a, .columns img", this.preventDefault)
+        .on("submit", ".columns form", this.preventDefault);
+    }
+
+    , preventDefault: function (e) {
+      e.preventDefault();
     }
   });
   
@@ -2432,19 +2445,6 @@ window.require.define({"views/layout": function(exports, require, module) {
     , events: {
         // Highlight columns.
         "click .columns": "highlightColumns"
-
-        // Links in columns shouldn't be clickable.
-      , "click .columns a": "preventDefault"
-
-      , "mouseenter .columns a": "addDataBypass"
-
-      , "mouseleave .columns a": "removeDataBypass"
-
-        // Links and images in columns shoulnd't be draggable
-      , "mousedown .columns a, .columns img": "preventDefault"
-
-        // Forms shouldn't be submittable
-      , "submit .columns form": "preventDefault"
 
         // Remove column
       , "click .columns .x-remove": "removeColumn"
@@ -2501,18 +2501,6 @@ window.require.define({"views/layout": function(exports, require, module) {
         , drag: this.resizeOn
         , stop: this.resizeStop
       });
-    }
-
-    , removeDataBypass: function () {
-      this.$(".columns a").removeAttr("data-bypass");
-    }
-
-    , addDataBypass: function () {
-      this.$(".columns a").attr("data-bypass", true);
-    }
-
-    , preventDefault: function (e) {
-      e.preventDefault();
     }
 
     // Remove .x-current from previously highlighted column and add to current one.

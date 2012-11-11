@@ -42,11 +42,24 @@ module.exports = View.extend({
     this.$el.appendTo($("#main", window.top.document));
 
     this.resize();
+    this.preventActions();
 
     return this;
   }
 
   , resize: function () {
     this.$el.height($(window.top).height() - 60);
+  }
+
+  // Prevent click, drag and submit on links, images and forms
+  // respectively in the iframe
+  , preventActions: function () {
+    $("body").on("click", ".columns a", this.preventDefault)
+      .on("mousedown", ".columns a, .columns img", this.preventDefault)
+      .on("submit", ".columns form", this.preventDefault);
+  }
+
+  , preventDefault: function (e) {
+    e.preventDefault();
   }
 });
