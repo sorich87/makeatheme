@@ -2191,13 +2191,7 @@ window.require.define({"views/download_button": function(exports, require, modul
     , render: function () {
       var button;
 
-      if (app.currentUser.id === void 0) {
-        button = "<button class='btn btn-success x-login'>Login to Download</button>";
-      } else {
-        button = download_button({id: app.data.theme._id});
-      }
-
-      this.$el.empty().append(button);
+      this.$el.empty().append(download_button({id: app.data.theme._id}));
 
       if (!app.data.theme.has_archive) {
         this.$el.hide();
@@ -3725,20 +3719,39 @@ window.require.define({"views/templates/declaration": function(exports, require,
 window.require.define({"views/templates/download_button": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-
-    buffer += "<div class=\"btn-group btn-block\">\n  <button data-toggle=\"dropdown\"\n    class=\"btn btn-success btn-block dropdown-toggle download\">\n    Download Theme <span class=\"caret\"></span>\n  </button>\n  <ul class=\"dropdown-menu\">\n    <li><a href=\"/themes/";
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <div class=\"btn-group btn-block\">\n    <button data-toggle=\"dropdown\"\n      class=\"btn btn-success btn-block dropdown-toggle download\">\n      Download Theme <span class=\"caret\"></span>\n    </button>\n    <ul class=\"dropdown-menu\">\n      <li><a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n      target=\"_blank\" data-bypass=\"true\">Download HTML5</a></li>\n    <li><a href=\"/themes/";
+    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n        target=\"_blank\" data-bypass=\"true\">Download HTML5</a></li>\n      <li><a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download/wordpress\"\n      data-event=\"Download:format:WordPress\"\n      target=\"_blank\" data-bypass=\"true\">Download WordPress</a></li>\n  </ul>\n</div>\n";
+    buffer += escapeExpression(stack1) + "/download/wordpress\"\n        data-event=\"Download:format:WordPress\"\n        target=\"_blank\" data-bypass=\"true\">Download WordPress</a></li>\n    </ul>\n  </div>\n";
+    return buffer;}
+
+  function program3(depth0,data) {
+    
+    
+    return "\n  <button class='btn btn-success x-login'>Login to Download</button>\n";}
+
+    foundHelper = helpers.currentUser;
+    stack1 = foundHelper || depth0.currentUser;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(3, program3, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n";
     return buffer;});
 }});
 

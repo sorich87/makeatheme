@@ -16,13 +16,7 @@ module.exports = View.extend({
   , render: function () {
     var button;
 
-    if (app.currentUser.id === void 0) {
-      button = "<button class='btn btn-success x-login'>Login to Download</button>";
-    } else {
-      button = download_button({id: app.data.theme._id});
-    }
-
-    this.$el.empty().append(button);
+    this.$el.empty().append(download_button({id: app.data.theme._id}));
 
     if (!app.data.theme.has_archive) {
       this.$el.hide();
