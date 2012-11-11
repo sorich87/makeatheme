@@ -136,6 +136,7 @@ body {
 body.theme {
   padding-top: 60px;
   padding-bottom: 0;
+  overflow: hidden;
 }
 body.theme #main {
   padding: 0;
@@ -192,6 +193,17 @@ body.theme #main {
   margin: 0;
   overflow: auto;
   float: right;
+
+  #editor-toggle {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    position: absolute;
+    margin: 10px 0 0 -30px;
+    background: white;
+    text-align: center;
+    cursor: pointer;
+  }
 
   #theme-name {
     padding: 10px;

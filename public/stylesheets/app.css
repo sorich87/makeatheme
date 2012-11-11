@@ -6123,6 +6123,7 @@ body {
 body.theme {
   padding-top: 60px;
   padding-bottom: 0;
+  overflow: hidden;
 }
 body.theme #main {
   padding: 0;
@@ -6175,6 +6176,16 @@ body.theme #main {
   margin: 0;
   overflow: auto;
   float: right;
+}
+#layout-editor #editor-toggle {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  position: absolute;
+  margin: 10px 0 0 -30px;
+  background: #fff;
+  text-align: center;
+  cursor: pointer;
 }
 #layout-editor #theme-name {
   padding: 10px;

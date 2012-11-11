@@ -26,6 +26,7 @@ module.exports = View.extend({
     var actions_view;
 
     this.$el.empty()
+      .append(app.createView("editor_toggle").render().$el)
       .append(theme_meta({name: app.data.theme.name}));
 
     if (app.data.theme.author_id === app.currentUser.id) {

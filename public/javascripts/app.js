@@ -2373,6 +2373,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       var actions_view;
 
       this.$el.empty()
+        .append(app.createView("editor_toggle").render().$el)
         .append(theme_meta({name: app.data.theme.name}));
 
       if (app.data.theme.author_id === app.currentUser.id) {
@@ -2409,6 +2410,45 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     , preventDefault: function (e) {
       e.preventDefault();
+    }
+  });
+  
+}});
+
+window.require.define({"views/editor_toggle": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view");
+
+  module.exports = View.extend({
+    id: "editor-toggle"
+
+    , events: {
+      "click": "toggleEditor"
+    }
+
+    , render: function () {
+      this.el.innerHTML = "&rarr;";
+
+      return this;
+    }
+
+    , toggleEditor: function (e) {
+      if (this.el.className === "collapsed") {
+        $(e.currentTarget.parentNode).animate({"margin-right": "0"});
+        $("#canvas", window.top.document).animate({
+          width: this.canvasWidth
+        });
+        this.el.innerHTML = "&rarr;";
+        this.el.className = "";
+      } else {
+        this.canvasWidth = $("#canvas", window.top.document).css("width");
+
+        $(e.currentTarget.parentNode).animate({"margin-right": "-250px"});
+        $("#canvas", window.top.document).animate({width: "100%"});
+
+        this.el.innerHTML = "&larr;";
+        this.el.className = "collapsed";
+      }
     }
   });
   
