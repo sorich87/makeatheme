@@ -1626,6 +1626,19 @@ window.require.define({"lib/mutations": function(exports, require, module) {
   
 }});
 
+window.require.define({"lib/view_helpers": function(exports, require, module) {
+  var app = require("application")
+    , User = require("models/user");
+
+  Handlebars.registerHelper("currentUser", function () {
+    if (app.currentUser.id) {
+      return app.currentUser;
+    }
+  });
+
+  
+}});
+
 window.require.define({"models/base/model": function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
@@ -1959,7 +1972,7 @@ window.require.define({"views/auth_links": function(exports, require, module) {
     }
 
     , render: function () {
-      var links = template({currentUser: this.model.toJSON()});
+      var links = template();
 
       this.$el.empty().append(links);
 
@@ -1992,7 +2005,8 @@ window.require.define({"views/auth_links": function(exports, require, module) {
 }});
 
 window.require.define({"views/base/view": function(exports, require, module) {
-  // Base class for all views.
+  require("lib/view_helpers");
+
   module.exports = Backbone.View.extend({
     render: function () {
       var data;
@@ -2251,8 +2265,9 @@ window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
     , data = require("lib/editor_data")
-    , accordion_group = require("views/templates/accordion_group");
     , mutations = require("lib/mutations")
+    , accordion_group = require("views/templates/accordion_group")
+    , copy_button = require("views/templates/copy_button");
 
   module.exports = View.extend({
     id: "layout-editor"
@@ -2319,13 +2334,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     , render_preview: function () {
       var button;
 
-      if (app.currentUser.id === void 0) {
-        button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
-      } else {
-        button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
-          " data-event='New Theme:type:copy'" +
-          " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
-      }
+      button = copy_button({theme_id: app.data.theme._id});
 
       this.$el
         .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
@@ -3618,7 +3627,6 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
 
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
-    stack1 = (stack1 === null || stack1 === undefined || stack1 === false ? stack1 : stack1.id);
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -3662,6 +3670,40 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n    </select>\n  </label>\n  <input class=\"new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/copy_button": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n  <a class=\"btn btn-primary btn-block copy\" data-bypass=\"true\"\n    data-event=\"New Theme:type:copy\" href=\"/themes/";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "/fork\">Copy Theme</a>\n";
+    return buffer;}
+
+  function program3(depth0,data) {
+    
+    
+    return "\n  <a class=\"btn btn-primary\" href=\"/login\">Login to Copy</a>\n";}
+
+    foundHelper = helpers.currentUser;
+    stack1 = foundHelper || depth0.currentUser;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(3, program3, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n";
     return buffer;});
 }});
 

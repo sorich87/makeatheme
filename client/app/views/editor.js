@@ -1,8 +1,9 @@
 var app = require("application")
   , View = require("views/base/view")
   , data = require("lib/editor_data")
-  , accordion_group = require("views/templates/accordion_group");
   , mutations = require("lib/mutations")
+  , accordion_group = require("views/templates/accordion_group")
+  , copy_button = require("views/templates/copy_button");
 
 module.exports = View.extend({
   id: "layout-editor"
@@ -69,13 +70,7 @@ module.exports = View.extend({
   , render_preview: function () {
     var button;
 
-    if (app.currentUser.id === void 0) {
-      button = "<a class='btn btn-primary' href='/login'>Login to Copy</a>";
-    } else {
-      button = "<a class='btn btn-primary btn-block copy' data-bypass='true'" +
-        " data-event='New Theme:type:copy'" +
-        " href='/themes/" + app.data.theme._id + "/fork'>Copy Theme</a>";
-    }
+    button = copy_button({theme_id: app.data.theme._id});
 
     this.$el
       .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")

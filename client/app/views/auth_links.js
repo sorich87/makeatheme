@@ -16,7 +16,7 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var links = template({currentUser: this.model.toJSON()});
+    var links = template();
 
     this.$el.empty().append(links);
 

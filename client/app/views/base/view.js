@@ -1,4 +1,5 @@
-// Base class for all views.
+require("lib/view_helpers");
+
 module.exports = Backbone.View.extend({
   render: function () {
     var data;
