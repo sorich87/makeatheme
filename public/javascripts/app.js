@@ -2255,18 +2255,14 @@ window.require.define({"views/download_button": function(exports, require, modul
   
 }});
 
-window.require.define({"views/editor": function(exports, require, module) {
+window.require.define({"views/edit_actions": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
-    , data = require("lib/editor_data")
     , mutations = require("lib/mutations")
-    , accordion_group = require("views/templates/accordion_group")
-    , copy_button = require("views/templates/copy_button");
+    , accordion_group = require("views/templates/accordion_group");
 
   module.exports = View.extend({
-    id: "layout-editor"
-
-    , panels: [
+    panels: [
         {
           id: "templates"
         , title: "Current Template"
@@ -2289,54 +2285,11 @@ window.require.define({"views/editor": function(exports, require, module) {
       }
     ]
 
-
-    , events: {
-      "click #customize-button a.copy": "askForPatience"
-    }
-
     , initialize: function () {
-      _.extend(app.editor, {
-          preview_only: !!app.data.preview_only
-        , templates: data.templates
-        , regions: data.regions
-        , blocks: data.blocks
-        , style: data.style
-      });
-
       _.bindAll(this, "accordionGroups");
     }
 
-    // Show editor when "template:loaded" event is triggered
     , render: function () {
-      this.$el.empty();
-
-      if (app.data.theme.author_id === app.currentUser.id) {
-        this.render_editor();
-      } else {
-        this.render_preview();
-      }
-
-      if (!app.editor.preview_only) {
-        this.$el.append(app.createView("download_button").render().$el);
-      }
-
-      this.$el.appendTo($("#main", window.top.document));
-
-      return this;
-    }
-
-    , render_preview: function () {
-      var button;
-
-      button = copy_button({theme_id: app.data.theme._id});
-
-      this.$el
-        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
-        .append(app.createView("templates_select").render().$el)
-        .append("<div id='customize-button'>" + button + "</div>");
-    }
-
-    , render_editor: function () {
       app.createView("regions");
       app.createView("blocks");
       app.createView("style_edit");
@@ -2347,8 +2300,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       // Setup drag and drop and resize
       app.createView("layout").render();
 
-      this.$el
-        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>")
+      this.$el.empty()
         .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
         .append(app.reuseView("save_button").render().$el)
         .append(app.reuseView("download_button").render().$el);
@@ -2363,25 +2315,11 @@ window.require.define({"views/editor": function(exports, require, module) {
           .append(app.reuseView(this.panels[i].id).render().$el);
       }
 
+      document.body.className = "editor";
+
       mutations.initialize();
-    }
 
-    , showSection: function (e) {
-      $(e.target).next().slideToggle("slow", function () {
-        var $this = $(this)
-          , $handle = $this.prev().children("span");
-
-        if ($this.is(":hidden")) {
-          $handle.empty().append("&or;");
-        } else {
-          $handle.empty().append("&and;");
-        }
-      });
-    }
-
-    , askForPatience: function (e) {
-      e.currentTarget.setAttribute("disabled", "true");
-      e.currentTarget.innerHTML = "Started the Photocopier";
+      return this;
     }
 
     , accordionGroups: function () {
@@ -2403,6 +2341,54 @@ window.require.define({"views/editor": function(exports, require, module) {
         , title: attributes.title
         , content: ""
       });
+    }
+  });
+  
+}});
+
+window.require.define({"views/editor": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view")
+    , data = require("lib/editor_data")
+    , mutations = require("lib/mutations")
+    , accordion_group = require("views/templates/accordion_group")
+    , copy_button = require("views/templates/copy_button");
+
+  module.exports = View.extend({
+    id: "layout-editor"
+
+    , initialize: function () {
+      _.extend(app.editor, {
+          preview_only: !!app.data.preview_only
+        , templates: data.templates
+        , regions: data.regions
+        , blocks: data.blocks
+        , style: data.style
+      });
+    }
+
+    // Show editor when "template:loaded" event is triggered
+    , render: function () {
+      var actions_view;
+
+      this.$el.empty()
+        .append("<div id='theme-name'>Theme: " + app.data.theme.name + "</div>");
+
+      if (app.data.theme.author_id === app.currentUser.id) {
+        actions_view = "edit_actions";
+      } else {
+        actions_view = "preview_actions";
+      }
+
+      this.$el.append(app.createView(actions_view).render().$el);
+
+      if (!app.editor.preview_only) {
+        this.$el.append(app.createView("download_button").render().$el);
+      }
+
+      this.$el.appendTo($("#main", window.top.document));
+
+      return this;
     }
   });
   
@@ -2899,6 +2885,37 @@ window.require.define({"views/password_reset": function(exports, require, module
           }
         }.bind(this)
       });
+    }
+  });
+  
+}});
+
+window.require.define({"views/preview_actions": function(exports, require, module) {
+  var app = require("application")
+    , View = require("views/base/view")
+    , data = require("lib/editor_data")
+    , mutations = require("lib/mutations")
+    , accordion_group = require("views/templates/accordion_group")
+    , copy_button = require("views/templates/copy_button");
+
+  module.exports = View.extend({
+    id: "layout-editor"
+
+    , events: {
+      "click #customize-button a.copy": "askForPatience"
+    }
+
+    , render: function () {
+      this.$el.empty()
+        .append(app.createView("templates_select").render().$el)
+        .append(copy_button({theme_id: app.data.theme._id}));
+
+      return this;
+    }
+
+    , askForPatience: function (e) {
+      e.currentTarget.setAttribute("disabled", "true");
+      e.currentTarget.innerHTML = "Started the Photocopier";
     }
   });
   
@@ -3669,19 +3686,20 @@ window.require.define({"views/templates/copy_button": function(exports, require,
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <a class=\"btn btn-primary btn-block copy\" data-bypass=\"true\"\n    data-event=\"New Theme:type:copy\" href=\"/themes/";
+    buffer += "\n    <a class=\"btn btn-primary btn-block copy\" data-bypass=\"true\"\n      data-event=\"New Theme:type:copy\" href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/fork\">Copy Theme</a>\n";
+    buffer += escapeExpression(stack1) + "/fork\">Copy Theme</a>\n  ";
     return buffer;}
 
   function program3(depth0,data) {
     
     
-    return "\n  <a class=\"btn btn-primary\" href=\"/login\">Login to Copy</a>\n";}
+    return "\n    <a class=\"btn btn-primary\" href=\"/login\">Login to Copy</a>\n  ";}
 
+    buffer += "<div id=\"customize-button\">\n  ";
     foundHelper = helpers.currentUser;
     stack1 = foundHelper || depth0.currentUser;
     stack2 = helpers['if'];
@@ -3691,7 +3709,7 @@ window.require.define({"views/templates/copy_button": function(exports, require,
     tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += "\n</div>\n";
     return buffer;});
 }});
 
