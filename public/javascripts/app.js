@@ -4346,16 +4346,19 @@ window.require.define({"views/theme": function(exports, require, module) {
         });
       });
 
-      Backbone.history.on("route", this.fullWidth.bind(this));
-      $(window).on("resize", this.fullWidth.bind(this));
+      $(window).on("resize", this.resize.bind(this));
     }
 
     , render: function () {
       this.$el.empty()
         .append(template({id: this.options.themeID}));
+
+      this.resize();
+
+      return this;
     }
 
-    , fullWidth: function () {
+    , resize: function () {
       this.$("#canvas").width($(window).width() - 250)
         .height($(window).height() - 60);
     }

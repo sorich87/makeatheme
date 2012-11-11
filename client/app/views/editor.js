@@ -16,6 +16,8 @@ module.exports = View.extend({
       , blocks: data.blocks
       , style: data.style
     });
+
+    $(window).on("resize", this.resize.bind(this));
   }
 
   // Show editor when "template:loaded" event is triggered
@@ -39,6 +41,12 @@ module.exports = View.extend({
 
     this.$el.appendTo($("#main", window.top.document));
 
+    this.resize();
+
     return this;
+  }
+
+  , resize: function () {
+    this.$el.height($(window.top).height() - 60);
   }
 });
