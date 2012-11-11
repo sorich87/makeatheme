@@ -1,7 +1,6 @@
-var View = require("views/base/view")
-  , app = require("application");
+var app = require("application");
 
-module.exports = View.extend({
+module.exports = {
   initialize: function () {
     app.on("node:added", this.addNode.bind(this));
     app.on("node:removed", this.removeNode.bind(this));
@@ -116,4 +115,4 @@ module.exports = View.extend({
       .find("a[data-bypass=true]")
         .removeAttr("data-bypass");
   }
-});
+};

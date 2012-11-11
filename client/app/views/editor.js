@@ -2,6 +2,7 @@ var app = require("application")
   , View = require("views/base/view")
   , data = require("lib/editor_data")
   , accordion_group = require("views/templates/accordion_group");
+  , mutations = require("lib/mutations")
 
 module.exports = View.extend({
   id: "layout-editor"
@@ -109,7 +110,7 @@ module.exports = View.extend({
         .append(app.reuseView(this.panels[i].id).render().$el);
     }
 
-    app.createView("mutations");
+    mutations.initialize();
   }
 
   , showSection: function (e) {
