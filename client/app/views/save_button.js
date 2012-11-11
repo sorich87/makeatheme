@@ -1,5 +1,6 @@
 var View = require("views/base/view")
-  , app = require("application");
+  , app = require("application")
+  , save_button = require("views/templates/save_button");
 
 module.exports = View.extend({
     id: "save-button"
@@ -9,14 +10,7 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var button;
-
-    if (app.currentUser.id) {
-      button = "<button class='btn btn-primary btn-block save'>" +
-        "Save Changes</button>";
-    }
-
-    this.$el.empty().append(button);
+    this.$el.empty().append(save_button());
 
     return this;
   }

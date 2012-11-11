@@ -3109,7 +3109,8 @@ window.require.define({"views/register": function(exports, require, module) {
 
 window.require.define({"views/save_button": function(exports, require, module) {
   var View = require("views/base/view")
-    , app = require("application");
+    , app = require("application")
+    , save_button = require("views/templates/save_button");
 
   module.exports = View.extend({
       id: "save-button"
@@ -3119,14 +3120,7 @@ window.require.define({"views/save_button": function(exports, require, module) {
     }
 
     , render: function () {
-      var button;
-
-      if (app.currentUser.id) {
-        button = "<button class='btn btn-primary btn-block save'>" +
-          "Save Changes</button>";
-      }
-
-      this.$el.empty().append(button);
+      this.$el.empty().append(save_button());
 
       return this;
     }
@@ -3884,6 +3878,29 @@ window.require.define({"views/templates/rule": function(exports, require, module
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" />\n  <input type=\"hidden\" name=\"index\" />\n</li>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/save_button": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
+
+  function program1(depth0,data) {
+    
+    
+    return "\n  <button class=\"btn btn-primary btn-block save\">Save Changes</button>\n";}
+
+    foundHelper = helpers.currentUser;
+    stack1 = foundHelper || depth0.currentUser;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n\n";
     return buffer;});
 }});
 
