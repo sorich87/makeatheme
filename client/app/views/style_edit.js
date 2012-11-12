@@ -13,14 +13,6 @@ module.exports = View.extend({
       "click .selector-choice a": "highlightElement"
     , "change .tag": "setTag"
 
-    , "click .add-rule": "addRuleInputs"
-    , "keyup .rules input": "editRule"
-    , "change .rules input": "editRule"
-
-    , "click .add-declaration": "addDeclarationInputs"
-    , "keyup .selector input": "editDeclaration"
-    , "change .selector input": "editDeclaration"
-
     , "click .back-to-general": "hideEditor"
   }
 
@@ -46,39 +38,20 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var selector, $element, declarations;
-
     this.media = "all";
 
-    if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
-      selector = this.tag;
-    } else {
-      if (this.tag) {
-        selector = this.selector + " " + this.tag;
-      } else {
-        selector = this.selector;
-      }
-      $element = $(selector);
-      if ($element) {
-        selector = $element[0];
-      }
-    }
-
-    declarations = this.customCSS.getDeclarations(selector);
-    if (declarations && declarations[this.media]) {
-      declarations =  declarations[this.media];
-    } else {
-      declarations = [];
-    }
-
-    this.$el.html(template({
+    this.el.innerHTML = template({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
-      , declarations: declarations
-    }));
+    });
 
-    this.markNonAppliedRules();
+    this.$el.append(app.createView("advanced_style_edit", {
+        selector: this.selector
+      , tag: this.tag
+      , media: this.media
+      , customCSS: this.customCSS
+    }).render().$el);
 
     return this;
   }
@@ -93,79 +66,6 @@ module.exports = View.extend({
       });
       return group;
     });
-  }
-
-  , addRuleInputs: function (e) {
-    var $button = $(e.currentTarget)
-      , $ul = $button.siblings("ul");
-
-    e.preventDefault();
-
-    $ul.append(rule_template({
-      selector: $button.siblings(".selector").find("input").val()
-    }));
-  }
-
-  , editRule: function (e, element) {
-    var selector, index
-      , $li = $(e.target).parent();
-
-    property = $li.find("input[name=property]").val();
-    value = $li.find("input[name=value]").val();
-    index = $li.find("input[name=index]").val() || null;
-    selector = $li.find("input[name=selector]").val();
-
-    // Trim whitespace and comma from selector to avoid DOM exception 12
-    selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
-
-    if (property && value) {
-      index = this.customCSS.insertRule({
-          selector: selector
-        , property: property
-        , value: value
-        , index: index
-        , media: this.media
-      });
-    } else {
-      if (index) {
-        this.customCSS.deleteRule(index, this.media);
-        index = "";
-      }
-
-      if (!property && !value && e.type === "change") {
-        $li.remove();
-      }
-    }
-
-    $li.find("input[name=index]").val(index);
-  }
-
-  , addDeclarationInputs: function (e) {
-    var selector = this.selector;
-
-    e.preventDefault();
-
-    if (this.tag) {
-      selector = this.selector + " " + this.tag;
-    }
-
-    $(e.currentTarget).before(declaration_template({selector: selector}));
-  }
-
-  , editDeclaration: function (e) {
-    var $input = $(e.currentTarget)
-      , value = $input.val();
-
-    if (!value && e.type === "change") {
-      $input.closest(".declaration-inputs").remove();
-    }
-
-    $input
-      .parent()
-        .siblings("ul")
-          .find("input[name=selector]")
-            .val(value)
-            .trigger("change");
   }
 
   , addThemeAttributes: function (attributes) {
@@ -184,22 +84,6 @@ module.exports = View.extend({
     }, true);
 
     this.render();
-  }
-
-  , markNonAppliedRules: function () {
-    var applied = {};
-    this.$(".rules input[name=property]").each(function () {
-      var similar = applied[this.value];
-
-      if (similar === void 0) {
-        applied[this.value] = this;
-        return;
-      }
-
-      if (this.parentNode.parentNode !== similar.parentNode.parentNode) {
-        $(this.parentNode).addClass("inactive");
-      }
-    });
   }
 
   , highlightElement: function (e) {

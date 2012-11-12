@@ -1958,6 +1958,157 @@ window.require.define({"router": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/advanced_style_edit": function(exports, require, module) {
+  var View = require("views/base/view")
+    , declaration_template = require("views/templates/declaration")
+    , rule_template = require("views/templates/rule")
+    , app = require("application")
+    , html_tags = require("lib/html_tags");
+
+  module.exports = View.extend({
+    events: {
+        "click .add-rule": "addRuleInputs"
+      , "keyup .rules input": "editRule"
+      , "change .rules input": "editRule"
+
+      , "click .add-declaration": "addDeclarationInputs"
+      , "keyup .selector input": "editDeclaration"
+      , "change .selector input": "editDeclaration"
+    }
+
+    , initialize: function () {
+      this.media = this.options.media;
+      this.tag = this.options.tag;
+      this.selector = this.options.selector;
+      this.customCSS = this.options.customCSS;
+    }
+
+    , render: function () {
+      var html = ""
+        , declarations, selector, $element, i;
+
+      if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
+        selector = this.tag;
+      } else {
+        if (this.tag) {
+          selector = this.selector + " " + this.tag;
+        } else {
+          selector = this.selector;
+        }
+        $element = $(selector);
+        if ($element) {
+          selector = $element[0];
+        }
+      }
+
+      declarations = this.customCSS.getDeclarations(selector);
+      if (declarations && declarations[this.media]) {
+        for (i = 0; i < declarations[this.media].length; i++) {
+          html += declaration_template(declarations[this.media][i]);
+        }
+      }
+
+      html += "<button class='btn add-declaration'>Add declaration</button>";
+
+      this.$el.empty().append(html);
+
+      this.markNonAppliedRules();
+
+      return this;
+    }
+
+    , addRuleInputs: function (e) {
+      var $button = $(e.currentTarget)
+        , $ul = $button.siblings("ul");
+
+      e.preventDefault();
+
+      $ul.append(rule_template({
+        selector: $button.siblings(".selector").find("input").val()
+      }));
+    }
+
+    , editRule: function (e, element) {
+      var selector, index
+        , $li = $(e.target).parent();
+
+      property = $li.find("input[name=property]").val();
+      value = $li.find("input[name=value]").val();
+      index = $li.find("input[name=index]").val() || null;
+      selector = $li.find("input[name=selector]").val();
+
+      // Trim whitespace and comma from selector to avoid DOM exception 12
+      selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
+
+      if (property && value) {
+        index = this.customCSS.insertRule({
+            selector: selector
+          , property: property
+          , value: value
+          , index: index
+          , media: this.media
+        });
+      } else {
+        if (index) {
+          this.customCSS.deleteRule(index, this.media);
+          index = "";
+        }
+
+        if (!property && !value && e.type === "change") {
+          $li.remove();
+        }
+      }
+
+      $li.find("input[name=index]").val(index);
+    }
+
+    , addDeclarationInputs: function (e) {
+      var selector = this.selector;
+
+      e.preventDefault();
+
+      if (this.tag) {
+        selector = this.selector + " " + this.tag;
+      }
+
+      $(e.currentTarget).before(declaration_template({selector: selector}));
+    }
+
+    , editDeclaration: function (e) {
+      var $input = $(e.currentTarget)
+        , value = $input.val();
+
+      if (!value && e.type === "change") {
+        $input.closest(".declaration-inputs").remove();
+      }
+
+      $input
+        .parent()
+          .siblings("ul")
+            .find("input[name=selector]")
+              .val(value)
+              .trigger("change");
+    }
+
+    , markNonAppliedRules: function () {
+      var applied = {};
+      this.$(".rules input[name=property]").each(function () {
+        var similar = applied[this.value];
+
+        if (similar === void 0) {
+          applied[this.value] = this;
+          return;
+        }
+
+        if (this.parentNode.parentNode !== similar.parentNode.parentNode) {
+          $(this.parentNode).addClass("inactive");
+        }
+      });
+    }
+  });
+  
+}});
+
 window.require.define({"views/auth_links": function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
@@ -3308,14 +3459,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         "click .selector-choice a": "highlightElement"
       , "change .tag": "setTag"
 
-      , "click .add-rule": "addRuleInputs"
-      , "keyup .rules input": "editRule"
-      , "change .rules input": "editRule"
-
-      , "click .add-declaration": "addDeclarationInputs"
-      , "keyup .selector input": "editDeclaration"
-      , "change .selector input": "editDeclaration"
-
       , "click .back-to-general": "hideEditor"
     }
 
@@ -3341,39 +3484,20 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var selector, $element, declarations;
-
       this.media = "all";
 
-      if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
-        selector = this.tag;
-      } else {
-        if (this.tag) {
-          selector = this.selector + " " + this.tag;
-        } else {
-          selector = this.selector;
-        }
-        $element = $(selector);
-        if ($element) {
-          selector = $element[0];
-        }
-      }
-
-      declarations = this.customCSS.getDeclarations(selector);
-      if (declarations && declarations[this.media]) {
-        declarations =  declarations[this.media];
-      } else {
-        declarations = [];
-      }
-
-      this.$el.html(template({
+      this.el.innerHTML = template({
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
-        , declarations: declarations
-      }));
+      });
 
-      this.markNonAppliedRules();
+      this.$el.append(app.createView("advanced_style_edit", {
+          selector: this.selector
+        , tag: this.tag
+        , media: this.media
+        , customCSS: this.customCSS
+      }).render().$el);
 
       return this;
     }
@@ -3388,79 +3512,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         });
         return group;
       });
-    }
-
-    , addRuleInputs: function (e) {
-      var $button = $(e.currentTarget)
-        , $ul = $button.siblings("ul");
-
-      e.preventDefault();
-
-      $ul.append(rule_template({
-        selector: $button.siblings(".selector").find("input").val()
-      }));
-    }
-
-    , editRule: function (e, element) {
-      var selector, index
-        , $li = $(e.target).parent();
-
-      property = $li.find("input[name=property]").val();
-      value = $li.find("input[name=value]").val();
-      index = $li.find("input[name=index]").val() || null;
-      selector = $li.find("input[name=selector]").val();
-
-      // Trim whitespace and comma from selector to avoid DOM exception 12
-      selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
-
-      if (property && value) {
-        index = this.customCSS.insertRule({
-            selector: selector
-          , property: property
-          , value: value
-          , index: index
-          , media: this.media
-        });
-      } else {
-        if (index) {
-          this.customCSS.deleteRule(index, this.media);
-          index = "";
-        }
-
-        if (!property && !value && e.type === "change") {
-          $li.remove();
-        }
-      }
-
-      $li.find("input[name=index]").val(index);
-    }
-
-    , addDeclarationInputs: function (e) {
-      var selector = this.selector;
-
-      e.preventDefault();
-
-      if (this.tag) {
-        selector = this.selector + " " + this.tag;
-      }
-
-      $(e.currentTarget).before(declaration_template({selector: selector}));
-    }
-
-    , editDeclaration: function (e) {
-      var $input = $(e.currentTarget)
-        , value = $input.val();
-
-      if (!value && e.type === "change") {
-        $input.closest(".declaration-inputs").remove();
-      }
-
-      $input
-        .parent()
-          .siblings("ul")
-            .find("input[name=selector]")
-              .val(value)
-              .trigger("change");
     }
 
     , addThemeAttributes: function (attributes) {
@@ -3479,22 +3530,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       }, true);
 
       this.render();
-    }
-
-    , markNonAppliedRules: function () {
-      var applied = {};
-      this.$(".rules input[name=property]").each(function () {
-        var similar = applied[this.value];
-
-        if (similar === void 0) {
-          applied[this.value] = this;
-          return;
-        }
-
-        if (this.parentNode.parentNode !== similar.parentNode.parentNode) {
-          $(this.parentNode).addClass("inactive");
-        }
-      });
     }
 
     , highlightElement: function (e) {
@@ -3834,15 +3869,50 @@ window.require.define({"views/templates/copy_button": function(exports, require,
 window.require.define({"views/templates/declaration": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
+  function program1(depth0,data,depth1) {
+    
+    var buffer = "", stack1;
+    buffer += "\n    <li>\n      <input name=\"property\" value=\"";
+    foundHelper = helpers.property;
+    stack1 = foundHelper || depth0.property;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" placeholder=\"property\" />:\n      <input name=\"value\" value=\"";
+    foundHelper = helpers.value;
+    stack1 = foundHelper || depth0.value;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" placeholder=\"value\" />\n      <input type=\"hidden\" name=\"index\" value=\"";
+    foundHelper = helpers.index;
+    stack1 = foundHelper || depth0.index;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "index", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n      <input type=\"hidden\" name=\"selector\" value=\"";
+    foundHelper = helpers.selector;
+    stack1 = foundHelper || depth1.selector;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "...selector", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
+    return buffer;}
 
     buffer += "<form class=\"declaration-inputs\">\n  <p class=\"selector\">\n    <input value=\"";
     foundHelper = helpers.selector;
     stack1 = foundHelper || depth0.selector;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
+    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n    ";
+    foundHelper = helpers.rules;
+    stack1 = foundHelper || depth0.rules;
+    stack2 = helpers.each;
+    tmp1 = self.programWithDepth(program1, data, depth0);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
     return buffer;});
 }});
 
@@ -4177,52 +4247,6 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n    ";
     return buffer;}
 
-  function program10(depth0,data) {
-    
-    var buffer = "", stack1, stack2;
-    buffer += "\n<form class=\"declaration-inputs\">\n  <p class=\"selector\">\n    <input value=\"";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth0.selector;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"selector\" />&nbsp; {\n  </p>\n  <ul class=\"rules\">\n    ";
-    foundHelper = helpers.rules;
-    stack1 = foundHelper || depth0.rules;
-    stack2 = helpers.each;
-    tmp1 = self.programWithDepth(program11, data, depth0);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
-    return buffer;}
-  function program11(depth0,data,depth1) {
-    
-    var buffer = "", stack1;
-    buffer += "\n    <li>\n      <input name=\"property\" value=\"";
-    foundHelper = helpers.property;
-    stack1 = foundHelper || depth0.property;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "property", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"property\" />:\n      <input name=\"value\" value=\"";
-    foundHelper = helpers.value;
-    stack1 = foundHelper || depth0.value;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "value", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" placeholder=\"value\" />\n      <input type=\"hidden\" name=\"index\" value=\"";
-    foundHelper = helpers.index;
-    stack1 = foundHelper || depth0.index;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "index", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n      <input type=\"hidden\" name=\"selector\" value=\"";
-    foundHelper = helpers.selector;
-    stack1 = foundHelper || depth1.selector;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "...selector", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n    </li>\n    ";
-    return buffer;}
-
     buffer += "<p><a href=\"#\" data-bypass=\"true\" class=\"back-to-general\">&lsaquo; Back</a></p>\n\n<p class=\"selector-choice\">\nElement:\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
@@ -4248,17 +4272,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</select>\n\n";
-    foundHelper = helpers.declarations;
-    stack1 = foundHelper || depth0.declarations;
-    stack2 = helpers.each;
-    tmp1 = self.program(10, program10, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n<button class=\"btn add-declaration\">Add declaration</button>\n";
+    buffer += "\n</select>\n";
     return buffer;});
 }});
 

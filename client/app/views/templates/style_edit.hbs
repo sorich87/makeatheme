@@ -24,24 +24,3 @@ Element:
   </optgroup>
   {{/each}}
 </select>
-
-{{#each declarations}}
-<form class="declaration-inputs">
-  <p class="selector">
-    <input value="{{selector}}" placeholder="selector" />&nbsp; {
-  </p>
-  <ul class="rules">
-    {{#each rules}}
-    <li>
-      <input name="property" value="{{property}}" placeholder="property" />:
-      <input name="value" value="{{value}}" placeholder="value" />
-      <input type="hidden" name="index" value="{{index}}" />
-      <input type="hidden" name="selector" value="{{../selector}}" />
-    </li>
-    {{/each}}
-  </ul>
-  <button class="btn btn-mini add-rule">Add rule</button>
-  <p>}</p>
-</form>
-{{/each}}
-<button class="btn add-declaration">Add declaration</button>
