@@ -2367,8 +2367,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
           .append(app.reuseView(this.panels[i].id).render().$el);
       }
 
-      document.body.className = "editor";
-
       mutations.initialize();
 
       return this;

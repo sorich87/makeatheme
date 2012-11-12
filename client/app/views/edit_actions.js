@@ -57,8 +57,6 @@ module.exports = View.extend({
         .append(app.reuseView(this.panels[i].id).render().$el);
     }
 
-    document.body.className = "editor";
-
     mutations.initialize();
 
     return this;
