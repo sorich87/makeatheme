@@ -3777,10 +3777,10 @@ window.require.define({"views/templates/copy_button": function(exports, require,
     
     var buffer = "", stack1;
     buffer += "\n    <a class=\"btn btn-primary btn-block copy\" data-bypass=\"true\"\n      data-event=\"New Theme:type:copy\" href=\"/themes/";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
+    foundHelper = helpers.theme_id;
+    stack1 = foundHelper || depth0.theme_id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_id", { hash: {} }); }
     buffer += escapeExpression(stack1) + "/fork\">Copy Theme</a>\n  ";
     return buffer;}
 
