@@ -46,7 +46,9 @@ _.extend(Application, {
 
     if (views[name] !== void 0) {
       views[name].undelegateEvents();
-      views[name].remove();
+      if (!options || !options.el) {
+        views[name].remove();
+      }
       views[name].off();
     }
 

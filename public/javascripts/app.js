@@ -123,7 +123,9 @@ window.require.define({"application": function(exports, require, module) {
 
       if (views[name] !== void 0) {
         views[name].undelegateEvents();
-        views[name].remove();
+        if (!options || !options.el) {
+          views[name].remove();
+        }
         views[name].off();
       }
 
@@ -1884,7 +1886,7 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      app.reuseView("theme", {
+      app.createView("theme", {
           themeID: id
         , el: $("#main")
       }).render();
