@@ -41,6 +41,7 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
+    this.$el.addClass("editing");
     this.makeDroppable();
     app.on("region:loaded", this.highLightEmpty.bind(this));
     app.on("template:loaded", this.highLightEmpty.bind(this));

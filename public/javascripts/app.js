@@ -149,6 +149,11 @@ window.require.define({"application": function(exports, require, module) {
     }
 
     , setBodyClasses: function () {
+      // Don't set classes in editor
+      if (this.data.theme) {
+        return;
+      }
+
       Backbone.history.on("route", function (router, name) {
         document.body.className = name;
       }.bind(this));
@@ -2553,6 +2558,7 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , initialize: function () {
+      this.$el.addClass("editing");
       this.makeDroppable();
       app.on("region:loaded", this.highLightEmpty.bind(this));
       app.on("template:loaded", this.highLightEmpty.bind(this));

@@ -72,6 +72,11 @@ _.extend(Application, {
   }
 
   , setBodyClasses: function () {
+    // Don't set classes in editor
+    if (this.data.theme) {
+      return;
+    }
+
     Backbone.history.on("route", function (router, name) {
       document.body.className = name;
     }.bind(this));
