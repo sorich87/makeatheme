@@ -38,10 +38,6 @@ module.exports = View.extend({
 
     this.$el.append(app.createView(actions_view).render().$el);
 
-    if (!app.editor.preview_only) {
-      this.$el.append(app.createView("download_button").render().$el);
-    }
-
     this.$el.appendTo($("#main", window.top.document));
 
     this.resize();

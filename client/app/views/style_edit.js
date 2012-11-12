@@ -20,10 +20,13 @@ module.exports = View.extend({
     , "click .add-declaration": "addDeclarationInputs"
     , "keyup .selector input": "editDeclaration"
     , "change .selector input": "editDeclaration"
+
+    , "click .back-to-general": "hideEditor"
   }
 
   , initialize: function () {
     app.on("column:highlight", this.setColumn.bind(this));
+    app.on("column:highlight", this.showEditor.bind(this));
     app.on("save:before", this.addThemeAttributes.bind(this));
     app.on("resize:end", this.changeWidth.bind(this));
 
@@ -209,5 +212,15 @@ module.exports = View.extend({
 
     this.selector = selector;
     this.render();
+  }
+
+  , showEditor: function () {
+    this.$el.siblings("#general").hide();
+    this.$el.show();
+  }
+
+  , hideEditor: function () {
+    this.$el.hide();
+    this.$el.siblings("#general").show();
   }
 });

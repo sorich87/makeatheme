@@ -18,10 +18,6 @@ module.exports = View.extend({
       , title: "Blocks"
     }
     , {
-        id: "style_edit"
-      , title: "Style"
-    }
-    , {
         id: "share_link"
       , title: "Share"
     }
@@ -43,9 +39,13 @@ module.exports = View.extend({
     app.createView("layout").render();
 
     this.$el.empty()
-      .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
-      .append(app.reuseView("save_button").render().$el)
-      .append(app.reuseView("download_button").render().$el);
+      .append("<div id='general'></div>")
+      .children()
+        .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
+        .append(app.reuseView("save_button").render().$el)
+        .append(app.reuseView("download_button").render().$el)
+        .end()
+      .append(app.reuseView("style_edit").render().$el.hide());
 
     for (var i in this.panels) {
       if (!this.panels.hasOwnProperty(i)) {

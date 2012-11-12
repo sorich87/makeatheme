@@ -1,45 +1,47 @@
-  <p class="selector-choice">
-  Element:
-  {{#if parents}}
-  {{#each parents}}
-  {{#if id}}
-  <a href="#" data-selector="#{{id}}" data-bypass="true">#{{id}}</a> &gt;
-  {{else}}
-  <a href="#" data-selector="{{localName}}" data-bypass="true">{{localName}}</a> &gt;
-  {{/if}}
-  {{/each}}
-  {{/if}}
-  <b>{{selector}}</b>
-  </p>
+<p><a href="#" data-bypass="true" class="back-to-general">&lsaquo; Back</a></p>
 
-  <select class="tag">
-    <option value="">Every tag</option>
-    {{#each htmlTags}}
-    <optgroup label="{{group}}">
-      {{#each tags}}
-      <option value="{{tag}}"{{selected}}>{{label}} ({{tag}})</option>
-      {{/each}}
-    </optgroup>
+<p class="selector-choice">
+Element:
+{{#if parents}}
+{{#each parents}}
+{{#if id}}
+<a href="#" data-selector="#{{id}}" data-bypass="true">#{{id}}</a> &gt;
+{{else}}
+<a href="#" data-selector="{{localName}}" data-bypass="true">{{localName}}</a> &gt;
+{{/if}}
+{{/each}}
+{{/if}}
+<b>{{selector}}</b>
+</p>
+
+<select class="tag">
+  <option value="">Every tag</option>
+  {{#each htmlTags}}
+  <optgroup label="{{group}}">
+    {{#each tags}}
+    <option value="{{tag}}"{{selected}}>{{label}} ({{tag}})</option>
     {{/each}}
-  </select>
-
-  {{#each declarations}}
-  <form class="declaration-inputs">
-    <p class="selector">
-      <input value="{{selector}}" placeholder="selector" />&nbsp; {
-    </p>
-    <ul class="rules">
-      {{#each rules}}
-      <li>
-        <input name="property" value="{{property}}" placeholder="property" />:
-        <input name="value" value="{{value}}" placeholder="value" />
-        <input type="hidden" name="index" value="{{index}}" />
-        <input type="hidden" name="selector" value="{{../selector}}" />
-      </li>
-      {{/each}}
-    </ul>
-    <button class="btn btn-mini add-rule">Add rule</button>
-    <p>}</p>
-  </form>
+  </optgroup>
   {{/each}}
-  <button class="btn add-declaration">Add declaration</button>
+</select>
+
+{{#each declarations}}
+<form class="declaration-inputs">
+  <p class="selector">
+    <input value="{{selector}}" placeholder="selector" />&nbsp; {
+  </p>
+  <ul class="rules">
+    {{#each rules}}
+    <li>
+      <input name="property" value="{{property}}" placeholder="property" />:
+      <input name="value" value="{{value}}" placeholder="value" />
+      <input type="hidden" name="index" value="{{index}}" />
+      <input type="hidden" name="selector" value="{{../selector}}" />
+    </li>
+    {{/each}}
+  </ul>
+  <button class="btn btn-mini add-rule">Add rule</button>
+  <p>}</p>
+</form>
+{{/each}}
+<button class="btn add-declaration">Add declaration</button>

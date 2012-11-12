@@ -6314,6 +6314,9 @@ body.theme #main {
   overflow-y: scroll;
   max-height: 500px;
 }
+#layout-editor #style-edit {
+  margin: 10px;
+}
 @font-face {
   font-family: 'fontello';
   src: url("../font/fontello.eot");
