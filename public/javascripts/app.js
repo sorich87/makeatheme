@@ -2806,6 +2806,8 @@ window.require.define({"views/login": function(exports, require, module) {
       e.preventDefault();
 
       if (this.validateInputs()) {
+        this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
         this.submitData();
       }
     }
@@ -2931,6 +2933,8 @@ window.require.define({"views/password_reset": function(exports, require, module
       e.preventDefault();
 
       if (this.validateInputs()) {
+        this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
         this.initiateReset();
       }
     }
@@ -2973,6 +2977,7 @@ window.require.define({"views/password_reset": function(exports, require, module
             break;
 
             case "error":
+              this.$("button[type=submit]").get(0).removeAttribute("disabled");
             break;
           }
         }.bind(this)
@@ -3188,6 +3193,8 @@ window.require.define({"views/register": function(exports, require, module) {
         attrs[this.getAttribute("name")] = this.value;
       });
 
+      this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
       user.save(attrs, {
         success: function (model, res) {
           model.set(res);
@@ -3199,6 +3206,8 @@ window.require.define({"views/register": function(exports, require, module) {
         }.bind(this)
 
         , error: function (model, err) {
+          this.$("button[type=submit]").get(0).removeAttribute("disabled");
+
           this.displayServerErrors(err);
         }.bind(this)
       });

@@ -15,6 +15,8 @@ module.exports = View.extend({
     e.preventDefault();
 
     if (this.validateInputs()) {
+      this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
       this.submitData();
     }
   }

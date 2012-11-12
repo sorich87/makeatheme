@@ -27,6 +27,8 @@ module.exports = View.extend({
       attrs[this.getAttribute("name")] = this.value;
     });
 
+    this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
     user.save(attrs, {
       success: function (model, res) {
         model.set(res);
@@ -38,6 +40,8 @@ module.exports = View.extend({
       }.bind(this)
 
       , error: function (model, err) {
+        this.$("button[type=submit]").get(0).removeAttribute("disabled");
+
         this.displayServerErrors(err);
       }.bind(this)
     });
