@@ -2472,7 +2472,9 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
     , accordion_group = require("views/templates/accordion_group");
 
   module.exports = View.extend({
-    panels: [
+    id: "edit-actions"
+
+    , panels: [
         {
           id: "templates"
         , title: "Current Template"

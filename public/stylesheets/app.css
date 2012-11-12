@@ -6174,7 +6174,6 @@ body.theme #main {
   width: 250px;
   padding: 0;
   margin: 0;
-  overflow: auto;
   position: absolute;
   right: 0;
 }
@@ -6213,6 +6212,13 @@ body.theme #main {
 #layout-editor #theme-name {
   padding: 10px;
   border-bottom: 1px solid #1c1c1c;
+}
+#layout-editor #edit-actions {
+  height: 100%;
+  overflow: auto;
+}
+#layout-editor #style-edit {
+  margin: 10px;
 }
 #layout-editor h4 {
   margin: 0;
@@ -6313,9 +6319,6 @@ body.theme #main {
 #layout-editor .accordion-inner {
   overflow-y: scroll;
   max-height: 500px;
-}
-#layout-editor #style-edit {
-  margin: 10px;
 }
 @font-face {
   font-family: 'fontello';
