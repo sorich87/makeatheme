@@ -15,35 +15,22 @@ module.exports = View.extend({
     , "change .selector input": "editDeclaration"
   }
 
-  , initialize: function () {
-    this.media = this.options.media;
-    this.tag = this.options.tag;
-    this.selector = this.options.selector;
-    this.customCSS = this.options.customCSS;
+  , initialize: function (options) {
+    this.media = options.media;
+    this.tag = options.tag;
+    this.selector = options.selector;
+    this.customCSS = options.customCSS;
+    this.currentCSS = options.currentCSS;
   }
 
   , render: function () {
     var html = ""
-      , declarations, selector, $element, i;
+      , declarations = this.currentCSS
+      , i;
 
-    if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
-      selector = this.tag;
-    } else {
-      if (this.tag) {
-        selector = this.selector + " " + this.tag;
-      } else {
-        selector = this.selector;
-      }
-      $element = $(selector);
-      if ($element) {
-        selector = $element[0];
-      }
-    }
-
-    declarations = this.customCSS.getDeclarations(selector);
-    if (declarations && declarations[this.media]) {
-      for (i = 0; i < declarations[this.media].length; i++) {
-        html += declaration_template(declarations[this.media][i]);
+    if (declarations) {
+      for (i = 0; i < declarations.length; i++) {
+        html += declaration_template(declarations[i]);
       }
     }
 

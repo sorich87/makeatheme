@@ -8,11 +8,12 @@ module.exports = View.extend({
     , "keyup input[type=text]": "editStyle"
   }
 
-  , initialize: function () {
-    this.media = this.options.media;
-    this.tag = this.options.tag;
-    this.selector = this.options.selector;
-    this.customCSS = this.options.customCSS;
+  , initialize: function (options) {
+    this.media = options.media;
+    this.tag = options.tag;
+    this.selector = options.selector;
+    this.customCSS = options.customCSS;
+    this.currentCSS = options.currentCSS;
   }
 
   , render: function () {
