@@ -7,3 +7,6 @@ Handlebars.registerHelper("currentUser", function () {
   }
 });
 
+Handlebars.registerHelper("selected", function (value, current) {
+  return value === current ? " selected='selected'" : "";
+});
