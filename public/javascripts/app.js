@@ -3445,6 +3445,21 @@ window.require.define({"views/share_link": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/simple_style_edit": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application")
+    , template = require("views/templates/simple_style_edit");
+
+  module.exports = View.extend({
+    render: function () {
+      this.el.innerHTML = template();
+
+      return this;
+    }
+  });
+  
+}});
+
 window.require.define({"views/style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
@@ -3462,6 +3477,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       , "change .tag": "setTag"
 
       , "click .back-to-general": "hideEditor"
+      , "change input[name=style_advanced]": "switchEditor"
     }
 
     , initialize: function () {
@@ -3472,6 +3488,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       this.selector = "body";
       this.customCSS = app.editor.style;
+      this.editorView = "simple_style_edit";
     }
 
     , setTag: function (e) {
@@ -3492,9 +3509,10 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
+        , advanced: this.editorView === "advanced_style_edit" ? true : false
       });
 
-      this.$el.append(app.createView("advanced_style_edit", {
+      this.$el.append(app.createView(this.editorView, {
           selector: this.selector
         , tag: this.tag
         , media: this.media
@@ -3554,6 +3572,16 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , hideEditor: function () {
       this.$el.hide();
       this.$el.siblings("#general").show();
+    }
+
+    , switchEditor: function (e) {
+      if (e.currentTarget.checked) {
+        this.editorView = "advanced_style_edit";
+      } else {
+        this.editorView = "simple_style_edit";
+      }
+
+      this.render();
     }
   });
   
@@ -4136,6 +4164,15 @@ window.require.define({"views/templates/share_link": function(exports, require, 
     return buffer;});
 }});
 
+window.require.define({"views/templates/simple_style_edit": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", foundHelper, self=this;
+
+
+    return buffer;});
+}});
+
 window.require.define({"views/templates/style_edit": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4143,12 +4180,17 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 
   function program1(depth0,data) {
     
+    
+    return " checked=\"checked\"";}
+
+  function program3(depth0,data) {
+    
     var buffer = "", stack1, stack2;
     buffer += "\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers.each;
-    tmp1 = self.program(2, program2, data);
+    tmp1 = self.program(4, program4, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -4156,22 +4198,22 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;}
-  function program2(depth0,data) {
+  function program4(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     stack2 = helpers['if'];
-    tmp1 = self.program(3, program3, data);
+    tmp1 = self.program(5, program5, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.program(5, program5, data);
+    tmp1.inverse = self.program(7, program7, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;}
-  function program3(depth0,data) {
+  function program5(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n<a href=\"#\" data-selector=\"#";
@@ -4187,7 +4229,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "</a> &gt;\n";
     return buffer;}
 
-  function program5(depth0,data) {
+  function program7(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n<a href=\"#\" data-selector=\"";
@@ -4203,7 +4245,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "</a> &gt;\n";
     return buffer;}
 
-  function program7(depth0,data) {
+  function program9(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n  <optgroup label=\"";
@@ -4215,7 +4257,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.tags;
     stack1 = foundHelper || depth0.tags;
     stack2 = helpers.each;
-    tmp1 = self.program(8, program8, data);
+    tmp1 = self.program(10, program10, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -4223,7 +4265,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </optgroup>\n  ";
     return buffer;}
-  function program8(depth0,data) {
+  function program10(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n    <option value=\"";
@@ -4249,11 +4291,21 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n    ";
     return buffer;}
 
-    buffer += "<p><a href=\"#\" data-bypass=\"true\" class=\"back-to-general\">&lsaquo; Back</a></p>\n\n<p class=\"selector-choice\">\nElement:\n";
+    buffer += "<div class=\"switch clearfix\">\n  <label class=\"checkbox pull-right\">\n    <input";
+    foundHelper = helpers.advanced;
+    stack1 = foundHelper || depth0.advanced;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    CSS Editor\n  </label>\n  <p><a href=\"#\" data-bypass=\"true\" class=\"back-to-general\">&lsaquo; Back</a></p>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
+    tmp1 = self.program(3, program3, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -4268,7 +4320,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.htmlTags;
     stack1 = foundHelper || depth0.htmlTags;
     stack2 = helpers.each;
-    tmp1 = self.program(7, program7, data);
+    tmp1 = self.program(9, program9, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;

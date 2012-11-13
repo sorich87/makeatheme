@@ -14,6 +14,7 @@ module.exports = View.extend({
     , "change .tag": "setTag"
 
     , "click .back-to-general": "hideEditor"
+    , "change input[name=style_advanced]": "switchEditor"
   }
 
   , initialize: function () {
@@ -24,6 +25,7 @@ module.exports = View.extend({
 
     this.selector = "body";
     this.customCSS = app.editor.style;
+    this.editorView = "simple_style_edit";
   }
 
   , setTag: function (e) {
@@ -44,9 +46,10 @@ module.exports = View.extend({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
+      , advanced: this.editorView === "advanced_style_edit" ? true : false
     });
 
-    this.$el.append(app.createView("advanced_style_edit", {
+    this.$el.append(app.createView(this.editorView, {
         selector: this.selector
       , tag: this.tag
       , media: this.media
@@ -106,5 +109,15 @@ module.exports = View.extend({
   , hideEditor: function () {
     this.$el.hide();
     this.$el.siblings("#general").show();
+  }
+
+  , switchEditor: function (e) {
+    if (e.currentTarget.checked) {
+      this.editorView = "advanced_style_edit";
+    } else {
+      this.editorView = "simple_style_edit";
+    }
+
+    this.render();
   }
 });

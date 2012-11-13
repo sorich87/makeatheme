@@ -6220,6 +6220,9 @@ body.theme #main {
 #layout-editor #style-edit {
   margin: 10px;
 }
+#layout-editor #style-edit .switch {
+  margin-right: 10px;
+}
 #layout-editor h4 {
   margin: 0;
 }
