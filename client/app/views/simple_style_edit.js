@@ -36,6 +36,7 @@ module.exports = View.extend({
     var field = e.currentTarget
       , property = field.name
       , value;
+    console.log(e);
 
     switch (field.nodeName) {
       case "INPUT":

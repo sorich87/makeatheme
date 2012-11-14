@@ -185,6 +185,30 @@ body.theme #main {
   width: 200px;
 }
 
+.sp-container {
+  background-color: white;
+  border: 1px solid #EEE;
+  padding: 0;
+  width: 214px;
+}
+.sp-container:after {
+  clear: both;
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.sp-picker-container,
+.sp-palette-container {
+  padding: 5px;
+  margin-bottom: 0;
+}
+.sp-picker-container {
+  width: 149px;
+}
+.sp-replacer:hover, .sp-replacer.sp-active {
+  border-color: blue;
+}
+
 /* Editor */
 #layout-editor {
   color: grayDarker;

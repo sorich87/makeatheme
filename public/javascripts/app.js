@@ -1898,6 +1898,18 @@ window.require.define({"router": function(exports, require, module) {
           themeID: id
         , el: $("#main")
       }).render();
+
+      jQuery(function ($) {
+        $("body").on("click", ".accordion-toggle", function (e) {
+          $(".color").spectrum({
+            showInput: true
+            , showPalette: true
+            , change: function(color, i) {
+              $("#theme").get(0).contentWindow.$(this).trigger("change");
+            }
+          });
+        });
+      });
     }
 
     , edit: function (id) {
@@ -2591,6 +2603,8 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       this.resize();
       this.preventActions();
+
+      app.trigger("editor:loaded");
 
       return this;
     }
@@ -3474,6 +3488,7 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
       var field = e.currentTarget
         , property = field.name
         , value;
+      console.log(e);
 
       switch (field.nodeName) {
         case "INPUT":
@@ -4614,12 +4629,12 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
-    buffer += escapeExpression(stack1) + " value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h4>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" class=\"input-medium\"\n              name=\"color\" value=\"";
+    buffer += escapeExpression(stack1) + " value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h4>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" class=\"input-medium color\"\n              name=\"color\" value=\"";
     foundHelper = helpers.color;
     stack1 = foundHelper || depth0.color;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "color", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-background-color\">Background color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-background-color\" class=\"input-medium\"\n              name=\"background-color\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-background-color\">Background color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-background-color\" class=\"input-medium color\"\n              name=\"background-color\" value=\"";
     foundHelper = helpers.backgroundColor;
     stack1 = foundHelper || depth0.backgroundColor;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }

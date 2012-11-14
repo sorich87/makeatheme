@@ -43,6 +43,8 @@ module.exports = View.extend({
     this.resize();
     this.preventActions();
 
+    app.trigger("editor:loaded");
+
     return this;
   }
 
