@@ -123,23 +123,29 @@ module.exports = View.extend({
   }
 
   , currentElementStyle: function () {
-    var declarations, selector, $element;
+    var declarations, selector, $element, $fakeElement;
 
     if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
       selector = this.tag;
     } else {
       if (this.tag) {
         selector = this.selector + " " + this.tag;
+        $element = $("<" + this.tag + ">");
+        $fakeElement = $("<div></div>");
+        $fakeElement.hide().append($element).appendTo($(this.selector));
       } else {
-        selector = this.selector;
+        $element = $(this.selector);
       }
-      $element = $(selector);
       if ($element) {
         selector = $element[0];
       }
     }
 
     declarations = this.customCSS.getDeclarations(selector);
+
+    if ($fakeElement) {
+      $fakeElement.remove();
+    }
 
     if (declarations) {
       return declarations[this.media];
