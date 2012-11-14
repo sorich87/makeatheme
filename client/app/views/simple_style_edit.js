@@ -36,7 +36,6 @@ module.exports = View.extend({
     var field = e.currentTarget
       , property = field.name
       , value;
-    console.log(e);
 
     switch (field.nodeName) {
       case "INPUT":
@@ -48,7 +47,7 @@ module.exports = View.extend({
         break;
     }
 
-    if (property === "font-size" &&
+    if ((property === "font-size" || property.match(/^(margin|padding)/)) &&
         !isNaN(parseFloat(value)) && isFinite(value)) {
       value = value + "px";
     }

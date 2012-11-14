@@ -3488,7 +3488,6 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
       var field = e.currentTarget
         , property = field.name
         , value;
-      console.log(e);
 
       switch (field.nodeName) {
         case "INPUT":
@@ -3500,7 +3499,7 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
           break;
       }
 
-      if (property === "font-size" &&
+      if ((property === "font-size" || property.match(/^(margin|padding)/)) &&
           !isNaN(parseFloat(value)) && isFinite(value)) {
         value = value + "px";
       }
@@ -4639,7 +4638,47 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     stack1 = foundHelper || depth0.backgroundColor;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "backgroundColor", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n</div>\n\n";
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-margins\">\n        Margins\n      </h4>\n    </div>\n    <div id=\"style-margins\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-top\">Top Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-top\" class=\"input-mini\"\n              name=\"margin-top\" value=\"";
+    foundHelper = helpers.marginTop;
+    stack1 = foundHelper || depth0.marginTop;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "marginTop", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-right\">Right Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-right\" class=\"input-mini\"\n              name=\"margin-right\" value=\"";
+    foundHelper = helpers.marginRight;
+    stack1 = foundHelper || depth0.marginRight;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "marginRight", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-bottom\">Bottom Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-bottom\" class=\"input-mini\"\n              name=\"margin-bottom\" value=\"";
+    foundHelper = helpers.marginBottom;
+    stack1 = foundHelper || depth0.marginBottom;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "marginBottom", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-left\">Left Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-left\" class=\"input-mini\"\n              name=\"margin-left\" value=\"";
+    foundHelper = helpers.marginLeft;
+    stack1 = foundHelper || depth0.marginLeft;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "marginLeft", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-padding\">\n        Padding\n      </h4>\n    </div>\n    <div id=\"style-padding\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-top\">Top Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-top\" class=\"input-mini\"\n              name=\"padding-top\" value=\"";
+    foundHelper = helpers.paddingTop;
+    stack1 = foundHelper || depth0.paddingTop;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "paddingTop", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-right\">Right Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-right\" class=\"input-mini\"\n              name=\"padding-right\" value=\"";
+    foundHelper = helpers.paddingRight;
+    stack1 = foundHelper || depth0.paddingRight;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "paddingRight", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-bottom\">Bottom Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-bottom\" class=\"input-mini\"\n              name=\"padding-bottom\" value=\"";
+    foundHelper = helpers.paddingBottom;
+    stack1 = foundHelper || depth0.paddingBottom;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "paddingBottom", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-left\">Left Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-left\" class=\"input-mini\"\n              name=\"padding-left\" value=\"";
+    foundHelper = helpers.paddingLeft;
+    stack1 = foundHelper || depth0.paddingLeft;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "paddingLeft", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n</div>\n\n";
     return buffer;});
 }});
 
