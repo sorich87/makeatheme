@@ -34,8 +34,13 @@ module.exports = View.extend({
 
   , editStyle: function (e) {
     var field = e.currentTarget
+      , selector = this.selector
       , property = field.name
       , value;
+
+    if (this.tag) {
+      selector += " " + this.tag;
+    }
 
     switch (field.nodeName) {
       case "INPUT":
@@ -53,7 +58,7 @@ module.exports = View.extend({
     }
 
     this.customCSS.insertRule({
-      selector: this.selector
+      selector: selector
       , property: property
       , value: value
       , media: this.media

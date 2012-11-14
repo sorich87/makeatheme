@@ -3486,8 +3486,13 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
 
     , editStyle: function (e) {
       var field = e.currentTarget
+        , selector = this.selector
         , property = field.name
         , value;
+
+      if (this.tag) {
+        selector += " " + this.tag;
+      }
 
       switch (field.nodeName) {
         case "INPUT":
@@ -3505,7 +3510,7 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
       }
 
       this.customCSS.insertRule({
-        selector: this.selector
+        selector: selector
         , property: property
         , value: value
         , media: this.media
