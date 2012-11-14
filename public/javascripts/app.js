@@ -3612,25 +3612,20 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , currentElementStyle: function () {
-      var declarations, selector, $element, $fakeElement;
+      var declarations, $element, $fakeElement;
 
-      if (this.tag && ["body", "html"].indexOf(this.selector) != -1) {
-        selector = this.tag;
+      if (this.tag) {
+        $element = $("<" + this.tag + ">");
+        $fakeElement = $("<div></div>");
+        $fakeElement
+          .hide()
+          .append($element)
+          .appendTo($(this.selector));
       } else {
-        if (this.tag) {
-          selector = this.selector + " " + this.tag;
-          $element = $("<" + this.tag + ">");
-          $fakeElement = $("<div></div>");
-          $fakeElement.hide().append($element).appendTo($(this.selector));
-        } else {
-          $element = $(this.selector);
-        }
-        if ($element) {
-          selector = $element[0];
-        }
+        $element = $(this.selector);
       }
 
-      declarations = this.customCSS.getDeclarations(selector);
+      declarations = this.customCSS.getDeclarations($element.get(0));
 
       if ($fakeElement) {
         $fakeElement.remove();
