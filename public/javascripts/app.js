@@ -3554,7 +3554,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       return html_tags.map(function (group) {
         group.tags = group.tags.map(function (tag) {
-          tag.selected = tag.tag === _this.tag ? " selected" : "";
+          tag.selectedAttr = tag.tag === _this.tag ? " selected" : "";
           return tag;
         });
         return group;
@@ -4478,10 +4478,10 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "tag", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\"";
-    foundHelper = helpers.selected;
-    stack1 = foundHelper || depth0.selected;
+    foundHelper = helpers.selectedAttr;
+    stack1 = foundHelper || depth0.selectedAttr;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selectedAttr", { hash: {} }); }
     buffer += escapeExpression(stack1) + ">";
     foundHelper = helpers.label;
     stack1 = foundHelper || depth0.label;

@@ -65,7 +65,7 @@ module.exports = View.extend({
 
     return html_tags.map(function (group) {
       group.tags = group.tags.map(function (tag) {
-        tag.selected = tag.tag === _this.tag ? " selected" : "";
+        tag.selectedAttr = tag.tag === _this.tag ? " selected" : "";
         return tag;
       });
       return group;
