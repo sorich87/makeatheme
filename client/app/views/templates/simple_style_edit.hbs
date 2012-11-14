@@ -6,40 +6,40 @@
         Typography
       </h4>
     </div>
-    <div id="style-typography" class="accordion-body collapse in">
+    <div id="style-typography" class="accordion-body collapse">
       <div class="accordion-inner">
 
         <div class="controls-group">
           <label for="visual-font-family">Font family</label>
           <div class="controls">
             <select id="visual-font-family" name="font-family" class="input-medium">
-              <option{{selected font_family "Arial, Helvetica, sans-serif"}}
+              <option{{selected fontFamily "Arial, Helvetica, sans-serif"}}
                 value='Arial, Helvetica, sans-serif'>Arial</option>
-              <option{{selected font_family "\"Arial Black\", Gadget, sans-serif"}}
+              <option{{selected fontFamily "'Arial Black', Gadget, sans-serif"}}
                 value='"Arial Black", Gadget, sans-serif'>Arial Black</option>
-              <option{{selected font_family "\"Comic Sans MS\", cursive, sans-serif"}}
+              <option{{selected fontFamily "'Comic Sans MS', cursive, sans-serif"}}
                 value='"Comic Sans MS", cursive, sans-serif'>Comic Sans MS</option>
-              <option{{selected font_family "\"Courier New\", Courier, monospace"}}
+              <option{{selected fontFamily "'Courier New', Courier, monospace"}}
                 value='"Courier New", Courier, monospace'>Courier New</option>
-              <option{{selected font_family "Georgia, serif"}}
+              <option{{selected fontFamily "Georgia, serif"}}
                 value='Georgia, serif'>Georgia</option>
-              <option{{selected font_family "\"Helvetica Neue\", Helvetica, Arial, sans-serif"}}
+              <option{{selected fontFamily "'Helvetica Neue', Helvetica, Arial, sans-serif"}}
                 value='"Helvetica Neue", Helvetica, Arial, sans-serif'>Helvetica Neue</option>
-              <option{{selected font_family "Impact, Charcoal, sans-serif"}}
+              <option{{selected fontFamily "Impact, Charcoal, sans-serif"}}
                 value='Impact, Charcoal, sans-serif'>Impact</option>
-              <option{{selected font_family "\"Lucida Console\", Monaco, monospace"}}
+              <option{{selected fontFamily "'Lucida Console', Monaco, monospace"}}
                 value='"Lucida Console", Monaco, monospace'>Lucida Console</option>
-              <option{{selected font_family "\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif"}}
+              <option{{selected fontFamily "'Lucida Sans Unicode', 'Lucida Grande', sans-serif"}}
                 value='"Lucida Sans Unicode", "Lucida Grande", sans-serif'>Lucida Sans Unicode</option>
-              <option{{selected font_family "\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif"}}
+              <option{{selected fontFamily "'Palatino Linotype', 'Book Antiqua', Palatino, serif"}}
                 value='"Palatino Linotype", "Book Antiqua", Palatino, serif'>Palatino Linotype</option>
-              <option{{selected font_family "Verdana, Geneva, sans-serif"}}
+              <option{{selected fontFamily "Verdana, Geneva, sans-serif"}}
                 value='Verdana, Geneva, sans-serif'>Verdana</option>
-              <option{{selected font_family "Tahoma, Geneva, sans-serif"}}
+              <option{{selected fontFamily "Tahoma, Geneva, sans-serif"}}
                 value='Tahoma, Geneva, sans-serif'>Tahoma</option>
-              <option{{selected font_family "\"Times New Roman\", Times, serif"}}
+              <option{{selected fontFamily "'Times New Roman', Times, serif"}}
                 value='"Times New Roman", Times, serif'>Times New Roman</option>
-              <option{{selected font_family "\"Trebuchet MS\", Helvetica, sans-serif"}}
+              <option{{selected fontFamily "'Trebuchet MS', Helvetica, sans-serif"}}
                 value='"Trebuchet MS", Helvetica, sans-serif'>Trebuchet MS</option>
             </select>
           </div>
@@ -48,7 +48,7 @@
         <div class="controls-group">
           <label for="visual-font-size">Font size</label>
           <div class="controls">
-            <input type="text" id="visual-font-size" name="font-size" class="input-mini" value="{{font_size}}" />
+            <input type="text" id="visual-font-size" name="font-size" class="input-mini" value="{{fontSize}}" />
           </div>
         </div>
 
@@ -56,17 +56,17 @@
           <label for="visual-font-weight">Font weight</label>
           <div class="controls">
             <select id="visual-font-weight" name="font-weight" class="input-medium">
-              <option value="normal">normal</option>
-              <option value="bold">bold</option>
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="500">500</option>
-              <option value="600">600</option>
-              <option value="700">700</option>
-              <option value="800">800</option>
-              <option value="900">900</option>
+              <option{{selected fontWeight "normal"}} value="normal">normal</option>
+              <option{{selected fontWeight "bold"}} value="bold">bold</option>
+              <option{{selected fontWeight "100"}} value="100">100</option>
+              <option{{selected fontWeight "200"}} value="200">200</option>
+              <option{{selected fontWeight "300"}} value="300">300</option>
+              <option{{selected fontWeight "400"}} value="400">400</option>
+              <option{{selected fontWeight "500"}} value="500">500</option>
+              <option{{selected fontWeight "600"}} value="600">600</option>
+              <option{{selected fontWeight "700"}} value="700">700</option>
+              <option{{selected fontWeight "800"}} value="800">800</option>
+              <option{{selected fontWeight "900"}} value="900">900</option>
             </select>
           </div>
         </div>
@@ -75,9 +75,9 @@
           <label for="visual-font-style">Font style</label>
           <div class="controls">
             <select id="visual-font-style" name="font-style" class="input-medium">
-              <option value="normal">normal</option>
-              <option value="italic">italic</option>
-              <option value="oblique">oblique</option>
+              <option{{selected fontStyle "normal"}} value="normal">normal</option>
+              <option{{selected fontStyle "italic"}} value="italic">italic</option>
+              <option{{selected fontStyle "oblique"}} value="oblique">oblique</option>
             </select>
           </div>
         </div>
@@ -85,7 +85,7 @@
         <div class="controls-group">
           <label for="visual-line-height">Line height</label>
           <div class="controls">
-            <input type="text" id="visual-line-height" name="line-height" class="input-mini" value="{{line_height}}" />
+            <input type="text" id="visual-line-height" name="line-height" class="input-mini" value="{{lineHeight}}" />
           </div>
         </div>
 
@@ -93,10 +93,10 @@
           <label for="visual-text-align">Text align</label>
           <div class="controls">
             <select id="visual-text-align" name="text-align" class="input-medium">
-              <option value="left">left</option>
-              <option value="right">right</option>
-              <option value="center">center</option>
-              <option value="justify">justify</option>
+              <option{{selected textAlign "left"}} value="left">left</option>
+              <option{{selected textAlign "right"}} value="right">right</option>
+              <option{{selected textAlign "center"}} value="center">center</option>
+              <option{{selected textAlign "justify"}} value="justify">justify</option>
             </select>
           </div>
         </div>
@@ -105,9 +105,10 @@
           <label for="visual-text-decoration">Text decoration</label>
           <div class="controls">
             <select id="visual-text-decoration" name="text-decoration" class="input-medium">
-              <option value="line-through">line-through</option>
-              <option value="overline">overline</option>
-              <option value="underline">underline</option>
+              <option{{selected textDecoration "none"}} value="none">none</option>
+              <option{{selected textDecoration "line-through"}} value="line-through">line-through</option>
+              <option{{selected textDecoration "overline"}} value="overline">overline</option>
+              <option{{selected textDecoration "underline"}} value="underline">underline</option>
             </select>
           </div>
         </div>
@@ -116,10 +117,10 @@
           <label for="visual-text-transform">Text transform</label>
           <div class="controls">
             <select id="visual-text-transform" name="text-transform" class="input-medium">
-              <option value="none">none</option>
-              <option value="capitalize">capitalize</option>
-              <option value="lowercase">lowercase</option>
-              <option value="uppercase">uppercase</option>
+              <option{{selected textTransform "none"}} value="none">none</option>
+              <option{{selected textTransform "capitalize"}} value="capitalize">capitalize</option>
+              <option{{selected textTransform "lowercase"}} value="lowercase">lowercase</option>
+              <option{{selected textTransform "uppercase"}} value="uppercase">uppercase</option>
             </select>
           </div>
         </div>
@@ -141,14 +142,16 @@
         <div class="controls-group">
           <label for="visual-color">Color</label>
           <div class="controls">
-            <input type="text" id="visual-color" name="color" class="input-mini" value="{{color}}" />
+            <input type="text" id="visual-color" class="input-medium"
+              name="color" value="{{color}}" />
           </div>
         </div>
 
         <div class="controls-group">
           <label for="visual-background-color">Background color</label>
           <div class="controls">
-            <input type="text" id="visual-background-color" name="background-color" class="input-mini" value="{{background_color}}" />
+            <input type="text" id="visual-background-color" class="input-medium"
+              name="background-color" value="{{backgroundColor}}" />
           </div>
         </div>
 

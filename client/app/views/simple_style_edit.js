@@ -17,7 +17,17 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    this.el.innerHTML = template({font_family:""});
+    switch (this.currentCSS.textAlign) {
+      case "start" :
+        this.currentCSS.textAlign = "left";
+        break;
+
+      case "end" :
+        this.currentCSS.textAlign = "right";
+        break;
+    }
+
+    this.el.innerHTML = template(this.currentCSS);
 
     return this;
   }
@@ -35,6 +45,11 @@ module.exports = View.extend({
       case "SELECT":
         value = field.options[field.selectedIndex].value;
         break;
+    }
+
+    if (property === "font-size" &&
+        !isNaN(parseFloat(value)) && isFinite(value)) {
+      value = value + "px";
     }
 
     this.customCSS.insertRule({

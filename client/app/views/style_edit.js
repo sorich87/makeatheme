@@ -40,6 +40,8 @@ module.exports = View.extend({
   }
 
   , render: function () {
+    var computedStyle = this.editorView === "simple_style_edit" ? true : false;
+
     this.media = "all";
 
     this.el.innerHTML = template({
@@ -54,7 +56,7 @@ module.exports = View.extend({
       , tag: this.tag
       , media: this.media
       , customCSS: this.customCSS
-      , currentCSS: this.currentElementStyle()
+      , currentCSS: this.currentElementStyle(computedStyle)
     }).render().$el);
 
     return this;
@@ -122,8 +124,8 @@ module.exports = View.extend({
     this.render();
   }
 
-  , currentElementStyle: function () {
-    var declarations, $element, $fakeElement;
+  , currentElementStyle: function (computed) {
+    var style, declarations, $element, $fakeElement;
 
     if (this.tag) {
       $element = $("<" + this.tag + ">");
@@ -136,14 +138,19 @@ module.exports = View.extend({
       $element = $(this.selector);
     }
 
-    declarations = this.customCSS.getDeclarations($element.get(0));
+    if (computed) {
+      style = _.clone(window.getComputedStyle($element.get(0)));
+    } else {
+      declarations = this.customCSS.getDeclarations($element.get(0));
+      if (declarations) {
+        style = declarations[this.media];
+      }
+    }
 
     if ($fakeElement) {
       $fakeElement.remove();
     }
 
-    if (declarations) {
-      return declarations[this.media];
-    }
+    return style;
   }
 });

@@ -3455,7 +3455,17 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
     }
 
     , render: function () {
-      this.el.innerHTML = template({font_family:""});
+      switch (this.currentCSS.textAlign) {
+        case "start" :
+          this.currentCSS.textAlign = "left";
+          break;
+
+        case "end" :
+          this.currentCSS.textAlign = "right";
+          break;
+      }
+
+      this.el.innerHTML = template(this.currentCSS);
 
       return this;
     }
@@ -3473,6 +3483,11 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
         case "SELECT":
           value = field.options[field.selectedIndex].value;
           break;
+      }
+
+      if (property === "font-size" &&
+          !isNaN(parseFloat(value)) && isFinite(value)) {
+        value = value + "px";
       }
 
       this.customCSS.insertRule({
@@ -3529,6 +3544,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
+      var computedStyle = this.editorView === "simple_style_edit" ? true : false;
+
       this.media = "all";
 
       this.el.innerHTML = template({
@@ -3543,7 +3560,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         , tag: this.tag
         , media: this.media
         , customCSS: this.customCSS
-        , currentCSS: this.currentElementStyle()
+        , currentCSS: this.currentElementStyle(computedStyle)
       }).render().$el);
 
       return this;
@@ -3611,8 +3628,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       this.render();
     }
 
-    , currentElementStyle: function () {
-      var declarations, $element, $fakeElement;
+    , currentElementStyle: function (computed) {
+      var style, declarations, $element, $fakeElement;
 
       if (this.tag) {
         $element = $("<" + this.tag + ">");
@@ -3625,15 +3642,20 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         $element = $(this.selector);
       }
 
-      declarations = this.customCSS.getDeclarations($element.get(0));
+      if (computed) {
+        style = _.clone(window.getComputedStyle($element.get(0)));
+      } else {
+        declarations = this.customCSS.getDeclarations($element.get(0));
+        if (declarations) {
+          style = declarations[this.media];
+        }
+      }
 
       if ($fakeElement) {
         $fakeElement.remove();
       }
 
-      if (declarations) {
-        return declarations[this.media];
-      }
+      return style;
     }
   });
   
@@ -4222,37 +4244,37 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     var buffer = "", stack1, stack2, stack3, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div class=\"accordion\" id=\"visual-style\">\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-typography\">\n        Typography\n      </h4>\n    </div>\n    <div id=\"style-typography\" class=\"accordion-body collapse in\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-family\">Font family</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-family\" name=\"font-family\" class=\"input-medium\">\n              <option";
+    buffer += "<div class=\"accordion\" id=\"visual-style\">\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-typography\">\n        Typography\n      </h4>\n    </div>\n    <div id=\"style-typography\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-family\">Font family</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-family\" name=\"font-family\" class=\"input-medium\">\n              <option";
     stack1 = "Arial, Helvetica, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='Arial, Helvetica, sans-serif'>Arial</option>\n              <option";
-    stack1 = "\"Arial Black\", Gadget, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Arial Black', Gadget, sans-serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Arial Black\", Gadget, sans-serif'>Arial Black</option>\n              <option";
-    stack1 = "\"Comic Sans MS\", cursive, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Comic Sans MS', cursive, sans-serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Comic Sans MS\", cursive, sans-serif'>Comic Sans MS</option>\n              <option";
-    stack1 = "\"Courier New\", Courier, monospace";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Courier New', Courier, monospace";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
@@ -4260,17 +4282,17 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Courier New\", Courier, monospace'>Courier New</option>\n              <option";
     stack1 = "Georgia, serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='Georgia, serif'>Georgia</option>\n              <option";
-    stack1 = "\"Helvetica Neue\", Helvetica, Arial, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
@@ -4278,35 +4300,35 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Helvetica Neue\", Helvetica, Arial, sans-serif'>Helvetica Neue</option>\n              <option";
     stack1 = "Impact, Charcoal, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='Impact, Charcoal, sans-serif'>Impact</option>\n              <option";
-    stack1 = "\"Lucida Console\", Monaco, monospace";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Lucida Console', Monaco, monospace";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Lucida Console\", Monaco, monospace'>Lucida Console</option>\n              <option";
-    stack1 = "\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Lucida Sans Unicode', 'Lucida Grande', sans-serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Lucida Sans Unicode\", \"Lucida Grande\", sans-serif'>Lucida Sans Unicode</option>\n              <option";
-    stack1 = "\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Palatino Linotype', 'Book Antiqua', Palatino, serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
@@ -4314,8 +4336,8 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Palatino Linotype\", \"Book Antiqua\", Palatino, serif'>Palatino Linotype</option>\n              <option";
     stack1 = "Verdana, Geneva, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
@@ -4323,51 +4345,285 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='Verdana, Geneva, sans-serif'>Verdana</option>\n              <option";
     stack1 = "Tahoma, Geneva, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='Tahoma, Geneva, sans-serif'>Tahoma</option>\n              <option";
-    stack1 = "\"Times New Roman\", Times, serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Times New Roman', Times, serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Times New Roman\", Times, serif'>Times New Roman</option>\n              <option";
-    stack1 = "\"Trebuchet MS\", Helvetica, sans-serif";
-    foundHelper = helpers.font_family;
-    stack2 = foundHelper || depth0.font_family;
+    stack1 = "'Trebuchet MS', Helvetica, sans-serif";
+    foundHelper = helpers.fontFamily;
+    stack2 = foundHelper || depth0.fontFamily;
     foundHelper = helpers.selected;
     stack3 = foundHelper || depth0.selected;
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + "\n                value='\"Trebuchet MS\", Helvetica, sans-serif'>Trebuchet MS</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-size\">Font size</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-font-size\" name=\"font-size\" class=\"input-mini\" value=\"";
-    foundHelper = helpers.font_size;
-    stack1 = foundHelper || depth0.font_size;
+    foundHelper = helpers.fontSize;
+    stack1 = foundHelper || depth0.fontSize;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "font_size", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-weight\">Font weight</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-weight\" name=\"font-weight\" class=\"input-medium\">\n              <option value=\"normal\">normal</option>\n              <option value=\"bold\">bold</option>\n              <option value=\"100\">100</option>\n              <option value=\"200\">200</option>\n              <option value=\"300\">300</option>\n              <option value=\"400\">400</option>\n              <option value=\"500\">500</option>\n              <option value=\"600\">600</option>\n              <option value=\"700\">700</option>\n              <option value=\"800\">800</option>\n              <option value=\"900\">900</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-style\">Font style</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-style\" name=\"font-style\" class=\"input-medium\">\n              <option value=\"normal\">normal</option>\n              <option value=\"italic\">italic</option>\n              <option value=\"oblique\">oblique</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-line-height\">Line height</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-line-height\" name=\"line-height\" class=\"input-mini\" value=\"";
-    foundHelper = helpers.line_height;
-    stack1 = foundHelper || depth0.line_height;
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "fontSize", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-weight\">Font weight</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-weight\" name=\"font-weight\" class=\"input-medium\">\n              <option";
+    stack1 = "normal";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"normal\">normal</option>\n              <option";
+    stack1 = "bold";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"bold\">bold</option>\n              <option";
+    stack1 = "100";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"100\">100</option>\n              <option";
+    stack1 = "200";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"200\">200</option>\n              <option";
+    stack1 = "300";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"300\">300</option>\n              <option";
+    stack1 = "400";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"400\">400</option>\n              <option";
+    stack1 = "500";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"500\">500</option>\n              <option";
+    stack1 = "600";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"600\">600</option>\n              <option";
+    stack1 = "700";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"700\">700</option>\n              <option";
+    stack1 = "800";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"800\">800</option>\n              <option";
+    stack1 = "900";
+    foundHelper = helpers.fontWeight;
+    stack2 = foundHelper || depth0.fontWeight;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"900\">900</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-style\">Font style</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-style\" name=\"font-style\" class=\"input-medium\">\n              <option";
+    stack1 = "normal";
+    foundHelper = helpers.fontStyle;
+    stack2 = foundHelper || depth0.fontStyle;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"normal\">normal</option>\n              <option";
+    stack1 = "italic";
+    foundHelper = helpers.fontStyle;
+    stack2 = foundHelper || depth0.fontStyle;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"italic\">italic</option>\n              <option";
+    stack1 = "oblique";
+    foundHelper = helpers.fontStyle;
+    stack2 = foundHelper || depth0.fontStyle;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"oblique\">oblique</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-line-height\">Line height</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-line-height\" name=\"line-height\" class=\"input-mini\" value=\"";
+    foundHelper = helpers.lineHeight;
+    stack1 = foundHelper || depth0.lineHeight;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "line_height", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-align\">Text align</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-align\" name=\"text-align\" class=\"input-medium\">\n              <option value=\"left\">left</option>\n              <option value=\"right\">right</option>\n              <option value=\"center\">center</option>\n              <option value=\"justify\">justify</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-decoration\">Text decoration</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-decoration\" name=\"text-decoration\" class=\"input-medium\">\n              <option value=\"line-through\">line-through</option>\n              <option value=\"overline\">overline</option>\n              <option value=\"underline\">underline</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-transform\">Text transform</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-transform\" name=\"text-transform\" class=\"input-medium\">\n              <option value=\"none\">none</option>\n              <option value=\"capitalize\">capitalize</option>\n              <option value=\"lowercase\">lowercase</option>\n              <option value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h4>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" name=\"color\" class=\"input-mini\" value=\"";
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "lineHeight", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-align\">Text align</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-align\" name=\"text-align\" class=\"input-medium\">\n              <option";
+    stack1 = "left";
+    foundHelper = helpers.textAlign;
+    stack2 = foundHelper || depth0.textAlign;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"left\">left</option>\n              <option";
+    stack1 = "right";
+    foundHelper = helpers.textAlign;
+    stack2 = foundHelper || depth0.textAlign;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"right\">right</option>\n              <option";
+    stack1 = "center";
+    foundHelper = helpers.textAlign;
+    stack2 = foundHelper || depth0.textAlign;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"center\">center</option>\n              <option";
+    stack1 = "justify";
+    foundHelper = helpers.textAlign;
+    stack2 = foundHelper || depth0.textAlign;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"justify\">justify</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-decoration\">Text decoration</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-decoration\" name=\"text-decoration\" class=\"input-medium\">\n              <option";
+    stack1 = "none";
+    foundHelper = helpers.textDecoration;
+    stack2 = foundHelper || depth0.textDecoration;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"none\">none</option>\n              <option";
+    stack1 = "line-through";
+    foundHelper = helpers.textDecoration;
+    stack2 = foundHelper || depth0.textDecoration;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"line-through\">line-through</option>\n              <option";
+    stack1 = "overline";
+    foundHelper = helpers.textDecoration;
+    stack2 = foundHelper || depth0.textDecoration;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"overline\">overline</option>\n              <option";
+    stack1 = "underline";
+    foundHelper = helpers.textDecoration;
+    stack2 = foundHelper || depth0.textDecoration;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"underline\">underline</option>\n            </select>\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-text-transform\">Text transform</label>\n          <div class=\"controls\">\n            <select id=\"visual-text-transform\" name=\"text-transform\" class=\"input-medium\">\n              <option";
+    stack1 = "none";
+    foundHelper = helpers.textTransform;
+    stack2 = foundHelper || depth0.textTransform;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"none\">none</option>\n              <option";
+    stack1 = "capitalize";
+    foundHelper = helpers.textTransform;
+    stack2 = foundHelper || depth0.textTransform;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"capitalize\">capitalize</option>\n              <option";
+    stack1 = "lowercase";
+    foundHelper = helpers.textTransform;
+    stack2 = foundHelper || depth0.textTransform;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"lowercase\">lowercase</option>\n              <option";
+    stack1 = "uppercase";
+    foundHelper = helpers.textTransform;
+    stack2 = foundHelper || depth0.textTransform;
+    foundHelper = helpers.selected;
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
+    buffer += escapeExpression(stack1) + " value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h4>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" class=\"input-medium\"\n              name=\"color\" value=\"";
     foundHelper = helpers.color;
     stack1 = foundHelper || depth0.color;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "color", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-background-color\">Background color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-background-color\" name=\"background-color\" class=\"input-mini\" value=\"";
-    foundHelper = helpers.background_color;
-    stack1 = foundHelper || depth0.background_color;
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n        <div class=\"controls-group\">\n          <label for=\"visual-background-color\">Background color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-background-color\" class=\"input-medium\"\n              name=\"background-color\" value=\"";
+    foundHelper = helpers.backgroundColor;
+    stack1 = foundHelper || depth0.backgroundColor;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "background_color", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "backgroundColor", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n</div>\n\n";
     return buffer;});
 }});
