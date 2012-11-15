@@ -4886,17 +4886,21 @@ window.require.define({"views/templates/templates_select": function(exports, req
 
   function program1(depth0,data) {
     
-    var buffer = "", stack1;
+    var buffer = "", stack1, stack2, stack3;
     buffer += "\n  <option value=\"";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    stack2 = "index";
     foundHelper = helpers.selected;
-    stack1 = foundHelper || depth0.selected;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selected", { hash: {} }); }
+    stack3 = foundHelper || depth0.selected;
+    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
+    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
+    else { stack1 = stack3; }
     buffer += escapeExpression(stack1) + ">";
     foundHelper = helpers.label;
     stack1 = foundHelper || depth0.label;
@@ -5038,7 +5042,7 @@ window.require.define({"views/templates_select": function(exports, require, modu
         return {
             id: template.id
           , label: template.label()
-          , selected: template.get("name") === "index" ? " selected='selected'" : ""
+          , name: template.get("name")
         };
       })
     }

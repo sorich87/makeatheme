@@ -1,6 +1,6 @@
 <label>Previewing template:</label>
 <select>
   {{#each templates}}
-  <option value="{{id}}"{{selected}}>{{label}}</option>
+  <option value="{{id}}"{{selected "index" name}}>{{label}}</option>
   {{/each}}
 </select>

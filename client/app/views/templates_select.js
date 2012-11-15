@@ -22,7 +22,7 @@ module.exports = View.extend({
       return {
           id: template.id
         , label: template.label()
-        , selected: template.get("name") === "index" ? " selected='selected'" : ""
+        , name: template.get("name")
       };
     })
   }
