@@ -35,6 +35,11 @@ set :json_encoder, JSON
 set :reload_templates, true # https://github.com/sinatra/sinatra-contrib/issues/33
 set :connections, {}
 
+mime_type :ttf, 'font/ttf'
+mime_type :woff, 'font/woff'
+mime_type :eot, 'application/vnd.ms-fontobject'
+mime_type :svg, 'image/svg+xml'
+
 require "config/environments/#{settings.environment}"
 
 # Models
