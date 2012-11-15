@@ -3465,7 +3465,7 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
       this.tag = options.tag;
       this.selector = options.selector;
       this.customCSS = options.customCSS;
-      this.currentCSS = options.currentCSS;
+      this.currentCSS = options.currentCSS || {};
     }
 
     , render: function () {
