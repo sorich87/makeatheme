@@ -760,7 +760,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
         continue;
       }
 
-      if (this.rules[rule.media][index].selector === rule.selector) {
+      if (this.rules[rule.media][index].selector === rule.selector &&
+         this.rules[rule.media][index].property === rule.property) {
         return index;
       }
     }

@@ -103,7 +103,8 @@ CustomCSS.prototype.getIndex = function (rule) {
       continue;
     }
 
-    if (this.rules[rule.media][index].selector === rule.selector) {
+    if (this.rules[rule.media][index].selector === rule.selector &&
+       this.rules[rule.media][index].property === rule.property) {
       return index;
     }
   }
