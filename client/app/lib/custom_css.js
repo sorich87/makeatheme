@@ -139,7 +139,7 @@ CustomCSS.prototype.getDeclarations = function (element) {
     for (index in this.rules[media]) {
       rule = this.rules[media][index];
 
-      selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*\w/g, "").trim();
+      selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*(\w|\))/g, "").trim();
 
       if (selectorWithoutPseudo === "") {
         selectorWithoutPseudo = "*";

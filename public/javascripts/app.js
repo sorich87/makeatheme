@@ -796,7 +796,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
       for (index in this.rules[media]) {
         rule = this.rules[media][index];
 
-        selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*\w/g, "").trim();
+        selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*(\w|\))/g, "").trim();
 
         if (selectorWithoutPseudo === "") {
           selectorWithoutPseudo = "*";
