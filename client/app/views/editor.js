@@ -55,9 +55,9 @@ module.exports = View.extend({
   // Prevent click, drag and submit on links, images and forms
   // respectively in the iframe
   , preventActions: function () {
-    $("body").on("click", ".columns a", this.preventDefault)
-      .on("mousedown", ".columns a, .columns img", this.preventDefault)
-      .on("submit", ".columns form", this.preventDefault);
+    $("body").on("click", ".column a", this.preventDefault)
+      .on("mousedown", ".column a, .column img", this.preventDefault)
+      .on("submit", ".column form", this.preventDefault);
   }
 
   , preventDefault: function (e) {

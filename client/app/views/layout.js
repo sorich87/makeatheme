@@ -28,12 +28,12 @@ module.exports = View.extend({
 
   , events: {
       // Highlight columns.
-      "click .columns": "highlightColumns"
+      "click .column": "highlightColumns"
 
       // Remove column
-    , "click .columns .x-remove": "removeColumn"
+    , "click .column .x-remove": "removeColumn"
 
-    , "mouseenter .column, .columns": "makeDraggable"
+    , "mouseenter .column": "makeDraggable"
 
     , "mouseenter .row": "makeDroppable"
 
@@ -58,7 +58,7 @@ module.exports = View.extend({
   }
 
   , makeDraggable: function (e) {
-    this.$(".column, .columns").draggable({
+    this.$(".column").draggable({
         addClasses: false
       , revert: "invalid"
       , drag: this.dragOn
@@ -70,7 +70,7 @@ module.exports = View.extend({
 
   , makeDroppable: function (e) {
     this.$(".row").droppable({
-        accept: ".column, .columns, .x-drag"
+        accept: ".column, .x-drag"
       , addClasses: false
       , drop: this.dropOn.bind(this)
       , out: this.dropOut

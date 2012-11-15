@@ -79,7 +79,7 @@ module.exports = View.extend({
   , insertBlock: function (element, id) {
     var block = this.collection.getByCid($(element).data("cid"));
 
-    element.outerHTML = "<div id='" + id + "' class='columns " +
+    element.outerHTML = "<div id='" + id + "' class='column " +
       block.className() + "'>" + block.get("build") + "</div>";
 
     app.trigger("node:added", window.document.getElementById(id));

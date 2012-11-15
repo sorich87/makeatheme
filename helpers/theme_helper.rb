@@ -46,7 +46,7 @@ module ThemeHelper
         # Ensure all columns and rows have IDs, for use in the editor
         if ensure_id
           template = Nokogiri::HTML::DocumentFragment.parse(piece[:template])
-          template.css('.row, .columns, .column').each do |node|
+          template.css('.row, .column').each do |node|
             if node['id'].nil?
               node['id'] = "x-#{xid}"
               xid += 1

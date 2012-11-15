@@ -144,7 +144,7 @@ Nunc iaculis suscipit dui.</p></pre>
     TEMPLATES = {
       index: %q[<div id="main">
 <div class="row">
-<div class="columns">
+<div class="column">
 <h1>Welcome to Make A Theme!</h1>
 <p>This is a small guide to get you started. Reading it will give you
 an idea of how to build your theme within a few minutes.</p>
@@ -152,7 +152,7 @@ an idea of how to build your theme within a few minutes.</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>How is a theme structured?</h2>
 <p>A theme is made of several templates. You can switch templates and
 add new ones by clicking &quot;Current Template&quot; to the right of
@@ -169,7 +169,7 @@ or footer.</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>What is a block?</h2>
 <p>Blocks are the components of a theme that you can actually see.
 A block can be an article, a navigation, a header image, a search form.</p>
@@ -187,7 +187,7 @@ we are in a very early stage...</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>What is &quot;Style&quot; for?</h2>
 <p>Under &quot;Style&quot;, is where, you guessed it, you can add styling
 to the elements on the page. You can add colors, backgrounds, width, etc.
@@ -203,7 +203,7 @@ But it will be when you add your creative touch! ;)</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>How to share with others?</h2>
 <p>Just copy the URL under &quot;Share&quot; and sent it to them.
 Soon, we will be adding more collaboration tools.</p>
@@ -211,7 +211,7 @@ Soon, we will be adding more collaboration tools.</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>How to download the result?</h2>
 <p>First, you will need to save it. You are too shy!
 Click the &quot;Save Changes&quot; button now.
@@ -222,7 +222,7 @@ in HTML5 or WordPress format.</p>
 </div>
 
 <div class="row">
-<div class="columns">
+<div class="column">
 <h2>Is that all?</h2>
 <p>Yes, now you know everything to get you started. This tutorial is
 made of several blocks. Delete them and make your next theme!
@@ -239,25 +239,23 @@ navigation bar to go back to the list of themes.</p>
       footer: '<footer id="colophon" role="contentinfo"><div class="row"></div></footer>'
     }
 
-    CSS = %q(.row, .column, .columns { -webkit-box-sizing: border-box;
+    CSS = %q(.row, .column { -webkit-box-sizing: border-box;
 -moz-box-sizing: border-box; box-sizing: border-box; }
 .row { width: 100%; max-width: 100%; margin: 0 auto; }
 .row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
-.row.collapse .column, .row.collapse .columns { padding: 0; }
+.row.collapse .column { padding: 0; }
 .row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
 .row .row.collapse { margin: 0; }
-.column, .columns { float: left; min-height: 1px; padding: 0 7.6%;
-position: relative; }
-.column.centered, .columns.centered { float: none; margin: 0 auto; }
+.column { float: left; min-height: 1px; padding: 0 7.6%; position: relative; }
+.column.centered { float: none; margin: 0 auto; }
 .row { *zoom: 1; }
 .row:before, .row:after { content: ""; display: table; }
 .row:after { clear: both; }
 @media only screen and (max-width: 650px) {
   .row { width: auto; min-width: 0; margin-left: 0; margin-right: 0; }
-  .column, .columns { width: auto !important; float: none; }
-  .column:before, .columns:before, .column:after, .columns:after {
-    content: ""; display: table; }
-  .column:after, .columns:after { clear: both; }
+  .column { width: auto !important; float: none; }
+  .column:before, .column:after { content: ""; display: table; }
+  .column:after { clear: both; }
 })
   end
 

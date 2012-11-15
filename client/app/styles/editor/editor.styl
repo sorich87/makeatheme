@@ -20,13 +20,13 @@ div.x-resize {
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 .x-current,
-.editing .columns:hover {
+.editing .column:hover {
   box-shadow: 0px 0px 0px 2px blue;
 }
-.columns.x-current {
+.column.x-current {
   cursor: move;
 }
-.columns div.x-resize {
+.column div.x-resize {
   position: absolute;
   top: 0;
   display: none;
@@ -46,23 +46,23 @@ div.x-remove {
   cursor: pointer;
   display: block;
 }
-.columns div.x-remove {
+.column div.x-remove {
   position: absolute;
   right: 0;
   top: 0;
   display: none;
 }
-.columns.x-current div.x-resize {
+.column.x-current div.x-resize {
   display: block;
   cursor: col-resize;
 }
-.columns.x-current div.x-remove {
+.column.x-current div.x-remove {
   display: block;
 }
-.columns.x-current a {
+.column.x-current a {
   cursor: move;
 }
-.columns div.x-name {
+.column div.x-name {
   position: absolute;
   top: 0;
   left: 0;
@@ -71,7 +71,7 @@ div.x-remove {
   background-color: yellowLight;
   display: none;
 }
-.columns.x-current div.x-name {
+.column.x-current div.x-name {
   display: block;
 }
 div.x-full:after,

@@ -2263,7 +2263,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     , insertBlock: function (element, id) {
       var block = this.collection.getByCid($(element).data("cid"));
 
-      element.outerHTML = "<div id='" + id + "' class='columns " +
+      element.outerHTML = "<div id='" + id + "' class='column " +
         block.className() + "'>" + block.get("build") + "</div>";
 
       app.trigger("node:added", window.document.getElementById(id));
@@ -2616,9 +2616,9 @@ window.require.define({"views/editor": function(exports, require, module) {
     // Prevent click, drag and submit on links, images and forms
     // respectively in the iframe
     , preventActions: function () {
-      $("body").on("click", ".columns a", this.preventDefault)
-        .on("mousedown", ".columns a, .columns img", this.preventDefault)
-        .on("submit", ".columns form", this.preventDefault);
+      $("body").on("click", ".column a", this.preventDefault)
+        .on("mousedown", ".column a, .column img", this.preventDefault)
+        .on("submit", ".column form", this.preventDefault);
     }
 
     , preventDefault: function (e) {
@@ -2698,12 +2698,12 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , events: {
         // Highlight columns.
-        "click .columns": "highlightColumns"
+        "click .column": "highlightColumns"
 
         // Remove column
-      , "click .columns .x-remove": "removeColumn"
+      , "click .column .x-remove": "removeColumn"
 
-      , "mouseenter .column, .columns": "makeDraggable"
+      , "mouseenter .column": "makeDraggable"
 
       , "mouseenter .row": "makeDroppable"
 
@@ -2728,7 +2728,7 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , makeDraggable: function (e) {
-      this.$(".column, .columns").draggable({
+      this.$(".column").draggable({
           addClasses: false
         , revert: "invalid"
         , drag: this.dragOn
@@ -2740,7 +2740,7 @@ window.require.define({"views/layout": function(exports, require, module) {
 
     , makeDroppable: function (e) {
       this.$(".row").droppable({
-          accept: ".column, .columns, .x-drag"
+          accept: ".column, .x-drag"
         , addClasses: false
         , drop: this.dropOn.bind(this)
         , out: this.dropOut
