@@ -264,7 +264,10 @@ navigation bar to go back to the list of themes.</p>
       home_url: "<?php echo home_url( '/' ); ?>",
       site_title: "<?php bloginfo( 'name' ); ?>",
       site_description: "<?php bloginfo( 'description' ); ?>",
+      search_form: "<?php get_search_form(); ?>"
+    }
 
+    BLOCKS = {
       article: %q(<?php if ( have_posts() ) : ?>
 <?php _s_content_nav( 'nav-above' ); ?>
 
@@ -332,7 +335,12 @@ navigation bar to go back to the list of themes.</p>
 
 <?php endif; ?>),
 
-      search_form: %q(<?php get_search_form(); ?>),
+      search_form: "<?php get_search_form(); ?>",
+
+      site_title: %q(<hgroup>
+  <h1 class="site-title"><a href="<?php echo home_url( '/' ); ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
+  <h2 class="site-description"><?php bloginfo( 'description' ); ?></h2>
+</hgroup>),
 
       header_image: %q(<?php $header_image = get_header_image();
 if ( ! empty( $header_image ) ) : ?>
@@ -391,8 +399,7 @@ if ( ! empty( $header_image ) ) : ?>
 </html>)
     }
 
-    BLOCKS = {
-      sidebar: %q(<?php do_action( 'before_sidebar' ); ?>
+    SIDEBAR = %q(<?php do_action( 'before_sidebar' ); ?>
 <?php if ( ! dynamic_sidebar( 'sidebar-{{ block_slug }}' ) ) : ?>
 
   <aside id="search" class="widget widget_search">
@@ -416,7 +423,6 @@ if ( ! empty( $header_image ) ) : ?>
   </aside>
 
 <?php endif; ?>)
-    }
   end
 
   module WP

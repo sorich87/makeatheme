@@ -83,7 +83,7 @@ module ThemeArchive
     end
 
     def sidebar_data(sidebar)
-      data = render_template(Defaults::PHP::BLOCKS[:sidebar], {
+      data = render_template(Defaults::PHP::SIDEBAR, {
         block_slug: sidebar.label.underscore
       })
       beautify(data, 'html')

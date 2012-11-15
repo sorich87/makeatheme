@@ -38,7 +38,7 @@ module LiquidTags
         @name = @name.to_sym
       end
 
-      template = ERB.new(Defaults::PHP::CONTENT[@name])
+      template = ERB.new(Defaults::PHP::BLOCKS[@name])
       template.result(get_binding(blocks.first))
     end
 
