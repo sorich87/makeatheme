@@ -1,17 +1,14 @@
 
 Theme.all.each do |theme|
-  theme.update(
+  Theme.collection.find(_id: theme.id).update(
     {
       '$unset' => {
-        archive_file_name: true,
-        archive_content_type: true,
-        archive_file_size: true,
-        archive_updated_at: true
+        tags: true
       }
     }
   )
 
-  puts "Archive attributes removed for theme #{theme.id}"
+  puts "Tags attribute removed from theme #{theme.id}"
 
   Jobs::ThemeArchive.create(theme_id: theme.id)
 end
