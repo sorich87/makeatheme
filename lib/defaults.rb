@@ -142,13 +142,16 @@ Nunc iaculis suscipit dui.</p></pre>
     }
 
     TEMPLATES = {
-      index: %q[<div class="row" id="main">
+      index: %q[<div id="main">
+<div class="row">
 <div class="columns">
 <h1>Welcome to Make A Theme!</h1>
 <p>This is a small guide to get you started. Reading it will give you
 an idea of how to build your theme within a few minutes.</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>How is a theme structured?</h2>
 <p>A theme is made of several templates. You can switch templates and
@@ -163,7 +166,9 @@ More on how to add blocks below.</p>
 which header and footer the current template uses or to add a new header
 or footer.</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>What is a block?</h2>
 <p>Blocks are the components of a theme that you can actually see.
@@ -179,7 +184,9 @@ several blocks of the same type to apply different styling to them.</p>
 Like slideshows, galleries, etc. Please be patient. Remember,
 we are in a very early stage...</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>What is &quot;Style&quot; for?</h2>
 <p>Under &quot;Style&quot;, is where, you guessed it, you can add styling
@@ -193,13 +200,17 @@ in the value field.</p>
 <p>Do you see how the template is now beautiful? Well, not really.
 But it will be when you add your creative touch! ;)</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>How to share with others?</h2>
 <p>Just copy the URL under &quot;Share&quot; and sent it to them.
 Soon, we will be adding more collaboration tools.</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>How to download the result?</h2>
 <p>First, you will need to save it. You are too shy!
@@ -208,7 +219,9 @@ Then wait for the archives to be built.</p>
 <p>The download button will appear and you will be able to download
 in HTML5 or WordPress format.</p>
 </div>
+</div>
 
+<div class="row">
 <div class="columns">
 <h2>Is that all?</h2>
 <p>Yes, now you know everything to get you started. This tutorial is
@@ -216,6 +229,7 @@ made of several blocks. Delete them and make your next theme!
 <p><b>PS:</b> If you are too busy (or lazy) to make a new theme from scratch,
 you can copy an existing one and modify it. Click "HOME" in the site
 navigation bar to go back to the list of themes.</p>
+</div>
 </div>
 </div>]
     }
