@@ -1906,6 +1906,7 @@ window.require.define({"router": function(exports, require, module) {
               showAlpha: true
             , showInput: true
             , showPalette: true
+            , preferredFormat: "rgb"
             , change: function(color, i) {
               $("#theme").get(0).contentWindow.$(this).trigger("change");
             }

@@ -50,6 +50,7 @@ module.exports = Backbone.Router.extend({
             showAlpha: true
           , showInput: true
           , showPalette: true
+          , preferredFormat: "rgb"
           , change: function(color, i) {
             $("#theme").get(0).contentWindow.$(this).trigger("change");
           }
