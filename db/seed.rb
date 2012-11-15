@@ -9,30 +9,24 @@ unless author
   )
 end
 
-theme_file = File.join(File.dirname(__FILE__), 'themes', 'twentyelevenx.zip')
-unless File.exists?(theme_file)
-  puts "Theme file not present... exiting. (#{theme_file})"
-  exit
-end
+Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
+  attrs = [
+    {
+      author: author,
+      listed: true
+    }
+  ]
 
-# Add more samples if you want
-attrs = [
-  {
-    author: author,
-    listed: true
-  }
-]
+  attrs.each do |theme_attr|
+    theme = Theme.create_from_zip(theme_file, theme_attr)
 
-attrs.each do |theme_attr|
-  next if Theme.where(theme_attr).first
-  theme = Theme.create_from_zip(theme_file, theme_attr)
-
-  if theme.save
-    Jobs::ThemeArchive.create(theme_id: theme.id)
-  else
-    puts "Errors...:"
-    theme.errors.each do |key, fault|
-      puts "\t#{key} #{fault}"
+    if theme.save
+      Jobs::ThemeArchive.create(theme_id: theme.id)
+    else
+      puts "Errors...:"
+      theme.errors.each do |key, fault|
+        puts "\t#{key} #{fault}"
+      end
     end
   end
 end

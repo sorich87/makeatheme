@@ -18,7 +18,7 @@ module ThemeHelper
     xid = 0
 
     # Register block tags
-    %w(header_image navigation search_form article sidebar).map do |name, template|
+    %w(site_title header_image navigation search_form article sidebar).map do |name, template|
       Liquid::Template.register_tag(name, LiquidTags::Block)
     end
 
