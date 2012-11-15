@@ -47,7 +47,8 @@ module.exports = Backbone.Router.extend({
     jQuery(function ($) {
       $("body").on("click", ".accordion-toggle", function (e) {
         $(".color").spectrum({
-          showInput: true
+            showAlpha: true
+          , showInput: true
           , showPalette: true
           , change: function(color, i) {
             $("#theme").get(0).contentWindow.$(this).trigger("change");
