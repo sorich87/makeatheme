@@ -20,7 +20,6 @@ class Theme
   field :uri,         type: String
   field :version,     type: String
   field :description, type: String
-  field :tags,        type: Array,      default: []
   field :listed,      type: Boolean,    default: false
   field :style,       type: Array,      default: []
 

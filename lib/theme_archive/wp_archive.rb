@@ -102,7 +102,6 @@ module ThemeArchive
         'Author' => @theme.author.to_fullname,
         'Author URI' => "http://www.makeatheme.com/users/#{@theme.author_id}",
         'Version' => @theme.version,
-        'Tags' => @theme.tags.join(', '),
         'License' => 'GNU General Public License v2',
         'License URI' => 'http://www.gnu.org/licenses/gpl-2.0.txt'
       }

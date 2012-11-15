@@ -126,13 +126,8 @@ module ThemeImport
     def filter_attributes(attributes)
       attrs = {}
 
-      [:name, :description, :tags].each do |attr|
-        if attr == :tags
-          val = attributes[attr].is_a?(String) ? CSV.parse_line(attributes[attr]) : attributes[attr]
-          attrs[:tags] = val
-        else
-          attrs[attr] = attributes[attr]
-        end
+      [:name, :description].each do |attr|
+        attrs[attr] = attributes[attr]
       end
 
       attrs

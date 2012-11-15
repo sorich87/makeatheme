@@ -11,8 +11,7 @@ describe "theme upload" do
 
     @theme_attributes = {
       :name => "Some test theme",
-      :description => "Some theme I threw together to make cash :-]",
-      :tags => ["some", "test", "theme"]
+      :description => "Some theme I threw together to make cash :-]"
     }
 
     @user = User.where(:email => @user_attributes[:email]).first
