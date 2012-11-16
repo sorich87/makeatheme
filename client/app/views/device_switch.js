@@ -21,7 +21,7 @@ module.exports = View.extend({
     e.preventDefault();
 
     $("#theme", window.top.document).animate({
-        width: "100%"
+        width: "1440px"
       , left: "50%"
       , "margin-left": "-50%"
     });

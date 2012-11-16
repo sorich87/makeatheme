@@ -2357,7 +2357,7 @@ window.require.define({"views/device_switch": function(exports, require, module)
       e.preventDefault();
 
       $("#theme", window.top.document).animate({
-          width: "100%"
+          width: "1440px"
         , left: "50%"
         , "margin-left": "-50%"
       });
