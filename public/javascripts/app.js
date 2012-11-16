@@ -2299,9 +2299,9 @@ window.require.define({"views/blocks": function(exports, require, module) {
         return;
       }
 
-      attributes = _.find(this.allBlocks, function (block) {
+      attributes = _.clone(_.find(this.allBlocks, function (block) {
         return block.name === name;
-      });
+      }));
 
       build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
       build.firstChild.setAttribute("data-x-label", label);
