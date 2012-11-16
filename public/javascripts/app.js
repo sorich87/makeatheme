@@ -1857,8 +1857,8 @@ window.require.define({"router": function(exports, require, module) {
 
   module.exports = Backbone.Router.extend({
     routes: {
-        "": "themes"
-      , "me/themes": "your_themes"
+        "": "your_themes"
+      , "themes": "themes"
       , "themes/:id": "theme"
       , "themes/:id/edit": "edit"
       , "login": "login"
@@ -1877,7 +1877,7 @@ window.require.define({"router": function(exports, require, module) {
         .append("<div id='new-button'><a href='/themes/new' " +
                 "data-event='New Theme:type:from scratch'" +
                 "class='btn btn-primary btn-large' data-bypass='true'>" +
-                "Create a New Theme</a></div>")
+                "Create a Theme from Scratch</a></div>")
         .append("<h3 class='page-title'>Or copy a theme below</h3>")
         .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
@@ -1888,7 +1888,9 @@ window.require.define({"router": function(exports, require, module) {
       var collection = app.currentUser.get("themes");
 
       $("#main").empty()
-        .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small></h1>")
+        .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small>" +
+                " <a href='/themes' class='btn btn-primary'>" +
+                "Create a New Theme</a></h1>")
         .append(app.createView("theme_list", {collection: collection}).render().$el);
     }
 
@@ -3885,7 +3887,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <ul class=\"nav\">\n    <li><a href=\"/\" id=\"your_themes\">New theme</a></li>\n    <li><a href=\"/me/themes\" id=\"your_themes\">Your themes</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
+    return "\n  <ul class=\"nav\">\n    <li><a href=\"/\" id=\"your_themes\">Your themes</a></li>\n    <li><a href=\"/themes\" id=\"new_theme\">New theme</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
 
   function program3(depth0,data) {
     
