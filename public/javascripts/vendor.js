@@ -12002,7 +12002,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
   _.extend(Backbone.History.prototype, {
     back: function (args) {
-      this.go(-1, args);
+      return this.go(-1, args);
     }
 
     , go: function (index, args) {
@@ -12010,6 +12010,7 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
       if (browser.session[index]) {
         Backbone.history.navigate(browser.session[index], args);
+        return true;
       }
     }
   });

@@ -106,10 +106,8 @@ _.extend(Application, {
   }
 
   , historyBack: function () {
-    if ($("#main").children().length === 0) {
+    if (!Backbone.history.back(true)) {
       Backbone.history.navigate("/", true);
-    } else {
-      Backbone.history.back(true);
     }
   }
 }, Backbone.Events);

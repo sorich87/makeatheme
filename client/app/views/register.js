@@ -16,7 +16,6 @@ module.exports = View.extend({
 
   // Create current user from form input values and submit to the server.
   // Handle error messages from server.
-  // Hide modal on success.
   , createUser: function (e) {
     e.preventDefault();
 
@@ -32,8 +31,6 @@ module.exports = View.extend({
     user.save(attrs, {
       success: function (model, res) {
         model.set(res);
-
-        this.$el.modal("hide");
 
         app.trigger("registration", model);
         app.trigger("notification", "success", "Your registration was successful. You are now logged in.");

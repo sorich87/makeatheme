@@ -52,8 +52,6 @@ module.exports = View.extend({
       , complete: function (jqXHR, textStatus) {
         switch (textStatus) {
           case "success":
-            this.$el.modal("hide");
-
             app.trigger("notification", "success", "We have sent you an email with a link to confirm your new password.");
           break;
 

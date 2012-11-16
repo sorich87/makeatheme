@@ -57,8 +57,6 @@ module.exports = View.extend({
     app.trigger("upload:after", theme);
     app.trigger("notification", "success", "Your theme is uploaded and ready to be edited!");
 
-    this.$el.modal("hide");
-
     Backbone.history.navigate("/themes/" + theme._id, true);
   }
 

@@ -71,31 +71,23 @@ module.exports = Backbone.Router.extend({
   , login: function () {
     this.anonymousOnly();
 
-    $(".modal").modal("hide");
-
-    $("body").append(app.createView("login").render().$el.modal("show"));
+    $("#main").empty().append(app.createView("login").render().$el);
   }
 
   , register: function () {
     this.anonymousOnly();
 
-    $(".modal").modal("hide");
-
-    $("body").append(app.createView("register").render().$el.modal("show"));
+    $("#main").empty().append(app.createView("register").render().$el);
   }
 
   , reset_password: function () {
     this.anonymousOnly();
 
-    $(".modal").modal("hide");
-
-    $("body").append(app.createView("password_reset").render().$el.modal("show"));
+    $("#main").empty().append(app.createView("password_reset").render().$el);
   }
 
   , upload: function () {
-    $(".modal").modal("hide");
-
-    $("body").append(app.createView("theme_upload").render().$el.modal("show"));
+    $("#main").empty().append(app.createView("theme_upload").render().$el);
   }
 
   , notFound: function (action) {
