@@ -15926,13 +15926,13 @@ if (typeof exports !== 'undefined') {
 		}
 	};
 }(DOMParser));
+
 ;
 
-﻿// Spectrum: The No Hassle Colorpicker
+// Spectrum Colorpicker v1.0.0
 // https://github.com/bgrins/spectrum
 // Author: Brian Grinstead
 // License: MIT
-// Requires: jQuery, spectrum.css
 
 (function (window, $, undefined) {
     var defaultOpts = {
@@ -17591,7 +17591,9 @@ if (typeof exports !== 'undefined') {
         }
     });
 
-})(this, jQuery);;
+})(this, jQuery);
+
+;
 
 // Underscore.string
 // (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
