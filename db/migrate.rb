@@ -1,5 +1,5 @@
 
-Theme.all.each do |theme|
+Theme.unscoped.all.each do |theme|
   Theme.collection.find(_id: theme.id).update(
     {
       '$unset' => {
