@@ -10,7 +10,7 @@ module ThemeImport
   end
 
   module ClassMethods
-    def create_from_zip(zip_file, attributes = {})
+    def new_from_zip(zip_file, attributes = {})
       theme = self.new(attributes)
       import = ThemeImport.new(zip_file)
 
@@ -18,18 +18,19 @@ module ThemeImport
       theme.regions = import.regions
       theme.write_attributes(import.attributes)
 
-      if theme.valid?
-        import.static_files.each do |static_file|
-          static_file = Asset.new(file: static_file)
-          # Pass invalid files
-          if static_file.valid?
-            theme.assets << static_file
-            static_file.save
-          end
-        end
+      return theme unless theme.valid?
 
-        theme.save
+      import.static_files.each do |static_file|
+        static_file = Asset.new(file: static_file)
+        theme.assets << static_file if static_file.valid?
       end
+
+      theme
+    end
+
+    def create_from_zip(zip_file, attributes = {})
+      theme = new_from_zip(zip_file, attributes)
+      theme.save
       theme
     end
   end

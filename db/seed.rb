@@ -18,7 +18,10 @@ Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
   ]
 
   attrs.each do |theme_attr|
-    theme = Theme.create_from_zip(theme_file, theme_attr)
+    theme = Theme.new_from_zip(theme_file, theme_attr)
+
+    old_theme = Theme.where(name: theme.name, author_id: author.id).first
+    theme[:_id] = old_theme._id unless old_theme.nil?
 
     if theme.save
       Jobs::ThemeArchive.create(theme_id: theme.id)

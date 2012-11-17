@@ -34,7 +34,7 @@ class Theme
 
   has_many :forks, :class_name => 'Theme'
 
-  has_and_belongs_to_many :assets
+  has_and_belongs_to_many :assets, autosave: true
 
   # Fields used by Paperclip
   field :screenshot_file_name
