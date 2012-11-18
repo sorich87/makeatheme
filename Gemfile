@@ -21,7 +21,6 @@ gem 'sass', '~> 3.2.1'
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'
-  # Automatic reload when editing files
   gem 'mongoid-rspec'
   gem 'database_cleaner'
   gem 'simplecov', :require => false
