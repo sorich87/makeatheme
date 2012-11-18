@@ -85,7 +85,7 @@ module ThemeHelper
   end
 
   def generate_theme_archive(theme)
-    Jobs::ThemeArchive.create(theme_id: theme.id)
+    Jobs::ThemeArchive.perform_async(theme.id)
   end
 
   # Load theme by id request parameter

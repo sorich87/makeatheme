@@ -2,7 +2,6 @@ require 'zip/zip'
 require 'yaml'
 require 'csv'
 require 'nokogiri'
-require 'sass_to_hash'
 
 module ThemeImport
   def self.included receiver

@@ -1,5 +1,4 @@
 require './app'
-require 'resque/tasks'
 
 namespace :db do
 
@@ -30,7 +29,7 @@ namespace :archives do
   desc "Rebuild theme archives"
   task :rebuild do
     Theme.unscoped.all.each do |theme|
-      Jobs::ThemeArchive.create(theme_id: theme.id)
+      Jobs::ThemeArchive.perform_async(theme.id)
       puts "Archive job queued for theme #{theme.id}"
     end
   end

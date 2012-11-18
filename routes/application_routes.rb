@@ -20,17 +20,17 @@ error 406 do
 end
 
 get '/jobs/:job_id', provides: 'text/event-stream' do
-  status = Resque::Plugins::Status::Hash.get(params[:job_id])
+  status = Sidekiq::Status::get(params[:job_id])
 
   return unless status
 
   stream :keep_open do |out|
-    if status.completed?
+    if status == 'complete'
       out << "event: success\n"
-      out << "data: #{status.message}\n\n"
-    elsif status.failed?
+      out << "data: success\n\n"
+    elsif status == 'failed'
       out << "event: errors\n"
-      out << "data: #{status.message}\n\n"
+      out << "data: failed\n\n"
     end
   end
 end
