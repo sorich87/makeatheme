@@ -209,7 +209,9 @@ class Theme
       }
     end
 
-    sass_engine = Sass::Engine.new(::Defaults::HTML::CSS, :syntax => :scss)
+    style = File.open(File.expand_path('../../lib/defaults/style.css', __FILE__))
+    sass_engine = Sass::Engine.new(style.read, :syntax => :scss)
+    style.close
     self.style = sass_engine.to_tree.to_a
   end
 end
