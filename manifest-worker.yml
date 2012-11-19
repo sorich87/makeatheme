@@ -9,7 +9,7 @@ applications:
         description: Standalone Application
         exec: 
     runtime: ruby193
-    command: bundle exec rake VERBOSE=true QUEUE=* resque:work
+    command: RACK_ENV=production bundle exec rake VERBOSE=true QUEUE=* resque:work
     infra: aws
     url: 
     mem: 128M
