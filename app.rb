@@ -20,6 +20,7 @@ require 'liquid'
 require 'json'
 require 'resque'
 require 'resque-status'
+require 'gibbon'
 
 Mongoid.load!("config/mongoid.yml")
 

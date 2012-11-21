@@ -25,7 +25,7 @@ class User
 
   attr_protected :password_hash
 
-  before_create :generate_password_hash
+  before_create :generate_password_hash, :subscribe_to_newsletter
 
   def to_fullname
     "#{self.first_name} #{self.last_name}"
@@ -73,10 +73,15 @@ class User
   end
 
   private
+
   def generate_password_hash
     if password.present?
       self.password_salt = BCrypt::Engine.generate_salt
       self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
     end
+  end
+
+  def subscribe_to_newsletter
+    Jobs::NewsletterSubscription.create(user_id: self.id)
   end
 end
