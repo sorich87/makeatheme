@@ -1852,8 +1852,7 @@ window.require.define({"models/user": function(exports, require, module) {
 }});
 
 window.require.define({"router": function(exports, require, module) {
-  var app = require("application")
-    , Themes = require("collections/themes");
+  var app = require("application");
 
   module.exports = Backbone.Router.extend({
     routes: {
@@ -1871,15 +1870,8 @@ window.require.define({"router": function(exports, require, module) {
     , themes: function () {
       this.userOnly();
 
-      var collection = new Themes(app.data.themes);
-
       $("#main").empty()
-        .append("<div id='new-button'><a href='/themes/new' " +
-                "data-event='New Theme:type:from scratch'" +
-                "class='btn btn-primary btn-large' data-bypass='true'>" +
-                "Create a Theme from Scratch</a></div>")
-        .append("<h3 class='page-title'>Or copy a theme below</h3>")
-        .append(app.createView("theme_list", {collection: collection}).render().$el);
+        .append(app.createView("themes").render().$el);
     }
 
     , user_themes: function () {
@@ -4956,12 +4948,12 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
   function program5(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n        <a class=\"btn btn pull-right\" href=\"/themes/";
+    buffer += "\n        <a class=\"btn pull-right\" href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><i class=\"icon-pencil icon-white\"></i> view & copy</a>\n        ";
+    buffer += escapeExpression(stack1) + "\"><i\n            class=\"icon-pencil\"></i> view & copy</a>\n        ";
     return buffer;}
 
     buffer += "<li class=\"span3\" id=\"theme-";
@@ -5030,6 +5022,15 @@ window.require.define({"views/templates/theme_upload": function(exports, require
 
 
     return "<div class=\"modal-header\">\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\">Theme Archive</label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Upload Theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/themes": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div id=\"new-button\">\n  <a href=\"/themes/new\" data-event=\"New Theme:type:from scratch\"\n    class=\"btn btn-primary btn-large\" data-bypass=\"true\">\n    Create a Theme from Scratch</a>\n</div>\n<h3 class=\"page-title\">Or copy a theme below</h3>\n";});
 }});
 
 window.require.define({"views/templates/user_themes": function(exports, require, module) {
@@ -5279,6 +5280,31 @@ window.require.define({"views/theme_upload": function(exports, require, module) 
       button.innerHTML = "Upload Theme";
     }
   });
+  
+}});
+
+window.require.define({"views/themes": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/themes")
+    , Themes = require("collections/themes")
+    , app = require("application");
+
+  module.exports = View.extend({
+    collection: new Themes(app.data.themes),
+
+    initialize: function () {
+      this.listView = app.createView("theme_list", {collection: this.collection});
+    },
+
+    render: function () {
+      this.$el.empty()
+        .append(template())
+        .append(this.listView.render().$el);
+
+      return this;
+    }
+  });
+
   
 }});
 

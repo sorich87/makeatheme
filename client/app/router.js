@@ -1,5 +1,4 @@
-var app = require("application")
-  , Themes = require("collections/themes");
+var app = require("application");
 
 module.exports = Backbone.Router.extend({
   routes: {
@@ -17,15 +16,8 @@ module.exports = Backbone.Router.extend({
   , themes: function () {
     this.userOnly();
 
-    var collection = new Themes(app.data.themes);
-
     $("#main").empty()
-      .append("<div id='new-button'><a href='/themes/new' " +
-              "data-event='New Theme:type:from scratch'" +
-              "class='btn btn-primary btn-large' data-bypass='true'>" +
-              "Create a Theme from Scratch</a></div>")
-      .append("<h3 class='page-title'>Or copy a theme below</h3>")
-      .append(app.createView("theme_list", {collection: collection}).render().$el);
+      .append(app.createView("themes").render().$el);
   }
 
   , user_themes: function () {
