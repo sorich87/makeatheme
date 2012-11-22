@@ -4,7 +4,7 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-get '/themes/new' do
+post '/themes/new' do
   protect!
 
   new_theme = Theme.new(
@@ -13,7 +13,7 @@ get '/themes/new' do
   )
   new_theme.save
 
-  redirect to "/themes/#{new_theme.id}"
+  halt new_theme.to_json
 end
 
 get '/themes/:id' do
