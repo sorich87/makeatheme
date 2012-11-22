@@ -20,13 +20,15 @@ get '/themes/:id' do
   respond_with theme
 end
 
-get '/themes/:id/fork' do
+post '/themes/fork' do
   protect!
 
-  fork = theme.fork(author: current_user)
+  id = JSON.parse(request.body.read)['id']
+
+  fork = Theme.unscoped.find(id).fork(author: current_user)
   fork.save
 
-  redirect to "/themes/#{fork.id}"
+  halt fork.to_json
 end
 
 get '/themes/:id/edit', provides: 'html' do

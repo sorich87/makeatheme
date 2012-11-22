@@ -3134,7 +3134,7 @@ window.require.define({"views/preview_actions": function(exports, require, modul
     id: "layout-editor"
 
     , events: {
-      "click #customize-button a.copy": "askForPatience"
+      "click #copy-theme": "copyTheme"
     }
 
     , render: function () {
@@ -3149,9 +3149,28 @@ window.require.define({"views/preview_actions": function(exports, require, modul
       return this;
     }
 
-    , askForPatience: function (e) {
-      e.currentTarget.setAttribute("disabled", "true");
-      e.currentTarget.innerHTML = "Started the Photocopier";
+    , copyTheme: function (e) {
+      var element = e.currentTarget;
+
+      element.setAttribute("disabled", "true");
+      element.innerHTML = "Started the Photocopier";
+
+      $.ajax({
+        type: "POST",
+        url: "/themes/fork",
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify({id: app.data.theme._id}),
+        success: function (data) {
+          var theme = JSON.parse(data);
+          window.top.Backbone.history.navigate("/themes/" + theme._id, true);
+        },
+        error: function () {
+          element.removeAttribute("disabled");
+
+          app.trigger("notification", "error", "Error. Unable to copy theme. " +
+                      "Please reload the page and try again.");
+        }
+      });
     }
   });
   
@@ -3932,18 +3951,12 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
 window.require.define({"views/templates/copy_button": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
 
   function program1(depth0,data) {
     
-    var buffer = "", stack1;
-    buffer += "\n    <a class=\"btn btn-primary btn-block copy\" data-bypass=\"true\"\n      data-event=\"New Theme:type:copy\" href=\"/themes/";
-    foundHelper = helpers.theme_id;
-    stack1 = foundHelper || depth0.theme_id;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/fork\">Copy Theme</a>\n  ";
-    return buffer;}
+    
+    return "\n    <button class=\"btn btn-primary btn-block\" id=\"copy-theme\"\n      data-event=\"New Theme:type:copy\">Copy Theme</button>\n  ";}
 
   function program3(depth0,data) {
     

@@ -9,7 +9,7 @@ module.exports = View.extend({
   id: "layout-editor"
 
   , events: {
-    "click #customize-button a.copy": "askForPatience"
+    "click #copy-theme": "copyTheme"
   }
 
   , render: function () {
@@ -24,8 +24,27 @@ module.exports = View.extend({
     return this;
   }
 
-  , askForPatience: function (e) {
-    e.currentTarget.setAttribute("disabled", "true");
-    e.currentTarget.innerHTML = "Started the Photocopier";
+  , copyTheme: function (e) {
+    var element = e.currentTarget;
+
+    element.setAttribute("disabled", "true");
+    element.innerHTML = "Started the Photocopier";
+
+    $.ajax({
+      type: "POST",
+      url: "/themes/fork",
+      contentType: "application/json; charset=UTF-8",
+      data: JSON.stringify({id: app.data.theme._id}),
+      success: function (data) {
+        var theme = JSON.parse(data);
+        window.top.Backbone.history.navigate("/themes/" + theme._id, true);
+      },
+      error: function () {
+        element.removeAttribute("disabled");
+
+        app.trigger("notification", "error", "Error. Unable to copy theme. " +
+                    "Please reload the page and try again.");
+      }
+    });
   }
 });

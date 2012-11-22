@@ -1,7 +1,7 @@
 <div id="customize-button">
   {{#if currentUser}}
-    <a class="btn btn-primary btn-block copy" data-bypass="true"
-      data-event="New Theme:type:copy" href="/themes/{{theme_id}}/fork">Copy Theme</a>
+    <button class="btn btn-primary btn-block" id="copy-theme"
+      data-event="New Theme:type:copy">Copy Theme</button>
   {{else}}
     <a class="btn btn-primary" href="/login">Login to Copy</a>
   {{/if}}
