@@ -6,15 +6,15 @@ module.exports = View.extend({
   collection: app.currentUser.get("themes"),
 
   initialize: function () {
-    this.listView = app.createView("theme_list", {collection: this.collection});
-
     app.on("theme:deleted", this.render.bind(this));
   },
 
   render: function () {
+    var listView = app.createView("theme_list", {collection: this.collection});
+
     this.$el.empty()
       .append(template({count: this.collection.length}))
-      .append(this.listView.render().$el);
+      .append(listView.render().$el);
 
     return this;
   }

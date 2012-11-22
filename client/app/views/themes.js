@@ -6,14 +6,12 @@ var View = require("views/base/view")
 module.exports = View.extend({
   collection: new Themes(app.data.themes),
 
-  initialize: function () {
-    this.listView = app.createView("theme_list", {collection: this.collection});
-  },
-
   render: function () {
+    var listView = app.createView("theme_list", {collection: this.collection});
+
     this.$el.empty()
       .append(template())
-      .append(this.listView.render().$el);
+      .append(listView.render().$el);
 
     return this;
   }

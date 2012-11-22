@@ -5337,14 +5337,12 @@ window.require.define({"views/themes": function(exports, require, module) {
   module.exports = View.extend({
     collection: new Themes(app.data.themes),
 
-    initialize: function () {
-      this.listView = app.createView("theme_list", {collection: this.collection});
-    },
-
     render: function () {
+      var listView = app.createView("theme_list", {collection: this.collection});
+
       this.$el.empty()
         .append(template())
-        .append(this.listView.render().$el);
+        .append(listView.render().$el);
 
       return this;
     }
@@ -5362,15 +5360,15 @@ window.require.define({"views/user_themes": function(exports, require, module) {
     collection: app.currentUser.get("themes"),
 
     initialize: function () {
-      this.listView = app.createView("theme_list", {collection: this.collection});
-
       app.on("theme:deleted", this.render.bind(this));
     },
 
     render: function () {
+      var listView = app.createView("theme_list", {collection: this.collection});
+
       this.$el.empty()
         .append(template({count: this.collection.length}))
-        .append(this.listView.render().$el);
+        .append(listView.render().$el);
 
       return this;
     }
