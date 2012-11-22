@@ -6,8 +6,12 @@ var View = require("views/base/view")
 module.exports = View.extend({
     el: $("<ul class='thumbnails'></ul>")
 
+  , events: {
+    "click .delete": "confirmDeletion"
+  }
+
   , initialize: function () {
-    this.bindEvents();
+    this.collection.on("reset", this.addAll, this);
   }
 
   , render: function () {
@@ -16,19 +20,13 @@ module.exports = View.extend({
     return this;
   }
 
-  , bindEvents: function () {
-    this.collection.on("reset", this.addAll, this);
-  }
-
   , addOne: function (theme) {
-    var currentUserIsOwner = theme.get("author_id") === app.currentUser.id;
-
     this.$el.append(template({
-        uri: "/themes/" + theme.id
+        id: theme.id
       , screenshot_uri: theme.get("screenshot_uri")
       , name: theme.get("name")
       , author: theme.get("author")
-      , edit_text: currentUserIsOwner ? "Edit" : "View & Copy"
+      , user_is_owner: theme.get("author_id") === app.currentUser.id
     }));
   }
 
@@ -38,5 +36,34 @@ module.exports = View.extend({
     this.collection.each(function (theme) {
       this.addOne(theme);
     }, this);
+  }
+
+  , confirmDeletion: function (e) {
+    var theme_id = e.currentTarget.getAttribute("data-theme-id"),
+        theme = this.collection.get(theme_id),
+        message = "Are you sure you want to delete '" +
+          theme.get("name") + "'? There's no going back.";
+
+    e.preventDefault();
+
+    if (window.confirm(message)) {
+      e.currentTarget.setAttribute("disabled");
+
+      theme.destroy({
+        success: function (model) {
+          app.trigger("theme:deleted", model);
+
+          app.trigger("notification", "success",
+                      "'" + model.get("name") + "' has been deleted.");
+        },
+
+        error: function (model) {
+          e.currentTarget.removeAttribute("disabled");
+
+          app.trigger("notification", "error", "Error. Unable to delete '" +
+                      model.get("name") + "'. Please try again.");
+        }
+      });
+    }
   }
 });

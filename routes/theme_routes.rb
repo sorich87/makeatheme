@@ -80,3 +80,11 @@ post '/themes' do
     respond_with intermediate.errors
   end
 end
+
+delete '/themes/:id' do
+  protect!
+
+  halt 401 unless theme.author?(current_user)
+
+  theme.destroy
+end

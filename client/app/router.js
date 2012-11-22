@@ -3,7 +3,7 @@ var app = require("application")
 
 module.exports = Backbone.Router.extend({
   routes: {
-      "": "your_themes"
+      "": "user_themes"
     , "themes": "themes"
     , "themes/:id": "theme"
     , "themes/:id/edit": "edit"
@@ -28,16 +28,11 @@ module.exports = Backbone.Router.extend({
       .append(app.createView("theme_list", {collection: collection}).render().$el);
   }
 
-  , your_themes: function () {
+  , user_themes: function () {
     this.userOnly();
 
-    var collection = app.currentUser.get("themes");
-
     $("#main").empty()
-      .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small>" +
-              " <a href='/themes' class='btn btn-primary'>" +
-              "Create a New Theme</a></h1>")
-      .append(app.createView("theme_list", {collection: collection}).render().$el);
+      .append(app.createView("user_themes").render().$el);
   }
 
   , theme: function (id) {
