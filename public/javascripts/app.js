@@ -4932,12 +4932,12 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
   function program3(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n        <div class=\"btn-group pull-right\">\n          <a class=\"btn btn-inverse\" href=\"/themes/";
+    buffer += "\n        <div class=\"btn-group pull-right\">\n          <a class=\"btn\" href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><i class=\"icon-pencil icon-white\"></i></a>\n          <button class=\"btn btn-danger delete\" data-theme-id=\"";
+    buffer += escapeExpression(stack1) + "\"><i class=\"icon-pencil\"></i></a>\n          <button class=\"btn btn-danger delete\" data-theme-id=\"";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
