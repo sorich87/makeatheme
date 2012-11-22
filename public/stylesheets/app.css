@@ -6553,6 +6553,10 @@ body {
   padding-bottom: 60px;
   line-height: 1.6em;
 }
+[contenteditable=true]:hover,
+[contenteditable=true]:focus {
+  background-color: #ffffe0;
+}
 #back-to-top {
   position: fixed;
   right: 50%;
@@ -6697,7 +6701,7 @@ body.theme #main {
   line-height: 30px;
   display: block;
 }
-#layout-editor #theme-name {
+#layout-editor #theme-meta {
   padding: 10px;
   border-bottom: 1px solid #1c1c1c;
 }

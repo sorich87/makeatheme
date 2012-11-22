@@ -2571,7 +2571,7 @@ window.require.define({"views/editor": function(exports, require, module) {
       this.$el.empty()
         .append(app.createView("editor_toggle").render().$el)
         .append(app.createView("device_switch").render().$el)
-        .append(theme_meta({name: app.data.theme.name}));
+        .append(app.createView("theme_meta").render().$el);
 
       if (app.data.theme.author_id === app.currentUser.id) {
         actions_view = "edit_actions";
@@ -5006,12 +5006,12 @@ window.require.define({"views/templates/theme_meta": function(exports, require, 
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div id=\"theme-name\">Theme: ";
+    buffer += "Theme: <span class=\"name\">";
     foundHelper = helpers.name;
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</div>\n";
+    buffer += escapeExpression(stack1) + "</span>\n";
     return buffer;});
 }});
 
@@ -5197,6 +5197,38 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       }
     }
   });
+  
+}});
+
+window.require.define({"views/theme_meta": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/theme_meta")
+    , Themes = require("collections/themes")
+    , app = require("application");
+
+  module.exports = View.extend({
+    id: "theme-meta",
+
+    initialize: function () {
+      app.on("save:before", this.saveThemeName.bind(this));
+    },
+
+    render: function () {
+      this.$el.empty()
+        .append(template({name: app.data.theme.name}));
+
+      if (app.data.theme.author_id === app.currentUser.id) {
+        this.$(".name").attr("contenteditable", "true");
+      }
+
+      return this;
+    },
+
+    saveThemeName: function (attributes) {
+      attributes.name = this.$(".name").text();
+    }
+  });
+
   
 }});
 

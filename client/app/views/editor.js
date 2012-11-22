@@ -28,7 +28,7 @@ module.exports = View.extend({
     this.$el.empty()
       .append(app.createView("editor_toggle").render().$el)
       .append(app.createView("device_switch").render().$el)
-      .append(theme_meta({name: app.data.theme.name}));
+      .append(app.createView("theme_meta").render().$el);
 
     if (app.data.theme.author_id === app.currentUser.id) {
       actions_view = "edit_actions";
