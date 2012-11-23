@@ -5142,7 +5142,6 @@ window.require.define({"views/theme": function(exports, require, module) {
 
 window.require.define({"views/theme_list": function(exports, require, module) {
   var View = require("views/base/view")
-    , Themes = require("collections/themes")
     , template = require("views/templates/theme_list")
     , app = require("application");
 

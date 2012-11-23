@@ -1,5 +1,4 @@
 var View = require("views/base/view")
-  , Themes = require("collections/themes")
   , template = require("views/templates/theme_list")
   , app = require("application");
 
