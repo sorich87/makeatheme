@@ -10,7 +10,11 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    app.on("save:after", this.waitForArchive.bind(this));
+    app.on("save:after", this.waitForArchive, this);
+  }
+
+  , teardown: function () {
+    app.off("save:after", this.waitForArchive, this);
   }
 
   , render: function () {

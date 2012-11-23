@@ -50,6 +50,7 @@ _.extend(Application, {
         views[name].remove();
       }
       views[name].off();
+      views[name].teardown();
     }
 
     views[name] = new View(options);

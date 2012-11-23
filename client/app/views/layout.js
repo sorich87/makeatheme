@@ -43,8 +43,13 @@ module.exports = View.extend({
   , initialize: function () {
     this.$el.addClass("editing");
     this.makeDroppable();
-    app.on("region:loaded", this.highLightEmpty.bind(this));
-    app.on("template:loaded", this.highLightEmpty.bind(this));
+    app.on("region:loaded", this.highLightEmpty, this);
+    app.on("template:loaded", this.highLightEmpty, this);
+  }
+
+  , teardown: function () {
+    app.off("region:loaded", this.highLightEmpty, this);
+    app.off("template:loaded", this.highLightEmpty, this);
   }
 
   , highLightEmpty: function () {

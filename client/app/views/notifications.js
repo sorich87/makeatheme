@@ -12,9 +12,11 @@ module.exports = View.extend({
   , className: "unstyled"
 
   , initialize: function () {
-    _.bindAll(this, "showNotification");
+    app.on("notification", this.showNotification, this);
+  }
 
-    app.on("notification", this.showNotification);
+  , teardown: function () {
+    app.off("notification", this.showNotification, this);
   }
 
   , showNotification: function (type, text) {

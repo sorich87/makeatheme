@@ -6,7 +6,11 @@ module.exports = View.extend({
   collection: app.currentUser.get("themes"),
 
   initialize: function () {
-    app.on("theme:deleted", this.render.bind(this));
+    app.on("theme:deleted", this.render, this);
+  },
+
+  teardown: function () {
+    app.off("theme:deleted", this.render, this);
   },
 
   render: function () {

@@ -7,7 +7,11 @@ module.exports = View.extend({
   id: "theme-meta",
 
   initialize: function () {
-    app.on("save:before", this.saveThemeName.bind(this));
+    app.on("save:before", this.saveThemeName, this);
+  },
+
+  teardown: function () {
+    app.off("save:before", this.saveThemeName, this);
   },
 
   render: function () {

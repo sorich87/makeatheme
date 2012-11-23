@@ -13,6 +13,10 @@ module.exports = View.extend({
     this.collection.on("reset", this.addAll, this);
   }
 
+  , teardown: function () {
+    this.collection.off("reset", this.addAll, this);
+  }
+
   , render: function () {
     this.collection.reset(this.collection.models);
 

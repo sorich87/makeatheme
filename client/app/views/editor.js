@@ -21,6 +21,10 @@ module.exports = View.extend({
     $(window).on("resize", this.resize.bind(this));
   }
 
+  , teardown: function () {
+    $(window).off("resize", this.resize.bind(this));
+  }
+
   // Show editor when "template:loaded" event is triggered
   , render: function () {
     var actions_view;

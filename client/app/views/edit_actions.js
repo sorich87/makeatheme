@@ -25,10 +25,6 @@ module.exports = View.extend({
     }
   ]
 
-  , initialize: function () {
-    _.bindAll(this, "accordionGroups");
-  }
-
   , render: function () {
     app.createView("regions");
     app.createView("blocks");
@@ -43,7 +39,7 @@ module.exports = View.extend({
     this.$el.empty()
       .append("<div id='general'></div>")
       .children()
-        .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
+        .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
         .append(app.reuseView("save_button").render().$el)
         .append(app.reuseView("download_button").render().$el)
         .end()

@@ -127,6 +127,7 @@ window.require.define({"application": function(exports, require, module) {
           views[name].remove();
         }
         views[name].off();
+        views[name].teardown();
       }
 
       views[name] = new View(options);
@@ -2111,6 +2112,10 @@ window.require.define({"views/auth_links": function(exports, require, module) {
       this.model.on("change", this.render, this);
     }
 
+    , teardown: function () {
+      this.model.off("change", this.render, this);
+    }
+
     , render: function () {
       var links = template();
 
@@ -2186,14 +2191,24 @@ window.require.define({"views/blocks": function(exports, require, module) {
       this.collection.on("add", this.addOne, this);
       this.collection.on("remove", this.removeOne, this);
 
-      app.on("mutations:started", this.makeMutable.bind(this));
-      app.on("save:before", this.addThemeAttributes.bind(this));
-      app.on("block:inserted", this.insertBlock.bind(this));
+      app.on("mutations:started", this.makeMutable, this);
+      app.on("save:before", this.addThemeAttributes, this);
+      app.on("block:inserted", this.insertBlock, this);
 
       this.allBlocks = _.map(app.data.blocks, function (block) {
         block.label = _.str.titleize(_.str.humanize(block.name));
         return block;
       });
+    }
+
+    , teardown: function () {
+      this.collection.off("reset", this.addAll, this);
+      this.collection.off("add", this.addOne, this);
+      this.collection.off("remove", this.removeOne, this);
+
+      app.off("mutations:started", this.makeMutable, this);
+      app.off("save:before", this.addThemeAttributes, this);
+      app.off("block:inserted", this.insertBlock, this);
     }
 
     , render: function () {
@@ -2379,7 +2394,11 @@ window.require.define({"views/download_button": function(exports, require, modul
     }
 
     , initialize: function () {
-      app.on("save:after", this.waitForArchive.bind(this));
+      app.on("save:after", this.waitForArchive, this);
+    }
+
+    , teardown: function () {
+      app.off("save:after", this.waitForArchive, this);
     }
 
     , render: function () {
@@ -2477,10 +2496,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
       }
     ]
 
-    , initialize: function () {
-      _.bindAll(this, "accordionGroups");
-    }
-
     , render: function () {
       app.createView("regions");
       app.createView("blocks");
@@ -2495,7 +2510,7 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
       this.$el.empty()
         .append("<div id='general'></div>")
         .children()
-          .append("<div class='accordion'>" + this.accordionGroups() + "</div>")
+          .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
           .append(app.reuseView("save_button").render().$el)
           .append(app.reuseView("download_button").render().$el)
           .end()
@@ -2562,6 +2577,10 @@ window.require.define({"views/editor": function(exports, require, module) {
       });
 
       $(window).on("resize", this.resize.bind(this));
+    }
+
+    , teardown: function () {
+      $(window).off("resize", this.resize.bind(this));
     }
 
     // Show editor when "template:loaded" event is triggered
@@ -2695,8 +2714,13 @@ window.require.define({"views/layout": function(exports, require, module) {
     , initialize: function () {
       this.$el.addClass("editing");
       this.makeDroppable();
-      app.on("region:loaded", this.highLightEmpty.bind(this));
-      app.on("template:loaded", this.highLightEmpty.bind(this));
+      app.on("region:loaded", this.highLightEmpty, this);
+      app.on("template:loaded", this.highLightEmpty, this);
+    }
+
+    , teardown: function () {
+      app.off("region:loaded", this.highLightEmpty, this);
+      app.off("template:loaded", this.highLightEmpty, this);
     }
 
     , highLightEmpty: function () {
@@ -3035,9 +3059,11 @@ window.require.define({"views/notifications": function(exports, require, module)
     , className: "unstyled"
 
     , initialize: function () {
-      _.bindAll(this, "showNotification");
+      app.on("notification", this.showNotification, this);
+    }
 
-      app.on("notification", this.showNotification);
+    , teardown: function () {
+      app.off("notification", this.showNotification, this);
     }
 
     , showNotification: function (type, text) {
@@ -3193,13 +3219,17 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , initialize: function () {
-      _.bindAll(this, "addThemeAttributes", "makeMutable", "addRegionsToTemplate");
-
       this.collection.on("add", this.addOne, this);
+      app.on("save:before", this.addThemeAttributes, this);
+      app.on("mutations:started", this.makeMutable, this);
+      app.on("template:load", this.addRegionsToTemplate, this);
+    }
 
-      app.on("save:before", this.addThemeAttributes);
-      app.on("mutations:started", this.makeMutable);
-      app.on("template:load", this.addRegionsToTemplate);
+    , teardown: function () {
+      this.collection.off("add", this.addOne, this);
+      app.off("save:before", this.addThemeAttributes, this);
+      app.off("mutations:started", this.makeMutable, this);
+      app.off("template:load", this.addRegionsToTemplate, this);
     }
 
     , render: function () {
@@ -3535,14 +3565,21 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , initialize: function () {
-      app.on("column:highlight", this.setColumn.bind(this));
-      app.on("column:highlight", this.showEditor.bind(this));
-      app.on("save:before", this.addThemeAttributes.bind(this));
-      app.on("resize:end", this.changeWidth.bind(this));
+      app.on("column:highlight", this.setColumn, this);
+      app.on("column:highlight", this.showEditor, this);
+      app.on("save:before", this.addThemeAttributes, this);
+      app.on("resize:end", this.changeWidth, this);
 
       this.selector = "body";
       this.customCSS = app.editor.style;
       this.editorView = "simple_style_edit";
+    }
+
+    , teardown: function () {
+      app.off("column:highlight", this.setColumn, this);
+      app.off("column:highlight", this.showEditor, this);
+      app.off("save:before", this.addThemeAttributes, this);
+      app.off("resize:end", this.changeWidth, this);
     }
 
     , setTag: function (e) {
@@ -3696,15 +3733,23 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , initialize: function (options) {
-      _.bindAll(this, "addThemeAttributes", "makeMutable", "saveRegion");
-
       this.collection.on("add", this.addOne, this);
       this.collection.on("reset", this.addAll, this);
       this.collection.on("remove", this.removeOne, this);
 
-      app.on("save:before", this.addThemeAttributes);
-      app.on("mutations:started", this.makeMutable);
-      app.on("region:load", this.saveRegion);
+      app.on("save:before", this.addThemeAttributes, this);
+      app.on("mutations:started", this.makeMutable, this);
+      app.on("region:load", this.saveRegion, this);
+    }
+
+    , teardown: function (options) {
+      this.collection.off("add", this.addOne, this);
+      this.collection.off("reset", this.addAll, this);
+      this.collection.off("remove", this.removeOne, this);
+
+      app.off("save:before", this.addThemeAttributes, this);
+      app.off("mutations:started", this.makeMutable, this);
+      app.off("region:load", this.saveRegion, this);
     }
 
     , render: function () {
@@ -5114,13 +5159,13 @@ window.require.define({"views/theme": function(exports, require, module) {
 
   module.exports = View.extend({
     initialize: function () {
-      $("body").on("mouseenter", "[name=property]", function (e) {
-        $(e.currentTarget).typeahead({
-          source: cssProperties
-        });
-      });
-
+      $("body").on("mouseenter", "[name=property]", this.typeahead);
       $(window).on("resize", this.resize.bind(this));
+    }
+
+    , teardown: function () {
+      $("body").off("mouseenter", "[name=property]", this.typeahead);
+      $(window).off("resize", this.resize.bind(this));
     }
 
     , render: function () {
@@ -5130,6 +5175,12 @@ window.require.define({"views/theme": function(exports, require, module) {
       this.resize();
 
       return this;
+    }
+
+    , typeahead: function (e) {
+      $(e.currentTarget).typeahead({
+        source: cssProperties
+      });
     }
 
     , resize: function () {
@@ -5154,6 +5205,10 @@ window.require.define({"views/theme_list": function(exports, require, module) {
 
     , initialize: function () {
       this.collection.on("reset", this.addAll, this);
+    }
+
+    , teardown: function () {
+      this.collection.off("reset", this.addAll, this);
     }
 
     , render: function () {
@@ -5222,7 +5277,11 @@ window.require.define({"views/theme_meta": function(exports, require, module) {
     id: "theme-meta",
 
     initialize: function () {
-      app.on("save:before", this.saveThemeName.bind(this));
+      app.on("save:before", this.saveThemeName, this);
+    },
+
+    teardown: function () {
+      app.off("save:before", this.saveThemeName, this);
     },
 
     render: function () {
@@ -5386,7 +5445,11 @@ window.require.define({"views/user_themes": function(exports, require, module) {
     collection: app.currentUser.get("themes"),
 
     initialize: function () {
-      app.on("theme:deleted", this.render.bind(this));
+      app.on("theme:deleted", this.render, this);
+    },
+
+    teardown: function () {
+      app.off("theme:deleted", this.render, this);
     },
 
     render: function () {
