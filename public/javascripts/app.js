@@ -4985,17 +4985,6 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n      <p>by <a href=\"#\">";
-    foundHelper = helpers.author;
-    stack1 = foundHelper || depth0.author;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "author", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a></p>\n      ";
-    return buffer;}
-
-  function program3(depth0,data) {
-    
-    var buffer = "", stack1;
     buffer += "\n        <div class=\"btn-group pull-right\">\n          <a class=\"btn\" href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
@@ -5009,7 +4998,7 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     buffer += escapeExpression(stack1) + "\"><i\n              class=\"icon-remove icon-white\"></i></button>\n        </div>\n        ";
     return buffer;}
 
-  function program5(depth0,data) {
+  function program3(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n        <a class=\"btn pull-right\" href=\"/themes/";
@@ -5040,24 +5029,14 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</h4>\n      ";
-    foundHelper = helpers.author;
-    stack1 = foundHelper || depth0.author;
+    buffer += escapeExpression(stack1) + "</h4>\n      <div>\n        ";
+    foundHelper = helpers.user_is_owner;
+    stack1 = foundHelper || depth0.user_is_owner;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      <div>\n        ";
-    foundHelper = helpers.user_is_owner;
-    stack1 = foundHelper || depth0.user_is_owner;
-    stack2 = helpers['if'];
-    tmp1 = self.program(3, program3, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.program(5, program5, data);
+    tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n      </div>\n    </div>\n  </div>\n</li>\n";
