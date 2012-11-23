@@ -3187,7 +3187,13 @@ window.require.define({"views/preview_actions": function(exports, require, modul
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify({id: app.data.theme._id}),
         success: function (data) {
-          var theme = JSON.parse(data);
+          var theme = JSON.parse(data),
+              userThemes;
+
+          userThemes = window.top.Application.currentUser.get("themes");
+          userThemes.add(theme);
+          window.top.Application.currentUser.set("themes", userThemes);
+
           window.top.Backbone.history.navigate("/themes/" + theme._id, true);
         },
         error: function () {
@@ -5420,8 +5426,12 @@ window.require.define({"views/themes": function(exports, require, module) {
         url: "/themes/new",
         contentType: "application/json; charset=UTF-8",
         success: function (data) {
-          var theme = JSON.parse(data);
-          window.top.Backbone.history.navigate("/themes/" + theme._id, true);
+          var theme = JSON.parse(data),
+              userThemes = app.currentUser.get("themes").add(theme);
+
+          app.currentUser.set("themes", userThemes);
+
+          Backbone.history.navigate("/themes/" + theme._id, true);
         },
         error: function () {
           element.removeAttribute("disabled");

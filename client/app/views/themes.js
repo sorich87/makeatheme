@@ -31,8 +31,12 @@ module.exports = View.extend({
       url: "/themes/new",
       contentType: "application/json; charset=UTF-8",
       success: function (data) {
-        var theme = JSON.parse(data);
-        window.top.Backbone.history.navigate("/themes/" + theme._id, true);
+        var theme = JSON.parse(data),
+            userThemes = app.currentUser.get("themes").add(theme);
+
+        app.currentUser.set("themes", userThemes);
+
+        Backbone.history.navigate("/themes/" + theme._id, true);
       },
       error: function () {
         element.removeAttribute("disabled");
