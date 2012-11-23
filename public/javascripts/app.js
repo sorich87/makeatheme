@@ -5413,7 +5413,7 @@ window.require.define({"views/themes": function(exports, require, module) {
       var element = e.currentTarget;
 
       element.setAttribute("disabled", "true");
-      element.innerHTML = "PLease wait...";
+      element.innerHTML = "Please wait...";
 
       $.ajax({
         type: "POST",

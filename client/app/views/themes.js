@@ -24,7 +24,7 @@ module.exports = View.extend({
     var element = e.currentTarget;
 
     element.setAttribute("disabled", "true");
-    element.innerHTML = "PLease wait...";
+    element.innerHTML = "Please wait...";
 
     $.ajax({
       type: "POST",
