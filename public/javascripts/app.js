@@ -170,6 +170,9 @@ window.require.define({"application": function(exports, require, module) {
       } else {
         this.currentUser = new User();
       }
+
+      this.on("theme:created", this.updateCurrentUserThemes, this);
+      this.on("theme:copied", this.updateCurrentUserThemes, this);
     }
 
     , updateCurrentUserThemes: function (theme) {
@@ -3180,12 +3183,9 @@ window.require.define({"views/preview_actions": function(exports, require, modul
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify({id: app.data.theme._id}),
         success: function (data) {
-          var theme = JSON.parse(data),
-              userThemes;
+          var theme = JSON.parse(data);
 
-          userThemes = window.top.Application.currentUser.get("themes");
-          userThemes.add(theme);
-          window.top.Application.currentUser.set("themes", userThemes);
+          window.top.Application.trigger("theme:copied", theme);
 
           window.top.Backbone.history.navigate("/themes/" + theme._id, true);
         },
@@ -5306,10 +5306,9 @@ window.require.define({"views/themes": function(exports, require, module) {
         url: "/themes/new",
         contentType: "application/json; charset=UTF-8",
         success: function (data) {
-          var theme = JSON.parse(data),
-              userThemes = app.currentUser.get("themes").add(theme);
+          var theme = JSON.parse(data);
 
-          app.currentUser.set("themes", userThemes);
+          app.trigger("theme:created", theme);
 
           Backbone.history.navigate("/themes/" + theme._id, true);
         },

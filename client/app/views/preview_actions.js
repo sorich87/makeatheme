@@ -36,12 +36,9 @@ module.exports = View.extend({
       contentType: "application/json; charset=UTF-8",
       data: JSON.stringify({id: app.data.theme._id}),
       success: function (data) {
-        var theme = JSON.parse(data),
-            userThemes;
+        var theme = JSON.parse(data);
 
-        userThemes = window.top.Application.currentUser.get("themes");
-        userThemes.add(theme);
-        window.top.Application.currentUser.set("themes", userThemes);
+        window.top.Application.trigger("theme:copied", theme);
 
         window.top.Backbone.history.navigate("/themes/" + theme._id, true);
       },

@@ -93,6 +93,9 @@ _.extend(Application, {
     } else {
       this.currentUser = new User();
     }
+
+    this.on("theme:created", this.updateCurrentUserThemes, this);
+    this.on("theme:copied", this.updateCurrentUserThemes, this);
   }
 
   , updateCurrentUserThemes: function (theme) {

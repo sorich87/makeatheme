@@ -31,10 +31,9 @@ module.exports = View.extend({
       url: "/themes/new",
       contentType: "application/json; charset=UTF-8",
       success: function (data) {
-        var theme = JSON.parse(data),
-            userThemes = app.currentUser.get("themes").add(theme);
+        var theme = JSON.parse(data);
 
-        app.currentUser.set("themes", userThemes);
+        app.trigger("theme:created", theme);
 
         Backbone.history.navigate("/themes/" + theme._id, true);
       },
