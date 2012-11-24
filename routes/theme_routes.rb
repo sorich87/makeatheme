@@ -63,26 +63,6 @@ put '/themes/:id' do
   respond_with_saved_theme!(theme, params)
 end
 
-post '/themes' do
-  protect!
-
-  file = params[:file]
-
-  status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
-
-  intermediate = ThemeUpload.new(
-    archive: file[:tempfile],
-    author: current_user,
-  )
-
-  if intermediate.save
-    respond_with job_id: intermediate.job_id
-  else
-    status 400
-    respond_with intermediate.errors
-  end
-end
-
 delete '/themes/:id' do
   protect!
 

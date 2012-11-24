@@ -170,8 +170,6 @@ window.require.define({"application": function(exports, require, module) {
       } else {
         this.currentUser = new User();
       }
-
-      this.on("upload:after", this.updateCurrentUserThemes);
     }
 
     , updateCurrentUserThemes: function (theme) {
@@ -1864,7 +1862,6 @@ window.require.define({"router": function(exports, require, module) {
       , "login": "login"
       , "register": "register"
       , "reset_password": "reset_password"
-      , "upload": "upload"
       , "*actions": "notFound"
     }
 
@@ -1928,10 +1925,6 @@ window.require.define({"router": function(exports, require, module) {
       this.anonymousOnly();
 
       $("#main").empty().append(app.createView("password_reset").render().$el);
-    }
-
-    , upload: function () {
-      $("#main").empty().append(app.createView("theme_upload").render().$el);
     }
 
     , notFound: function (action) {
@@ -5058,15 +5051,6 @@ window.require.define({"views/templates/theme_meta": function(exports, require, 
     return buffer;});
 }});
 
-window.require.define({"views/templates/theme_upload": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<div class=\"modal-header\">\n  <h3>Upload a new theme</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"file\">Theme Archive</label>\n        <div class=\"controls\">\n          <input type=\"file\" name=\"file\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Upload Theme</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n</div>\n";});
-}});
-
 window.require.define({"views/templates/themes": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -5285,89 +5269,6 @@ window.require.define({"views/theme_meta": function(exports, require, module) {
     }
   });
 
-  
-}});
-
-window.require.define({"views/theme_upload": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application");
-
-  module.exports = View.extend({
-      className: "modal"
-    , template: "theme_upload"
-
-    , events: {
-      "submit form": "sendFormData"
-    }
-
-    , sendFormData: function (e) {
-      var $form = this.$("form")
-        , button = this.$("button[type=submit]")[0];
-
-      e.preventDefault();
-
-      button.setAttribute("disabled", "true");
-      button.innerHTML = "Processing...";
-
-      $form.children(".alert-error").remove();
-
-      app.trigger("upload:before");
-
-      $.ajax({
-          type: "POST"
-        , url: "/themes"
-        , data: new FormData($form[0])
-
-        , success: function (data, textStatus, jqXHR) {
-          var eventSource = new EventSource("/jobs/" + data.job_id);
-
-          eventSource.addEventListener("success", this.themeUploaded.bind(this), false);
-          eventSource.addEventListener("errors", this.themeErrors.bind(this), false);
-        }.bind(this)
-
-        , error: function (jqXHR, textStatus, errorThrown) {
-          $form.prepend("<p class='alert alert-error'>" + errorThrown +
-                        " Please refresh the page and try again.</p>");
-
-          button.removeAttribute("disabled");
-          button.innerHTML = "Upload Theme";
-        }
-
-        , cache: false
-        , contentType: false
-        , dataType: "json"
-        , processData: false
-      });
-    }
-
-    , themeUploaded: function (e) {
-      var theme = JSON.parse(e.data);
-
-      e.currentTarget.close();
-
-      app.trigger("upload:after", theme);
-      app.trigger("notification", "success", "Your theme is uploaded and ready to be edited!");
-
-      Backbone.history.navigate("/themes/" + theme._id, true);
-    }
-
-    , themeErrors: function (e) {
-      var key
-        , errors = JSON.parse(e.data)
-        , button = this.$("button[type=submit]")[0];
-
-      e.currentTarget.close();
-
-      for (key in errors) {
-        if (errors.hasOwnProperty(key)) {
-          this.$("form").prepend("<p class='alert alert-error'>" + _.str.humanize(key) + " " + errors[key] + "</p>");
-        }
-      }
-
-      button.removeAttribute("disabled");
-      button.innerHTML = "Upload Theme";
-    }
-  });
   
 }});
 

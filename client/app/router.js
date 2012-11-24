@@ -9,7 +9,6 @@ module.exports = Backbone.Router.extend({
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
-    , "upload": "upload"
     , "*actions": "notFound"
   }
 
@@ -73,10 +72,6 @@ module.exports = Backbone.Router.extend({
     this.anonymousOnly();
 
     $("#main").empty().append(app.createView("password_reset").render().$el);
-  }
-
-  , upload: function () {
-    $("#main").empty().append(app.createView("theme_upload").render().$el);
   }
 
   , notFound: function (action) {

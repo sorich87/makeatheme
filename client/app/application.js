@@ -93,8 +93,6 @@ _.extend(Application, {
     } else {
       this.currentUser = new User();
     }
-
-    this.on("upload:after", this.updateCurrentUserThemes);
   }
 
   , updateCurrentUserThemes: function (theme) {
