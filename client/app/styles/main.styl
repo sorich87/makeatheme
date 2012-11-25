@@ -86,9 +86,6 @@ yellowLight =         #ffffe0
   letter-spacing: 0.09em;
   margin: 60px 0;
 }
-.thumbnail {
-  border: 1px solid #08c;
-}
 #footer {
   border-top: 1px solid #EEE;
   margin: 60px 0 0;
@@ -99,6 +96,10 @@ body {
   padding-top: 60px;
   padding-bottom: 60px;
   line-height: 1.6em;
+}
+[contenteditable=true]:hover,
+[contenteditable=true]:focus {
+  background-color: yellowLight;
 }
 #back-to-top {
   position: fixed;
@@ -154,7 +155,7 @@ body.theme #main {
   height: 100%;
   position: absolute;
 }
-#new-button {
+#new-theme {
   margin: 60px 0 0;
   text-align: center;
 }
@@ -255,7 +256,7 @@ body.theme #main {
     }
   }
 
-  #theme-name {
+  #theme-meta {
     padding: 10px;
     border-bottom: 1px solid grayDarker;
   }

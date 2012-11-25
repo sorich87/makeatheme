@@ -1,43 +1,29 @@
-var app = require("application")
-  , Themes = require("collections/themes");
+var app = require("application");
 
 module.exports = Backbone.Router.extend({
   routes: {
-      "": "your_themes"
+      "": "user_themes"
     , "themes": "themes"
     , "themes/:id": "theme"
     , "themes/:id/edit": "edit"
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
-    , "upload": "upload"
     , "*actions": "notFound"
   }
 
   , themes: function () {
     this.userOnly();
 
-    var collection = new Themes(app.data.themes);
-
     $("#main").empty()
-      .append("<div id='new-button'><a href='/themes/new' " +
-              "data-event='New Theme:type:from scratch'" +
-              "class='btn btn-primary btn-large' data-bypass='true'>" +
-              "Create a Theme from Scratch</a></div>")
-      .append("<h3 class='page-title'>Or copy a theme below</h3>")
-      .append(app.createView("theme_list", {collection: collection}).render().$el);
+      .append(app.createView("themes").render().$el);
   }
 
-  , your_themes: function () {
+  , user_themes: function () {
     this.userOnly();
 
-    var collection = app.currentUser.get("themes");
-
     $("#main").empty()
-      .append("<h1 class='page-header'>Your Themes <small>(" + collection.length + ")</small>" +
-              " <a href='/themes' class='btn btn-primary'>" +
-              "Create a New Theme</a></h1>")
-      .append(app.createView("theme_list", {collection: collection}).render().$el);
+      .append(app.createView("user_themes").render().$el);
   }
 
   , theme: function (id) {
@@ -86,10 +72,6 @@ module.exports = Backbone.Router.extend({
     this.anonymousOnly();
 
     $("#main").empty().append(app.createView("password_reset").render().$el);
-  }
-
-  , upload: function () {
-    $("#main").empty().append(app.createView("theme_upload").render().$el);
   }
 
   , notFound: function (action) {

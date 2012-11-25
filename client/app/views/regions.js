@@ -14,13 +14,17 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    _.bindAll(this, "addThemeAttributes", "makeMutable", "addRegionsToTemplate");
-
     this.collection.on("add", this.addOne, this);
+    app.on("save:before", this.addThemeAttributes, this);
+    app.on("mutations:started", this.makeMutable, this);
+    app.on("template:load", this.addRegionsToTemplate, this);
+  }
 
-    app.on("save:before", this.addThemeAttributes);
-    app.on("mutations:started", this.makeMutable);
-    app.on("template:load", this.addRegionsToTemplate);
+  , teardown: function () {
+    this.collection.off("add", this.addOne, this);
+    app.off("save:before", this.addThemeAttributes, this);
+    app.off("mutations:started", this.makeMutable, this);
+    app.off("template:load", this.addRegionsToTemplate, this);
   }
 
   , render: function () {

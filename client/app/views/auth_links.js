@@ -15,6 +15,10 @@ module.exports = View.extend({
     this.model.on("change", this.render, this);
   }
 
+  , teardown: function () {
+    this.model.off("change", this.render, this);
+  }
+
   , render: function () {
     var links = template();
 

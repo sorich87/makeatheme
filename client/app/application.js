@@ -50,6 +50,7 @@ _.extend(Application, {
         views[name].remove();
       }
       views[name].off();
+      views[name].teardown();
     }
 
     views[name] = new View(options);
@@ -93,7 +94,8 @@ _.extend(Application, {
       this.currentUser = new User();
     }
 
-    this.on("upload:after", this.updateCurrentUserThemes);
+    this.on("theme:created", this.updateCurrentUserThemes, this);
+    this.on("theme:copied", this.updateCurrentUserThemes, this);
   }
 
   , updateCurrentUserThemes: function (theme) {

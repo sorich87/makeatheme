@@ -5,13 +5,13 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
   initialize: function () {
-    $("body").on("mouseenter", "[name=property]", function (e) {
-      $(e.currentTarget).typeahead({
-        source: cssProperties
-      });
-    });
-
+    $("body").on("mouseenter", "[name=property]", this.typeahead);
     $(window).on("resize", this.resize.bind(this));
+  }
+
+  , teardown: function () {
+    $("body").off("mouseenter", "[name=property]", this.typeahead);
+    $(window).off("resize", this.resize.bind(this));
   }
 
   , render: function () {
@@ -21,6 +21,12 @@ module.exports = View.extend({
     this.resize();
 
     return this;
+  }
+
+  , typeahead: function (e) {
+    $(e.currentTarget).typeahead({
+      source: cssProperties
+    });
   }
 
   , resize: function () {

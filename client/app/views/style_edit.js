@@ -18,14 +18,21 @@ module.exports = View.extend({
   }
 
   , initialize: function () {
-    app.on("column:highlight", this.setColumn.bind(this));
-    app.on("column:highlight", this.showEditor.bind(this));
-    app.on("save:before", this.addThemeAttributes.bind(this));
-    app.on("resize:end", this.changeWidth.bind(this));
+    app.on("column:highlight", this.setColumn, this);
+    app.on("column:highlight", this.showEditor, this);
+    app.on("save:before", this.addThemeAttributes, this);
+    app.on("resize:end", this.changeWidth, this);
 
     this.selector = "body";
     this.customCSS = app.editor.style;
     this.editorView = "simple_style_edit";
+  }
+
+  , teardown: function () {
+    app.off("column:highlight", this.setColumn, this);
+    app.off("column:highlight", this.showEditor, this);
+    app.off("save:before", this.addThemeAttributes, this);
+    app.off("resize:end", this.changeWidth, this);
   }
 
   , setTag: function (e) {

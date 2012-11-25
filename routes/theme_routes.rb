@@ -4,7 +4,7 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-get '/themes/new' do
+post '/themes/new' do
   protect!
 
   new_theme = Theme.new(
@@ -13,20 +13,22 @@ get '/themes/new' do
   )
   new_theme.save
 
-  redirect to "/themes/#{new_theme.id}"
+  halt new_theme.to_json
 end
 
 get '/themes/:id' do
   respond_with theme
 end
 
-get '/themes/:id/fork' do
+post '/themes/fork' do
   protect!
 
-  fork = theme.fork(author: current_user)
+  id = JSON.parse(request.body.read)['id']
+
+  fork = Theme.unscoped.find(id).fork(author: current_user)
   fork.save
 
-  redirect to "/themes/#{fork.id}"
+  halt fork.to_json
 end
 
 get '/themes/:id/edit', provides: 'html' do
@@ -61,22 +63,10 @@ put '/themes/:id' do
   respond_with_saved_theme!(theme, params)
 end
 
-post '/themes' do
+delete '/themes/:id' do
   protect!
 
-  file = params[:file]
+  halt 401 unless theme.author?(current_user)
 
-  status 400 and respond_with :error => 'Theme archive missing.' if file.nil?
-
-  intermediate = ThemeUpload.new(
-    archive: file[:tempfile],
-    author: current_user,
-  )
-
-  if intermediate.save
-    respond_with job_id: intermediate.job_id
-  else
-    status 400
-    respond_with intermediate.errors
-  end
+  theme.destroy
 end

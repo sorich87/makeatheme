@@ -19,15 +19,23 @@ module.exports = View.extend({
   }
 
   , initialize: function (options) {
-    _.bindAll(this, "addThemeAttributes", "makeMutable", "saveRegion");
-
     this.collection.on("add", this.addOne, this);
     this.collection.on("reset", this.addAll, this);
     this.collection.on("remove", this.removeOne, this);
 
-    app.on("save:before", this.addThemeAttributes);
-    app.on("mutations:started", this.makeMutable);
-    app.on("region:load", this.saveRegion);
+    app.on("save:before", this.addThemeAttributes, this);
+    app.on("mutations:started", this.makeMutable, this);
+    app.on("region:load", this.saveRegion, this);
+  }
+
+  , teardown: function (options) {
+    this.collection.off("add", this.addOne, this);
+    this.collection.off("reset", this.addAll, this);
+    this.collection.off("remove", this.removeOne, this);
+
+    app.off("save:before", this.addThemeAttributes, this);
+    app.off("mutations:started", this.makeMutable, this);
+    app.off("region:load", this.saveRegion, this);
   }
 
   , render: function () {
