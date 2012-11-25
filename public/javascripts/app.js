@@ -3174,8 +3174,12 @@ window.require.define({"views/preview_actions": function(exports, require, modul
     , copyTheme: function (e) {
       var element = e.currentTarget;
 
-      element.setAttribute("disabled", "true");
-      element.innerHTML = "Started the Photocopier";
+      // Set timeout so that button is disabled after all script are run
+      // to avoid blocking event bubbling
+      setTimeout(function () {
+        element.setAttribute("disabled", "true");
+        element.innerHTML = "Started the Photocopier";
+      }, 0);
 
       $.ajax({
         type: "POST",
@@ -5298,8 +5302,12 @@ window.require.define({"views/themes": function(exports, require, module) {
     createTheme: function (e) {
       var element = e.currentTarget;
 
-      element.setAttribute("disabled", "true");
-      element.innerHTML = "Please wait...";
+      // Set timeout so that button is disabled after all script are run
+      // to avoid blocking event bubbling
+      setTimeout(function () {
+        element.setAttribute("disabled", "true");
+        element.innerHTML = "Please wait...";
+      }, 0);
 
       $.ajax({
         type: "POST",
