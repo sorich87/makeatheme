@@ -27,8 +27,12 @@ module.exports = View.extend({
   , copyTheme: function (e) {
     var element = e.currentTarget;
 
-    element.setAttribute("disabled", "true");
-    element.innerHTML = "Started the Photocopier";
+    // Set timeout so that button is disabled after all script are run
+    // to avoid blocking event bubbling
+    setTimeout(function () {
+      element.setAttribute("disabled", "true");
+      element.innerHTML = "Started the Photocopier";
+    }, 0);
 
     $.ajax({
       type: "POST",
