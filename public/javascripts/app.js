@@ -127,7 +127,9 @@ window.require.define({"application": function(exports, require, module) {
           views[name].remove();
         }
         views[name].off();
-        views[name].teardown();
+        if ("teardown" in views[name]) {
+          views[name].teardown();
+        }
       }
 
       views[name] = new View(options);
