@@ -995,7 +995,11 @@ window.require.define({"lib/editor_data": function(exports, require, module) {
     };
 
     store = JSON.stringify(store);
-    sessionStorage.setItem("theme-" + app.data.theme._id, store);
+    try {
+      sessionStorage.setItem("theme-" + app.data.theme._id, store);
+    } catch(e) {
+      sessionStorage.clear();
+    }
   }, 1000);
 
   module.exports = data;

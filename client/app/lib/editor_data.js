@@ -35,7 +35,11 @@ setInterval(function () {
   };
 
   store = JSON.stringify(store);
-  sessionStorage.setItem("theme-" + app.data.theme._id, store);
+  try {
+    sessionStorage.setItem("theme-" + app.data.theme._id, store);
+  } catch(e) {
+    sessionStorage.clear();
+  }
 }, 1000);
 
 module.exports = data;
