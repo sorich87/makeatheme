@@ -3166,10 +3166,6 @@ window.require.define({"views/preview_actions": function(exports, require, modul
         .append(app.createView("templates_select").render().$el)
         .append(copy_button({theme_id: app.data.theme._id}));
 
-      if (!app.editor.preview_only) {
-        this.$el.append(app.createView("download_button").render().$el);
-      }
-
       return this;
     }
 

@@ -17,10 +17,6 @@ module.exports = View.extend({
       .append(app.createView("templates_select").render().$el)
       .append(copy_button({theme_id: app.data.theme._id}));
 
-    if (!app.editor.preview_only) {
-      this.$el.append(app.createView("download_button").render().$el);
-    }
-
     return this;
   }
 
