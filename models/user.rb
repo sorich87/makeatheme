@@ -25,7 +25,8 @@ class User
 
   attr_protected :password_hash
 
-  before_create :generate_password_hash, :subscribe_to_newsletter
+  before_create :subscribe_to_newsletter
+  before_save :generate_password_hash
 
   def to_fullname
     "#{self.first_name} #{self.last_name}"
@@ -70,6 +71,11 @@ class User
     self.password_reset_hash = ''
     self.password_reset_sent_at = nil
     self.save
+  end
+
+  def verify_password!(suspect)
+    suspect_hash = BCrypt::Engine.hash_secret(suspect, self.password_salt)
+    return suspect_hash == self.password_hash
   end
 
   private

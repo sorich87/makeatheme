@@ -20,7 +20,7 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var links = template();
+    var links = template(this.model.toJSON());
 
     this.$el.empty().append(links);
 
@@ -29,7 +29,9 @@ module.exports = View.extend({
 
   // Send request to delete current user session
   // and redirect to homepage on success
-  , deleteSession: function () {
+  , deleteSession: function (e) {
+    e.preventDefault();
+
     $.ajax({
         contentType: "application/json; charset=UTF-8"
       , dataType: "json"

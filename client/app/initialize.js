@@ -15,6 +15,10 @@ jQuery(function($) {
     var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
     , root = location.protocol + "//" + location.host + "/";
 
+    if (href.attr === "#") {
+      return;
+    }
+
     if (href.prop && href.prop.slice(0, root.length) === root &&
        Backbone.history.fragment !== "") {
       e.preventDefault();

@@ -316,6 +316,10 @@ window.require.define({"initialize": function(exports, require, module) {
       var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
       , root = location.protocol + "//" + location.host + "/";
 
+      if (href.attr === "#") {
+        return;
+      }
+
       if (href.prop && href.prop.slice(0, root.length) === root &&
          Backbone.history.fragment !== "") {
         e.preventDefault();
@@ -1645,9 +1649,7 @@ window.require.define({"lib/view_helpers": function(exports, require, module) {
     , User = require("models/user");
 
   Handlebars.registerHelper("current_user", function () {
-    if (app.currentUser.id) {
-      return app.currentUser;
-    }
+    return !!app.currentUser.id;
   });
 
   Handlebars.registerHelper("selected", function (value, current) {
@@ -1868,6 +1870,7 @@ window.require.define({"router": function(exports, require, module) {
       , "themes": "themes"
       , "themes/:id": "theme"
       , "themes/:id/edit": "edit"
+      , "account": "account"
       , "login": "login"
       , "register": "register"
       , "reset_password": "reset_password"
@@ -1918,6 +1921,12 @@ window.require.define({"router": function(exports, require, module) {
       app.createView("editor").render();
     }
 
+    , account: function () {
+      this.userOnly();
+
+      $("#main").empty().append(app.createView("account").render().$el);
+    }
+
     , login: function () {
       this.anonymousOnly();
 
@@ -1955,6 +1964,76 @@ window.require.define({"router": function(exports, require, module) {
       }
     }
   });
+  
+}});
+
+window.require.define({"views/account": function(exports, require, module) {
+  var app = require("application"),
+      View = require("views/base/view"),
+      template = require("views/templates/account"),
+      User = require("models/user");
+
+  module.exports = View.extend({
+    template: "account",
+    model: app.currentUser,
+
+    events: {
+      "submit form": "editUser"
+    },
+
+    initialize: function () {
+      Backbone.Validation.bind(this);
+    },
+
+    render: function () {
+      this.$el.empty().append(template(this.model.toJSON()));
+
+      return this;
+    },
+
+    editUser: function (e) {
+      var attrs = {id: this.model.id};
+
+      e.preventDefault();
+
+      this.$("input").each(function () {
+        attrs[this.getAttribute("name")] = this.value;
+      });
+
+      this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
+
+      (new User()).save(attrs, {
+        success: function (model, res) {
+          this.model.set(res);
+
+          this.$("button[type=submit]").get(0).removeAttribute("disabled");
+
+          app.trigger("user:edit", this.model);
+          app.trigger("notification", "success", "Changes to your account have been saved.");
+        }.bind(this)
+
+        , error: function (model, err) {
+          this.$("button[type=submit]").get(0).removeAttribute("disabled");
+
+          this.displayServerErrors(err);
+        }.bind(this)
+      });
+    }
+
+    , displayServerErrors: function (err) {
+      if (! err.responseText) {
+        return;
+      }
+
+      var msgs = JSON.parse(err.responseText);
+
+      Object.keys(msgs).forEach(function (attr) {
+        var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
+        Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
+      }.bind(this));
+    }
+  });
+
   
 }});
 
@@ -2119,7 +2198,7 @@ window.require.define({"views/auth_links": function(exports, require, module) {
     }
 
     , render: function () {
-      var links = template();
+      var links = template(this.model.toJSON());
 
       this.$el.empty().append(links);
 
@@ -2128,7 +2207,9 @@ window.require.define({"views/auth_links": function(exports, require, module) {
 
     // Send request to delete current user session
     // and redirect to homepage on success
-    , deleteSession: function () {
+    , deleteSession: function (e) {
+      e.preventDefault();
+
       $.ajax({
           contentType: "application/json; charset=UTF-8"
         , dataType: "json"
@@ -3935,20 +4016,56 @@ window.require.define({"views/templates/accordion_group": function(exports, requ
     return buffer;});
 }});
 
+window.require.define({"views/templates/account": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<h1 class=\"page-header\">Account / Profile</h1>\n<form class=\"form-horizontal\">\n  <fieldset>\n    <legend>Name and Email</legend>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n      <div class=\"controls\">\n        <input type=\"text\" class=\"input-xlarge\" name=\"first_name\" value=\"";
+    foundHelper = helpers.first_name;
+    stack1 = foundHelper || depth0.first_name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n      <div class=\"controls\">\n        <input type=\"text\" class=\"input-xlarge\" name=\"last_name\" value=\"";
+    foundHelper = helpers.last_name;
+    stack1 = foundHelper || depth0.last_name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "last_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-email\">Email Address</label>\n      <div class=\"controls\">\n        <input type=\"text\" class=\"input-xlarge\" name=\"email\" value=\"";
+    foundHelper = helpers.email;
+    stack1 = foundHelper || depth0.email;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "email", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">Current Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"current_password\">\n      </div>\n    </div>\n  </fieldset>\n\n  <fieldset>\n    <legend>Change Password <small>(leave the fields below blank if not changing password)</small></legend>\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">New Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n      </div>\n    </div>\n  </fieldset>\n\n  <div class=\"control-group\">\n    <div class=\"controls\">\n      <button type=\"submit\" class=\"btn btn-primary submit\">Save Changes</button>\n    </div>\n  </div>\n</form>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/auth_links": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
   function program1(depth0,data) {
     
-    
-    return "\n  <ul class=\"nav\">\n    <li><a href=\"/\" id=\"your_themes\">Your themes</a></li>\n    <li><a href=\"/themes\" id=\"new_theme\">New theme</a></li>\n    <li><button class=\"btn\" id=\"logout\">Log out</button></li>\n  </ul>\n";}
+    var buffer = "", stack1;
+    buffer += "\n  <ul class=\"nav pull-right\">\n    <li><a href=\"/\" id=\"your_themes\">Your themes</a></li>\n    <li><a href=\"/themes\" id=\"new_theme\">New theme</a></li>\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        ";
+    foundHelper = helpers.first_name;
+    stack1 = foundHelper || depth0.first_name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "first_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " ";
+    foundHelper = helpers.last_name;
+    stack1 = foundHelper || depth0.last_name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "last_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\">Account</a></li>\n        <li><a href=\"#\" id=\"logout\">Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
+    return buffer;}
 
   function program3(depth0,data) {
     
     
-    return "\n  <ul class=\"nav\">\n    <li><a id=\"register\" href=\"/register\">Register</a></li>\n    <li><a id=\"login\" href=\"/login\">Log in</a></li>\n  </ul>\n";}
+    return "\n  <ul class=\"nav pull-right\">\n    <li><a id=\"register\" href=\"/register\">Register</a></li>\n    <li><a id=\"login\" href=\"/login\">Log in</a></li>\n  </ul>\n";}
 
     foundHelper = helpers.current_user;
     stack1 = foundHelper || depth0.current_user;
