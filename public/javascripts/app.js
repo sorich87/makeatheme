@@ -1978,7 +1978,8 @@ window.require.define({"views/account": function(exports, require, module) {
     model: app.currentUser,
 
     events: {
-      "submit form": "editUser"
+      "submit form": "editUser",
+      "change .error input": "clearError"
     },
 
     initialize: function () {
@@ -2018,9 +2019,9 @@ window.require.define({"views/account": function(exports, require, module) {
           this.displayServerErrors(err);
         }.bind(this)
       });
-    }
+    },
 
-    , displayServerErrors: function (err) {
+    displayServerErrors: function (err) {
       if (! err.responseText) {
         return;
       }
@@ -2031,6 +2032,12 @@ window.require.define({"views/account": function(exports, require, module) {
         var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
         Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
       }.bind(this));
+    },
+
+    clearError: function (e) {
+      $(e.currentTarget).closest(".error")
+        .removeClass("error")
+        .find(".error-message").remove();
     }
   });
 
@@ -3443,7 +3450,8 @@ window.require.define({"views/register": function(exports, require, module) {
     , model: app.currentUser
 
     , events: {
-      "submit form": "createUser"
+      "submit form": "createUser",
+      "change .error input": "clearError"
     }
 
     , initialize: function () {
@@ -3491,6 +3499,12 @@ window.require.define({"views/register": function(exports, require, module) {
         var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
         Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
       }.bind(this));
+    },
+
+    clearError: function (e) {
+      $(e.currentTarget).closest(".error")
+        .removeClass("error")
+        .find(".error-message").remove();
     }
   });
   
