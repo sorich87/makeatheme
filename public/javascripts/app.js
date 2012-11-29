@@ -1644,7 +1644,7 @@ window.require.define({"lib/view_helpers": function(exports, require, module) {
   var app = require("application")
     , User = require("models/user");
 
-  Handlebars.registerHelper("currentUser", function () {
+  Handlebars.registerHelper("current_user", function () {
     if (app.currentUser.id) {
       return app.currentUser;
     }
@@ -3950,8 +3950,8 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     
     return "\n  <ul class=\"nav\">\n    <li><a id=\"register\" href=\"/register\">Register</a></li>\n    <li><a id=\"login\" href=\"/login\">Log in</a></li>\n  </ul>\n";}
 
-    foundHelper = helpers.currentUser;
-    stack1 = foundHelper || depth0.currentUser;
+    foundHelper = helpers.current_user;
+    stack1 = foundHelper || depth0.current_user;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -4014,8 +4014,8 @@ window.require.define({"views/templates/copy_button": function(exports, require,
     return "\n    <a class=\"btn btn-primary\" href=\"/login\">Login to Copy</a>\n  ";}
 
     buffer += "<div id=\"customize-button\">\n  ";
-    foundHelper = helpers.currentUser;
-    stack1 = foundHelper || depth0.currentUser;
+    foundHelper = helpers.current_user;
+    stack1 = foundHelper || depth0.current_user;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -4112,8 +4112,8 @@ window.require.define({"views/templates/download_button": function(exports, requ
     
     return "\n  <button class='btn btn-success x-login'>Login to Download</button>\n";}
 
-    foundHelper = helpers.currentUser;
-    stack1 = foundHelper || depth0.currentUser;
+    foundHelper = helpers.current_user;
+    stack1 = foundHelper || depth0.current_user;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
@@ -4267,8 +4267,8 @@ window.require.define({"views/templates/save_button": function(exports, require,
     
     return "\n  <button class=\"btn btn-primary btn-block save\">Save Changes</button>\n";}
 
-    foundHelper = helpers.currentUser;
-    stack1 = foundHelper || depth0.currentUser;
+    foundHelper = helpers.current_user;
+    stack1 = foundHelper || depth0.current_user;
     stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};

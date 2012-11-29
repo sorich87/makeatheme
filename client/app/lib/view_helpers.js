@@ -1,7 +1,7 @@
 var app = require("application")
   , User = require("models/user");
 
-Handlebars.registerHelper("currentUser", function () {
+Handlebars.registerHelper("current_user", function () {
   if (app.currentUser.id) {
     return app.currentUser;
   }
