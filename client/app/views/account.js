@@ -5,7 +5,7 @@ var app = require("application"),
 
 module.exports = View.extend({
   template: "account",
-  model: app.currentUser,
+  model: _.clone(app.currentUser),
 
   events: {
     "submit form": "editUser",
@@ -23,7 +23,7 @@ module.exports = View.extend({
   },
 
   editUser: function (e) {
-    var attrs = {id: this.model.id};
+    var attrs = {};
 
     e.preventDefault();
 
@@ -33,13 +33,13 @@ module.exports = View.extend({
 
     this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
 
-    (new User()).save(attrs, {
+    this.model.save(attrs, {
       success: function (model, res) {
-        this.model.set(res);
+        app.currentUser.set(res);
 
         this.$("button[type=submit]").get(0).removeAttribute("disabled");
 
-        app.trigger("user:edit", this.model);
+        app.trigger("user:edit", app.currentUser);
         app.trigger("notification", "success", "Changes to your account have been saved.");
       }.bind(this)
 
