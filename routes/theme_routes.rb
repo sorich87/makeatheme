@@ -14,6 +14,8 @@ post '/themes' do
   new_theme.save
 
   if new_theme.save
+    Jobs::ThemeArchive.create(theme_id: new_theme.id)
+
     halt new_theme.to_json
   else
     halt 400, new_theme.errors.to_json
@@ -29,10 +31,12 @@ post '/themes/fork' do
 
   id = JSON.parse(request.body.read)['id']
 
-  fork = Theme.unscoped.find(id).fork(author: current_user)
-  fork.save
+  copy = Theme.unscoped.find(id).fork(author: current_user)
+  copy.save
 
-  halt fork.to_json
+  Jobs::ThemeArchive.create(theme_id: copy.id)
+
+  halt copy.to_json
 end
 
 get '/themes/:id/edit', provides: 'html' do
