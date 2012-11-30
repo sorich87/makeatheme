@@ -4,16 +4,20 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-post '/themes/new' do
+post '/themes' do
   protect!
 
   new_theme = Theme.new(
-    name: DateTime.now.strftime('%m/%d/%Y at %I:%M%p'),
+    name: JSON.parse(request.body.read)['name'],
     author: current_user
   )
   new_theme.save
 
-  halt new_theme.to_json
+  if new_theme.save
+    halt new_theme.to_json
+  else
+    halt 400, new_theme.errors.to_json
+  end
 end
 
 get '/themes/:id' do

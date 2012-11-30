@@ -5216,7 +5216,7 @@ window.require.define({"views/templates/themes": function(exports, require, modu
     var foundHelper, self=this;
 
 
-    return "<div id=\"new-theme\">\n  <button data-event=\"New Theme:type:from scratch\"\n    class=\"btn btn-primary btn-large\" data-bypass=\"true\">\n    Create a Theme from Scratch</button>\n</div>\n<h3 class=\"page-title\">Or copy a theme below</h3>\n";});
+    return "<h3 class=\"page-title\">Create a new theme from scratch</h3>\n<form id=\"new-theme\" class=\"form-inline\">\n  <input type=\"text\" class=\"input-medium\" name=\"theme_name\" placeholder=\"Theme Name\">\n  <button data-event=\"New Theme:type:from scratch\"\n    class=\"btn btn-primary\" data-bypass=\"true\">\n    Create Theme</button>\n</form>\n<h3 class=\"page-title\">Or copy a theme below</h3>\n";});
 }});
 
 window.require.define({"views/templates/user_themes": function(exports, require, module) {
@@ -5441,7 +5441,7 @@ window.require.define({"views/themes": function(exports, require, module) {
     collection: new Themes(app.data.themes),
 
     events: {
-      "click #new-theme button": "createTheme"
+      "submit #new-theme": "createTheme"
     },
 
     render: function () {
@@ -5455,19 +5455,22 @@ window.require.define({"views/themes": function(exports, require, module) {
     },
 
     createTheme: function (e) {
-      var element = e.currentTarget;
+      var data = {name: this.$("input[name=theme_name]").val()};
+      console.log(data);
+
+      e.preventDefault();
 
       // Set timeout so that button is disabled after all script are run
       // to avoid blocking event bubbling
       setTimeout(function () {
-        element.setAttribute("disabled", "true");
-        element.innerHTML = "Please wait...";
+        this.$("button").attr("disabled", "true").html("Please wait...");
       }, 0);
 
       $.ajax({
         type: "POST",
-        url: "/themes/new",
+        url: "/themes",
         contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(data),
         success: function (data) {
           var theme = JSON.parse(data);
 
@@ -5476,11 +5479,11 @@ window.require.define({"views/themes": function(exports, require, module) {
           Backbone.history.navigate("/themes/" + theme._id, true);
         },
         error: function () {
-          element.removeAttribute("disabled");
+          this.$("button").removeAttr("disabled").html("Create Theme");
 
           app.trigger("notification", "error", "Unable to create a theme. " +
                       "Please try again.");
-        }
+        }.bind(this)
       });
     }
   });

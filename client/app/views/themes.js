@@ -7,7 +7,7 @@ module.exports = View.extend({
   collection: new Themes(app.data.themes),
 
   events: {
-    "click #new-theme button": "createTheme"
+    "submit #new-theme": "createTheme"
   },
 
   render: function () {
@@ -21,19 +21,22 @@ module.exports = View.extend({
   },
 
   createTheme: function (e) {
-    var element = e.currentTarget;
+    var data = {name: this.$("input[name=theme_name]").val()};
+    console.log(data);
+
+    e.preventDefault();
 
     // Set timeout so that button is disabled after all script are run
     // to avoid blocking event bubbling
     setTimeout(function () {
-      element.setAttribute("disabled", "true");
-      element.innerHTML = "Please wait...";
+      this.$("button").attr("disabled", "true").html("Please wait...");
     }, 0);
 
     $.ajax({
       type: "POST",
-      url: "/themes/new",
+      url: "/themes",
       contentType: "application/json; charset=UTF-8",
+      data: JSON.stringify(data),
       success: function (data) {
         var theme = JSON.parse(data);
 
@@ -42,11 +45,11 @@ module.exports = View.extend({
         Backbone.history.navigate("/themes/" + theme._id, true);
       },
       error: function () {
-        element.removeAttribute("disabled");
+        this.$("button").removeAttr("disabled").html("Create Theme");
 
         app.trigger("notification", "error", "Unable to create a theme. " +
                     "Please try again.");
-      }
+      }.bind(this)
     });
   }
 });
