@@ -43,6 +43,12 @@ put '/users' do
   end
 end
 
+delete '/users' do
+  protect!
+
+  current_user.destroy
+end
+
 post '/users/reset_password' do
   params = JSON.parse(request.body.read, symbolize_names: true)
   user = User.where(:email => params[:email]).first

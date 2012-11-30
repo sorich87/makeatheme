@@ -4,12 +4,14 @@ var app = require("application"),
     User = require("models/user");
 
 module.exports = View.extend({
+  className: "row",
   template: "account",
   model: _.clone(app.currentUser),
 
   events: {
     "submit form": "editUser",
-    "change .error input": "clearError"
+    "change .error input": "clearError",
+    "click #delete-user": "deleteUser"
   },
 
   initialize: function () {
@@ -68,6 +70,26 @@ module.exports = View.extend({
     $(e.currentTarget).closest(".error")
       .removeClass("error")
       .find(".error-message").remove();
+  },
+
+  deleteUser: function () {
+    var message = "Are you sure you want to delete your account? " +
+      "All your data will be deleted and we won't be able to recover it.";
+
+    if (!window.confirm(message)) {
+      return;
+    }
+
+    this.model.destroy({
+      success: function (model) {
+        window.location = "/";
+      },
+
+      error: function (model) {
+        app.trigger("notification", "error", "Error. Unable to delete your " +
+                    "account. Please try again or contact us.");
+      }
+    });
   }
 });
 

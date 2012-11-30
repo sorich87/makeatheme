@@ -1974,12 +1974,14 @@ window.require.define({"views/account": function(exports, require, module) {
       User = require("models/user");
 
   module.exports = View.extend({
+    className: "row",
     template: "account",
     model: _.clone(app.currentUser),
 
     events: {
       "submit form": "editUser",
-      "change .error input": "clearError"
+      "change .error input": "clearError",
+      "click #delete-user": "deleteUser"
     },
 
     initialize: function () {
@@ -2038,6 +2040,26 @@ window.require.define({"views/account": function(exports, require, module) {
       $(e.currentTarget).closest(".error")
         .removeClass("error")
         .find(".error-message").remove();
+    },
+
+    deleteUser: function () {
+      var message = "Are you sure you want to delete your account? " +
+        "All your data will be deleted and we won't be able to recover it.";
+
+      if (!window.confirm(message)) {
+        return;
+      }
+
+      this.model.destroy({
+        success: function (model) {
+          window.location = "/";
+        },
+
+        error: function (model) {
+          app.trigger("notification", "error", "Error. Unable to delete your " +
+                      "account. Please try again or contact us.");
+        }
+      });
     }
   });
 
@@ -4036,7 +4058,7 @@ window.require.define({"views/templates/account": function(exports, require, mod
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<h1 class=\"page-header\">Account / Profile</h1>\n<form class=\"form-horizontal\">\n  <fieldset>\n    <legend>Name and Email</legend>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n      <div class=\"controls\">\n        <input type=\"text\" class=\"input-xlarge\" name=\"first_name\" value=\"";
+    buffer += "<h1 class=\"page-header\">Account / Profile</h1>\n<form class=\"form-horizontal span6\">\n  <fieldset>\n    <legend>Name and Email</legend>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n      <div class=\"controls\">\n        <input type=\"text\" class=\"input-xlarge\" name=\"first_name\" value=\"";
     foundHelper = helpers.first_name;
     stack1 = foundHelper || depth0.first_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -4051,7 +4073,7 @@ window.require.define({"views/templates/account": function(exports, require, mod
     stack1 = foundHelper || depth0.email;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "email", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">Current Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"current_password\">\n      </div>\n    </div>\n  </fieldset>\n\n  <fieldset>\n    <legend>Change Password <small>(leave the fields below blank if not changing password)</small></legend>\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">New Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n      </div>\n    </div>\n  </fieldset>\n\n  <div class=\"control-group\">\n    <div class=\"controls\">\n      <button type=\"submit\" class=\"btn btn-primary submit\">Save Changes</button>\n    </div>\n  </div>\n</form>\n";
+    buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">Current Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"current_password\">\n      </div>\n    </div>\n  </fieldset>\n\n  <fieldset>\n    <legend>Change Password <small>(leave the fields below blank if not changing)</small></legend>\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">New Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n      </div>\n    </div>\n  </fieldset>\n\n  <div class=\"control-group\">\n    <div class=\"controls\">\n      <button type=\"submit\" class=\"btn btn-primary submit\">Save Changes</button>\n    </div>\n  </div>\n</form>\n\n<div class=\"span6\">\n  <button id=\"delete-user\" class=\"btn btn-danger pull-right\">Delete Account</button>\n</div>\n";
     return buffer;});
 }});
 
