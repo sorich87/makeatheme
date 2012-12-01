@@ -111,7 +111,9 @@ module ThemeArchive
     end
 
     def asset_data(asset)
-      open(asset.file.url)
+      open(asset.file.url, 'rb') do |io|
+        return io.read
+      end
     end
 
     def compile_stylesheets(zipfile)
@@ -131,7 +133,9 @@ module ThemeArchive
     # Include screenshot file in archive
     def compile_screenshot(zipfile)
       zipfile.get_output_stream('screenshot.png') do |f|
-        f.puts open(@theme.screenshot.url(:thumb)).read if @theme.screenshot.file?
+        open(@theme.screenshot.url(:thumb), 'rb') do |io|
+          f.puts io.read if @theme.screenshot.file?
+        end
       end
     end
 
