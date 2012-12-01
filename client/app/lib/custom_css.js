@@ -58,16 +58,17 @@ CustomCSS.prototype.insertRule = function (rule, overwrite) {
 
   if (rule.index !== null && rule.index !== void 0) {
     index = rule.index;
-    this.deleteRule(index);
   } else if (overwrite) {
     index = this.getIndex(rule);
-    this.deleteRule(index);
   }
+  this.deleteRule(index);
   index = this.sheets[media].cssRules.length;
 
   declaration = rule.selector + " {" + rule.property + ": " + rule.value + "}";
 
-  this.sheets[media].insertRule(declaration, index);
+  try {
+    this.sheets[media].insertRule(declaration, index);
+  } catch(e) {}
 
   this.rules[media] = this.rules[media] || {};
   this.rules[media][index] = {
@@ -230,7 +231,9 @@ CustomCSS.prototype.deleteRule = function (index, media) {
 
   media = media || "all";
 
-  this.sheets[media].deleteRule(index);
+  try {
+    this.sheets[media].deleteRule(index);
+  } catch(e) {}
 
   delete this.rules[media][index];
 };
