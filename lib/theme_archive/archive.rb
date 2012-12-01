@@ -104,6 +104,16 @@ module ThemeArchive
           f.puts asset_data(asset)
         end
       end
+
+      @theme.external_assets.each do |asset_url|
+        filename = asset_url.split('/').last.strip
+        filename = "images/#{filename}"
+        zipfile.get_output_stream(filename) do |f|
+          open(asset_url, 'rb') do |io|
+            f.puts io.read
+          end
+        end
+      end
     end
 
     def asset_filename(asset)

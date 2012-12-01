@@ -85,7 +85,8 @@ class Theme
     super.collect do |rule|
       rule['value'].gsub!(/url\("?([^"?)]+)"?\)/) do
         asset_name = $1.split('/').last.strip
-        asset_url = self.assets.where(file_file_name: asset_name).first.file.url
+        asset = self.assets.where(file_file_name: asset_name).first
+        asset_url = if asset then asset.file.url else $1 end
         "url(\"#{asset_url}\")"
       end
       rule
@@ -112,13 +113,14 @@ class Theme
         string << "#{selector} {\n"
 
         declarations.each do |declaration|
+          value = declaration['value']
           if relativize_assets
-            declaration['value'].gsub!(/url\("?([^"?)]+)"?\)/) do
-              asset_name = $1.split('/').last.strip
+            value = value.gsub(/url\("?([^")]+)"?\)/) do
+              asset_name = $1.split('/').last.split('?').first.strip
               "url(\"images/#{asset_name}\")"
             end
           end
-          string << "\t#{declaration['property']}: #{declaration['value']};\n"
+          string << "\t#{declaration['property']}: #{value};\n"
         end
 
         string << "}\n";
@@ -127,6 +129,22 @@ class Theme
       string << '}' if media != "all"
     end
     string
+  end
+
+  def external_assets
+    files = []
+    self.style.collect do |rule|
+      rule['value'].scan(/url\("?([^")]+)"?\)/) do |url|
+        files << url.first unless self.assets_urls.include?(url.first)
+      end
+    end
+    files.flatten
+  end
+
+  def assets_urls
+    self.assets.all.map do |asset|
+      asset.file.url
+    end
   end
 
   def as_json(options={})
