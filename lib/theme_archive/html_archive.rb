@@ -77,7 +77,8 @@ module ThemeArchive
     end
 
     def compile_other_files(zipfile)
-      headers_dir = File.join(settings.root, 'public', 'images', 'headers', '*')
+      headers_dir = File.join(File.dirname(__FILE__), '..', '..',
+                              'public', 'images', 'headers', '*')
       Dir[headers_dir].each do |header_path|
         filename = File.basename(header_path)
 
