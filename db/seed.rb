@@ -18,10 +18,20 @@ Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
   ]
 
   attrs.each do |theme_attr|
-    theme = Theme.new_from_zip(theme_file, theme_attr)
+    new_theme = Theme.new_from_zip(theme_file, theme_attr)
 
-    old_theme = Theme.where(name: theme.name, author_id: author.id).first
-    theme[:_id] = old_theme._id unless old_theme.nil?
+    theme = Theme.where(name: new_theme.name, author_id: author.id).first
+    if theme.nil?
+      theme = new_theme
+    else
+      theme.write_attributes(new_theme.attributes)
+      new_theme.assets.each do |asset|
+        theme.assets << asset
+      end
+      theme.blocks = new_theme.blocks
+      theme.regions = new_theme.regions
+      theme.templates = new_theme.templates
+    end
 
     if theme.save
       Jobs::ThemeArchive.create(theme_id: theme.id)
