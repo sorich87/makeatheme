@@ -25,6 +25,8 @@ module ThemeImport
         theme.assets << static_file if static_file.valid?
       end
 
+      absolutize_css_urls(theme)
+
       theme
     end
 
@@ -32,6 +34,22 @@ module ThemeImport
       theme = new_from_zip(zip_file, attributes)
       theme.save
       theme
+    end
+
+    private
+
+    def absolutize_css_urls(theme)
+      theme[:style].collect do |rule|
+        rule[:value].gsub!(/url\("?([^"?)]+)"?\)/) do
+          asset_name = $1.split('/').last.strip
+          asset = theme.assets.select do |a|
+            a.file_file_name == asset_name
+          end.first
+          asset_url = if asset then asset.file.url else $1 end
+          "url(\"#{asset_url}\")"
+        end
+        rule
+      end
     end
   end
 
@@ -47,7 +65,6 @@ module ThemeImport
 
       Zip::ZipFile.foreach(zip_file) { |entry| parse_entry(entry) if entry.file? }
     end
-
 
     def parse_entry(zip_file)
       filename = File.basename(zip_file.to_s)

@@ -81,18 +81,6 @@ class Theme
     :content_type => { :content_type => 'application/zip' },
     :size => { :less_than => 1.megabyte }
 
-  def style
-    super.collect do |rule|
-      rule['value'].gsub!(/url\("?([^"?)]+)"?\)/) do
-        asset_name = $1.split('/').last.strip
-        asset = self.assets.where(file_file_name: asset_name).first
-        asset_url = if asset then asset.file.url else $1 end
-        "url(\"#{asset_url}\")"
-      end
-      rule
-    end
-  end
-
   # Get template content from name
   def template_content(name)
     templates.select { |t| t[:name] = name || 'index' }.first[:template]
