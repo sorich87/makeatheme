@@ -7,7 +7,8 @@ module.exports = View.extend({
   , model: app.currentUser
 
   , events: {
-    "submit form": "createUser"
+    "submit form": "createUser",
+    "change .error input": "clearError"
   }
 
   , initialize: function () {
@@ -55,5 +56,11 @@ module.exports = View.extend({
       var msg = Backbone.Validation.labelFormatters.sentenceCase(attr) + " " + msgs[attr][0];
       Backbone.Validation.callbacks.invalid(this, attr, msg, "name");
     }.bind(this));
+  },
+
+  clearError: function (e) {
+    $(e.currentTarget).closest(".error")
+      .removeClass("error")
+      .find(".error-message").remove();
   }
 });

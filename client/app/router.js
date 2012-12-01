@@ -6,6 +6,7 @@ module.exports = Backbone.Router.extend({
     , "themes": "themes"
     , "themes/:id": "theme"
     , "themes/:id/edit": "edit"
+    , "account": "account"
     , "login": "login"
     , "register": "register"
     , "reset_password": "reset_password"
@@ -54,6 +55,12 @@ module.exports = Backbone.Router.extend({
     }
 
     app.createView("editor").render();
+  }
+
+  , account: function () {
+    this.userOnly();
+
+    $("#main").empty().append(app.createView("account").render().$el);
   }
 
   , login: function () {

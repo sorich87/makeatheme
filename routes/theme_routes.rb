@@ -4,16 +4,22 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-post '/themes/new' do
+post '/themes' do
   protect!
 
   new_theme = Theme.new(
-    name: DateTime.now.strftime('%m/%d/%Y at %I:%M%p'),
+    name: JSON.parse(request.body.read)['name'],
     author: current_user
   )
   new_theme.save
 
-  halt new_theme.to_json
+  if new_theme.save
+    Jobs::ThemeArchive.create(theme_id: new_theme.id)
+
+    halt new_theme.to_json
+  else
+    halt 400, new_theme.errors.to_json
+  end
 end
 
 get '/themes/:id' do
@@ -25,10 +31,12 @@ post '/themes/fork' do
 
   id = JSON.parse(request.body.read)['id']
 
-  fork = Theme.unscoped.find(id).fork(author: current_user)
-  fork.save
+  copy = Theme.unscoped.find(id).fork(author: current_user)
+  copy.save
 
-  halt fork.to_json
+  Jobs::ThemeArchive.create(theme_id: copy.id)
+
+  halt copy.to_json
 end
 
 get '/themes/:id/edit', provides: 'html' do

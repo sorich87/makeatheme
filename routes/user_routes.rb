@@ -22,6 +22,33 @@ post '/users' do
   end
 end
 
+put '/users' do
+  params = JSON.parse(request.body.read, symbolize_names: true)
+  user = User.find(params[:id])
+
+  unless user.verify_password!(params[:current_password])
+    status 400
+    body({current_password: ["invalid"]}.to_json)
+    return
+  end
+
+  params.slice!(:first_name, :last_name, :email, :password)
+
+  if user.update_attributes(params)
+    status 202
+    body user.to_json
+  else
+    status 400
+    body user.errors.to_json
+  end
+end
+
+delete '/users' do
+  protect!
+
+  current_user.destroy
+end
+
 post '/users/reset_password' do
   params = JSON.parse(request.body.read, symbolize_names: true)
   user = User.where(:email => params[:email]).first

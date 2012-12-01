@@ -1,11 +1,20 @@
-{{#if currentUser}}
-  <ul class="nav">
+{{#if current_user}}
+  <ul class="nav pull-right">
     <li><a href="/" id="your_themes">Your themes</a></li>
     <li><a href="/themes" id="new_theme">New theme</a></li>
-    <li><button class="btn" id="logout">Log out</button></li>
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        {{first_name}} {{last_name}}
+        <b class="caret"></b>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="/account" id="account">Account</a></li>
+        <li><a href="#" id="logout">Log out</a></li>
+      </ul>
+    </li>
   </ul>
 {{else}}
-  <ul class="nav">
+  <ul class="nav pull-right">
     <li><a id="register" href="/register">Register</a></li>
     <li><a id="login" href="/login">Log in</a></li>
   </ul>

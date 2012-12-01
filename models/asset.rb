@@ -21,5 +21,5 @@ class Asset
 
   has_attached_file :file,
     fog_public: true, # For now
-    path: ':class/:id/:basename-:style.:extension'
+    path: ':class/:id/:filename'
 end

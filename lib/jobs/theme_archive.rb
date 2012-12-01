@@ -13,7 +13,7 @@ module Jobs
       return if theme.nil?
 
       theme_url = "http://#{settings.editor_domain}/themes/#{theme.id}/preview"
-      screenshot = open("http://#{settings.capture_domain}/?url=#{theme_url}")
+      screenshot = open("http://#{settings.capture_domain}/?url=#{theme_url}", 'rb')
 
       if screenshot
         def screenshot.original_filename; 'screenshot.png'; end
