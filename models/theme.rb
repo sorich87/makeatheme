@@ -1,11 +1,6 @@
 require 'paperclip'
 require 'fog'
-require 'theme_import'
-require 'theme_archive'
-require 'asset'
 require 'set'
-require 'region'
-require 'template'
 
 class Theme
   include Mongoid::Document

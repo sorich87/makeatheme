@@ -1,14 +1,10 @@
-require 'resque-lock-timeout'
-
 module Jobs
   class NewsletterSubscription
-    include Resque::Plugins::Status
-    extend Resque::Plugins::LockTimeout
+    include Sidekiq::Worker
+    include Sidekiq::Status::Worker
 
-    @queue = :newsletter_subscription
-
-    def perform
-      user = User.where(id: options['user_id']).first
+    def perform(user_id)
+      user = User.where(id: user_id).first
 
       gb = Gibbon.new
       gb.list_subscribe(
@@ -20,10 +16,6 @@ module Jobs
         },
         double_optin: false
       )
-    end
-
-    def self.redis_lock_key(uuid, options = {})
-      ['lock', name, options.to_s].compact.join(':')
     end
   end
 end

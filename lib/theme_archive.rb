@@ -1,5 +1,5 @@
-require 'theme_archive/wp_archive'
-require 'theme_archive/html_archive'
+require_relative 'theme_archive/wp_archive'
+require_relative 'theme_archive/html_archive'
 
 module ThemeArchive
 

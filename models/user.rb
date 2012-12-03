@@ -88,6 +88,6 @@ class User
   end
 
   def subscribe_to_newsletter
-    Jobs::NewsletterSubscription.create(user_id: self.id)
+    Jobs::NewsletterSubscription.perform_async(self.id)
   end
 end
