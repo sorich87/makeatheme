@@ -1,12 +1,11 @@
 require './app'
-require 'resque/server'
-require 'resque/status_server'
+require 'sidekiq/web'
 
 # Protect Resque
-Resque::Server.use Rack::Auth::Basic do |username, password|
-  password == ENV['RESQUE_AUTH']
-end if ENV['RESQUE_AUTH']
+Sidekiq::Web.use Rack::Auth::Basic do |username, password|
+  password == ENV['SIDEKIQ_AUTH']
+end if ENV['SIDEKIQ_AUTH']
 
 run Rack::URLMap.new \
   "/"       => Sinatra::Application,
-  "/resque" => Resque::Server.new
+  "/sidekiq" => Sidekiq::Web.new

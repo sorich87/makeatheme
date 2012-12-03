@@ -1,15 +1,12 @@
-require 'resque-lock-timeout'
 require 'open-uri'
 
 module Jobs
   class ThemeArchive
-    include Resque::Plugins::Status
-    extend Resque::Plugins::LockTimeout
+    include Sidekiq::Worker
+    include Sidekiq::Status::Worker
 
-    @queue = :theme_archive
-
-    def perform
-      theme = Theme.unscoped.where(id: options['theme_id']).first
+    def perform(theme_id)
+      theme = Theme.unscoped.where(id: theme_id).first
       return if theme.nil?
 
       theme_url = "http://#{settings.editor_domain}/themes/#{theme.id}/preview"
@@ -21,17 +18,7 @@ module Jobs
         theme.screenshot = screenshot
         theme.save
         theme.generate_archive!
-
-        completed theme.to_json
-      else
-        # TODO: Add error to log
-        # How to get some useful info form phantomjs?
-        failed
       end
-    end
-
-    def self.redis_lock_key(uuid, options = {})
-      ['lock', name, options.to_s].compact.join(':')
     end
   end
 end

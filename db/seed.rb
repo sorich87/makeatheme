@@ -34,7 +34,7 @@ Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
     end
 
     if theme.save
-      Jobs::ThemeArchive.create(theme_id: theme.id)
+      Jobs::ThemeArchive.perform_async(theme.id)
     else
       puts "Errors...:"
       theme.errors.each do |key, fault|

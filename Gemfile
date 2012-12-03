@@ -14,9 +14,10 @@ gem "rubyzip", "~> 0.9.9"
 gem "pony", "~> 1.4"
 gem 'nokogiri', '~> 1.5.0'
 gem 'liquid'
-gem 'resque', '~> 1.22.0'
-gem 'resque-status', '~> 0.3.3'
-gem 'resque-lock-timeout', '~> 0.3.3'
+gem 'sidekiq'
+gem 'sidekiq-status'
+gem 'kiqstand'
+gem 'slim'
 gem 'sass', '~> 3.2.1'
 gem 'gibbon'
 

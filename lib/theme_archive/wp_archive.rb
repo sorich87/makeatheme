@@ -1,4 +1,4 @@
-require 'theme_archive/archive'
+require_relative 'archive'
 
 module ThemeArchive
 
