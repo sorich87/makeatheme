@@ -14,7 +14,7 @@ post '/themes' do
   new_theme.save
 
   if new_theme.save
-    Jobs::ThemeArchive.create(theme_id: new_theme.id)
+    Jobs::ThemeArchive.perform_async(new_theme.id)
 
     halt new_theme.to_json
   else
@@ -34,7 +34,7 @@ post '/themes/fork' do
   copy = Theme.unscoped.find(id).fork(author: current_user)
   copy.save
 
-  Jobs::ThemeArchive.create(theme_id: copy.id)
+  Jobs::ThemeArchive.perform_async(copy.id)
 
   halt copy.to_json
 end

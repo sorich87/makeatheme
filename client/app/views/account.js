@@ -1,3 +1,5 @@
+// User account edit and delete.
+
 var app = require("application"),
     View = require("views/base/view"),
     template = require("views/templates/account"),
