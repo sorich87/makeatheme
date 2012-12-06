@@ -343,6 +343,8 @@ window.require.define({"initialize": function(exports, require, module) {
 }});
 
 window.require.define({"lib/css_properties": function(exports, require, module) {
+  // List of all CSS properties
+  // Used for autocomplete
   module.exports = [
     "align-content",
     "align-items",
@@ -678,8 +680,6 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
   /**
    * Create a stylesheet for the media type passed as argument.
-   *
-   * Create empty hash in values and indexes as well.
    */
   CustomCSS.prototype.createSheet = function (media) {
     var node = document.createElement("style");
@@ -801,9 +801,11 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
       mediaDeclarations = {};
 
+      // Group rules by selector.
       for (index in this.rules[media]) {
         rule = this.rules[media][index];
 
+        // Strip pseudo-elements and pseudo-classes from selector.
         selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*(\w|\))/g, "").trim();
 
         if (selectorWithoutPseudo === "") {
@@ -833,6 +835,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
       allDeclarations[media] = [];
 
+      // Put rules in an array.
       for (i in mediaDeclarations) {
         if (!mediaDeclarations.hasOwnProperty(i)) {
           continue;
@@ -843,6 +846,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
         allDeclarations[media][l] = mediaDeclarations[i];
       }
 
+      // Sort rules by specificity.
       allDeclarations[media].reverse().sort(sortBySpecificity);
     }
 
@@ -850,7 +854,7 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
   };
 
   /**
-   * Get rules in the format used on the server
+   * Get all rules in an array.
    */
   CustomCSS.prototype.getRules = function () {
     var media, index, selector, property, value
@@ -965,6 +969,9 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 }});
 
 window.require.define({"lib/editor_data": function(exports, require, module) {
+  // Return all data for a theme.
+  // Save temporarily in sessionStorage.
+
   var data
     , app = require("application")
     , Templates = require("collections/templates")
@@ -1014,6 +1021,8 @@ window.require.define({"lib/editor_data": function(exports, require, module) {
 }});
 
 window.require.define({"lib/html_tags": function(exports, require, module) {
+  // HTML tags list.
+
   module.exports = [
     {
         group: "Headings"
@@ -1365,7 +1374,8 @@ window.require.define({"lib/html_tags": function(exports, require, module) {
 }});
 
 window.require.define({"lib/matches_selector": function(exports, require, module) {
-  
+  // Cross-browser way to check if a selector matches an element.
+
   /**
    * Element prototype.
    */
@@ -1413,6 +1423,8 @@ window.require.define({"lib/matches_selector": function(exports, require, module
 }});
 
 window.require.define({"lib/mixpanel": function(exports, require, module) {
+  // Mixpanel tracking.
+  // If debug is enabled, log data to console instead of sending to Mixpanel.
   var debug
     , app = require("application");
 
@@ -1526,6 +1538,8 @@ window.require.define({"lib/mixpanel": function(exports, require, module) {
 }});
 
 window.require.define({"lib/mutations": function(exports, require, module) {
+  // Copy changes from the template build.
+
   var app = require("application");
 
   module.exports = {
@@ -1761,6 +1775,7 @@ window.require.define({"models/template": function(exports, require, module) {
       this.set("regions", regions);
     }
 
+    // Standard WordPress templates.
     , standards: [
         {
           name: "index"
@@ -1971,6 +1986,8 @@ window.require.define({"router": function(exports, require, module) {
 }});
 
 window.require.define({"views/account": function(exports, require, module) {
+  // User account edit and delete.
+
   var app = require("application"),
       View = require("views/base/view"),
       template = require("views/templates/account"),
@@ -2070,6 +2087,8 @@ window.require.define({"views/account": function(exports, require, module) {
 }});
 
 window.require.define({"views/advanced_style_edit": function(exports, require, module) {
+  // CSS style edit.
+
   var View = require("views/base/view")
     , declaration_template = require("views/templates/declaration")
     , rule_template = require("views/templates/rule")
@@ -2110,6 +2129,7 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
 
       this.$el.empty().append(html);
 
+      // Overline low specificity rules.
       this.markNonAppliedRules();
 
       return this;

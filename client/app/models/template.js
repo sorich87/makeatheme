@@ -33,6 +33,7 @@ module.exports = Model.extend({
     this.set("regions", regions);
   }
 
+  // Standard WordPress templates.
   , standards: [
       {
         name: "index"

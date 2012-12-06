@@ -1,3 +1,5 @@
+// CSS style edit.
+
 var View = require("views/base/view")
   , declaration_template = require("views/templates/declaration")
   , rule_template = require("views/templates/rule")
@@ -38,6 +40,7 @@ module.exports = View.extend({
 
     this.$el.empty().append(html);
 
+    // Overline low specificity rules.
     this.markNonAppliedRules();
 
     return this;

@@ -15,8 +15,6 @@ var CustomCSS = function (rules) {
 
 /**
  * Create a stylesheet for the media type passed as argument.
- *
- * Create empty hash in values and indexes as well.
  */
 CustomCSS.prototype.createSheet = function (media) {
   var node = document.createElement("style");
@@ -138,9 +136,11 @@ CustomCSS.prototype.getDeclarations = function (element) {
 
     mediaDeclarations = {};
 
+    // Group rules by selector.
     for (index in this.rules[media]) {
       rule = this.rules[media][index];
 
+      // Strip pseudo-elements and pseudo-classes from selector.
       selectorWithoutPseudo = rule.selector.replace(/:[^,\s]*(\w|\))/g, "").trim();
 
       if (selectorWithoutPseudo === "") {
@@ -170,6 +170,7 @@ CustomCSS.prototype.getDeclarations = function (element) {
 
     allDeclarations[media] = [];
 
+    // Put rules in an array.
     for (i in mediaDeclarations) {
       if (!mediaDeclarations.hasOwnProperty(i)) {
         continue;
@@ -180,6 +181,7 @@ CustomCSS.prototype.getDeclarations = function (element) {
       allDeclarations[media][l] = mediaDeclarations[i];
     }
 
+    // Sort rules by specificity.
     allDeclarations[media].reverse().sort(sortBySpecificity);
   }
 
@@ -187,7 +189,7 @@ CustomCSS.prototype.getDeclarations = function (element) {
 };
 
 /**
- * Get rules in the format used on the server
+ * Get all rules in an array.
  */
 CustomCSS.prototype.getRules = function () {
   var media, index, selector, property, value

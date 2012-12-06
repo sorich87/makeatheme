@@ -1,3 +1,5 @@
+// List of all CSS properties
+// Used for autocomplete
 module.exports = [
   "align-content",
   "align-items",

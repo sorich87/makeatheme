@@ -1,3 +1,5 @@
+// Mixpanel tracking.
+// If debug is enabled, log data to console instead of sending to Mixpanel.
 var debug
   , app = require("application");
 

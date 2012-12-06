@@ -1,3 +1,5 @@
+// Copy changes from the template build.
+
 var app = require("application");
 
 module.exports = {

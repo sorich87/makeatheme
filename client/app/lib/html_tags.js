@@ -1,3 +1,5 @@
+// HTML tags list.
+
 module.exports = [
   {
       group: "Headings"

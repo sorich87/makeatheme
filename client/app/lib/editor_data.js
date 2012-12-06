@@ -1,3 +1,6 @@
+// Return all data for a theme.
+// Save temporarily in sessionStorage.
+
 var data
   , app = require("application")
   , Templates = require("collections/templates")

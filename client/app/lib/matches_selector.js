@@ -1,3 +1,4 @@
+// Cross-browser way to check if a selector matches an element.
 
 /**
  * Element prototype.
