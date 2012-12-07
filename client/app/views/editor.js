@@ -3,8 +3,7 @@ var app = require("application")
   , data = require("lib/editor_data")
   , mutations = require("lib/mutations")
   , theme_meta = require("views/templates/theme_meta")
-  , accordion_group = require("views/templates/accordion_group")
-  , copy_button = require("views/templates/copy_button");
+  , accordion_group = require("views/templates/accordion_group");
 
 module.exports = View.extend({
   id: "layout-editor"
