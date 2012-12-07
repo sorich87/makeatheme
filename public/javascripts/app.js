@@ -3329,6 +3329,7 @@ window.require.define({"views/preview_actions": function(exports, require, modul
         },
         error: function () {
           element.removeAttribute("disabled");
+          element.innerHTML = "Copy Theme";
 
           app.trigger("notification", "error", "Error. Unable to copy theme. " +
                       "Please reload the page and try again.");
