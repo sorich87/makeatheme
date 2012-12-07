@@ -38,7 +38,7 @@ module ThemeArchive
 
     # Register block tags
     def register_tags
-      block_names = %w(site_title header_image navigation search_form article sidebar)
+      block_names = %w(site_title header_image navigation search_form article sidebar credits)
       block_names.map do |name, template|
         Liquid::Template.register_tag(name, @tags_class)
       end

@@ -138,7 +138,11 @@ Nunc iaculis suscipit dui.</p></pre>
   </div><!-- .entry-content -->
 </article>),
 
-      sidebar: %q({{widget_search}}{{widget_text}})
+      sidebar: %q({{widget_search}}{{widget_text}}),
+
+      credits: %q(<a href="http://www.makeatheme.com/"
+title="Responsive HTML5 and WordPress themes editor" rel="generator">
+Built with Make A Theme</a>)
     }
 
     TEMPLATES = {
