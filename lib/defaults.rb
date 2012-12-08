@@ -68,8 +68,8 @@ Nunc iaculis suscipit dui.</p></pre>
 
     BLOCKS = {
       site_title: %q(<hgroup>
-  <h1 id="site-title"><a href="{{home_url}}" title="{{site_title}}" rel="home">{{site_title}}</a></h1>
-  <h2 id="site-description">{{site_description}}</h2>
+  <h1 class="site-title"><a href="{{home_url}}" title="{{site_title}}" rel="home">{{site_title}}</a></h1>
+  <h2 class="site-description">{{site_description}}</h2>
 </hgroup>),
 
       header_image: %q(<a href="{{site_url}}">
@@ -138,7 +138,11 @@ Nunc iaculis suscipit dui.</p></pre>
   </div><!-- .entry-content -->
 </article>),
 
-      sidebar: %q({{widget_search}}{{widget_text}})
+      sidebar: %q({{widget_search}}{{widget_text}}),
+
+      credits: %q(<a href="http://www.makeatheme.com/"
+title="Responsive HTML5 and WordPress themes editor" rel="generator">
+Built with Make A Theme</a>)
     }
 
     TEMPLATES = {
@@ -268,7 +272,8 @@ navigation bar to go back to the list of themes.</p>
     }
 
     BLOCKS = {
-      article: %q(<?php if ( have_posts() ) : ?>
+      article: %q(
+<?php if ( have_posts() ) : ?>
 <?php _s_content_nav( 'nav-above' ); ?>
 
 <?php /* Start the Loop */ ?>
@@ -290,9 +295,11 @@ navigation bar to go back to the list of themes.</p>
 
 <?php get_template_part( 'no-results', 'index' ); ?>
 
-<?php endif; ?>),
+<?php endif; ?>
+),
 
-      "article-single" => %q(<?php while ( have_posts() ) : the_post(); ?>
+      "article-single" => %q(
+<?php while ( have_posts() ) : the_post(); ?>
 
   <?php _s_content_nav( 'nav-above' ); ?>
 
@@ -306,17 +313,21 @@ navigation bar to go back to the list of themes.</p>
       comments_template( '', true );
   ?>
 
-<?php endwhile; // end of the loop. ?>),
+<?php endwhile; // end of the loop. ?>
+),
 
-      "article-page" => %q(<?php while ( have_posts() ) : the_post(); ?>
+      "article-page" => %q(
+<?php while ( have_posts() ) : the_post(); ?>
 
   <?php get_template_part( 'content', 'page' ); ?>
 
   <?php comments_template( '', true ); ?>
 
-<?php endwhile; // end of the loop. ?>),
+<?php endwhile; // end of the loop. ?>
+),
 
-      article: %q(<?php if ( have_posts() ) : ?>
+      article: %q(
+<?php if ( have_posts() ) : ?>
 
   <?php _s_content_nav( 'nav-above' ); ?>
 
@@ -333,23 +344,30 @@ navigation bar to go back to the list of themes.</p>
 
   <?php get_template_part( 'no-results' ); ?>
 
-<?php endif; ?>),
+<?php endif; ?>
+),
 
       search_form: "<?php get_search_form(); ?>",
 
-      site_title: %q(<hgroup>
+      site_title: %q(
+<hgroup>
   <h1 class="site-title"><a href="<?php echo home_url( '/' ); ?>" title="<?php echo esc_attr( get_bloginfo( 'name', 'display' ) ); ?>" rel="home"><?php bloginfo( 'name' ); ?></a></h1>
   <h2 class="site-description"><?php bloginfo( 'description' ); ?></h2>
-</hgroup>),
+</hgroup>
+),
 
-      header_image: %q(<?php $header_image = get_header_image();
+      header_image: %q(
+<?php $header_image = get_header_image();
 if ( ! empty( $header_image ) ) : ?>
   <img src="<?php echo esc_url( $header_image ); ?>" class="header-image" width="<?php echo get_custom_header()->width; ?>" height="<?php echo get_custom_header()->height; ?>" alt="" />
-<?php endif; ?>),
+<?php endif; ?>
+),
 
-      navigation: %q(<nav role="navigation">
+      navigation: %q(
+<nav role="navigation">
   <?php wp_nav_menu( array( 'theme_location' => '<%= block.label.underscore %>' ) ); ?>
-</nav>),
+</nav>
+),
 
       sidebar: "<?php get_sidebar(<% unless block.label == 'Default' %> '<%= block.label.underscore %>' <% end %>); ?>"
     }

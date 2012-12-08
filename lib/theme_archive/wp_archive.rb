@@ -14,7 +14,7 @@ module ThemeArchive
     protected
 
     def region_data(region)
-      template = region[:template]
+      template = beautify(region[:template], 'html')
 
       if 'header' == region[:name]
         template = Defaults::PHP::REGIONS[:header] + template
@@ -24,8 +24,7 @@ module ThemeArchive
         template = template + Defaults::PHP::REGIONS[:footer]
       end
 
-      data = render_template(template, @locals)
-      beautify(data, 'html')
+      render_template(template, @locals)
     end
 
     def region_filename(region)
@@ -48,7 +47,8 @@ module ThemeArchive
         header = "<?php\n/**\n * Template Name: #{template.name}\n */\n?>\n" + header
       end
 
-      data = beautify(render_template(template[:template], @locals), 'html')
+      template = beautify(template[:template], 'html')
+      data = render_template(template, @locals)
       header + data + footer
     end
 
@@ -86,7 +86,7 @@ module ThemeArchive
       data = render_template(Defaults::PHP::SIDEBAR, {
         block_slug: sidebar.label.underscore
       })
-      beautify(data, 'html')
+      data
     end
 
     def stylesheet_data(style)
