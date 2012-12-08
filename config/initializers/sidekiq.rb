@@ -23,4 +23,12 @@ if defined?(PhusionPassenger)
       end
     end if forked
   end
+else
+  Sidekiq.configure_client do |config|
+    config.redis = {url: redis_url}
+
+    config.client_middleware do |chain|
+      chain.add Sidekiq::Status::ClientMiddleware
+    end
+  end
 end
