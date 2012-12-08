@@ -1,5 +1,3 @@
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__)))
-
 require 'sinatra'
 require "sinatra/reloader" if development?
 require 'sinatra/session'
@@ -18,10 +16,12 @@ require 'sidekiq'
 require 'kiqstand'
 require 'sidekiq-status'
 
-Mongoid.load!("config/mongoid.yml")
+$LOAD_PATH.unshift(settings.root)
+
+Mongoid.load!(File.join('config', 'mongoid.yml'))
 
 # Load initializers
-Dir["config/initializers/*.rb"].each {|file| require_relative file }
+Dir["config/initializers/*.rb"].each {|file| require file}
 
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
@@ -34,19 +34,19 @@ mime_type :woff, 'font/woff'
 mime_type :eot, 'application/vnd.ms-fontobject'
 mime_type :svg, 'image/svg+xml'
 
-require_relative "config/environments/#{settings.environment}"
+require File.join('config', 'environments', settings.environment.to_s)
 
 # Libs
-Dir["lib/*.rb"].each {|file| require_relative file }
+Dir["lib/*.rb"].each {|file| require file}
 
 # Load jobs
-Dir["lib/jobs/*.rb"].each {|file| require_relative file }
+Dir["lib/jobs/*.rb"].each {|file| require file}
 
 # Models
-Dir["models/*.rb"].each {|file| require_relative file}
+Dir["models/*.rb"].each {|file| require file}
 
 # Helpers
-Dir["helpers/*.rb"].each {|file| require_relative file}
+Dir["helpers/*.rb"].each {|file| require file}
 
 # Register helper classes
 helpers ApplicationHelper, SessionHelper, ThemeHelper
@@ -54,4 +54,4 @@ helpers ApplicationHelper, SessionHelper, ThemeHelper
 respond_to :html, :json
 
 # Routes
-Dir["routes/*.rb"].each {|file| require_relative file}
+Dir["routes/*.rb"].each {|file| require file}
