@@ -68,8 +68,8 @@ Nunc iaculis suscipit dui.</p></pre>
 
     BLOCKS = {
       site_title: %q(<hgroup>
-  <h1 id="site-title"><a href="{{home_url}}" title="{{site_title}}" rel="home">{{site_title}}</a></h1>
-  <h2 id="site-description">{{site_description}}</h2>
+  <h1 class="site-title"><a href="{{home_url}}" title="{{site_title}}" rel="home">{{site_title}}</a></h1>
+  <h2 class="site-description">{{site_description}}</h2>
 </hgroup>),
 
       header_image: %q(<a href="{{site_url}}">
