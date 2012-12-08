@@ -17,8 +17,10 @@ Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
     theme = new_theme
   else
     theme.write_attributes(new_theme.attributes)
+    theme.asset_ids = []
     new_theme.assets.each do |asset|
-      theme.assets << asset
+      theme.asset_ids << asset.id
+      asset.save
     end
     theme.blocks = new_theme.blocks
     theme.regions = new_theme.regions
