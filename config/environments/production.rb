@@ -1,4 +1,3 @@
-set :app_file, File.join(ENV['EB_CONFIG_APP_CURRENT'], 'app.rb')
 set :editor_domain, 'editor.makeatheme.com'
 set :capture_domain, 'capture.makeatheme.com'
 
