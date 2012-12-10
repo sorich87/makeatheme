@@ -15,6 +15,7 @@ require 'gibbon'
 require 'sidekiq'
 require 'kiqstand'
 require 'sidekiq-status'
+require 'ratchetio'
 
 $LOAD_PATH.unshift(settings.root)
 

@@ -44,7 +44,7 @@ module.exports = View.extend({
           app.trigger("logout");
 
           setTimeout(function () {
-            window.location = "/";
+            window.location = "/login";
           });
         }
       }.bind(this)
