@@ -20,6 +20,7 @@ gem 'kiqstand'
 gem 'slim'
 gem 'sass', '~> 3.2.1'
 gem 'gibbon'
+gem 'ratchetio'
 
 group :test, :development do
   gem 'rspec', '~> 2.11.0'
