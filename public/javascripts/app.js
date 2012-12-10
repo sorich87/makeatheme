@@ -2274,7 +2274,7 @@ window.require.define({"views/auth_links": function(exports, require, module) {
             app.trigger("logout");
 
             setTimeout(function () {
-              window.location = "/";
+              window.location = "/login";
             });
           }
         }.bind(this)
