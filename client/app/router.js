@@ -15,16 +15,14 @@ module.exports = Backbone.Router.extend({
 
   , themes: function () {
     this.userOnly();
-
-    $("#main").empty()
-      .append(app.createView("themes").render().$el);
+    this.view = app.createView("themes");
+    this.render();
   }
 
   , user_themes: function () {
     this.userOnly();
-
-    $("#main").empty()
-      .append(app.createView("user_themes").render().$el);
+    this.view = app.createView("user_themes");
+    this.render();
   }
 
   , theme: function (id) {
@@ -59,31 +57,31 @@ module.exports = Backbone.Router.extend({
 
   , account: function () {
     this.userOnly();
-
-    $("#main").empty().append(app.createView("account").render().$el);
+    this.view = app.createView("account");
+    this.render();
   }
 
   , login: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("login").render().$el);
+    this.view = app.createView("login");
+    this.render();
   }
 
   , register: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("register").render().$el);
+    this.view = app.createView("register");
+    this.render();
   }
 
   , reset_password: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("password_reset").render().$el);
+    this.view = app.createView("password_reset");
+    this.render();
   }
 
   , notFound: function (action) {
-    $("#main").empty()
-      .append(app.reuseView("not_found").render().$el);
+    this.view = app.createView("not_found");
+    this.render();
   }
 
   , userOnly: function () {
@@ -98,5 +96,15 @@ module.exports = Backbone.Router.extend({
       document.location = "/";
       return true;
     }
+  }
+
+  , render: function () {
+    if (this._currentView) {
+      this._currentView.teardown();
+    }
+
+    this._currentView = this.view;
+
+    $("#main").empty().append(this.view.render().$el);
   }
 });
