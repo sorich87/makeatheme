@@ -20,6 +20,10 @@ module.exports = View.extend({
     Backbone.Validation.bind(this);
   },
 
+  teardown: function () {
+    Backbone.Validation.unbind(this);
+  },
+
   render: function () {
     this.$el.empty().append(template(this.model.toJSON()));
 
