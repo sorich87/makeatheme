@@ -6587,9 +6587,6 @@ body {
   z-index: 99999;
   width: 300px;
 }
-.navbar .container {
-  width: auto;
-}
 /* Theme page */
 body.theme {
   padding-top: 40px;
@@ -6600,6 +6597,9 @@ body.theme #main {
   padding: 0;
   margin: 0;
   width: 100%;
+}
+body.theme .navbar .container {
+  width: auto;
 }
 #canvas {
   overflow: auto;
