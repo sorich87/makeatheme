@@ -5304,7 +5304,6 @@ window.require.define({"views/templates_select": function(exports, require, modu
 
 window.require.define({"views/theme": function(exports, require, module) {
   var View = require("views/base/view")
-    , application = require("application")
     , cssProperties = require("lib/css_properties")
     , template = require("views/templates/theme");
 

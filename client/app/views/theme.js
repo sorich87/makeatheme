@@ -1,5 +1,4 @@
 var View = require("views/base/view")
-  , application = require("application")
   , cssProperties = require("lib/css_properties")
   , template = require("views/templates/theme");
 
