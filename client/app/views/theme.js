@@ -31,6 +31,6 @@ module.exports = View.extend({
 
   , resize: function () {
     this.$("#canvas").width($(window).width() - 250)
-      .height($(window).height() - 60);
+      .height($(window).height() - 40);
   }
 });

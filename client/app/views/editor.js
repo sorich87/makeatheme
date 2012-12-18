@@ -52,7 +52,7 @@ module.exports = View.extend({
   }
 
   , resize: function () {
-    this.$el.height($(window.top).height() - 60);
+    this.$el.height($(window.top).height() - 40);
   }
 
   // Prevent click, drag and submit on links, images and forms

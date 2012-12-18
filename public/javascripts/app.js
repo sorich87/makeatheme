@@ -2745,7 +2745,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$el.height($(window.top).height() - 60);
+      this.$el.height($(window.top).height() - 40);
     }
 
     // Prevent click, drag and submit on links, images and forms
@@ -4108,7 +4108,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <ul class=\"nav pull-right\">\n    <li><a href=\"/\" id=\"your_themes\">Your themes</a></li>\n    <li><a href=\"/themes\" id=\"new_theme\">New theme</a></li>\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        ";
+    buffer += "\n  <ul class=\"nav pull-right\">\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        ";
     foundHelper = helpers.first_name;
     stack1 = foundHelper || depth0.first_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -4118,7 +4118,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = foundHelper || depth0.last_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "last_name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\">Account</a></li>\n        <li><a href=\"#\" id=\"logout\">Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
+    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\">Account</a></li>\n        <li><a href=\"//support.makeatheme.com\" id=\"support\">Help & Feedback</a></li>\n        <li><a href=\"#\" id=\"logout\">Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
     return buffer;}
 
   function program3(depth0,data) {
@@ -5336,7 +5336,7 @@ window.require.define({"views/theme": function(exports, require, module) {
 
     , resize: function () {
       this.$("#canvas").width($(window).width() - 250)
-        .height($(window).height() - 60);
+        .height($(window).height() - 40);
     }
   });
   

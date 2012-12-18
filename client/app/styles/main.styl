@@ -93,8 +93,8 @@ yellowLight =         #ffffe0
 }
 
 body {
-  padding-top: 60px;
-  padding-bottom: 60px;
+  padding-top: 40px;
+  padding-bottom: 40px;
   line-height: 1.6em;
 }
 [contenteditable=true]:hover,
@@ -127,7 +127,7 @@ body {
 /* Notification */
 #notifications {
   right: 15px;
-  top: 75px;
+  top: 55px;
   position: fixed;
   z-index: 99999;
   width: 300px;
@@ -135,14 +135,19 @@ body {
 
 /* Theme page */
 body.theme {
-  padding-top: 60px;
+  padding-top: 40px;
   padding-bottom: 0;
   overflow: hidden;
-}
-body.theme #main {
-  padding: 0;
-  margin: 0;
-  width: 100%;
+
+  #main {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
+
+  .navbar .container {
+    width: auto;
+  }
 }
 #canvas {
   overflow: auto;
