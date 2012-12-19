@@ -23,10 +23,14 @@ module.exports = View.extend({
   },
 
   createTheme: function (e) {
-    var data = {name: this.$("input[name=theme_name]").val()};
-    console.log(data);
+    var data = {name: this.$("input[name=theme_name]").val().trim()};
 
     e.preventDefault();
+
+    if (!data.name) {
+      app.trigger("notification", "error", "Please fill in the theme name");
+      return;
+    }
 
     // Set timeout so that button is disabled after all script are run
     // to avoid blocking event bubbling
