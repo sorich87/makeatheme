@@ -6598,9 +6598,6 @@ body.theme #main {
   margin: 0;
   width: 100%;
 }
-body.theme .navbar .container {
-  width: auto;
-}
 #canvas {
   overflow: auto;
   float: left;
