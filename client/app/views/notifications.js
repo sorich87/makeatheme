@@ -11,12 +11,8 @@ module.exports = View.extend({
   , id: "notifications"
   , className: "unstyled"
 
-  , initialize: function () {
-    app.on("notification", this.showNotification, this);
-  }
-
-  , teardown: function () {
-    app.off("notification", this.showNotification, this);
+  , appEvents: {
+    "notification": "showNotification"
   }
 
   , showNotification: function (type, text) {

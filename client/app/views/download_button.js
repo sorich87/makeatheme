@@ -9,12 +9,8 @@ module.exports = View.extend({
     "click button.x-login": "login"
   }
 
-  , initialize: function () {
-    app.on("save:after", this.waitForArchive, this);
-  }
-
-  , teardown: function () {
-    app.off("save:after", this.waitForArchive, this);
+  , appEvents: {
+    "save:after": "waitForArchive"
   }
 
   , render: function () {

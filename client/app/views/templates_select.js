@@ -15,6 +15,8 @@ module.exports = View.extend({
     $("#page").fadeOut().empty()
       .append(template.get("full"))
       .fadeIn();
+
+    View.prototype.initialize.call(this);
   }
 
   , data: {

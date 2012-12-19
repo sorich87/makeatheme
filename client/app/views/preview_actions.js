@@ -13,8 +13,12 @@ module.exports = View.extend({
   }
 
   , render: function () {
+    var templatesSelectView = app.createView("templates_select");
+
+    this.subViews.push(templatesSelectView);
+
     this.$el.empty()
-      .append(app.createView("templates_select").render().$el)
+      .append(templatesSelectView.render().$el)
       .append(copy_button({theme_id: app.data.theme._id}));
 
     return this;

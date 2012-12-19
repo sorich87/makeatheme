@@ -18,28 +18,37 @@ module.exports = View.extend({
     });
 
     $(window).on("resize", this.resize.bind(this));
+
+    View.prototype.initialize.call(this);
   }
 
   , teardown: function () {
     $(window).off("resize", this.resize.bind(this));
+
+    View.prototype.teardown.call(this);
   }
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    var actions_view;
-
-    this.$el.empty()
-      .append(app.createView("editor_toggle").render().$el)
-      .append(app.createView("device_switch").render().$el)
-      .append(app.createView("theme_meta").render().$el);
+    var editorToggleView = app.createView("editor_toggle"),
+        deviceSwitchView = app.createView("device_switch"),
+        themeMetaView = app.createView("theme_meta"),
+        actionsView;
 
     if (app.data.theme.author_id === app.currentUser.id) {
-      actions_view = "edit_actions";
+      actionsView = app.createView("edit_actions");
     } else {
-      actions_view = "preview_actions";
+      actionsView = app.createView("preview_actions");
     }
 
-    this.$el.append(app.createView(actions_view).render().$el);
+    this.subViews.push(editorToggleView, deviceSwitchView, themeMetaView,
+                  actionsView);
+
+    this.$el.empty()
+      .append(editorToggleView.render().$el)
+      .append(deviceSwitchView.render().$el)
+      .append(themeMetaView.render().$el)
+      .append(actionsView.render().$el);
 
     this.$el.appendTo($("#main", window.top.document));
 

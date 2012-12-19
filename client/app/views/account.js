@@ -9,19 +9,12 @@ module.exports = View.extend({
   className: "row",
   template: "account",
   model: _.clone(app.currentUser),
+  validateModel: true,
 
   events: {
     "submit form": "editUser",
     "change .error input": "clearError",
     "click #delete-user": "deleteUser"
-  },
-
-  initialize: function () {
-    Backbone.Validation.bind(this);
-  },
-
-  teardown: function () {
-    Backbone.Validation.unbind(this);
   },
 
   render: function () {

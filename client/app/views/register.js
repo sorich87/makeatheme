@@ -5,14 +5,11 @@ module.exports = View.extend({
     className: "modal"
   , template: "register"
   , model: app.currentUser
+  , validateModel: true
 
   , events: {
     "submit form": "createUser",
     "change .error input": "clearError"
-  }
-
-  , initialize: function () {
-    Backbone.Validation.bind(this);
   }
 
   // Create current user from form input values and submit to the server.

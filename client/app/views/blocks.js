@@ -15,29 +15,25 @@ module.exports = View.extend({
     , "mouseover .x-drag": "makeDraggable"
   }
 
-  , initialize: function () {
-    this.collection.on("reset", this.addAll, this);
-    this.collection.on("add", this.addOne, this);
-    this.collection.on("remove", this.removeOne, this);
+  , objectEvents: {
+    collection: {
+      "reset": "addAll",
+      "add": "addOne",
+      "remove": "removeOne"
+    }
+  }
 
-    app.on("mutations:started", this.makeMutable, this);
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("block:inserted", this.insertBlock, this);
+  , appEvents: {
+    "mutations:started": "makeMutable",
+    "save:before": "addThemeAttributes",
+    "block:inserted": "insertBlock"
+  }
 
-    this.allBlocks = _.map(app.data.blocks, function (block) {
+  , allBlocks: function () {
+    return _.map(app.data.blocks, function (block) {
       block.label = _.str.titleize(_.str.humanize(block.name));
       return block;
     });
-  }
-
-  , teardown: function () {
-    this.collection.off("reset", this.addAll, this);
-    this.collection.off("add", this.addOne, this);
-    this.collection.off("remove", this.removeOne, this);
-
-    app.off("mutations:started", this.makeMutable, this);
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("block:inserted", this.insertBlock, this);
   }
 
   , render: function () {
@@ -87,7 +83,7 @@ module.exports = View.extend({
   // If the element is inserted in a row,
   // load the actual template chuck to insert
   , insertBlock: function (element, id) {
-    var block = this.collection.getByCid($(element).data("cid"));
+    var block = this.collection.get($(element).data("cid"));
 
     element.outerHTML = "<div id='" + id + "' class='column " +
       block.className() + "'>" + block.get("build") + "</div>";

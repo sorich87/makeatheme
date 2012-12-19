@@ -17,17 +17,9 @@ module.exports = View.extend({
     , "change .selector input": "editDeclaration"
   }
 
-  , initialize: function (options) {
-    this.media = options.media;
-    this.tag = options.tag;
-    this.selector = options.selector;
-    this.customCSS = options.customCSS;
-    this.currentCSS = options.currentCSS;
-  }
-
   , render: function () {
     var html = ""
-      , declarations = this.currentCSS
+      , declarations = this.options.currentCSS
       , i;
 
     if (declarations) {
@@ -70,16 +62,16 @@ module.exports = View.extend({
     selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
 
     if (property && value) {
-      index = this.customCSS.insertRule({
+      index = this.options.customCSS.insertRule({
           selector: selector
         , property: property
         , value: value
         , index: index
-        , media: this.media
+        , media: this.options.media
       });
     } else {
       if (index) {
-        this.customCSS.deleteRule(index, this.media);
+        this.options.customCSS.deleteRule(index, this.options.media);
         index = "";
       }
 
@@ -92,12 +84,12 @@ module.exports = View.extend({
   }
 
   , addDeclarationInputs: function (e) {
-    var selector = this.selector;
+    var selector = this.options.selector;
 
     e.preventDefault();
 
-    if (this.tag) {
-      selector = this.selector + " " + this.tag;
+    if (this.options.tag) {
+      selector = this.options.selector + " " + this.options.tag;
     }
 
     $(e.currentTarget).before(declaration_template({selector: selector}));

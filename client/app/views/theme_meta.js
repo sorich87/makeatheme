@@ -6,12 +6,8 @@ var View = require("views/base/view")
 module.exports = View.extend({
   id: "theme-meta",
 
-  initialize: function () {
-    app.on("save:before", this.saveThemeName, this);
-  },
-
-  teardown: function () {
-    app.off("save:before", this.saveThemeName, this);
+  appEvents: {
+    "save:before": "saveThemeName"
   },
 
   render: function () {

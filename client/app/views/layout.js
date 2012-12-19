@@ -40,16 +40,16 @@ module.exports = View.extend({
     , "mouseenter .x-resize": "makeResizeable"
   }
 
+  , appEvents: {
+    "region:loaded": "highLightEmpty",
+    "template:loaded": "highLightEmpty"
+  }
+
   , initialize: function () {
     this.$el.addClass("editing");
     this.makeDroppable();
-    app.on("region:loaded", this.highLightEmpty, this);
-    app.on("template:loaded", this.highLightEmpty, this);
-  }
 
-  , teardown: function () {
-    app.off("region:loaded", this.highLightEmpty, this);
-    app.off("template:loaded", this.highLightEmpty, this);
+    View.prototype.initialize.call(this);
   }
 
   , highLightEmpty: function () {

@@ -13,6 +13,8 @@ module.exports = View.extend({
   render: function () {
     var listView = app.createView("theme_list", {collection: this.collection});
 
+    this.subViews.push(listView);
+
     this.$el.empty()
       .append(template())
       .append(listView.render().$el);

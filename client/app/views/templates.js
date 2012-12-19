@@ -18,24 +18,18 @@ module.exports = View.extend({
     , "submit .new-template-select": "addTemplate"
   }
 
-  , initialize: function (options) {
-    this.collection.on("add", this.addOne, this);
-    this.collection.on("reset", this.addAll, this);
-    this.collection.on("remove", this.removeOne, this);
-
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("mutations:started", this.makeMutable, this);
-    app.on("region:load", this.saveRegion, this);
+  , objectEvents: {
+    collection: {
+      "add": "addOne",
+      "reset": "addAll",
+      "remove": "removeOne"
+    }
   }
 
-  , teardown: function (options) {
-    this.collection.off("add", this.addOne, this);
-    this.collection.off("reset", this.addAll, this);
-    this.collection.off("remove", this.removeOne, this);
-
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("mutations:started", this.makeMutable, this);
-    app.off("region:load", this.saveRegion, this);
+  , appEvents: {
+    "save:before": "addThemeAttributes",
+    "mutations:started": "makeMutable",
+    "region:load": "saveRegion"
   }
 
   , render: function () {
@@ -87,7 +81,7 @@ module.exports = View.extend({
   }
 
   , switchTemplate: function () {
-    var template = this.collection.getByCid(this.$("ul input:checked").val());
+    var template = this.collection.get(this.$("ul input:checked").val());
 
     this.$("ul li").removeClass("current");
     this.$("ul input:checked").closest("li").addClass("current");

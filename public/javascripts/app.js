@@ -89,7 +89,7 @@ window.require.define({"application": function(exports, require, module) {
 
       // Setup notifications handling
       // Append to top window in case document is in an iframe
-      this.reuseView("notifications").render()
+      this.createView("notifications").render()
         .$el.appendTo($("body", window.top.document));
 
       this.setCurrentUser();
@@ -101,7 +101,7 @@ window.require.define({"application": function(exports, require, module) {
       mixpanel.initialize();
 
       // Render the login and logout links
-      this.reuseView("auth_links").render();
+      this.createView("auth_links").render();
 
       // Set per-view body classes
       this.setBodyClasses();
@@ -130,20 +130,6 @@ window.require.define({"application": function(exports, require, module) {
         if ("teardown" in views[name]) {
           views[name].teardown();
         }
-      }
-
-      views[name] = new View(options);
-      this.views = views;
-      return views[name];
-    }
-
-    // Return existing view, otherwise create a new one
-    , reuseView: function(name, options) {
-      var views = this.views || {}
-        , View = require("views/" + name);
-
-      if (views[name] !== void 0) {
-        return views[name];
       }
 
       views[name] = new View(options);
@@ -2005,19 +1991,12 @@ window.require.define({"views/account": function(exports, require, module) {
     className: "row",
     template: "account",
     model: _.clone(app.currentUser),
+    validateModel: true,
 
     events: {
       "submit form": "editUser",
       "change .error input": "clearError",
       "click #delete-user": "deleteUser"
-    },
-
-    initialize: function () {
-      Backbone.Validation.bind(this);
-    },
-
-    teardown: function () {
-      Backbone.Validation.unbind(this);
     },
 
     render: function () {
@@ -2118,17 +2097,9 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
       , "change .selector input": "editDeclaration"
     }
 
-    , initialize: function (options) {
-      this.media = options.media;
-      this.tag = options.tag;
-      this.selector = options.selector;
-      this.customCSS = options.customCSS;
-      this.currentCSS = options.currentCSS;
-    }
-
     , render: function () {
       var html = ""
-        , declarations = this.currentCSS
+        , declarations = this.options.currentCSS
         , i;
 
       if (declarations) {
@@ -2171,16 +2142,16 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
       selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
 
       if (property && value) {
-        index = this.customCSS.insertRule({
+        index = this.options.customCSS.insertRule({
             selector: selector
           , property: property
           , value: value
           , index: index
-          , media: this.media
+          , media: this.options.media
         });
       } else {
         if (index) {
-          this.customCSS.deleteRule(index, this.media);
+          this.options.customCSS.deleteRule(index, this.options.media);
           index = "";
         }
 
@@ -2193,12 +2164,12 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
     }
 
     , addDeclarationInputs: function (e) {
-      var selector = this.selector;
+      var selector = this.options.selector;
 
       e.preventDefault();
 
-      if (this.tag) {
-        selector = this.selector + " " + this.tag;
+      if (this.options.tag) {
+        selector = this.options.selector + " " + this.options.tag;
       }
 
       $(e.currentTarget).before(declaration_template({selector: selector}));
@@ -2253,12 +2224,10 @@ window.require.define({"views/auth_links": function(exports, require, module) {
       "click #logout": "deleteSession"
     }
 
-    , initialize: function () {
-      this.model.on("change", this.render, this);
-    }
-
-    , teardown: function () {
-      this.model.off("change", this.render, this);
+    , objectEvents: {
+      model: {
+        "change": "render"
+      }
     }
 
     , render: function () {
@@ -2297,9 +2266,48 @@ window.require.define({"views/auth_links": function(exports, require, module) {
 }});
 
 window.require.define({"views/base/view": function(exports, require, module) {
+  var app = require("application");
+
   require("lib/view_helpers");
 
   module.exports = Backbone.View.extend({
+    // Call on for each model, collection and app event, instantiate the
+    // subViews array and bind validation events.
+    initialize: function (options) {
+      this.subViews = [];
+
+      for (var object in this.objectEvents) {
+        if (!this.objectEvents.hasOwnProperty(object)) {
+          return;
+        }
+
+        this._listenTo(object, this.objectEvents[object]);
+      }
+
+      if (this.validateModel) {
+        Backbone.Validation.bind(this);
+      }
+
+      this._listenTo(app, this.appEvents);
+    },
+
+    // Teardown all the subviews, unbind validation events,
+    // remove the view element and undelegate its events.
+    teardown: function () {
+      this.subViews.forEach(function (subView) {
+        subView.teardown();
+      });
+
+      if (this.validateModel) {
+        Backbone.Validation.unbind(this);
+      }
+
+      this.remove();
+      this.undelegateEvents();
+
+      return this;
+    },
+
     render: function () {
       var data;
 
@@ -2310,6 +2318,18 @@ window.require.define({"views/base/view": function(exports, require, module) {
       }
 
       return this;
+    },
+
+    _listenTo: function (object, events) {
+      if (object !== Object(object)) {
+        object = this[object];
+      }
+
+      for (var event in events) {
+        var callback = events[event];
+
+        this.listenTo(object, event, this[callback]);
+      }
     }
   });
   
@@ -2333,29 +2353,25 @@ window.require.define({"views/blocks": function(exports, require, module) {
       , "mouseover .x-drag": "makeDraggable"
     }
 
-    , initialize: function () {
-      this.collection.on("reset", this.addAll, this);
-      this.collection.on("add", this.addOne, this);
-      this.collection.on("remove", this.removeOne, this);
+    , objectEvents: {
+      collection: {
+        "reset": "addAll",
+        "add": "addOne",
+        "remove": "removeOne"
+      }
+    }
 
-      app.on("mutations:started", this.makeMutable, this);
-      app.on("save:before", this.addThemeAttributes, this);
-      app.on("block:inserted", this.insertBlock, this);
+    , appEvents: {
+      "mutations:started": "makeMutable",
+      "save:before": "addThemeAttributes",
+      "block:inserted": "insertBlock"
+    }
 
-      this.allBlocks = _.map(app.data.blocks, function (block) {
+    , allBlocks: function () {
+      return _.map(app.data.blocks, function (block) {
         block.label = _.str.titleize(_.str.humanize(block.name));
         return block;
       });
-    }
-
-    , teardown: function () {
-      this.collection.off("reset", this.addAll, this);
-      this.collection.off("add", this.addOne, this);
-      this.collection.off("remove", this.removeOne, this);
-
-      app.off("mutations:started", this.makeMutable, this);
-      app.off("save:before", this.addThemeAttributes, this);
-      app.off("block:inserted", this.insertBlock, this);
     }
 
     , render: function () {
@@ -2405,7 +2421,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     // If the element is inserted in a row,
     // load the actual template chuck to insert
     , insertBlock: function (element, id) {
-      var block = this.collection.getByCid($(element).data("cid"));
+      var block = this.collection.get($(element).data("cid"));
 
       element.outerHTML = "<div id='" + id + "' class='column " +
         block.className() + "'>" + block.get("build") + "</div>";
@@ -2540,12 +2556,8 @@ window.require.define({"views/download_button": function(exports, require, modul
       "click button.x-login": "login"
     }
 
-    , initialize: function () {
-      app.on("save:after", this.waitForArchive, this);
-    }
-
-    , teardown: function () {
-      app.off("save:after", this.waitForArchive, this);
+    , appEvents: {
+      "save:after": "waitForArchive"
     }
 
     , render: function () {
@@ -2628,40 +2640,50 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
         {
           id: "templates"
         , title: "Current Template"
+        , view: "templatesView"
       }
       , {
           id: "regions"
         , title: "Header &amp; Footer"
+        , view: "regionsView"
       }
       , {
           id: "blocks"
         , title: "Blocks"
+        , view: "blocksView"
       }
       , {
           id: "share_link"
         , title: "Share"
+        , view: "shareLinkView"
       }
     ]
 
     , render: function () {
-      app.createView("regions");
-      app.createView("blocks");
-      app.createView("style_edit");
-      app.createView("share_link");
-      app.createView("save_button");
-      app.createView("download_button");
+      this.templatesView = app.createView("templates");
+      this.regionsView = app.createView("regions");
+      this.blocksView = app.createView("blocks");
+      this.styleEditView = app.createView("style_edit");
+      this.shareLinkView = app.createView("share_link");
+      this.saveButtonView = app.createView("save_button");
+      this.downloadButtonView = app.createView("download_button");
+      this.layoutView = app.createView("layout");
+
+      this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
+                         this.styleEditview, this.shareLinkView, this.layoutView,
+                         this.saveButtonView, this.downloadButtonView);
 
       // Setup drag and drop and resize
-      app.createView("layout").render();
+      this.layoutView.render();
 
       this.$el.empty()
         .append("<div id='general'></div>")
         .children()
           .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
-          .append(app.reuseView("save_button").render().$el)
-          .append(app.reuseView("download_button").render().$el)
+          .append(this.saveButtonView.render().$el)
+          .append(this.downloadButtonView.render().$el)
           .end()
-        .append(app.reuseView("style_edit").render().$el.hide());
+        .append(this.styleEditView.render().$el.hide());
 
       for (var i in this.panels) {
         if (!this.panels.hasOwnProperty(i)) {
@@ -2670,7 +2692,7 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
 
         this.$("#editor-" + this.panels[i].id + " .accordion-inner")
           .empty()
-          .append(app.reuseView(this.panels[i].id).render().$el);
+          .append(this[this.panels[i].view].render().$el);
       }
 
       mutations.initialize();
@@ -2723,28 +2745,37 @@ window.require.define({"views/editor": function(exports, require, module) {
       });
 
       $(window).on("resize", this.resize.bind(this));
+
+      View.prototype.initialize.call(this);
     }
 
     , teardown: function () {
       $(window).off("resize", this.resize.bind(this));
+
+      View.prototype.teardown.call(this);
     }
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      var actions_view;
-
-      this.$el.empty()
-        .append(app.createView("editor_toggle").render().$el)
-        .append(app.createView("device_switch").render().$el)
-        .append(app.createView("theme_meta").render().$el);
+      var editorToggleView = app.createView("editor_toggle"),
+          deviceSwitchView = app.createView("device_switch"),
+          themeMetaView = app.createView("theme_meta"),
+          actionsView;
 
       if (app.data.theme.author_id === app.currentUser.id) {
-        actions_view = "edit_actions";
+        actionsView = app.createView("edit_actions");
       } else {
-        actions_view = "preview_actions";
+        actionsView = app.createView("preview_actions");
       }
 
-      this.$el.append(app.createView(actions_view).render().$el);
+      this.subViews.push(editorToggleView, deviceSwitchView, themeMetaView,
+                    actionsView);
+
+      this.$el.empty()
+        .append(editorToggleView.render().$el)
+        .append(deviceSwitchView.render().$el)
+        .append(themeMetaView.render().$el)
+        .append(actionsView.render().$el);
 
       this.$el.appendTo($("#main", window.top.document));
 
@@ -2857,16 +2888,16 @@ window.require.define({"views/layout": function(exports, require, module) {
       , "mouseenter .x-resize": "makeResizeable"
     }
 
+    , appEvents: {
+      "region:loaded": "highLightEmpty",
+      "template:loaded": "highLightEmpty"
+    }
+
     , initialize: function () {
       this.$el.addClass("editing");
       this.makeDroppable();
-      app.on("region:loaded", this.highLightEmpty, this);
-      app.on("template:loaded", this.highLightEmpty, this);
-    }
 
-    , teardown: function () {
-      app.off("region:loaded", this.highLightEmpty, this);
-      app.off("template:loaded", this.highLightEmpty, this);
+      View.prototype.initialize.call(this);
     }
 
     , highLightEmpty: function () {
@@ -3207,12 +3238,8 @@ window.require.define({"views/notifications": function(exports, require, module)
     , id: "notifications"
     , className: "unstyled"
 
-    , initialize: function () {
-      app.on("notification", this.showNotification, this);
-    }
-
-    , teardown: function () {
-      app.off("notification", this.showNotification, this);
+    , appEvents: {
+      "notification": "showNotification"
     }
 
     , showNotification: function (type, text) {
@@ -3313,8 +3340,12 @@ window.require.define({"views/preview_actions": function(exports, require, modul
     }
 
     , render: function () {
+      var templatesSelectView = app.createView("templates_select");
+
+      this.subViews.push(templatesSelectView);
+
       this.$el.empty()
-        .append(app.createView("templates_select").render().$el)
+        .append(templatesSelectView.render().$el)
         .append(copy_button({theme_id: app.data.theme._id}));
 
       return this;
@@ -3371,18 +3402,16 @@ window.require.define({"views/regions": function(exports, require, module) {
       , "click .x-header-new button, .x-footer-new button": "addRegion"
     }
 
-    , initialize: function () {
-      this.collection.on("add", this.addOne, this);
-      app.on("save:before", this.addThemeAttributes, this);
-      app.on("mutations:started", this.makeMutable, this);
-      app.on("template:load", this.addRegionsToTemplate, this);
+    , objectEvents: {
+      collection: {
+        "add": "addOne"
+      }
     }
 
-    , teardown: function () {
-      this.collection.off("add", this.addOne, this);
-      app.off("save:before", this.addThemeAttributes, this);
-      app.off("mutations:started", this.makeMutable, this);
-      app.off("template:load", this.addRegionsToTemplate, this);
+    , appEvents: {
+      "save:before": "addThemeAttributes",
+      "mutations:started": "makeMutable",
+      "template:load": "addRegionsToTemplate"
     }
 
     , render: function () {
@@ -3508,14 +3537,11 @@ window.require.define({"views/register": function(exports, require, module) {
       className: "modal"
     , template: "register"
     , model: app.currentUser
+    , validateModel: true
 
     , events: {
       "submit form": "createUser",
       "change .error input": "clearError"
-    }
-
-    , initialize: function () {
-      Backbone.Validation.bind(this);
     }
 
     // Create current user from form input values and submit to the server.
@@ -3644,38 +3670,32 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
       , "keyup input[type=text]": "editStyle"
     }
 
-    , initialize: function (options) {
-      this.media = options.media;
-      this.tag = options.tag;
-      this.selector = options.selector;
-      this.customCSS = options.customCSS;
-      this.currentCSS = options.currentCSS || {};
-    }
-
     , render: function () {
-      switch (this.currentCSS.textAlign) {
+      var currentCSS = this.options.currentCSS || {};
+
+      switch (currentCSS.textAlign) {
         case "start" :
-          this.currentCSS.textAlign = "left";
+          currentCSS.textAlign = "left";
           break;
 
         case "end" :
-          this.currentCSS.textAlign = "right";
+          currentCSS.textAlign = "right";
           break;
       }
 
-      this.el.innerHTML = template(this.currentCSS);
+      this.el.innerHTML = template(currentCSS);
 
       return this;
     }
 
     , editStyle: function (e) {
       var field = e.currentTarget
-        , selector = this.selector
+        , selector = this.options.selector
         , property = field.name
         , value;
 
-      if (this.tag) {
-        selector += " " + this.tag;
+      if (this.options.tag) {
+        selector += " " + this.options.tag;
       }
 
       switch (field.nodeName) {
@@ -3693,11 +3713,11 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
         value = value + "px";
       }
 
-      this.customCSS.insertRule({
+      this.options.customCSS.insertRule({
         selector: selector
         , property: property
         , value: value
-        , media: this.media
+        , media: this.options.media
       }, true);
     }
   });
@@ -3724,22 +3744,18 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       , "change input[name=style_advanced]": "switchEditor"
     }
 
-    , initialize: function () {
-      app.on("column:highlight", this.setColumn, this);
-      app.on("column:highlight", this.showEditor, this);
-      app.on("save:before", this.addThemeAttributes, this);
-      app.on("resize:end", this.changeWidth, this);
+    , appEvents: {
+      "column:highlight": "showEditor",
+      "save:before": "addThemeAttributes",
+      "resize:end": "changeWidth"
+    }
 
+    , initialize: function () {
       this.selector = "body";
       this.customCSS = app.editor.style;
       this.editorView = "simple_style_edit";
-    }
 
-    , teardown: function () {
-      app.off("column:highlight", this.setColumn, this);
-      app.off("column:highlight", this.showEditor, this);
-      app.off("save:before", this.addThemeAttributes, this);
-      app.off("resize:end", this.changeWidth, this);
+      View.prototype.initialize.call(this);
     }
 
     , setTag: function (e) {
@@ -3754,7 +3770,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var computedStyle = this.editorView === "simple_style_edit" ? true : false;
+      var advanced = this.editorView === "advanced_style_edit" ? true : false,
+          editorView;
 
       this.media = "all";
 
@@ -3762,16 +3779,19 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
-        , advanced: this.editorView === "advanced_style_edit" ? true : false
+        , advanced: advanced
       });
 
-      this.$el.append(app.createView(this.editorView, {
+      editorView = app.createView(this.editorView, {
           selector: this.selector
         , tag: this.tag
         , media: this.media
         , customCSS: this.customCSS
-        , currentCSS: this.currentElementStyle(computedStyle)
-      }).render().$el);
+        , currentCSS: this.currentElementStyle(!advanced)
+      });
+      this.subViews.push(editorView);
+
+      this.$el.append(editorView.render().$el);
 
       return this;
     }
@@ -3818,7 +3838,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       this.render();
     }
 
-    , showEditor: function () {
+    , showEditor: function (element) {
+      this.setColumn(element);
       this.$el.siblings("#general").hide();
       this.$el.show();
     }
@@ -3892,24 +3913,18 @@ window.require.define({"views/templates": function(exports, require, module) {
       , "submit .new-template-select": "addTemplate"
     }
 
-    , initialize: function (options) {
-      this.collection.on("add", this.addOne, this);
-      this.collection.on("reset", this.addAll, this);
-      this.collection.on("remove", this.removeOne, this);
-
-      app.on("save:before", this.addThemeAttributes, this);
-      app.on("mutations:started", this.makeMutable, this);
-      app.on("region:load", this.saveRegion, this);
+    , objectEvents: {
+      collection: {
+        "add": "addOne",
+        "reset": "addAll",
+        "remove": "removeOne"
+      }
     }
 
-    , teardown: function (options) {
-      this.collection.off("add", this.addOne, this);
-      this.collection.off("reset", this.addAll, this);
-      this.collection.off("remove", this.removeOne, this);
-
-      app.off("save:before", this.addThemeAttributes, this);
-      app.off("mutations:started", this.makeMutable, this);
-      app.off("region:load", this.saveRegion, this);
+    , appEvents: {
+      "save:before": "addThemeAttributes",
+      "mutations:started": "makeMutable",
+      "region:load": "saveRegion"
     }
 
     , render: function () {
@@ -3961,7 +3976,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , switchTemplate: function () {
-      var template = this.collection.getByCid(this.$("ul input:checked").val());
+      var template = this.collection.get(this.$("ul input:checked").val());
 
       this.$("ul li").removeClass("current");
       this.$("ul input:checked").closest("li").addClass("current");
@@ -5290,6 +5305,8 @@ window.require.define({"views/templates_select": function(exports, require, modu
       $("#page").fadeOut().empty()
         .append(template.get("full"))
         .fadeIn();
+
+      View.prototype.initialize.call(this);
     }
 
     , data: {
@@ -5326,11 +5343,15 @@ window.require.define({"views/theme": function(exports, require, module) {
     initialize: function () {
       $("body").on("mouseenter", "[name=property]", this.typeahead);
       $(window).on("resize", this.resize.bind(this));
+
+      View.prototype.initialize.call(this);
     }
 
     , teardown: function () {
       $("body").off("mouseenter", "[name=property]", this.typeahead);
       $(window).off("resize", this.resize.bind(this));
+
+      View.prototype.teardown.call(this);
     }
 
     , render: function () {
@@ -5368,12 +5389,10 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       "click .delete": "confirmDeletion"
     }
 
-    , initialize: function () {
-      this.collection.on("reset", this.addAll, this);
-    }
-
-    , teardown: function () {
-      this.collection.off("reset", this.addAll, this);
+    , objectEvents: {
+      collection: {
+        "reset": "addAll"
+      }
     }
 
     , render: function () {
@@ -5441,12 +5460,8 @@ window.require.define({"views/theme_meta": function(exports, require, module) {
   module.exports = View.extend({
     id: "theme-meta",
 
-    initialize: function () {
-      app.on("save:before", this.saveThemeName, this);
-    },
-
-    teardown: function () {
-      app.off("save:before", this.saveThemeName, this);
+    appEvents: {
+      "save:before": "saveThemeName"
     },
 
     render: function () {
@@ -5483,6 +5498,8 @@ window.require.define({"views/themes": function(exports, require, module) {
 
     render: function () {
       var listView = app.createView("theme_list", {collection: this.collection});
+
+      this.subViews.push(listView);
 
       this.$el.empty()
         .append(template())
@@ -5536,16 +5553,14 @@ window.require.define({"views/user_themes": function(exports, require, module) {
   module.exports = View.extend({
     collection: app.currentUser.get("themes"),
 
-    initialize: function () {
-      app.on("theme:deleted", this.render, this);
-    },
-
-    teardown: function () {
-      app.off("theme:deleted", this.render, this);
+    appEvents: {
+      "theme:deleted": "render"
     },
 
     render: function () {
       var listView = app.createView("theme_list", {collection: this.collection});
+
+      this.subViews.push(listView);
 
       this.$el.empty()
         .append(template({count: this.collection.length}))

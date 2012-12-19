@@ -10,40 +10,50 @@ module.exports = View.extend({
       {
         id: "templates"
       , title: "Current Template"
+      , view: "templatesView"
     }
     , {
         id: "regions"
       , title: "Header &amp; Footer"
+      , view: "regionsView"
     }
     , {
         id: "blocks"
       , title: "Blocks"
+      , view: "blocksView"
     }
     , {
         id: "share_link"
       , title: "Share"
+      , view: "shareLinkView"
     }
   ]
 
   , render: function () {
-    app.createView("regions");
-    app.createView("blocks");
-    app.createView("style_edit");
-    app.createView("share_link");
-    app.createView("save_button");
-    app.createView("download_button");
+    this.templatesView = app.createView("templates");
+    this.regionsView = app.createView("regions");
+    this.blocksView = app.createView("blocks");
+    this.styleEditView = app.createView("style_edit");
+    this.shareLinkView = app.createView("share_link");
+    this.saveButtonView = app.createView("save_button");
+    this.downloadButtonView = app.createView("download_button");
+    this.layoutView = app.createView("layout");
+
+    this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
+                       this.styleEditview, this.shareLinkView, this.layoutView,
+                       this.saveButtonView, this.downloadButtonView);
 
     // Setup drag and drop and resize
-    app.createView("layout").render();
+    this.layoutView.render();
 
     this.$el.empty()
       .append("<div id='general'></div>")
       .children()
         .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
-        .append(app.reuseView("save_button").render().$el)
-        .append(app.reuseView("download_button").render().$el)
+        .append(this.saveButtonView.render().$el)
+        .append(this.downloadButtonView.render().$el)
         .end()
-      .append(app.reuseView("style_edit").render().$el.hide());
+      .append(this.styleEditView.render().$el.hide());
 
     for (var i in this.panels) {
       if (!this.panels.hasOwnProperty(i)) {
@@ -52,7 +62,7 @@ module.exports = View.extend({
 
       this.$("#editor-" + this.panels[i].id + " .accordion-inner")
         .empty()
-        .append(app.reuseView(this.panels[i].id).render().$el);
+        .append(this[this.panels[i].view].render().$el);
     }
 
     mutations.initialize();

@@ -12,7 +12,7 @@ _.extend(Application, {
 
     // Setup notifications handling
     // Append to top window in case document is in an iframe
-    this.reuseView("notifications").render()
+    this.createView("notifications").render()
       .$el.appendTo($("body", window.top.document));
 
     this.setCurrentUser();
@@ -24,7 +24,7 @@ _.extend(Application, {
     mixpanel.initialize();
 
     // Render the login and logout links
-    this.reuseView("auth_links").render();
+    this.createView("auth_links").render();
 
     // Set per-view body classes
     this.setBodyClasses();
@@ -53,20 +53,6 @@ _.extend(Application, {
       if ("teardown" in views[name]) {
         views[name].teardown();
       }
-    }
-
-    views[name] = new View(options);
-    this.views = views;
-    return views[name];
-  }
-
-  // Return existing view, otherwise create a new one
-  , reuseView: function(name, options) {
-    var views = this.views || {}
-      , View = require("views/" + name);
-
-    if (views[name] !== void 0) {
-      return views[name];
     }
 
     views[name] = new View(options);

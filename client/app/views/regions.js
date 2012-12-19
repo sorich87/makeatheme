@@ -13,18 +13,16 @@ module.exports = View.extend({
     , "click .x-header-new button, .x-footer-new button": "addRegion"
   }
 
-  , initialize: function () {
-    this.collection.on("add", this.addOne, this);
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("mutations:started", this.makeMutable, this);
-    app.on("template:load", this.addRegionsToTemplate, this);
+  , objectEvents: {
+    collection: {
+      "add": "addOne"
+    }
   }
 
-  , teardown: function () {
-    this.collection.off("add", this.addOne, this);
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("mutations:started", this.makeMutable, this);
-    app.off("template:load", this.addRegionsToTemplate, this);
+  , appEvents: {
+    "save:before": "addThemeAttributes",
+    "mutations:started": "makeMutable",
+    "template:load": "addRegionsToTemplate"
   }
 
   , render: function () {

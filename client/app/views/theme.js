@@ -6,11 +6,15 @@ module.exports = View.extend({
   initialize: function () {
     $("body").on("mouseenter", "[name=property]", this.typeahead);
     $(window).on("resize", this.resize.bind(this));
+
+    View.prototype.initialize.call(this);
   }
 
   , teardown: function () {
     $("body").off("mouseenter", "[name=property]", this.typeahead);
     $(window).off("resize", this.resize.bind(this));
+
+    View.prototype.teardown.call(this);
   }
 
   , render: function () {

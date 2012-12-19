@@ -17,22 +17,18 @@ module.exports = View.extend({
     , "change input[name=style_advanced]": "switchEditor"
   }
 
-  , initialize: function () {
-    app.on("column:highlight", this.setColumn, this);
-    app.on("column:highlight", this.showEditor, this);
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("resize:end", this.changeWidth, this);
+  , appEvents: {
+    "column:highlight": "showEditor",
+    "save:before": "addThemeAttributes",
+    "resize:end": "changeWidth"
+  }
 
+  , initialize: function () {
     this.selector = "body";
     this.customCSS = app.editor.style;
     this.editorView = "simple_style_edit";
-  }
 
-  , teardown: function () {
-    app.off("column:highlight", this.setColumn, this);
-    app.off("column:highlight", this.showEditor, this);
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("resize:end", this.changeWidth, this);
+    View.prototype.initialize.call(this);
   }
 
   , setTag: function (e) {
@@ -47,7 +43,8 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var computedStyle = this.editorView === "simple_style_edit" ? true : false;
+    var advanced = this.editorView === "advanced_style_edit" ? true : false,
+        editorView;
 
     this.media = "all";
 
@@ -55,16 +52,19 @@ module.exports = View.extend({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
-      , advanced: this.editorView === "advanced_style_edit" ? true : false
+      , advanced: advanced
     });
 
-    this.$el.append(app.createView(this.editorView, {
+    editorView = app.createView(this.editorView, {
         selector: this.selector
       , tag: this.tag
       , media: this.media
       , customCSS: this.customCSS
-      , currentCSS: this.currentElementStyle(computedStyle)
-    }).render().$el);
+      , currentCSS: this.currentElementStyle(!advanced)
+    });
+    this.subViews.push(editorView);
+
+    this.$el.append(editorView.render().$el);
 
     return this;
   }
@@ -111,7 +111,8 @@ module.exports = View.extend({
     this.render();
   }
 
-  , showEditor: function () {
+  , showEditor: function (element) {
+    this.setColumn(element);
     this.$el.siblings("#general").hide();
     this.$el.show();
   }
