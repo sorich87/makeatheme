@@ -3115,8 +3115,6 @@ window.require.define({"views/login": function(exports, require, module) {
       e.preventDefault();
 
       if (this.validateInputs()) {
-        this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
-
         this.submitData();
       }
     }
@@ -3139,7 +3137,10 @@ window.require.define({"views/login": function(exports, require, module) {
     }
 
     , submitData: function () {
-      var data = {};
+      var data = {},
+          button = this.$("button[type=submit]").get(0);
+
+      button.setAttribute("disabled", "true");
 
       this.$("input").each(function (i, element) {
         var attr = element.getAttribute("name");
@@ -3171,6 +3172,8 @@ window.require.define({"views/login": function(exports, require, module) {
               if (form.children(".alert-error").length === 0) {
                 form.prepend("<p class='alert alert-error'>" + response.error + "</p>");
               }
+
+              button.removeAttribute("disabled");
             break;
           }
         }.bind(this)

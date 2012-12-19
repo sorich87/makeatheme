@@ -15,8 +15,6 @@ module.exports = View.extend({
     e.preventDefault();
 
     if (this.validateInputs()) {
-      this.$("button[type=submit]").get(0).setAttribute("disabled", "true");
-
       this.submitData();
     }
   }
@@ -39,7 +37,10 @@ module.exports = View.extend({
   }
 
   , submitData: function () {
-    var data = {};
+    var data = {},
+        button = this.$("button[type=submit]").get(0);
+
+    button.setAttribute("disabled", "true");
 
     this.$("input").each(function (i, element) {
       var attr = element.getAttribute("name");
@@ -71,6 +72,8 @@ module.exports = View.extend({
             if (form.children(".alert-error").length === 0) {
               form.prepend("<p class='alert alert-error'>" + response.error + "</p>");
             }
+
+            button.removeAttribute("disabled");
           break;
         }
       }.bind(this)
