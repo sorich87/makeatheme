@@ -26,10 +26,8 @@ module.exports = Backbone.Router.extend({
   }
 
   , theme: function (id) {
-    app.createView("theme", {
-        themeID: id
-      , el: $("#main")
-    }).render();
+    this.view = app.createView("theme", {themeID: id});
+    this.render();
 
     jQuery(function ($) {
       $("body").on("click", ".accordion-toggle", function (e) {
@@ -52,7 +50,7 @@ module.exports = Backbone.Router.extend({
       return;
     }
 
-    app.createView("editor").render();
+    this.view = app.createView("editor").render();
   }
 
   , account: function () {

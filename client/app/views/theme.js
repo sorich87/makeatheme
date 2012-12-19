@@ -3,7 +3,9 @@ var View = require("views/base/view")
   , template = require("views/templates/theme");
 
 module.exports = View.extend({
-  initialize: function () {
+  id: "canvas"
+
+  , initialize: function () {
     $("body").on("mouseenter", "[name=property]", this.typeahead);
     $(window).on("resize", this.resize.bind(this));
 
@@ -33,7 +35,7 @@ module.exports = View.extend({
   }
 
   , resize: function () {
-    this.$("#canvas").width($(window).width() - 250)
+    this.$el.width($(window).width() - 250)
       .height($(window).height() - 40);
   }
 });

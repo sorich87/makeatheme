@@ -1894,10 +1894,8 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , theme: function (id) {
-      app.createView("theme", {
-          themeID: id
-        , el: $("#main")
-      }).render();
+      this.view = app.createView("theme", {themeID: id});
+      this.render();
 
       jQuery(function ($) {
         $("body").on("click", ".accordion-toggle", function (e) {
@@ -1920,7 +1918,7 @@ window.require.define({"router": function(exports, require, module) {
         return;
       }
 
-      app.createView("editor").render();
+      this.view = app.createView("editor").render();
     }
 
     , account: function () {
@@ -5173,12 +5171,12 @@ window.require.define({"views/templates/theme": function(exports, require, modul
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div id=\"canvas\">\n  <iframe id=\"theme\" name=\"theme\" src=\"/themes/";
+    buffer += "<iframe id=\"theme\" name=\"theme\" src=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n</div>\n";
+    buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
     return buffer;});
 }});
 
@@ -5340,7 +5338,9 @@ window.require.define({"views/theme": function(exports, require, module) {
     , template = require("views/templates/theme");
 
   module.exports = View.extend({
-    initialize: function () {
+    id: "canvas"
+
+    , initialize: function () {
       $("body").on("mouseenter", "[name=property]", this.typeahead);
       $(window).on("resize", this.resize.bind(this));
 
@@ -5370,7 +5370,7 @@ window.require.define({"views/theme": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$("#canvas").width($(window).width() - 250)
+      this.$el.width($(window).width() - 250)
         .height($(window).height() - 40);
     }
   });
