@@ -4188,7 +4188,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <ul class=\"nav pull-right\">\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        <i class=\"icon-user icon-white\"></i> ";
+    buffer += "\n  <ul class=\"nav pull-right\">\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        <i class=\"icon-user\"></i> ";
     foundHelper = helpers.first_name;
     stack1 = foundHelper || depth0.first_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -4198,7 +4198,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = foundHelper || depth0.last_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "last_name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\">Account</a></li>\n        <li><a href=\"//support.makeatheme.com\" id=\"support\">Help & Feedback</a></li>\n        <li><a href=\"#\" id=\"logout\">Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
+    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\"><i class=\"icon-wrench\"></i> Settings</a></li>\n        <li><a href=\"//support.makeatheme.com\" target=\"_blank\" id=\"support\"><i class=\"icon-question-sign\"></i> Help & Feedback</a></li>\n        <li><a href=\"#\" id=\"logout\"><i class=\"icon-signout\"></i> Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
     return buffer;}
 
   function program3(depth0,data) {
@@ -4262,7 +4262,7 @@ window.require.define({"views/templates/copy": function(exports, require, module
   function program1(depth0,data) {
     
     
-    return "\n  <a href=\"#\" data-bypass=\"true\" id=\"copy-theme\"\n    data-event=\"New Theme:type:copy\"><i class=\"icon-edit\"></i> Copy Theme</a>\n";}
+    return "\n  <a href=\"#\" data-bypass=\"true\" id=\"copy-theme\"\n    data-event=\"New Theme:type:copy\"><i class=\"icon-copy\"></i> Copy Theme</a>\n";}
 
   function program3(depth0,data) {
     
@@ -4352,12 +4352,12 @@ window.require.define({"views/templates/download": function(exports, require, mo
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n  target=\"_blank\" data-bypass=\"true\">Download HTML5</a>\n<a href=\"/themes/";
+    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n  target=\"_blank\" data-bypass=\"true\"><i class=\"c-icon-html5\"></i> Download HTML5</a>\n<a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download/wordpress\" data-event=\"Download:format:WordPress\"\n  target=\"_blank\" data-bypass=\"true\">Download WordPress</a>\n";
+    buffer += escapeExpression(stack1) + "/download/wordpress\" data-event=\"Download:format:WordPress\"\n  target=\"_blank\" data-bypass=\"true\"><i class=\"c-icon-wordpress\"></i> Download WordPress</a>\n";
     return buffer;});
 }});
 
@@ -4514,7 +4514,7 @@ window.require.define({"views/templates/save": function(exports, require, module
     var foundHelper, self=this;
 
 
-    return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-ok\"></i> Save Theme</a>\n";});
+    return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-save\"></i> Save Theme</a>\n";});
 }});
 
 window.require.define({"views/templates/share_link": function(exports, require, module) {
@@ -5236,7 +5236,7 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><i\n              class=\"icon-remove icon-white\"></i></button>\n        </div>\n        ";
+    buffer += escapeExpression(stack1) + "\"><i\n              class=\"icon-trash\"></i></button>\n        </div>\n        ";
     return buffer;}
 
   function program3(depth0,data) {
@@ -5247,7 +5247,7 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"><i\n            class=\"icon-pencil\"></i> view & copy</a>\n        ";
+    buffer += escapeExpression(stack1) + "\"><i\n            class=\"icon-eye-open\"></i> view & copy</a>\n        ";
     return buffer;}
 
     buffer += "<li class=\"span3\" id=\"theme-";

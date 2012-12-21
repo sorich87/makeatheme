@@ -384,6 +384,7 @@ body.theme {
   }
 }
 
+// Fontello fonts used for tablet, phone and PC icons
 @font-face {
   font-family: 'fontello';
   src: url("../font/fontello.eot");
@@ -411,4 +412,20 @@ body.theme {
 .f-icon-tablet:before { content: '\e7b1'; } /* '' */
 .f-icon-monitor:before { content: '💻'; } /* '\1f4bb' */
 .f-icon-mobile:before { content: '📱'; } /* '\1f4f1' */
+
+
+// Custom icons for WordPress and HTML5
+[class^="c-icon-"],
+[class*=" c-icon-"] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  margin-right: 3px;
+  line-height: 14px;
+  vertical-align: text-top;
+  background-repeat: no-repeat;
+}
+.c-icon-html5 { background-image: url("../images/icon-html5.png"); }
+.c-icon-wordpress { background-image: url("../images/icon-wordpress.png"); }
 
