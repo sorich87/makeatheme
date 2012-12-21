@@ -1,15 +1,33 @@
-var View = require("views/base/view")
-  , app = require("application")
-  , Template = require("models/template")
-  , template = require("views/templates/templates");
+var View = require("views/base/view"),
+    app = require("application"),
+    template = require("views/templates/templates"),
+    Templates = require("collections/templates");
 
 module.exports = View.extend({
-    id: "templates-preview"
-  , className: "x-section"
-  , template: "templates_select"
-  , collection: app.editor.templates
+  id: "templates-select",
+  tagName: "li",
+  className: "dropdown-submenu",
 
-  , initialize: function () {
+  template: "templates_select",
+  collection: app.currentTheme.get("templates"),
+
+  data: function () {
+    return {
+      templates: this.collection.map(function (template) {
+        return {
+          id: template.id,
+          label: template.label(),
+          active: template.get("name") === "index"
+        };
+      })
+    };
+  },
+
+  events: {
+    "click .dropdown-menu a": "switchTemplate"
+  },
+
+  initialize: function () {
     var template = this.collection.getCurrent();
 
     $("#page").fadeOut().empty()
@@ -17,27 +35,19 @@ module.exports = View.extend({
       .fadeIn();
 
     View.prototype.initialize.call(this);
-  }
+  },
 
-  , data: {
-    templates: app.editor.templates.map(function (template) {
-      return {
-          id: template.id
-        , label: template.label()
-        , name: template.get("name")
-      };
-    })
-  }
+  switchTemplate: function (e) {
+    var id = e.currentTarget.getAttribute("data-id"),
+        template = this.collection.get(id);
 
-  , events: {
-    "change select": "switchTemplate"
-  }
-
-  , switchTemplate: function () {
-    var template = this.collection.get(this.$("select").val());
+    e.preventDefault();
 
     $("#page").fadeOut().empty()
       .append(template.get("full"))
       .fadeIn();
+
+    this.$(".active").removeClass("active");
+    $(e.currentTarget.parentNode).addClass("active");
   }
 });

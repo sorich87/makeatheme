@@ -1,6 +1,6 @@
-<label>Previewing template:</label>
-<select>
+<a tabindex="-1" href="#">Switch Template</a>
+<ul class="dropdown-menu">
   {{#each templates}}
-  <option value="{{id}}"{{selected "index" name}}>{{label}}</option>
+  <li{{#if active}} class="active"{{/if}}><a href="#" data-id="{{id}}">{{label}}</a></li>
   {{/each}}
-</select>
+</ul>

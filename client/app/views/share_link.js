@@ -6,6 +6,6 @@ module.exports = View.extend({
   , className: "x-section well well-small"
   , template: "share_link"
   , data: {
-    theme: app.data.theme._id
+    theme: app.currentTheme.id
   }
 });

@@ -6630,7 +6630,6 @@ body.theme #main {
   border-bottom-right-radius: 0;
 }
 .dropdown-menu {
-  width: 100%;
   border-radius: 0;
 }
 .typeahead {
@@ -6799,12 +6798,6 @@ body.theme #main {
 }
 #layout-editor input.hide {
   display: none;
-}
-#layout-editor #customize-button,
-#layout-editor #download-button,
-#layout-editor #save-button {
-  margin: 10px;
-  text-align: center;
 }
 #layout-editor #templates-preview {
   padding: 10px;

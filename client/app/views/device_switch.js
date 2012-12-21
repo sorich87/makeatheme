@@ -3,18 +3,26 @@ var app = require("application")
   , device_switch = require("views/templates/device_switch");
 
 module.exports = View.extend({
+  tagName: "li",
+  className: "dropdown-submenu",
   id: "device-switch"
 
   , events: {
       "click .pc-size": "resizeToPC"
     , "click .tablet-size": "resizeToTablet"
     , "click .phone-size": "resizeToPhone"
+    , "click .dropdown-menu a": "highlightActive"
   }
 
   , render: function () {
     this.el.innerHTML = device_switch();
 
     return this;
+  }
+
+  , highlightActive: function (e) {
+    this.$(".active").removeClass("active");
+    $(e.currentTarget.parentNode).addClass("active");
   }
 
   , resizeToPC: function (e) {

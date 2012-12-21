@@ -45,12 +45,18 @@ module.exports = Backbone.Router.extend({
   }
 
   , edit: function (id) {
-    if (app.data.theme === void 0) {
-      window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+    if (app.currentTheme === void 0) {
+      $("#main", window.top.document).empty()
+        .append(app.createView("not_found").render().$el);
       return;
     }
 
-    this.view = app.createView("editor").render();
+    $("#menubar", window.top.document).empty()
+      .append(app.createView("menubar").render().$el);
+
+    if (app.currentUser.canEdit(app.currentTheme)) {
+      app.createView("editor").render();
+    }
   }
 
   , account: function () {

@@ -18,7 +18,7 @@ module.exports = Collection.extend({
       return template.get("current") === true;
     });
 
-    if (! current) {
+    if (!current) {
       current = this.getByName("index");
     }
 

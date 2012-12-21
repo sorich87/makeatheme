@@ -1,24 +1,23 @@
-var View = require("views/base/view")
-  , app = require("application")
-  , save_button = require("views/templates/save_button");
+var View = require("views/base/view"),
+    app = require("application"),
+    save = require("views/templates/save");
 
 module.exports = View.extend({
-    id: "save-button"
+  tagName: "li",
+  className: "dropdown",
 
-  , events: {
-    "click button.save": "save"
-  }
+  events: {
+    "click #save-theme": "saveTheme"
+  },
 
-  , render: function () {
-    this.$el.empty().append(save_button());
+  render: function () {
+    this.$el.empty().append(save());
 
     return this;
-  }
+  },
 
-  , save: function (e) {
+  saveTheme: function (e) {
     var attrs = _.clone(app.data.theme);
-
-    e.target.setAttribute("disabled", "true");
 
     app.trigger("save:before", attrs);
 
@@ -26,16 +25,10 @@ module.exports = View.extend({
       success: function (theme) {
         app.trigger("save:after", theme);
 
-        e.target.removeAttribute("disabled");
-
         app.trigger("notification", "success", "Theme saved.");
-
-        window.top.Backbone.history.navigate("/themes/" + theme.id, true);
       }
       , error: function (theme, response) {
         app.trigger("save:error");
-
-        e.target.removeAttribute("disabled");
 
         app.trigger("notification", "error", "Unable to save the theme. Please try again.");
       }

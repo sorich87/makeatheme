@@ -31,15 +31,21 @@ module.exports = View.extend({
   // Show editor when "template:loaded" event is triggered
   , render: function () {
     var editorToggleView = app.createView("editor_toggle"),
-        themeMetaView = app.createView("theme_meta"),
-        actionsView = app.createView("edit_actions");
+        deviceSwitchView = app.createView("device_switch"),
+        themeMetaView = app.createView("theme_meta");
 
-    this.subViews.push(editorToggleView, themeMetaView, actionsView);
+    this.subViews.push(editorToggleView, deviceSwitchView, themeMetaView);
 
     this.$el.empty()
       .append(editorToggleView.render().$el)
-      .append(themeMetaView.render().$el)
-      .append(actionsView.render().$el);
+      .append(deviceSwitchView.render().$el)
+      .append(themeMetaView.render().$el);
+
+    if (app.data.theme.author_id === app.currentUser.id) {
+      this._showEdit();
+    } else {
+      this._showPreview();
+    }
 
     this.$el.appendTo($("#main", window.top.document));
 
@@ -53,8 +59,6 @@ module.exports = View.extend({
 
   , resize: function () {
     this.$el.height($(window.top).height() - 40);
-
-    $("#canvas", window.top.document).width($(window.top).width() - 250);
   }
 
   // Prevent click, drag and submit on links, images and forms
@@ -67,5 +71,13 @@ module.exports = View.extend({
 
   , preventDefault: function (e) {
     e.preventDefault();
+  }
+
+  , _showEdit: function () {
+    var editView = app.createView("edit_actions");
+
+    this.subViews.push(editView);
+
+    editView.render().$el.appendTo(this.$el);
   }
 });

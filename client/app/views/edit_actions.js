@@ -35,13 +35,10 @@ module.exports = View.extend({
     this.blocksView = app.createView("blocks");
     this.styleEditView = app.createView("style_edit");
     this.shareLinkView = app.createView("share_link");
-    this.saveButtonView = app.createView("save_button");
-    this.downloadButtonView = app.createView("download_button");
     this.layoutView = app.createView("layout");
 
     this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
-                       this.styleEditview, this.shareLinkView, this.layoutView,
-                       this.saveButtonView, this.downloadButtonView);
+                       this.styleEditview, this.shareLinkView, this.layoutView);
 
     // Setup drag and drop and resize
     this.layoutView.render();
@@ -50,8 +47,6 @@ module.exports = View.extend({
       .append("<div id='general'></div>")
       .children()
         .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
-        .append(this.saveButtonView.render().$el)
-        .append(this.downloadButtonView.render().$el)
         .end()
       .append(this.styleEditView.render().$el.hide());
 

@@ -41,4 +41,8 @@ module.exports = Model.extend({
       equalTo: "password"
     }
   }
+
+  , canEdit: function (theme) {
+    return this.id === theme.get("author_id");
+  }
 });

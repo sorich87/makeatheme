@@ -138,8 +138,7 @@ class Theme
       :author_id => self.author_id,
       :screenshot_uri => self.screenshot.url(:thumb),
       :fork => self.fork?,
-      :archive_job_id => self.archive_job_id,
-      :has_archive => self.html_archive.file? && self.wp_archive.file?
+      :archive_job_id => self.archive_job_id
     }
   end
 

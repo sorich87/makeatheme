@@ -1,31 +1,27 @@
-var app = require("application")
-  , View = require("views/base/view")
-  , data = require("lib/editor_data")
-  , mutations = require("lib/mutations")
-  , accordion_group = require("views/templates/accordion_group")
-  , copy_button = require("views/templates/copy_button");
+var app = require("application"),
+    View = require("views/base/view"),
+    copy = require("views/templates/copy");
 
 module.exports = View.extend({
-  id: "layout-editor"
+  tagName: "li",
+  className: "dropdown",
+  model: app.currentTheme,
 
-  , events: {
+  events: {
     "click #copy-theme": "copyTheme"
   }
 
   , render: function () {
-    var templatesSelectView = app.createView("templates_select");
-
-    this.subViews.push(templatesSelectView);
-
     this.$el.empty()
-      .append(templatesSelectView.render().$el)
-      .append(copy_button({theme_id: app.data.theme._id}));
+      .append(copy({theme_id: this.model.id}));
 
     return this;
   }
 
   , copyTheme: function (e) {
     var element = e.currentTarget;
+
+    e.preventDefault();
 
     // Set timeout so that button is disabled after all script are run
     // to avoid blocking event bubbling
@@ -38,11 +34,14 @@ module.exports = View.extend({
       type: "POST",
       url: "/themes/fork",
       contentType: "application/json; charset=UTF-8",
-      data: JSON.stringify({id: app.data.theme._id}),
+      data: JSON.stringify({id: this.model.id}),
       success: function (data) {
         var theme = JSON.parse(data);
 
         window.top.Application.trigger("theme:copied", theme);
+
+        app.trigger("notification", "success", "The theme has been copied. " +
+                    "Now start editing.");
 
         window.top.Backbone.history.navigate("/themes/" + theme._id, true);
       },

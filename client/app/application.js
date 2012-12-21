@@ -16,6 +16,7 @@ _.extend(Application, {
       .$el.appendTo($("body", window.top.document));
 
     this.setCurrentUser();
+    this.setCurrentTheme();
 
     // Initialize router
     this.router = new Router();
@@ -84,6 +85,32 @@ _.extend(Application, {
 
     this.on("theme:created", this.updateCurrentUserThemes, this);
     this.on("theme:copied", this.updateCurrentUserThemes, this);
+  }
+
+  , setCurrentTheme: function () {
+    var Theme = require("models/theme"),
+        Blocks = require("collections/blocks"),
+        Regions = require("collections/regions"),
+        Templates = require("collections/templates"),
+        CustomCSS = require("lib/custom_css");
+
+    if (this.data.theme) {
+      this.currentTheme = new Theme(this.data.theme);
+
+      if (this.data.theme_pieces) {
+        var blocks = new Blocks(this.data.theme_pieces.blocks),
+            regions = new Regions(this.data.theme_pieces.regions),
+            templates = new Templates(this.data.theme_pieces.templates);
+
+        this.currentTheme.set("blocks", blocks);
+        this.currentTheme.set("regions", regions);
+        this.currentTheme.set("templates", templates);
+      }
+
+      if (this.data.style) {
+        this.currentTheme.set("css", new CustomCSS(this.data.style));
+      }
+    }
   }
 
   , updateCurrentUserThemes: function (theme) {

@@ -93,6 +93,7 @@ window.require.define({"application": function(exports, require, module) {
         .$el.appendTo($("body", window.top.document));
 
       this.setCurrentUser();
+      this.setCurrentTheme();
 
       // Initialize router
       this.router = new Router();
@@ -161,6 +162,32 @@ window.require.define({"application": function(exports, require, module) {
 
       this.on("theme:created", this.updateCurrentUserThemes, this);
       this.on("theme:copied", this.updateCurrentUserThemes, this);
+    }
+
+    , setCurrentTheme: function () {
+      var Theme = require("models/theme"),
+          Blocks = require("collections/blocks"),
+          Regions = require("collections/regions"),
+          Templates = require("collections/templates"),
+          CustomCSS = require("lib/custom_css");
+
+      if (this.data.theme) {
+        this.currentTheme = new Theme(this.data.theme);
+
+        if (this.data.theme_pieces) {
+          var blocks = new Blocks(this.data.theme_pieces.blocks),
+              regions = new Regions(this.data.theme_pieces.regions),
+              templates = new Templates(this.data.theme_pieces.templates);
+
+          this.currentTheme.set("blocks", blocks);
+          this.currentTheme.set("regions", regions);
+          this.currentTheme.set("templates", templates);
+        }
+
+        if (this.data.style) {
+          this.currentTheme.set("css", new CustomCSS(this.data.style));
+        }
+      }
     }
 
     , updateCurrentUserThemes: function (theme) {
@@ -251,7 +278,7 @@ window.require.define({"collections/templates": function(exports, require, modul
         return template.get("current") === true;
       });
 
-      if (! current) {
+      if (!current) {
         current = this.getByName("index");
       }
 
@@ -1861,6 +1888,10 @@ window.require.define({"models/user": function(exports, require, module) {
         equalTo: "password"
       }
     }
+
+    , canEdit: function (theme) {
+      return this.id === theme.get("author_id");
+    }
   });
   
 }});
@@ -1913,12 +1944,18 @@ window.require.define({"router": function(exports, require, module) {
     }
 
     , edit: function (id) {
-      if (app.data.theme === void 0) {
-        window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+      if (app.currentTheme === void 0) {
+        $("#main", window.top.document).empty()
+          .append(app.createView("not_found").render().$el);
         return;
       }
 
-      this.view = app.createView("editor").render();
+      $("#menubar", window.top.document).empty()
+        .append(app.createView("menubar").render().$el);
+
+      if (app.currentUser.canEdit(app.currentTheme)) {
+        app.createView("editor").render();
+      }
     }
 
     , account: function () {
@@ -2488,24 +2525,93 @@ window.require.define({"views/blocks": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/copy": function(exports, require, module) {
+  var app = require("application"),
+      View = require("views/base/view"),
+      copy = require("views/templates/copy");
+
+  module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown",
+    model: app.currentTheme,
+
+    events: {
+      "click #copy-theme": "copyTheme"
+    }
+
+    , render: function () {
+      this.$el.empty()
+        .append(copy({theme_id: this.model.id}));
+
+      return this;
+    }
+
+    , copyTheme: function (e) {
+      var element = e.currentTarget;
+
+      e.preventDefault();
+
+      // Set timeout so that button is disabled after all script are run
+      // to avoid blocking event bubbling
+      setTimeout(function () {
+        element.setAttribute("disabled", "true");
+        element.innerHTML = "Started the Photocopier";
+      }, 0);
+
+      $.ajax({
+        type: "POST",
+        url: "/themes/fork",
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify({id: this.model.id}),
+        success: function (data) {
+          var theme = JSON.parse(data);
+
+          window.top.Application.trigger("theme:copied", theme);
+
+          app.trigger("notification", "success", "The theme has been copied. " +
+                      "Now start editing.");
+
+          window.top.Backbone.history.navigate("/themes/" + theme._id, true);
+        },
+        error: function () {
+          element.removeAttribute("disabled");
+          element.innerHTML = "Copy Theme";
+
+          app.trigger("notification", "error", "Error. Unable to copy theme. " +
+                      "Please reload the page and try again.");
+        }
+      });
+    }
+  });
+  
+}});
+
 window.require.define({"views/device_switch": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
     , device_switch = require("views/templates/device_switch");
 
   module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown-submenu",
     id: "device-switch"
 
     , events: {
         "click .pc-size": "resizeToPC"
       , "click .tablet-size": "resizeToTablet"
       , "click .phone-size": "resizeToPhone"
+      , "click .dropdown-menu a": "highlightActive"
     }
 
     , render: function () {
       this.el.innerHTML = device_switch();
 
       return this;
+    }
+
+    , highlightActive: function (e) {
+      this.$(".active").removeClass("active");
+      $(e.currentTarget.parentNode).addClass("active");
     }
 
     , resizeToPC: function (e) {
@@ -2542,82 +2648,56 @@ window.require.define({"views/device_switch": function(exports, require, module)
   
 }});
 
-window.require.define({"views/download_button": function(exports, require, module) {
+window.require.define({"views/download": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
-    , download_button = require("views/templates/download_button");
+    , download = require("views/templates/download");
 
   module.exports = View.extend({
-      id: "download-button"
+    tagName: "li",
+    className: "dropdown",
+    model: app.currentTheme,
 
-    , events: {
-      "click button.x-login": "login"
-    }
+    events: {
+      "click a": "askForPatience"
+    },
 
-    , appEvents: {
+    appEvents: {
       "save:after": "waitForArchive"
-    }
+    },
 
-    , render: function () {
-      var button;
-
-      this.$el.empty().append(download_button({id: app.data.theme._id}));
-
-      if (!app.data.theme.has_archive) {
-        this.$el.hide();
-      }
+    render: function () {
+      this.$el.empty().append(download({id: this.model.id}));
 
       return this;
-    }
+    },
 
-    , login: function () {
-      window.top.Backbone.history.navigate("/login", true);
-    }
+    waitForArchive: function (theme) {
+      var eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
 
-    , download: function (e) {
-      var $iframe = $("#download-iframe", window.top.document)
-        , url = "/themes/" + app.data.theme._id + "/download";
-
-      e.preventDefault();
-
-      if ($iframe.length === 0) {
-        $iframe = $("<iframe id='download-iframe' width='0' height='0' src='" + url + "'></iframe>")
-          .appendTo($("body", window.top.document));
-      } else {
-        $iframe.attr("src", url);
-      }
-    }
-
-    , waitForArchive: function (theme) {
-      var button = this.$("button")[0]
-        , eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
-
-      this.$el.show();
-
-      button.setAttribute("disabled", "true");
-      button.innerHTML = "Rebuilding archives...";
+      this.waitingForArchive = true;
 
       eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
       eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
-    }
+    },
 
-    , resetButton: function (e) {
-      var button = this.$("button")[0];
+    askForPatience: function (e) {
+      if (this.waitingForArchive) {
+        e.preventDefault();
 
-      e.currentTarget.close();
+        app.trigger("notification", "info", "The theme archives are being " +
+                    "regenerated. Please try again in a moment.");
+      }
+    },
 
-      button.removeAttribute("disabled");
-      button.innerHTML = "Download Theme <span class='caret'></span>";
-    }
-
-    , archiveSuccess: function (e) {
-      this.resetButton(e);
+    archiveSuccess: function (e) {
+      this.waitingForArchive = false;
 
       app.trigger("notification", "success", "Theme archives updated.");
-    }
+    },
 
-    , archiveErrors: function (e) {
-      this.resetButton(e);
+    archiveErrors: function (e) {
+      this.waitingForArchive = false;
 
       app.trigger("notification", "error", "Error updating the theme archives.");
     }
@@ -2663,13 +2743,10 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
       this.blocksView = app.createView("blocks");
       this.styleEditView = app.createView("style_edit");
       this.shareLinkView = app.createView("share_link");
-      this.saveButtonView = app.createView("save_button");
-      this.downloadButtonView = app.createView("download_button");
       this.layoutView = app.createView("layout");
 
       this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
-                         this.styleEditview, this.shareLinkView, this.layoutView,
-                         this.saveButtonView, this.downloadButtonView);
+                         this.styleEditview, this.shareLinkView, this.layoutView);
 
       // Setup drag and drop and resize
       this.layoutView.render();
@@ -2678,8 +2755,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
         .append("<div id='general'></div>")
         .children()
           .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
-          .append(this.saveButtonView.render().$el)
-          .append(this.downloadButtonView.render().$el)
           .end()
         .append(this.styleEditView.render().$el.hide());
 
@@ -2756,22 +2831,13 @@ window.require.define({"views/editor": function(exports, require, module) {
     // Show editor when "template:loaded" event is triggered
     , render: function () {
       var editorToggleView = app.createView("editor_toggle"),
-          deviceSwitchView = app.createView("device_switch"),
           themeMetaView = app.createView("theme_meta"),
-          actionsView;
+          actionsView = app.createView("edit_actions");
 
-      if (app.data.theme.author_id === app.currentUser.id) {
-        actionsView = app.createView("edit_actions");
-      } else {
-        actionsView = app.createView("preview_actions");
-      }
-
-      this.subViews.push(editorToggleView, deviceSwitchView, themeMetaView,
-                    actionsView);
+      this.subViews.push(editorToggleView, themeMetaView, actionsView);
 
       this.$el.empty()
         .append(editorToggleView.render().$el)
-        .append(deviceSwitchView.render().$el)
         .append(themeMetaView.render().$el)
         .append(actionsView.render().$el);
 
@@ -2787,6 +2853,8 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     , resize: function () {
       this.$el.height($(window.top).height() - 40);
+
+      $("#canvas", window.top.document).width($(window.top).width() - 250);
     }
 
     // Prevent click, drag and submit on links, images and forms
@@ -3212,6 +3280,59 @@ window.require.define({"views/login": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/menubar": function(exports, require, module) {
+  var app = require("application"),
+      View = require("views/base/view"),
+      menubar = require("views/templates/menubar");
+
+  module.exports = View.extend({
+    tagName: "ul",
+    className: "nav",
+    model: app.currentTheme,
+
+    render: function () {
+      this.$el.empty().append(menubar({theme_name: this.model.get("name")}));
+
+      this.buildFileMenu();
+      this.buildViewMenu();
+
+      return this;
+    },
+
+    buildFileMenu: function () {
+      var menu = this.$("#file-menu"),
+          copyView = app.createView("copy"),
+          saveView = app.createView("save"),
+          downloadView = app.createView("download");
+
+      this.subViews.push(copyView);
+
+      if (app.currentUser.canEdit(app.currentTheme)) {
+        menu.append(saveView.render().$el);
+        menu.append(downloadView.render().$el);
+      }
+
+      menu.append(copyView.render().$el);
+    },
+
+    buildViewMenu: function () {
+      var menu = this.$("#view-menu"),
+          deviceSwitchView = app.createView("device_switch"),
+          templatesSelectView = app.createView("templates_select");
+
+      this.subViews.push(deviceSwitchView, templatesSelectView);
+
+      menu.append(deviceSwitchView.render().$el);
+
+      if (!app.currentUser.canEdit(app.currentTheme)) {
+        menu.append(templatesSelectView.render().$el);
+      }
+    }
+  });
+
+  
+}});
+
 window.require.define({"views/not_found": function(exports, require, module) {
   var View = require("views/base/view");
 
@@ -3316,68 +3437,6 @@ window.require.define({"views/password_reset": function(exports, require, module
             break;
           }
         }.bind(this)
-      });
-    }
-  });
-  
-}});
-
-window.require.define({"views/preview_actions": function(exports, require, module) {
-  var app = require("application")
-    , View = require("views/base/view")
-    , data = require("lib/editor_data")
-    , mutations = require("lib/mutations")
-    , accordion_group = require("views/templates/accordion_group")
-    , copy_button = require("views/templates/copy_button");
-
-  module.exports = View.extend({
-    id: "layout-editor"
-
-    , events: {
-      "click #copy-theme": "copyTheme"
-    }
-
-    , render: function () {
-      var templatesSelectView = app.createView("templates_select");
-
-      this.subViews.push(templatesSelectView);
-
-      this.$el.empty()
-        .append(templatesSelectView.render().$el)
-        .append(copy_button({theme_id: app.data.theme._id}));
-
-      return this;
-    }
-
-    , copyTheme: function (e) {
-      var element = e.currentTarget;
-
-      // Set timeout so that button is disabled after all script are run
-      // to avoid blocking event bubbling
-      setTimeout(function () {
-        element.setAttribute("disabled", "true");
-        element.innerHTML = "Started the Photocopier";
-      }, 0);
-
-      $.ajax({
-        type: "POST",
-        url: "/themes/fork",
-        contentType: "application/json; charset=UTF-8",
-        data: JSON.stringify({id: app.data.theme._id}),
-        success: function (data) {
-          var theme = JSON.parse(data);
-
-          window.top.Application.trigger("theme:copied", theme);
-
-          window.top.Backbone.history.navigate("/themes/" + theme._id, true);
-        },
-        error: function () {
-          element.removeAttribute("disabled");
-          element.innerHTML = "Copy Theme";
-
-          app.trigger("notification", "error", "Error. Unable to copy theme. " +
-                      "Please reload the page and try again.");
-        }
       });
     }
   });
@@ -3594,28 +3653,27 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/save_button": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application")
-    , save_button = require("views/templates/save_button");
+window.require.define({"views/save": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      save = require("views/templates/save");
 
   module.exports = View.extend({
-      id: "save-button"
+    tagName: "li",
+    className: "dropdown",
 
-    , events: {
-      "click button.save": "save"
-    }
+    events: {
+      "click #save-theme": "saveTheme"
+    },
 
-    , render: function () {
-      this.$el.empty().append(save_button());
+    render: function () {
+      this.$el.empty().append(save());
 
       return this;
-    }
+    },
 
-    , save: function (e) {
+    saveTheme: function (e) {
       var attrs = _.clone(app.data.theme);
-
-      e.target.setAttribute("disabled", "true");
 
       app.trigger("save:before", attrs);
 
@@ -3623,16 +3681,10 @@ window.require.define({"views/save_button": function(exports, require, module) {
         success: function (theme) {
           app.trigger("save:after", theme);
 
-          e.target.removeAttribute("disabled");
-
           app.trigger("notification", "success", "Theme saved.");
-
-          window.top.Backbone.history.navigate("/themes/" + theme.id, true);
         }
         , error: function (theme, response) {
           app.trigger("save:error");
-
-          e.target.removeAttribute("disabled");
 
           app.trigger("notification", "error", "Unable to save the theme. Please try again.");
         }
@@ -3651,7 +3703,7 @@ window.require.define({"views/share_link": function(exports, require, module) {
     , className: "x-section well well-small"
     , template: "share_link"
     , data: {
-      theme: app.data.theme._id
+      theme: app.currentTheme.id
     }
   });
   
@@ -4136,7 +4188,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
   function program1(depth0,data) {
     
     var buffer = "", stack1;
-    buffer += "\n  <ul class=\"nav pull-right\">\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        ";
+    buffer += "\n  <ul class=\"nav pull-right\">\n    <li class=\"dropdown\">\n      <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n        <i class=\"icon-user icon-white\"></i> ";
     foundHelper = helpers.first_name;
     stack1 = foundHelper || depth0.first_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -4202,7 +4254,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     return buffer;});
 }});
 
-window.require.define({"views/templates/copy_button": function(exports, require, module) {
+window.require.define({"views/templates/copy": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
@@ -4210,14 +4262,13 @@ window.require.define({"views/templates/copy_button": function(exports, require,
   function program1(depth0,data) {
     
     
-    return "\n    <button class=\"btn btn-primary btn-block\" id=\"copy-theme\"\n      data-event=\"New Theme:type:copy\">Copy Theme</button>\n  ";}
+    return "\n  <a href=\"#\" data-bypass=\"true\" id=\"copy-theme\"\n    data-event=\"New Theme:type:copy\"><i class=\"icon-edit\"></i> Copy Theme</a>\n";}
 
   function program3(depth0,data) {
     
     
-    return "\n    <a class=\"btn btn-primary\" href=\"/login\">Login to Copy</a>\n  ";}
+    return "\n  <a href=\"/login\"><i class=\"icon-file\"></i> Login to Copy Theme</a>\n";}
 
-    buffer += "<div id=\"customize-button\">\n  ";
     foundHelper = helpers.current_user;
     stack1 = foundHelper || depth0.current_user;
     stack2 = helpers['if'];
@@ -4227,7 +4278,7 @@ window.require.define({"views/templates/copy_button": function(exports, require,
     tmp1.inverse = self.program(3, program3, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</div>\n";
+    buffer += "\n";
     return buffer;});
 }});
 
@@ -4287,45 +4338,26 @@ window.require.define({"views/templates/device_switch": function(exports, requir
     var foundHelper, self=this;
 
 
-    return "<ul>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"f-icon-monitor\"></i></a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"f-icon-tablet\"></i></a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"f-icon-mobile\"></i></a></li>\n</ul>\n";});
+    return "<a tabindex=\"-1\" href=\"#\">Switch Device</a>\n<ul class=\"dropdown-menu\">\n  <li class=\"active\"><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"f-icon-monitor\"></i> PC</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"f-icon-tablet\"></i> Tablet</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"f-icon-mobile\"></i> Phone</a></li>\n</ul>\n";});
 }});
 
-window.require.define({"views/templates/download_button": function(exports, require, module) {
+window.require.define({"views/templates/download": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n  <div class=\"btn-group btn-block\">\n    <button data-toggle=\"dropdown\"\n      class=\"btn btn-success btn-block dropdown-toggle download\">\n      Download Theme <span class=\"caret\"></span>\n    </button>\n    <ul class=\"dropdown-menu\">\n      <li><a href=\"/themes/";
+
+    buffer += "<a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n        target=\"_blank\" data-bypass=\"true\">Download HTML5</a></li>\n      <li><a href=\"/themes/";
+    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n  target=\"_blank\" data-bypass=\"true\">Download HTML5</a>\n<a href=\"/themes/";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download/wordpress\"\n        data-event=\"Download:format:WordPress\"\n        target=\"_blank\" data-bypass=\"true\">Download WordPress</a></li>\n    </ul>\n  </div>\n";
-    return buffer;}
-
-  function program3(depth0,data) {
-    
-    
-    return "\n  <button class='btn btn-success x-login'>Login to Download</button>\n";}
-
-    foundHelper = helpers.current_user;
-    stack1 = foundHelper || depth0.current_user;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.program(3, program3, data);
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n";
+    buffer += escapeExpression(stack1) + "/download/wordpress\" data-event=\"Download:format:WordPress\"\n  target=\"_blank\" data-bypass=\"true\">Download WordPress</a>\n";
     return buffer;});
 }});
 
@@ -4336,6 +4368,21 @@ window.require.define({"views/templates/login": function(exports, require, modul
 
 
     return "<div class=\"modal-header\">\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"/reset_password\" data-dismiss=\"modal\">Reset password</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/menubar": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<ul class=\"nav\">\n  <li class=\"divider-vertical\"></li>\n  <li class=\"navbar-text\">";
+    foundHelper = helpers.theme_name;
+    stack1 = foundHelper || depth0.theme_name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n</ul>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -4461,27 +4508,13 @@ window.require.define({"views/templates/rule": function(exports, require, module
     return buffer;});
 }});
 
-window.require.define({"views/templates/save_button": function(exports, require, module) {
+window.require.define({"views/templates/save": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
+    var foundHelper, self=this;
 
-  function program1(depth0,data) {
-    
-    
-    return "\n  <button class=\"btn btn-primary btn-block save\">Save Changes</button>\n";}
 
-    foundHelper = helpers.current_user;
-    stack1 = foundHelper || depth0.current_user;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n\n";
-    return buffer;});
+    return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-ok\"></i> Save Theme</a>\n";});
 }});
 
 window.require.define({"views/templates/share_link": function(exports, require, module) {
@@ -5128,30 +5161,35 @@ window.require.define({"views/templates/templates_select": function(exports, req
 
   function program1(depth0,data) {
     
-    var buffer = "", stack1, stack2, stack3;
-    buffer += "\n  <option value=\"";
+    var buffer = "", stack1, stack2;
+    buffer += "\n  <li";
+    foundHelper = helpers.active;
+    stack1 = foundHelper || depth0.active;
+    stack2 = helpers['if'];
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "><a href=\"#\" data-id=\"";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    stack2 = "index";
-    foundHelper = helpers.selected;
-    stack3 = foundHelper || depth0.selected;
-    if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
-    else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
-    else { stack1 = stack3; }
-    buffer += escapeExpression(stack1) + ">";
+    buffer += escapeExpression(stack1) + "\">";
     foundHelper = helpers.label;
     stack1 = foundHelper || depth0.label;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n  ";
+    buffer += escapeExpression(stack1) + "</a></li>\n  ";
     return buffer;}
+  function program2(depth0,data) {
+    
+    
+    return " class=\"active\"";}
 
-    buffer += "<label>Previewing template:</label>\n<select>\n  ";
+    buffer += "<a tabindex=\"-1\" href=\"#\">Switch Template</a>\n<ul class=\"dropdown-menu\">\n  ";
     foundHelper = helpers.templates;
     stack1 = foundHelper || depth0.templates;
     stack2 = helpers.each;
@@ -5161,7 +5199,7 @@ window.require.define({"views/templates/templates_select": function(exports, req
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</select>\n";
+    buffer += "\n</ul>\n";
     return buffer;});
 }});
 
@@ -5286,18 +5324,36 @@ window.require.define({"views/templates/user_themes": function(exports, require,
 }});
 
 window.require.define({"views/templates_select": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application")
-    , Template = require("models/template")
-    , template = require("views/templates/templates");
+  var View = require("views/base/view"),
+      app = require("application"),
+      template = require("views/templates/templates"),
+      Templates = require("collections/templates");
 
   module.exports = View.extend({
-      id: "templates-preview"
-    , className: "x-section"
-    , template: "templates_select"
-    , collection: app.editor.templates
+    id: "templates-select",
+    tagName: "li",
+    className: "dropdown-submenu",
 
-    , initialize: function () {
+    template: "templates_select",
+    collection: app.currentTheme.get("templates"),
+
+    data: function () {
+      return {
+        templates: this.collection.map(function (template) {
+          return {
+            id: template.id,
+            label: template.label(),
+            active: template.get("name") === "index"
+          };
+        })
+      };
+    },
+
+    events: {
+      "click .dropdown-menu a": "switchTemplate"
+    },
+
+    initialize: function () {
       var template = this.collection.getCurrent();
 
       $("#page").fadeOut().empty()
@@ -5305,28 +5361,20 @@ window.require.define({"views/templates_select": function(exports, require, modu
         .fadeIn();
 
       View.prototype.initialize.call(this);
-    }
+    },
 
-    , data: {
-      templates: app.editor.templates.map(function (template) {
-        return {
-            id: template.id
-          , label: template.label()
-          , name: template.get("name")
-        };
-      })
-    }
+    switchTemplate: function (e) {
+      var id = e.currentTarget.getAttribute("data-id"),
+          template = this.collection.get(id);
 
-    , events: {
-      "change select": "switchTemplate"
-    }
-
-    , switchTemplate: function () {
-      var template = this.collection.get(this.$("select").val());
+      e.preventDefault();
 
       $("#page").fadeOut().empty()
         .append(template.get("full"))
         .fadeIn();
+
+      this.$(".active").removeClass("active");
+      $(e.currentTarget.parentNode).addClass("active");
     }
   });
   
@@ -5370,7 +5418,7 @@ window.require.define({"views/theme": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$el.width($(window).width() - 250)
+      this.$el.width("100%")
         .height($(window).height() - 40);
     }
   });
