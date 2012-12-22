@@ -3290,6 +3290,7 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
       this.buildFileMenu();
       this.buildViewMenu();
+      this.buildTemplateMenu();
 
       return this;
     },
@@ -3319,14 +3320,21 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
     buildViewMenu: function () {
       var menu = this.$("#view-menu"),
-          deviceSwitchView = app.createView("device_switch"),
-          templatesSelectView = app.createView("templates_select");
+          deviceSwitchView = app.createView("device_switch");
 
-      this.subViews.push(deviceSwitchView, templatesSelectView);
+      this.subViews.push(deviceSwitchView);
 
       menu.append(deviceSwitchView.render().$el);
+    },
 
-      if (!app.currentUser.canEdit(app.currentTheme)) {
+    buildTemplateMenu: function () {
+      var menu = this.$("#template-menu"),
+          templatesSelectView = app.createView("templates_select");
+
+      this.subViews.push(templatesSelectView);
+
+      if (app.currentUser.canEdit(app.currentTheme)) {
+      } else {
         menu.append(templatesSelectView.render().$el);
       }
     },
@@ -4490,7 +4498,7 @@ window.require.define({"views/templates/menubar": function(exports, require, mod
     stack1 = foundHelper || depth0.theme_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n</ul>\n";
+    buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Template <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"template-menu\"></ul>\n  </li>\n</ul>\n";
     return buffer;});
 }});
 

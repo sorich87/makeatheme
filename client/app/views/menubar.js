@@ -16,6 +16,7 @@ module.exports = View.extend({
 
     this.buildFileMenu();
     this.buildViewMenu();
+    this.buildTemplateMenu();
 
     return this;
   },
@@ -45,14 +46,21 @@ module.exports = View.extend({
 
   buildViewMenu: function () {
     var menu = this.$("#view-menu"),
-        deviceSwitchView = app.createView("device_switch"),
-        templatesSelectView = app.createView("templates_select");
+        deviceSwitchView = app.createView("device_switch");
 
-    this.subViews.push(deviceSwitchView, templatesSelectView);
+    this.subViews.push(deviceSwitchView);
 
     menu.append(deviceSwitchView.render().$el);
+  },
 
-    if (!app.currentUser.canEdit(app.currentTheme)) {
+  buildTemplateMenu: function () {
+    var menu = this.$("#template-menu"),
+        templatesSelectView = app.createView("templates_select");
+
+    this.subViews.push(templatesSelectView);
+
+    if (app.currentUser.canEdit(app.currentTheme)) {
+    } else {
       menu.append(templatesSelectView.render().$el);
     }
   },
