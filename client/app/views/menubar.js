@@ -18,22 +18,23 @@ module.exports = View.extend({
 
   buildFileMenu: function () {
     var menu = this.$("#file-menu"),
-        copyView = app.createView("copy"),
-        saveView = app.createView("save"),
-        shareView = app.createView("share"),
-        downloadView = app.createView("download");
+        copyThemeView = app.createView("copy_theme"),
+        saveThemeView = app.createView("save_theme"),
+        shareThemeView = app.createView("share_theme"),
+        downloadThemeView = app.createView("download_theme");
 
-    this.subViews.push(copyView, saveView, shareView, downloadView);
+    this.subViews.push(copyThemeView, saveThemeView, shareThemeView,
+                       downloadThemeView);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
-      menu.append(saveView.render().$el);
-      menu.append(shareView.render().$el);
+      menu.append(saveThemeView.render().$el);
+      menu.append(shareThemeView.render().$el);
       menu.append(this.divider());
-      menu.append(downloadView.render().$el);
+      menu.append(downloadThemeView.render().$el);
       menu.append(this.divider());
     }
 
-    menu.append(copyView.render().$el);
+    menu.append(copyThemeView.render().$el);
   },
 
   buildViewMenu: function () {

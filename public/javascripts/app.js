@@ -2525,10 +2525,10 @@ window.require.define({"views/blocks": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/copy": function(exports, require, module) {
+window.require.define({"views/copy_theme": function(exports, require, module) {
   var app = require("application"),
       View = require("views/base/view"),
-      copy = require("views/templates/copy");
+      template = require("views/templates/copy_theme");
 
   module.exports = View.extend({
     tagName: "li",
@@ -2541,7 +2541,7 @@ window.require.define({"views/copy": function(exports, require, module) {
 
     , render: function () {
       this.$el.empty()
-        .append(copy({theme_id: this.model.id}));
+        .append(template({theme_id: this.model.id}));
 
       return this;
     }
@@ -2648,10 +2648,10 @@ window.require.define({"views/device_switch": function(exports, require, module)
   
 }});
 
-window.require.define({"views/download": function(exports, require, module) {
+window.require.define({"views/download_theme": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
-    , download = require("views/templates/download");
+    , template = require("views/templates/download_theme");
 
   module.exports = View.extend({
     tagName: "li",
@@ -2667,7 +2667,7 @@ window.require.define({"views/download": function(exports, require, module) {
     },
 
     render: function () {
-      this.$el.empty().append(download({id: this.model.id}));
+      this.$el.empty().append(template({id: this.model.id}));
 
       return this;
     },
@@ -3295,22 +3295,23 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
     buildFileMenu: function () {
       var menu = this.$("#file-menu"),
-          copyView = app.createView("copy"),
-          saveView = app.createView("save"),
-          shareView = app.createView("share"),
-          downloadView = app.createView("download");
+          copyThemeView = app.createView("copy_theme"),
+          saveThemeView = app.createView("save_theme"),
+          shareThemeView = app.createView("share_theme"),
+          downloadThemeView = app.createView("download_theme");
 
-      this.subViews.push(copyView, saveView, shareView, downloadView);
+      this.subViews.push(copyThemeView, saveThemeView, shareThemeView,
+                         downloadThemeView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
-        menu.append(saveView.render().$el);
-        menu.append(shareView.render().$el);
+        menu.append(saveThemeView.render().$el);
+        menu.append(shareThemeView.render().$el);
         menu.append(this.divider());
-        menu.append(downloadView.render().$el);
+        menu.append(downloadThemeView.render().$el);
         menu.append(this.divider());
       }
 
-      menu.append(copyView.render().$el);
+      menu.append(copyThemeView.render().$el);
     },
 
     buildViewMenu: function () {
@@ -3655,10 +3656,10 @@ window.require.define({"views/register": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/save": function(exports, require, module) {
+window.require.define({"views/save_theme": function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
-      save = require("views/templates/save");
+      template = require("views/templates/save_theme");
 
   module.exports = View.extend({
     tagName: "li",
@@ -3669,7 +3670,7 @@ window.require.define({"views/save": function(exports, require, module) {
     },
 
     render: function () {
-      this.$el.empty().append(save());
+      this.$el.empty().append(template());
 
       return this;
     },
@@ -3696,21 +3697,21 @@ window.require.define({"views/save": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/share": function(exports, require, module) {
+window.require.define({"views/share_theme": function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
-      share = require("views/templates/share");
+      template = require("views/templates/share_theme");
 
   module.exports = View.extend({
     tagName: "li",
     className: "dropdown",
 
     render: function () {
-      var shareLinkView = app.createView("share_link").render();
+      var shareLinkView = app.createView("share_theme_link").render();
 
       this.subViews.push(shareLinkView);
 
-      this.$el.empty().append(share());
+      this.$el.empty().append(template());
 
       return this;
     }
@@ -3718,17 +3719,17 @@ window.require.define({"views/share": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/share_link": function(exports, require, module) {
+window.require.define({"views/share_theme_link": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application",
-      share_link = require("views/templates/share_link"));
+      template = require("views/templates/share_theme_link"));
 
   module.exports = View.extend({
     id: "share-link",
 
     render: function () {
       this.$el.empty()
-        .append(share_link({theme: app.currentTheme.id}))
+        .append(template({theme: app.currentTheme.id}))
         .appendTo($("#main", window.top.document));
 
       return this;
@@ -4282,7 +4283,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     return buffer;});
 }});
 
-window.require.define({"views/templates/copy": function(exports, require, module) {
+window.require.define({"views/templates/copy_theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
@@ -4369,7 +4370,7 @@ window.require.define({"views/templates/device_switch": function(exports, requir
     return "<a tabindex=\"-1\" href=\"#\">Switch Device</a>\n<ul class=\"dropdown-menu\">\n  <li class=\"active\"><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"f-icon-monitor\"></i> PC</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"f-icon-tablet\"></i> Tablet</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"f-icon-mobile\"></i> Phone</a></li>\n</ul>\n";});
 }});
 
-window.require.define({"views/templates/download": function(exports, require, module) {
+window.require.define({"views/templates/download_theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4536,7 +4537,7 @@ window.require.define({"views/templates/rule": function(exports, require, module
     return buffer;});
 }});
 
-window.require.define({"views/templates/save": function(exports, require, module) {
+window.require.define({"views/templates/save_theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
@@ -4545,7 +4546,7 @@ window.require.define({"views/templates/save": function(exports, require, module
     return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-save\"></i> Save Theme</a>\n";});
 }});
 
-window.require.define({"views/templates/share": function(exports, require, module) {
+window.require.define({"views/templates/share_theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
@@ -4554,7 +4555,7 @@ window.require.define({"views/templates/share": function(exports, require, modul
     return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#share-modal\"\n  id=\"share-theme\"><i class=\"icon-share\"></i> Share Theme</a>\n";});
 }});
 
-window.require.define({"views/templates/share_link": function(exports, require, module) {
+window.require.define({"views/templates/share_theme_link": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;

@@ -1,6 +1,6 @@
 var app = require("application"),
     View = require("views/base/view"),
-    copy = require("views/templates/copy");
+    template = require("views/templates/copy_theme");
 
 module.exports = View.extend({
   tagName: "li",
@@ -13,7 +13,7 @@ module.exports = View.extend({
 
   , render: function () {
     this.$el.empty()
-      .append(copy({theme_id: this.model.id}));
+      .append(template({theme_id: this.model.id}));
 
     return this;
   }

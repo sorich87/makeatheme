@@ -1,6 +1,6 @@
 var View = require("views/base/view")
   , app = require("application")
-  , download = require("views/templates/download");
+  , template = require("views/templates/download_theme");
 
 module.exports = View.extend({
   tagName: "li",
@@ -16,7 +16,7 @@ module.exports = View.extend({
   },
 
   render: function () {
-    this.$el.empty().append(download({id: this.model.id}));
+    this.$el.empty().append(template({id: this.model.id}));
 
     return this;
   },

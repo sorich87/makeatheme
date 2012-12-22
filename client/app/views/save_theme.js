@@ -1,6 +1,6 @@
 var View = require("views/base/view"),
     app = require("application"),
-    save = require("views/templates/save");
+    template = require("views/templates/save_theme");
 
 module.exports = View.extend({
   tagName: "li",
@@ -11,7 +11,7 @@ module.exports = View.extend({
   },
 
   render: function () {
-    this.$el.empty().append(save());
+    this.$el.empty().append(template());
 
     return this;
   },
