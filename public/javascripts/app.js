@@ -2730,11 +2730,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
         , title: "Blocks"
         , view: "blocksView"
       }
-      , {
-          id: "share_link"
-        , title: "Share"
-        , view: "shareLinkView"
-      }
     ]
 
     , render: function () {
@@ -2742,11 +2737,10 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
       this.regionsView = app.createView("regions");
       this.blocksView = app.createView("blocks");
       this.styleEditView = app.createView("style_edit");
-      this.shareLinkView = app.createView("share_link");
       this.layoutView = app.createView("layout");
 
       this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
-                         this.styleEditview, this.shareLinkView, this.layoutView);
+                         this.styleEditview, this.layoutView);
 
       // Setup drag and drop and resize
       this.layoutView.render();
@@ -3303,12 +3297,14 @@ window.require.define({"views/menubar": function(exports, require, module) {
       var menu = this.$("#file-menu"),
           copyView = app.createView("copy"),
           saveView = app.createView("save"),
+          shareView = app.createView("share"),
           downloadView = app.createView("download");
 
-      this.subViews.push(copyView);
+      this.subViews.push(copyView, saveView, shareView, downloadView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(saveView.render().$el);
+        menu.append(shareView.render().$el);
         menu.append(this.divider());
         menu.append(downloadView.render().$el);
         menu.append(this.divider());
@@ -3700,16 +3696,42 @@ window.require.define({"views/save": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/share_link": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application");
+window.require.define({"views/share": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      share = require("views/templates/share");
 
   module.exports = View.extend({
-      id: "share-link"
-    , className: "x-section well well-small"
-    , template: "share_link"
-    , data: {
-      theme: app.currentTheme.id
+    tagName: "li",
+    className: "dropdown",
+
+    render: function () {
+      var shareLinkView = app.createView("share_link").render();
+
+      this.subViews.push(shareLinkView);
+
+      this.$el.empty().append(share());
+
+      return this;
+    }
+  });
+  
+}});
+
+window.require.define({"views/share_link": function(exports, require, module) {
+  var View = require("views/base/view")
+    , app = require("application",
+      share_link = require("views/templates/share_link"));
+
+  module.exports = View.extend({
+    id: "share-link",
+
+    render: function () {
+      this.$el.empty()
+        .append(share_link({theme: app.currentTheme.id}))
+        .appendTo($("#main", window.top.document));
+
+      return this;
     }
   });
   
@@ -4523,18 +4545,27 @@ window.require.define({"views/templates/save": function(exports, require, module
     return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-save\"></i> Save Theme</a>\n";});
 }});
 
+window.require.define({"views/templates/share": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#share-modal\"\n  id=\"share-theme\"><i class=\"icon-share\"></i> Share Theme</a>\n";});
+}});
+
 window.require.define({"views/templates/share_link": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<p>http://makeatheme.com/themes/";
+    buffer += "<div id=\"share-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"share-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"share-modal-header\">Share Theme</h3>\n  </div>\n  <div class=\"modal-body\">\n    <p>This theme can be viewed by anyone you give the following link to.<br />\n    Please share it with care.</p>\n    <div class=\"well well-small\">http://makeatheme.com/themes/";
     foundHelper = helpers.theme;
     stack1 = foundHelper || depth0.theme;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</p>\n";
+    buffer += escapeExpression(stack1) + "</div>\n  </div>\n</div>\n";
     return buffer;});
 }});
 

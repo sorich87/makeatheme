@@ -22,11 +22,6 @@ module.exports = View.extend({
       , title: "Blocks"
       , view: "blocksView"
     }
-    , {
-        id: "share_link"
-      , title: "Share"
-      , view: "shareLinkView"
-    }
   ]
 
   , render: function () {
@@ -34,11 +29,10 @@ module.exports = View.extend({
     this.regionsView = app.createView("regions");
     this.blocksView = app.createView("blocks");
     this.styleEditView = app.createView("style_edit");
-    this.shareLinkView = app.createView("share_link");
     this.layoutView = app.createView("layout");
 
     this.subViews.push(this.templatesView, this.regionsViews, this.blocksView,
-                       this.styleEditview, this.shareLinkView, this.layoutView);
+                       this.styleEditview, this.layoutView);
 
     // Setup drag and drop and resize
     this.layoutView.render();

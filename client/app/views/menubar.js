@@ -20,12 +20,14 @@ module.exports = View.extend({
     var menu = this.$("#file-menu"),
         copyView = app.createView("copy"),
         saveView = app.createView("save"),
+        shareView = app.createView("share"),
         downloadView = app.createView("download");
 
-    this.subViews.push(copyView);
+    this.subViews.push(copyView, saveView, shareView, downloadView);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
       menu.append(saveView.render().$el);
+      menu.append(shareView.render().$el);
       menu.append(this.divider());
       menu.append(downloadView.render().$el);
       menu.append(this.divider());
