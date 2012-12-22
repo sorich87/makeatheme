@@ -2796,7 +2796,6 @@ window.require.define({"views/editor": function(exports, require, module) {
     , View = require("views/base/view")
     , data = require("lib/editor_data")
     , mutations = require("lib/mutations")
-    , theme_meta = require("views/templates/theme_meta")
     , accordion_group = require("views/templates/accordion_group");
 
   module.exports = View.extend({
@@ -2825,14 +2824,12 @@ window.require.define({"views/editor": function(exports, require, module) {
     // Show editor when "template:loaded" event is triggered
     , render: function () {
       var editorToggleView = app.createView("editor_toggle"),
-          themeMetaView = app.createView("theme_meta"),
           actionsView = app.createView("edit_actions");
 
-      this.subViews.push(editorToggleView, themeMetaView, actionsView);
+      this.subViews.push(editorToggleView, actionsView);
 
       this.$el.empty()
         .append(editorToggleView.render().$el)
-        .append(themeMetaView.render().$el)
         .append(actionsView.render().$el);
 
       this.$el.appendTo($("#main", window.top.document));
@@ -3284,6 +3281,10 @@ window.require.define({"views/menubar": function(exports, require, module) {
     className: "nav",
     model: app.currentTheme,
 
+    appEvents: {
+      "theme:renamed": "render"
+    },
+
     render: function () {
       this.$el.empty().append(menubar({theme_name: this.model.get("name")}));
 
@@ -3296,6 +3297,7 @@ window.require.define({"views/menubar": function(exports, require, module) {
     buildFileMenu: function () {
       var menu = this.$("#file-menu"),
           copyThemeView = app.createView("copy_theme"),
+          renameThemeView = app.createView("rename_theme"),
           saveThemeView = app.createView("save_theme"),
           shareThemeView = app.createView("share_theme"),
           downloadThemeView = app.createView("download_theme");
@@ -3305,6 +3307,7 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(saveThemeView.render().$el);
+        menu.append(renameThemeView.render().$el);
         menu.append(shareThemeView.render().$el);
         menu.append(this.divider());
         menu.append(downloadThemeView.render().$el);
@@ -3653,6 +3656,83 @@ window.require.define({"views/register": function(exports, require, module) {
         .find(".error-message").remove();
     }
   });
+  
+}});
+
+window.require.define({"views/rename_theme": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      template = require("views/templates/rename_theme");
+
+  module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown",
+
+    render: function () {
+      var formView = app.createView("rename_theme_form").render();
+
+      this.subViews.push(formView);
+
+      this.$el.empty().append(template());
+
+      return this;
+    }
+  });
+  
+}});
+
+window.require.define({"views/rename_theme_form": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/rename_theme_form")
+    , Themes = require("collections/themes")
+    , app = require("application");
+
+  module.exports = View.extend({
+    events: {
+      "submit form": "verifyName"
+    },
+
+    appEvents: {
+      "save:before": "saveThemeName"
+    },
+
+    render: function () {
+      this.$el.empty()
+        .append(template({name: app.currentTheme.get("name")}))
+        .appendTo($("#main", window.top.document));
+
+      return this;
+    },
+
+    verifyName: function (e) {
+      // Use window.top here because the modal is bound to the top window.
+      var $element = window.top.$(e.currentTarget),
+          $form = this.$("form"),
+          name = this.$(".name").val();
+
+      e.preventDefault();
+
+      if (name) {
+        $element.closest("#rename-theme-modal").modal("hide");
+
+        app.currentTheme.set("name", name);
+
+        app.trigger("notification", "success", "Theme name changed. Save to keep the change.");
+
+        app.trigger("theme:renamed");
+
+      } else if ($form.children(".alert-error").length === 0) {
+        $form.prepend("<p class='alert alert-error'>" +
+                      "Theme name can't be empty.</p>");
+      }
+    },
+
+
+    saveThemeName: function (attributes) {
+      attributes.name = this.$(".name").val();
+    }
+  });
+
   
 }});
 
@@ -4522,6 +4602,30 @@ window.require.define({"views/templates/register": function(exports, require, mo
     return "<div class=\"modal-header\">\n  <h3>Create a free account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n  </ul>\n</div>\n";});
 }});
 
+window.require.define({"views/templates/rename_theme": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#rename-theme-modal\"><i class=\"icon-edit\"></i> Rename Theme</a>\n";});
+}});
+
+window.require.define({"views/templates/rename_theme_form": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div id=\"rename-theme-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"rename-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"rename-modal-header\">Rename Theme</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large name\" placeholder=\"Theme Name\" value=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Rename</button>\n    </form>\n  </div>\n</div>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/rule": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -5322,21 +5426,6 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     return buffer;});
 }});
 
-window.require.define({"views/templates/theme_meta": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "Theme: <span class=\"name\">";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</span>\n";
-    return buffer;});
-}});
-
 window.require.define({"views/templates/themes": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -5534,38 +5623,6 @@ window.require.define({"views/theme_list": function(exports, require, module) {
       }
     }
   });
-  
-}});
-
-window.require.define({"views/theme_meta": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/theme_meta")
-    , Themes = require("collections/themes")
-    , app = require("application");
-
-  module.exports = View.extend({
-    id: "theme-meta",
-
-    appEvents: {
-      "save:before": "saveThemeName"
-    },
-
-    render: function () {
-      this.$el.empty()
-        .append(template({name: app.data.theme.name}));
-
-      if (app.data.theme.author_id === app.currentUser.id) {
-        this.$(".name").attr("contenteditable", "true");
-      }
-
-      return this;
-    },
-
-    saveThemeName: function (attributes) {
-      attributes.name = this.$(".name").text();
-    }
-  });
-
   
 }});
 

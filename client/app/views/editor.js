@@ -2,7 +2,6 @@ var app = require("application")
   , View = require("views/base/view")
   , data = require("lib/editor_data")
   , mutations = require("lib/mutations")
-  , theme_meta = require("views/templates/theme_meta")
   , accordion_group = require("views/templates/accordion_group");
 
 module.exports = View.extend({
@@ -31,14 +30,12 @@ module.exports = View.extend({
   // Show editor when "template:loaded" event is triggered
   , render: function () {
     var editorToggleView = app.createView("editor_toggle"),
-        themeMetaView = app.createView("theme_meta"),
         actionsView = app.createView("edit_actions");
 
-    this.subViews.push(editorToggleView, themeMetaView, actionsView);
+    this.subViews.push(editorToggleView, actionsView);
 
     this.$el.empty()
       .append(editorToggleView.render().$el)
-      .append(themeMetaView.render().$el)
       .append(actionsView.render().$el);
 
     this.$el.appendTo($("#main", window.top.document));

@@ -7,6 +7,10 @@ module.exports = View.extend({
   className: "nav",
   model: app.currentTheme,
 
+  appEvents: {
+    "theme:renamed": "render"
+  },
+
   render: function () {
     this.$el.empty().append(menubar({theme_name: this.model.get("name")}));
 
@@ -19,6 +23,7 @@ module.exports = View.extend({
   buildFileMenu: function () {
     var menu = this.$("#file-menu"),
         copyThemeView = app.createView("copy_theme"),
+        renameThemeView = app.createView("rename_theme"),
         saveThemeView = app.createView("save_theme"),
         shareThemeView = app.createView("share_theme"),
         downloadThemeView = app.createView("download_theme");
@@ -28,6 +33,7 @@ module.exports = View.extend({
 
     if (app.currentUser.canEdit(app.currentTheme)) {
       menu.append(saveThemeView.render().$el);
+      menu.append(renameThemeView.render().$el);
       menu.append(shareThemeView.render().$el);
       menu.append(this.divider());
       menu.append(downloadThemeView.render().$el);
