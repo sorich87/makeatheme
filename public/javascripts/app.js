@@ -3309,7 +3309,9 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(saveView.render().$el);
+        menu.append(this.divider());
         menu.append(downloadView.render().$el);
+        menu.append(this.divider());
       }
 
       menu.append(copyView.render().$el);
@@ -3327,6 +3329,10 @@ window.require.define({"views/menubar": function(exports, require, module) {
       if (!app.currentUser.canEdit(app.currentTheme)) {
         menu.append(templatesSelectView.render().$el);
       }
+    },
+
+    divider: function () {
+      return "<li class='divider'></li>";
     }
   });
 
