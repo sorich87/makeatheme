@@ -8,10 +8,6 @@ module.exports = View.extend({
     "submit form": "verifyName"
   },
 
-  appEvents: {
-    "save:before": "saveThemeName"
-  },
-
   render: function () {
     this.$el.empty()
       .append(template({name: app.currentTheme.get("name")}))
@@ -41,11 +37,6 @@ module.exports = View.extend({
       $form.prepend("<p class='alert alert-error'>" +
                     "Theme name can't be empty.</p>");
     }
-  },
-
-
-  saveThemeName: function (attributes) {
-    attributes.name = this.$(".name").val();
   }
 });
 

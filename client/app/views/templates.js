@@ -6,7 +6,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "templates-select"
   , className: "x-section"
-  , collection: app.editor.templates
+  , collection: app.currentTheme.get("templates")
 
   , events: {
       "change ul input": "switchTemplate"
@@ -27,7 +27,6 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "save:before": "addThemeAttributes",
     "mutations:started": "makeMutable",
     "region:load": "saveRegion"
   }
@@ -38,8 +37,7 @@ module.exports = View.extend({
     }.bind(this));
 
     this.$el.empty().append(template({
-        standards: standards
-      , edit: !app.editor.preview_only
+      standards: standards
     }));
 
     this.collection.reset(this.collection.models);
@@ -156,12 +154,6 @@ module.exports = View.extend({
     this.render();
 
     app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.templates = _.map(this.collection.models, function (template) {
-      return _.pick(template.attributes, "_id", "name", "template");
-    });
   }
 
   , makeMutable: function (pieces) {

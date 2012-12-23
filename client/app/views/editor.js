@@ -1,6 +1,5 @@
 var app = require("application")
   , View = require("views/base/view")
-  , data = require("lib/editor_data")
   , mutations = require("lib/mutations")
   , accordion_group = require("views/templates/accordion_group");
 
@@ -8,14 +7,6 @@ module.exports = View.extend({
   id: "layout-editor"
 
   , initialize: function () {
-    _.extend(app.editor, {
-        preview_only: !!app.data.preview_only
-      , templates: data.templates
-      , regions: data.regions
-      , blocks: data.blocks
-      , style: data.style
-    });
-
     $(window).on("resize", this.resize.bind(this));
 
     View.prototype.initialize.call(this);

@@ -107,9 +107,6 @@ window.require.define({"application": function(exports, require, module) {
       // Set per-view body classes
       this.setBodyClasses();
 
-      // Holds editor settings and data
-      this.editor = {};
-
       // When login or registration modal is closed, go back to the previous page
       this.authRedirect();
 
@@ -185,7 +182,7 @@ window.require.define({"application": function(exports, require, module) {
         }
 
         if (this.data.style) {
-          this.currentTheme.set("css", new CustomCSS(this.data.style));
+          this.currentTheme.set("style", new CustomCSS(this.data.style));
         }
       }
     }
@@ -1840,6 +1837,29 @@ window.require.define({"models/theme": function(exports, require, module) {
       , author: ""
       , screenshot_uri: ""
     }
+
+    , toJSON: function () {
+      var attributes = _.clone(this.attributes);
+
+      ["blocks", "regions", "templates"].forEach(function (object) {
+        if (!attributes[object].models) {
+          return [];
+        }
+
+        var filter = function (model) {
+          return _.pick(model.attributes, "_id", "label", "name", "slug",
+                        "template");
+        };
+
+        attributes[object] = _.map(attributes[object].models, filter);
+      });
+
+      if ("getRules" in attributes.style) {
+        attributes.style = attributes.style.getRules();
+      }
+
+      return attributes;
+    }
   });
   
 }});
@@ -2379,7 +2399,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-block-insert"
     , className: "x-section"
-    , collection: app.editor.blocks
+    , collection: app.currentTheme.get("blocks")
 
     , events: {
         "click .new-block": "showForm"
@@ -2398,7 +2418,6 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
     , appEvents: {
       "mutations:started": "makeMutable",
-      "save:before": "addThemeAttributes",
       "block:inserted": "insertBlock"
     }
 
@@ -2514,12 +2533,6 @@ window.require.define({"views/blocks": function(exports, require, module) {
         this.collection.remove(cid);
         this.render();
       }
-    }
-
-    , addThemeAttributes: function (attributes) {
-      attributes.blocks = _.map(this.collection.models, function (block) {
-        return _.pick(block.attributes, "_id", "name", "label", "template");
-      });
     }
   });
   
@@ -2794,7 +2807,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
 window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
-    , data = require("lib/editor_data")
     , mutations = require("lib/mutations")
     , accordion_group = require("views/templates/accordion_group");
 
@@ -2802,14 +2814,6 @@ window.require.define({"views/editor": function(exports, require, module) {
     id: "layout-editor"
 
     , initialize: function () {
-      _.extend(app.editor, {
-          preview_only: !!app.data.preview_only
-        , templates: data.templates
-        , regions: data.regions
-        , blocks: data.blocks
-        , style: data.style
-      });
-
       $(window).on("resize", this.resize.bind(this));
 
       View.prototype.initialize.call(this);
@@ -3466,7 +3470,7 @@ window.require.define({"views/regions": function(exports, require, module) {
   module.exports = View.extend({
       id: "x-region-select"
     , className: "x-section"
-    , collection: app.editor.regions
+    , collection: app.currentTheme.get("regions")
 
     , events: {
         "change .x-header-select, .x-footer-select": "switchRegion"
@@ -3480,7 +3484,6 @@ window.require.define({"views/regions": function(exports, require, module) {
     }
 
     , appEvents: {
-      "save:before": "addThemeAttributes",
       "mutations:started": "makeMutable",
       "template:load": "addRegionsToTemplate"
     }
@@ -3570,12 +3573,6 @@ window.require.define({"views/regions": function(exports, require, module) {
         .children(":selected").removeAttr("selected").end()
         .children("[value='']")
           .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
-    }
-
-    , addThemeAttributes: function (attributes) {
-      attributes.regions = _.map(this.collection.models, function (region) {
-        return _.pick(region.attributes, "_id", "name", "slug", "template");
-      });
     }
 
     , makeMutable: function (pieces) {
@@ -3700,10 +3697,6 @@ window.require.define({"views/rename_theme_form": function(exports, require, mod
       "submit form": "verifyName"
     },
 
-    appEvents: {
-      "save:before": "saveThemeName"
-    },
-
     render: function () {
       this.$el.empty()
         .append(template({name: app.currentTheme.get("name")}))
@@ -3733,11 +3726,6 @@ window.require.define({"views/rename_theme_form": function(exports, require, mod
         $form.prepend("<p class='alert alert-error'>" +
                       "Theme name can't be empty.</p>");
       }
-    },
-
-
-    saveThemeName: function (attributes) {
-      attributes.name = this.$(".name").val();
     }
   });
 
@@ -3752,6 +3740,7 @@ window.require.define({"views/save_theme": function(exports, require, module) {
   module.exports = View.extend({
     tagName: "li",
     className: "dropdown",
+    model: app.currentTheme,
 
     events: {
       "click #save-theme": "saveTheme"
@@ -3764,17 +3753,15 @@ window.require.define({"views/save_theme": function(exports, require, module) {
     },
 
     saveTheme: function (e) {
-      var attrs = _.clone(app.data.theme);
+      e.preventDefault();
 
-      app.trigger("save:before", attrs);
-
-      app.currentUser.get("themes").create(attrs, {
+      this.model.save(null, {
         success: function (theme) {
           app.trigger("save:after", theme);
 
           app.trigger("notification", "success", "Theme saved.");
-        }
-        , error: function (theme, response) {
+        },
+        error: function (theme, response) {
           app.trigger("save:error");
 
           app.trigger("notification", "error", "Unable to save the theme. Please try again.");
@@ -3913,13 +3900,12 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , appEvents: {
       "column:highlight": "showEditor",
-      "save:before": "addThemeAttributes",
       "resize:end": "changeWidth"
     }
 
     , initialize: function () {
       this.selector = "body";
-      this.customCSS = app.editor.style;
+      this.customCSS = app.currentTheme.get("style");
       this.editorView = "simple_style_edit";
 
       View.prototype.initialize.call(this);
@@ -3973,10 +3959,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         });
         return group;
       });
-    }
-
-    , addThemeAttributes: function (attributes) {
-      attributes.style = this.customCSS.getRules();
     }
 
     , changeWidth: function (selector, width) {
@@ -4068,7 +4050,7 @@ window.require.define({"views/templates": function(exports, require, module) {
   module.exports = View.extend({
       id: "templates-select"
     , className: "x-section"
-    , collection: app.editor.templates
+    , collection: app.currentTheme.get("templates")
 
     , events: {
         "change ul input": "switchTemplate"
@@ -4089,7 +4071,6 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , appEvents: {
-      "save:before": "addThemeAttributes",
       "mutations:started": "makeMutable",
       "region:load": "saveRegion"
     }
@@ -4100,8 +4081,7 @@ window.require.define({"views/templates": function(exports, require, module) {
       }.bind(this));
 
       this.$el.empty().append(template({
-          standards: standards
-        , edit: !app.editor.preview_only
+        standards: standards
       }));
 
       this.collection.reset(this.collection.models);
@@ -4218,12 +4198,6 @@ window.require.define({"views/templates": function(exports, require, module) {
       this.render();
 
       app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
-    }
-
-    , addThemeAttributes: function (attributes) {
-      attributes.templates = _.map(this.collection.models, function (template) {
-        return _.pick(template.attributes, "_id", "name", "template");
-      });
     }
 
     , makeMutable: function (pieces) {

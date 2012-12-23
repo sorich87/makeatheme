@@ -6,7 +6,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-region-select"
   , className: "x-section"
-  , collection: app.editor.regions
+  , collection: app.currentTheme.get("regions")
 
   , events: {
       "change .x-header-select, .x-footer-select": "switchRegion"
@@ -20,7 +20,6 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "save:before": "addThemeAttributes",
     "mutations:started": "makeMutable",
     "template:load": "addRegionsToTemplate"
   }
@@ -110,12 +109,6 @@ module.exports = View.extend({
       .children(":selected").removeAttr("selected").end()
       .children("[value='']")
         .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.regions = _.map(this.collection.models, function (region) {
-      return _.pick(region.attributes, "_id", "name", "slug", "template");
-    });
   }
 
   , makeMutable: function (pieces) {

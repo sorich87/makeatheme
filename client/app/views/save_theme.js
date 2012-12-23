@@ -5,6 +5,7 @@ var View = require("views/base/view"),
 module.exports = View.extend({
   tagName: "li",
   className: "dropdown",
+  model: app.currentTheme,
 
   events: {
     "click #save-theme": "saveTheme"
@@ -17,17 +18,15 @@ module.exports = View.extend({
   },
 
   saveTheme: function (e) {
-    var attrs = _.clone(app.data.theme);
+    e.preventDefault();
 
-    app.trigger("save:before", attrs);
-
-    app.currentUser.get("themes").create(attrs, {
+    this.model.save(null, {
       success: function (theme) {
         app.trigger("save:after", theme);
 
         app.trigger("notification", "success", "Theme saved.");
-      }
-      , error: function (theme, response) {
+      },
+      error: function (theme, response) {
         app.trigger("save:error");
 
         app.trigger("notification", "error", "Unable to save the theme. Please try again.");

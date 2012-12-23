@@ -6,7 +6,7 @@ var View = require("views/base/view")
 module.exports = View.extend({
     id: "x-block-insert"
   , className: "x-section"
-  , collection: app.editor.blocks
+  , collection: app.currentTheme.get("blocks")
 
   , events: {
       "click .new-block": "showForm"
@@ -25,7 +25,6 @@ module.exports = View.extend({
 
   , appEvents: {
     "mutations:started": "makeMutable",
-    "save:before": "addThemeAttributes",
     "block:inserted": "insertBlock"
   }
 
@@ -141,11 +140,5 @@ module.exports = View.extend({
       this.collection.remove(cid);
       this.render();
     }
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.blocks = _.map(this.collection.models, function (block) {
-      return _.pick(block.attributes, "_id", "name", "label", "template");
-    });
   }
 });

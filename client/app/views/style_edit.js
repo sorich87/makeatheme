@@ -19,13 +19,12 @@ module.exports = View.extend({
 
   , appEvents: {
     "column:highlight": "showEditor",
-    "save:before": "addThemeAttributes",
     "resize:end": "changeWidth"
   }
 
   , initialize: function () {
     this.selector = "body";
-    this.customCSS = app.editor.style;
+    this.customCSS = app.currentTheme.get("style");
     this.editorView = "simple_style_edit";
 
     View.prototype.initialize.call(this);
@@ -79,10 +78,6 @@ module.exports = View.extend({
       });
       return group;
     });
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.style = this.customCSS.getRules();
   }
 
   , changeWidth: function (selector, width) {

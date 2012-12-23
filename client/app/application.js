@@ -30,9 +30,6 @@ _.extend(Application, {
     // Set per-view body classes
     this.setBodyClasses();
 
-    // Holds editor settings and data
-    this.editor = {};
-
     // When login or registration modal is closed, go back to the previous page
     this.authRedirect();
 
@@ -108,7 +105,7 @@ _.extend(Application, {
       }
 
       if (this.data.style) {
-        this.currentTheme.set("css", new CustomCSS(this.data.style));
+        this.currentTheme.set("style", new CustomCSS(this.data.style));
       }
     }
   }
