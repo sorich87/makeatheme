@@ -35,7 +35,7 @@ module.exports = View.extend({
   }
 
   , resize: function () {
-    this.$el.width("100%")
+    this.$el.width($(window).width() - 250)
       .height($(window).height() - 40);
   }
 });

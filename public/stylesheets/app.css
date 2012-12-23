@@ -6865,6 +6865,9 @@ body.theme #main {
   margin: 0;
   width: 100%;
 }
+body.theme.preview #canvas {
+  width: 100% !important;
+}
 #canvas {
   overflow: auto;
   float: left;

@@ -56,6 +56,10 @@ module.exports = Backbone.Router.extend({
 
     if (app.currentUser.canEdit(app.currentTheme)) {
       app.createView("editor").render();
+
+      $("body", window.top.document).addClass("edit");
+    } else {
+      $("body", window.top.document).addClass("preview");
     }
   }
 

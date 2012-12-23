@@ -41,8 +41,6 @@ module.exports = View.extend({
 
   , resize: function () {
     this.$el.height($(window.top).height() - 40);
-
-    $("#canvas", window.top.document).width($(window.top).width() - 250);
   }
 
   // Prevent click, drag and submit on links, images and forms
