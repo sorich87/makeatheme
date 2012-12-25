@@ -28,7 +28,8 @@ module.exports = View.extend({
 
   , appEvents: {
     "mutations:started": "makeMutable",
-    "region:load": "saveRegion"
+    "region:load": "saveRegion",
+    "template:loaded": "render"
   }
 
   , render: function () {
@@ -41,8 +42,6 @@ module.exports = View.extend({
     }));
 
     this.collection.reset(this.collection.models);
-
-    this.loadTemplate(this.collection.getCurrent());
 
     return this;
   }
@@ -83,25 +82,6 @@ module.exports = View.extend({
 
     this.$("ul li").removeClass("current");
     this.$("ul input:checked").closest("li").addClass("current");
-
-    this.loadTemplate(template);
-  }
-
-  // Save current template, display it and trigger template:loaded event
-  , loadTemplate: function (template) {
-    var regions;
-
-    app.trigger("template:load", template);
-
-    regions = template.get("regions_attributes");
-
-    build = regions.header.get("build") + template.get("build") + regions.footer.get("build");
-
-    $("#page").fadeOut().empty().append(build).fadeIn();
-
-    this.collection.setCurrent(template);
-
-    app.trigger("template:loaded", template);
   }
 
   // Remove column if confirmed.

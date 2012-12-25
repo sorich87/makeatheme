@@ -20,8 +20,7 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "mutations:started": "makeMutable",
-    "template:load": "addRegionsToTemplate"
+    "mutations:started": "makeMutable"
   }
 
   , render: function () {
@@ -113,20 +112,5 @@ module.exports = View.extend({
 
   , makeMutable: function (pieces) {
     pieces.regions = this.collection;
-  }
-
-  // Add corresponding regions attributes to template so that the regions are
-  // displayed in the template.
-  // Mark the regions as selected in the editor.
-  , addRegionsToTemplate: function (template) {
-    var regions = template.get("regions");
-
-    template.set("regions_attributes", {
-        header: this.collection.getByName("header", regions.header)
-      , footer: this.collection.getByName("footer", regions.footer)
-    });
-
-    this.$(".x-header-select").val(regions.header);
-    this.$(".x-footer-select").val(regions.footer);
   }
 });

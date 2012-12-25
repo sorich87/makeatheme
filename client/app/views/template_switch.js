@@ -7,8 +7,7 @@ module.exports = View.extend({
   id: "templates-select",
   tagName: "li",
   className: "dropdown-submenu",
-
-  template: "templates_select",
+  template: "template_switch",
   collection: app.currentTheme.get("templates"),
 
   data: function () {
@@ -28,26 +27,34 @@ module.exports = View.extend({
   },
 
   initialize: function () {
-    var template = this.collection.getCurrent();
-
-    $("#page").fadeOut().empty()
-      .append(template.get("full"))
-      .fadeIn();
+    this.loadTemplate(this.collection.getCurrent());
 
     View.prototype.initialize.call(this);
   },
 
   switchTemplate: function (e) {
-    var id = e.currentTarget.getAttribute("data-id"),
-        template = this.collection.get(id);
+    var id = e.currentTarget.getAttribute("data-id");
 
     e.preventDefault();
 
-    $("#page").fadeOut().empty()
-      .append(template.get("full"))
-      .fadeIn();
+    this.loadTemplate(this.collection.get(id));
 
     this.$(".active").removeClass("active");
     $(e.currentTarget.parentNode).addClass("active");
+  }
+
+  // Save current template, display it and trigger template:loaded event
+  , loadTemplate: function (template) {
+    var regions = app.currentTheme.get("regions"),
+        templateRegions = template.get("regions"),
+        header = regions.getByName("header", templateRegions.header),
+        footer = regions.getByName("footer", templateRegions.footer),
+        build = header.get("build") + template.get("build") + footer.get("build");
+
+    $("#page").fadeOut().empty().append(build).fadeIn();
+
+    this.collection.setCurrent(template);
+
+    app.trigger("template:loaded", template);
   }
 });

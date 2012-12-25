@@ -55,14 +55,14 @@ module.exports = View.extend({
 
   buildTemplateMenu: function () {
     var menu = this.$("#template-menu"),
-        templatesSelectView = app.createView("templates_select");
+        templateSwitchView = app.createView("template_switch");
 
-    this.subViews.push(templatesSelectView);
+    this.subViews.push(templateSwitchView);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
-    } else {
-      menu.append(templatesSelectView.render().$el);
     }
+
+    menu.append(templateSwitchView.render().$el);
   },
 
   divider: function () {
