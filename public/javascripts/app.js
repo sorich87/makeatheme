@@ -1715,63 +1715,11 @@ window.require.define({"models/template": function(exports, require, module) {
       , regions: { header: "default", footer: "default" }
     }
 
-    , label: function () {
-      var key;
-
-      for (key in this.standards) {
-        if (!this.standards.hasOwnProperty(key)) {
-          continue;
-        }
-
-        if (this.get("name") === this.standards[key].name) {
-          return this.standards[key].label;
-        }
-      }
-
-      return this.get("name");
-    }
-
     , setRegion: function (name, slug) {
       var regions = this.get("regions");
       regions[name] = slug;
       this.set("regions", regions);
     }
-
-    // Standard WordPress templates.
-    , standards: [
-        {
-          name: "index"
-        , label: "Default"
-      }
-      , {
-          name: "front-page"
-        , label: "Front Page"
-      }
-      , {
-          name: "home"
-        , label: "Blog"
-      }
-      , {
-          name: "single"
-        , label: "Article"
-      }
-      , {
-          name: "page"
-        , label: "Page"
-      }
-      , {
-          name: "archive"
-        , label: "Archive"
-      }
-      , {
-          name: "search"
-        , label: "Search Results"
-      }
-      , {
-          name: "404"
-        , label: "Error 404"
-      }
-    ]
   });
   
 }});
@@ -4139,7 +4087,7 @@ window.require.define({"views/template_switch": function(exports, require, modul
         templates: this.collection.map(function (template) {
           return {
             id: template.id,
-            label: template.label(),
+            label: template.get("name"),
             active: template.get("name") === currentTemplate.get("name")
           };
         })
@@ -4185,101 +4133,6 @@ window.require.define({"views/template_switch": function(exports, require, modul
       this.collection.setCurrent(template);
 
       app.trigger("template:loaded", template);
-    }
-  });
-  
-}});
-
-window.require.define({"views/templates": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application")
-    , Template = require("models/template")
-    , template = require("views/templates/templates");
-
-  module.exports = View.extend({
-      id: "templates-select"
-    , className: "x-section"
-    , collection: app.currentTheme.get("templates")
-
-    , events: {
-        "change ul input": "switchTemplate"
-      , "focus ul input": "switchTemplate"
-      , "blur ul input": "switchTemplate"
-      , "click .close": "removeTemplate"
-    }
-
-    , objectEvents: {
-      collection: {
-        "add": "addOne",
-        "reset": "addAll",
-        "remove": "removeOne"
-      }
-    }
-
-    , appEvents: {
-      "template:created": "render",
-      "template:loaded": "render"
-    }
-
-    , render: function () {
-      var standards = _.reject((new Template()).standards, function (standard) {
-        return !!this.collection.getByName(standard.name);
-      }.bind(this));
-
-      this.$el.empty().append(template({
-        standards: standards
-      }));
-
-      this.collection.reset(this.collection.models);
-
-      return this;
-    }
-
-    , addOne: function (template) {
-      var checked = ""
-        , current = ""
-        , remove = "";
-
-      if (template.cid === this.collection.getCurrent().cid) {
-        checked = " checked='checked'";
-        current = " class='current'";
-      }
-
-      if (template.get("name") != "index") {
-        remove = "<span class='close' title='Delete template'>&times;</span>";
-      }
-
-      this.$("ul").append("<li" + current + "><label><input name='x-template'" + checked +
-                          " type='radio' value='" + template.cid + "' />" +
-                          template.label() + "</label>" + remove + "</li>");
-    }
-
-    , addAll: function () {
-      this.$("ul").empty();
-
-      _.each(this.collection.models, function (template) {
-        this.addOne(template);
-      }, this);
-    }
-
-    , removeOne: function (template) {
-      this.$("input[value='" + template.cid + "']").closest("li").remove();
-    }
-
-    , switchTemplate: function () {
-      var template = this.collection.get(this.$("ul input:checked").val());
-
-      this.$("ul li").removeClass("current");
-      this.$("ul input:checked").closest("li").addClass("current");
-    }
-
-    // Remove column if confirmed.
-    , removeTemplate: function (e) {
-      if (confirm("Are you sure you want to delete this template?")) {
-        var cid = $(e.currentTarget).parent().find("input").val();
-        this.collection.remove(cid);
-        this.render();
-      }
     }
   });
   

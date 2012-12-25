@@ -17,7 +17,7 @@ module.exports = View.extend({
       templates: this.collection.map(function (template) {
         return {
           id: template.id,
-          label: template.label(),
+          label: template.get("name"),
           active: template.get("name") === currentTemplate.get("name")
         };
       })
