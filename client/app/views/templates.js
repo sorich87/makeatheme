@@ -24,7 +24,6 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "mutations:started": "makeMutable",
     "region:load": "saveRegion",
     "template:created": "render",
     "template:loaded": "render"
@@ -89,10 +88,6 @@ module.exports = View.extend({
       this.collection.remove(cid);
       this.render();
     }
-  }
-
-  , makeMutable: function (pieces) {
-    pieces.templates = this.collection;
   }
 
   , saveRegion: function (region) {

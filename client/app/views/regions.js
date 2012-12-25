@@ -19,10 +19,6 @@ module.exports = View.extend({
     }
   }
 
-  , appEvents: {
-    "mutations:started": "makeMutable"
-  }
-
   , render: function () {
     this.$el.empty().append(template({
         headers: this.collection.where({name: "header"}).map(function (header) { return header.attributes; })
@@ -108,9 +104,5 @@ module.exports = View.extend({
       .children(":selected").removeAttr("selected").end()
       .children("[value='']")
         .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
-  }
-
-  , makeMutable: function (pieces) {
-    pieces.regions = this.collection;
   }
 });

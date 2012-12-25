@@ -24,7 +24,6 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "mutations:started": "makeMutable",
     "block:inserted": "insertBlock"
   }
 
@@ -88,10 +87,6 @@ module.exports = View.extend({
       block.className() + "'>" + block.get("build") + "</div>";
 
     app.trigger("node:added", window.document.getElementById(id));
-  }
-
-  , makeMutable: function (pieces) {
-    pieces.blocks = this.collection;
   }
 
   , showForm: function (e) {

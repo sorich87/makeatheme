@@ -3,12 +3,11 @@
 var app = require("application");
 
 module.exports = {
+  collection: app.currentTheme,
+
   initialize: function () {
     app.on("node:added", this.addNode.bind(this));
     app.on("node:removed", this.removeNode.bind(this));
-
-    this.pieces = {};
-    app.trigger("mutations:started", this.pieces);
   }
 
   , addNode: function (node, type) {
@@ -22,8 +21,8 @@ module.exports = {
       topNode = node.parentNode.parentNode;
 
       // Add corresponding Liquid tag in column node.
-      for (var i in this.pieces.blocks.models) {
-        block = this.pieces.blocks.models[i];
+      for (var i in this.collection.get("blocks").models) {
+        block = this.collection.get("blocks").models[i];
 
         if (node.firstElementChild.getAttribute("data-x-name") === block.get("name") &&
             node.firstElementChild.getAttribute("data-x-label") === block.get("label")) {
@@ -89,12 +88,12 @@ module.exports = {
   , getTemplatePiece: function(topNode) {
     var piece, template, regions, regionName;
 
-    template = this.pieces.templates.getCurrent();
+    template = this.collection.get("templates").getCurrent();
 
     if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
       regionName = topNode.tagName.toLowerCase();
       regions = template.get("regions");
-      piece = this.pieces.regions.getByName(regionName, regions[regionName]);
+      piece = this.collection.get("regions").getByName(regionName, regions[regionName]);
 
       piece.set("build", topNode.outerHTML);
     } else {

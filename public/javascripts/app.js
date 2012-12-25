@@ -1506,12 +1506,11 @@ window.require.define({"lib/mutations": function(exports, require, module) {
   var app = require("application");
 
   module.exports = {
+    collection: app.currentTheme,
+
     initialize: function () {
       app.on("node:added", this.addNode.bind(this));
       app.on("node:removed", this.removeNode.bind(this));
-
-      this.pieces = {};
-      app.trigger("mutations:started", this.pieces);
     }
 
     , addNode: function (node, type) {
@@ -1525,8 +1524,8 @@ window.require.define({"lib/mutations": function(exports, require, module) {
         topNode = node.parentNode.parentNode;
 
         // Add corresponding Liquid tag in column node.
-        for (var i in this.pieces.blocks.models) {
-          block = this.pieces.blocks.models[i];
+        for (var i in this.collection.get("blocks").models) {
+          block = this.collection.get("blocks").models[i];
 
           if (node.firstElementChild.getAttribute("data-x-name") === block.get("name") &&
               node.firstElementChild.getAttribute("data-x-label") === block.get("label")) {
@@ -1592,12 +1591,12 @@ window.require.define({"lib/mutations": function(exports, require, module) {
     , getTemplatePiece: function(topNode) {
       var piece, template, regions, regionName;
 
-      template = this.pieces.templates.getCurrent();
+      template = this.collection.get("templates").getCurrent();
 
       if (["HEADER", "FOOTER"].indexOf(topNode.tagName) !== -1) {
         regionName = topNode.tagName.toLowerCase();
         regions = template.get("regions");
-        piece = this.pieces.regions.getByName(regionName, regions[regionName]);
+        piece = this.collection.get("regions").getByName(regionName, regions[regionName]);
 
         piece.set("build", topNode.outerHTML);
       } else {
@@ -2374,7 +2373,6 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , appEvents: {
-      "mutations:started": "makeMutable",
       "block:inserted": "insertBlock"
     }
 
@@ -2438,10 +2436,6 @@ window.require.define({"views/blocks": function(exports, require, module) {
         block.className() + "'>" + block.get("build") + "</div>";
 
       app.trigger("node:added", window.document.getElementById(id));
-    }
-
-    , makeMutable: function (pieces) {
-      pieces.blocks = this.collection;
     }
 
     , showForm: function (e) {
@@ -3516,10 +3510,6 @@ window.require.define({"views/regions": function(exports, require, module) {
       }
     }
 
-    , appEvents: {
-      "mutations:started": "makeMutable"
-    }
-
     , render: function () {
       this.$el.empty().append(template({
           headers: this.collection.where({name: "header"}).map(function (header) { return header.attributes; })
@@ -3605,10 +3595,6 @@ window.require.define({"views/regions": function(exports, require, module) {
         .children(":selected").removeAttr("selected").end()
         .children("[value='']")
           .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
-    }
-
-    , makeMutable: function (pieces) {
-      pieces.regions = this.collection;
     }
   });
   
@@ -4155,7 +4141,6 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , appEvents: {
-      "mutations:started": "makeMutable",
       "region:load": "saveRegion",
       "template:created": "render",
       "template:loaded": "render"
@@ -4220,10 +4205,6 @@ window.require.define({"views/templates": function(exports, require, module) {
         this.collection.remove(cid);
         this.render();
       }
-    }
-
-    , makeMutable: function (pieces) {
-      pieces.templates = this.collection;
     }
 
     , saveRegion: function (region) {
