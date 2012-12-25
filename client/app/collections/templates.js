@@ -33,6 +33,11 @@ module.exports = Collection.extend({
       oldCurrent.set("current", false);
     }
 
+    // If template is an array of attributes, get the corresponding model.
+    if (template.name) {
+      template = this.getByName(template.name);
+    }
+
     template.set("current", true);
   }
 });

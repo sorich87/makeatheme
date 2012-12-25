@@ -11,12 +11,14 @@ module.exports = View.extend({
   collection: app.currentTheme.get("templates"),
 
   data: function () {
+    var currentTemplate = this.collection.getCurrent();
+
     return {
       templates: this.collection.map(function (template) {
         return {
           id: template.id,
           label: template.label(),
-          active: template.get("name") === "index"
+          active: template.get("name") === currentTemplate.get("name")
         };
       })
     };
@@ -24,6 +26,10 @@ module.exports = View.extend({
 
   events: {
     "click .dropdown-menu a": "switchTemplate"
+  },
+
+  appEvents: {
+    "template:created": "render"
   },
 
   initialize: function () {

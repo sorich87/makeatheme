@@ -290,6 +290,11 @@ window.require.define({"collections/templates": function(exports, require, modul
         oldCurrent.set("current", false);
       }
 
+      // If template is an array of attributes, get the corresponding model.
+      if (template.name) {
+        template = this.getByName(template.name);
+      }
+
       template.set("current", true);
     }
   });
@@ -3283,11 +3288,14 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
     buildTemplateMenu: function () {
       var menu = this.$("#template-menu"),
+          newTemplateView = app.createView("new_template"),
           templateSwitchView = app.createView("template_switch");
 
-      this.subViews.push(templateSwitchView);
+      this.subViews.push(newTemplateView, templateSwitchView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
+        menu.append(newTemplateView.render().$el);
+        menu.append(this.divider());
       }
 
       menu.append(templateSwitchView.render().$el);
@@ -3295,6 +3303,81 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
     divider: function () {
       return "<li class='divider'></li>";
+    }
+  });
+
+  
+}});
+
+window.require.define({"views/new_template": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      template = require("views/templates/new_template");
+
+  module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown",
+
+    render: function () {
+      var formView = app.createView("new_template_form").render();
+
+      this.subViews.push(formView);
+
+      this.$el.empty().append(template());
+
+      return this;
+    }
+  });
+  
+}});
+
+window.require.define({"views/new_template_form": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/new_template_form")
+    , app = require("application");
+
+  module.exports = View.extend({
+    collection: app.currentTheme.get("templates"),
+
+    events: {
+      "submit form": "addTemplate"
+    },
+
+    render: function () {
+      this.$el.empty()
+        .append(template())
+        .appendTo($("#main", window.top.document));
+
+      return this;
+    },
+
+    addTemplate: function (e) {
+      // Use window.top here because the modal is bound to the top window.
+      var $element = window.top.$(e.currentTarget),
+          $form = this.$("form"),
+          name = this.$(".name").val();
+
+      e.preventDefault();
+
+      if (name) {
+        $element.closest("#template-form-modal").modal("hide");
+
+        attributes = _.pick(this.collection.getByName("index").attributes,
+                            "template", "build", "regions");
+        attributes.name = name;
+
+        this.collection.add(attributes);
+        this.collection.setCurrent(attributes);
+
+        app.trigger("notification", "success", "The new template was created. " +
+                    "It's a copy of the default one.");
+
+        app.trigger("template:created");
+
+      } else if ($form.children(".alert-error").length === 0) {
+        $form.prepend("<p class='alert alert-error'>" +
+                      "Template name can't be empty.</p>");
+      }
     }
   });
 
@@ -3989,12 +4072,14 @@ window.require.define({"views/template_switch": function(exports, require, modul
     collection: app.currentTheme.get("templates"),
 
     data: function () {
+      var currentTemplate = this.collection.getCurrent();
+
       return {
         templates: this.collection.map(function (template) {
           return {
             id: template.id,
             label: template.label(),
-            active: template.get("name") === "index"
+            active: template.get("name") === currentTemplate.get("name")
           };
         })
       };
@@ -4002,6 +4087,10 @@ window.require.define({"views/template_switch": function(exports, require, modul
 
     events: {
       "click .dropdown-menu a": "switchTemplate"
+    },
+
+    appEvents: {
+      "template:created": "render"
     },
 
     initialize: function () {
@@ -4055,9 +4144,6 @@ window.require.define({"views/templates": function(exports, require, module) {
       , "focus ul input": "switchTemplate"
       , "blur ul input": "switchTemplate"
       , "click .close": "removeTemplate"
-      , "click .new-template": "showForm"
-      , "change .new-template-select select": "selectTemplate"
-      , "submit .new-template-select": "addTemplate"
     }
 
     , objectEvents: {
@@ -4071,6 +4157,7 @@ window.require.define({"views/templates": function(exports, require, module) {
     , appEvents: {
       "mutations:started": "makeMutable",
       "region:load": "saveRegion",
+      "template:created": "render",
       "template:loaded": "render"
     }
 
@@ -4133,49 +4220,6 @@ window.require.define({"views/templates": function(exports, require, module) {
         this.collection.remove(cid);
         this.render();
       }
-    }
-
-    , showForm: function (e) {
-      var $div = this.$(".new-template-select");
-
-      if ($div.is(":hidden")) {
-        $div.show("normal");
-      } else {
-        $div.hide("normal");
-      }
-    }
-
-    , selectTemplate: function (e) {
-      if ($(e.currentTarget).val() === "") {
-        this.$(".new-template-name").show().css("display", "block");
-      } else {
-        this.$(".new-template-name").hide();
-      }
-    }
-
-    , addTemplate: function (e) {
-      var name, attributes, template;
-
-      e.preventDefault();
-
-      name = this.$(".new-template-select select").val() ||
-             this.$(".new-template-name").val();
-
-      if (!name) {
-        app.trigger("notification", "error", "Please, enter a template name.");
-        return;
-      }
-
-      attributes = _.pick(this.collection.getByName("index").attributes,
-                          "template", "build", "regions");
-      attributes.name = name;
-
-      template = new Template(attributes);
-      this.collection.add(template);
-      this.collection.setCurrent(template);
-      this.render();
-
-      app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
     }
 
     , makeMutable: function (pieces) {
@@ -4452,6 +4496,24 @@ window.require.define({"views/templates/menubar": function(exports, require, mod
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_name", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Template <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"template-menu\"></ul>\n  </li>\n</ul>\n";
     return buffer;});
+}});
+
+window.require.define({"views/templates/new_template": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#template-form-modal\"\n  id=\"share-theme\">New Template</a>\n";});
+}});
+
+window.require.define({"views/templates/new_template_form": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var foundHelper, self=this;
+
+
+    return "<div id=\"template-form-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"template-form-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"template-form-modal-header\">New Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large name\" placeholder=\"Template Name\" value=\"\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Create Template</button>\n    </form>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -5273,36 +5335,10 @@ window.require.define({"views/templates/template_switch": function(exports, requ
 window.require.define({"views/templates/templates": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+    var foundHelper, self=this;
 
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n    <option value=\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n    ";
-    return buffer;}
 
-    buffer += "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-template-select hide\">\n  <legend>Add New Template</legend>\n  <select>\n    ";
-    foundHelper = helpers.standards;
-    stack1 = foundHelper || depth0.standards;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    <option value=\"\">Other</option>\n  </select>\n  <input class=\"new-template-name hide\" type=\"text\" value=\"\" placeholder=\"Enter template name\" />\n  <button class=\"new-template-add btn\">Add template</button>\n</form>\n<button class=\"new-template\">&plus; New Template</button>\n";
-    return buffer;});
+    return "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n";});
 }});
 
 window.require.define({"views/templates/theme": function(exports, require, module) {

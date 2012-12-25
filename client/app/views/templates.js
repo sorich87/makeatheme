@@ -13,9 +13,6 @@ module.exports = View.extend({
     , "focus ul input": "switchTemplate"
     , "blur ul input": "switchTemplate"
     , "click .close": "removeTemplate"
-    , "click .new-template": "showForm"
-    , "change .new-template-select select": "selectTemplate"
-    , "submit .new-template-select": "addTemplate"
   }
 
   , objectEvents: {
@@ -29,6 +26,7 @@ module.exports = View.extend({
   , appEvents: {
     "mutations:started": "makeMutable",
     "region:load": "saveRegion",
+    "template:created": "render",
     "template:loaded": "render"
   }
 
@@ -91,49 +89,6 @@ module.exports = View.extend({
       this.collection.remove(cid);
       this.render();
     }
-  }
-
-  , showForm: function (e) {
-    var $div = this.$(".new-template-select");
-
-    if ($div.is(":hidden")) {
-      $div.show("normal");
-    } else {
-      $div.hide("normal");
-    }
-  }
-
-  , selectTemplate: function (e) {
-    if ($(e.currentTarget).val() === "") {
-      this.$(".new-template-name").show().css("display", "block");
-    } else {
-      this.$(".new-template-name").hide();
-    }
-  }
-
-  , addTemplate: function (e) {
-    var name, attributes, template;
-
-    e.preventDefault();
-
-    name = this.$(".new-template-select select").val() ||
-           this.$(".new-template-name").val();
-
-    if (!name) {
-      app.trigger("notification", "error", "Please, enter a template name.");
-      return;
-    }
-
-    attributes = _.pick(this.collection.getByName("index").attributes,
-                        "template", "build", "regions");
-    attributes.name = name;
-
-    template = new Template(attributes);
-    this.collection.add(template);
-    this.collection.setCurrent(template);
-    this.render();
-
-    app.trigger("notification", "success", "The new template was created. It's a copy of the default one.");
   }
 
   , makeMutable: function (pieces) {
