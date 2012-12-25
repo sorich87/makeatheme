@@ -22,7 +22,7 @@ $LOAD_PATH.unshift(settings.root)
 Mongoid.load!(File.join('config', 'mongoid.yml'))
 
 # Load initializers
-Dir["config/initializers/*.rb"].each {|file| require file}
+Dir["config/initializers/*.rb"].each {|file| require_relative file}
 
 set :session_secret, 'zup3r4z1kr149124sessionvalu123123md5!!!:3'
 set :method_override, true
@@ -35,19 +35,19 @@ mime_type :woff, 'font/woff'
 mime_type :eot, 'application/vnd.ms-fontobject'
 mime_type :svg, 'image/svg+xml'
 
-require File.join('config', 'environments', settings.environment.to_s)
+require_relative File.join('config', 'environments', settings.environment.to_s)
 
 # Libs
-Dir["lib/*.rb"].each {|file| require file}
+Dir["lib/*.rb"].each {|file| require_relative file}
 
 # Load jobs
-Dir["lib/jobs/*.rb"].each {|file| require file}
+Dir["lib/jobs/*.rb"].each {|file| require_relative file}
 
 # Models
-Dir["models/*.rb"].each {|file| require file}
+Dir["models/*.rb"].each {|file| require_relative file}
 
 # Helpers
-Dir["helpers/*.rb"].each {|file| require file}
+Dir["helpers/*.rb"].each {|file| require_relative file}
 
 # Register helper classes
 helpers ApplicationHelper, SessionHelper, ThemeHelper
@@ -55,4 +55,4 @@ helpers ApplicationHelper, SessionHelper, ThemeHelper
 respond_to :html, :json
 
 # Routes
-Dir["routes/*.rb"].each {|file| require file}
+Dir["routes/*.rb"].each {|file| require_relative file}
