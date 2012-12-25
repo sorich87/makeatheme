@@ -37,7 +37,7 @@ module.exports = View.extend({
 
       this.collection.remove(id);
 
-      this.$("option[value=" + id + "]").remove();
+      this.render();
 
       app.trigger("notification", "success", "The template has been deleted.");
 

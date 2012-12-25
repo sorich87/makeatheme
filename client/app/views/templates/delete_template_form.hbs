@@ -4,13 +4,17 @@
     <h3 id="delete-template-modal-header">Delete a Template</h3>
   </div>
   <div class="modal-body">
-    <form class="form-inline">
-      <select class="input-large template-id">
-        {{#each templates}}
-          <option value="{{_id}}">{{name}}</option>
-        {{/each}}
-      </select>
-      <button type="submit" class="btn btn-primary" aria-hidden="true">Delete</button>
-    </form>
+    {{#if templates}}
+      <form class="form-inline">
+        <select class="input-large template-id">
+          {{#each templates}}
+            <option value="{{_id}}">{{name}}</option>
+          {{/each}}
+        </select>
+        <button type="submit" class="btn btn-primary" aria-hidden="true">Delete</button>
+      </form>
+    {{else}}
+      <p>No template to delete.</p>
+    {{/if}}
   </div>
 </div>

@@ -2560,7 +2560,7 @@ window.require.define({"views/delete_template_form": function(exports, require, 
 
         this.collection.remove(id);
 
-        this.$("option[value=" + id + "]").remove();
+        this.render();
 
         app.trigger("notification", "success", "The template has been deleted.");
 
@@ -4366,8 +4366,23 @@ window.require.define({"views/templates/delete_template_form": function(exports,
 
   function program1(depth0,data) {
     
+    var buffer = "", stack1, stack2;
+    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large template-id\">\n          ";
+    foundHelper = helpers.templates;
+    stack1 = foundHelper || depth0.templates;
+    stack2 = helpers.each;
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n        </select>\n        <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Delete</button>\n      </form>\n    ";
+    return buffer;}
+  function program2(depth0,data) {
+    
     var buffer = "", stack1;
-    buffer += "\n          <option value=\"";
+    buffer += "\n            <option value=\"";
     foundHelper = helpers._id;
     stack1 = foundHelper || depth0._id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -4377,20 +4392,25 @@ window.require.define({"views/templates/delete_template_form": function(exports,
     stack1 = foundHelper || depth0.name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n        ";
+    buffer += escapeExpression(stack1) + "</option>\n          ";
     return buffer;}
 
-    buffer += "<div id=\"delete-template-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"delete-template-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"delete-template-modal-header\">Delete a Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <select class=\"input-large template-id\">\n        ";
+  function program4(depth0,data) {
+    
+    
+    return "\n      <p>No template to delete.</p>\n    ";}
+
+    buffer += "<div id=\"delete-template-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"delete-template-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"delete-template-modal-header\">Delete a Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    ";
     foundHelper = helpers.templates;
     stack1 = foundHelper || depth0.templates;
-    stack2 = helpers.each;
+    stack2 = helpers['if'];
     tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
+    tmp1.inverse = self.program(4, program4, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      </select>\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Delete</button>\n    </form>\n  </div>\n</div>\n";
+    buffer += "\n  </div>\n</div>\n";
     return buffer;});
 }});
 
