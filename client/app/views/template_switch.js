@@ -29,7 +29,8 @@ module.exports = View.extend({
   },
 
   appEvents: {
-    "template:created": "render"
+    "template:created": "render",
+    "template:deleted": "render"
   },
 
   initialize: function () {

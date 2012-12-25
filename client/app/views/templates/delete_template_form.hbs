@@ -1,0 +1,16 @@
+<div id="delete-template-modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="delete-template-modal-header" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="delete-template-modal-header">Delete a Template</h3>
+  </div>
+  <div class="modal-body">
+    <form class="form-inline">
+      <select class="input-large template-id">
+        {{#each templates}}
+          <option value="{{_id}}">{{name}}</option>
+        {{/each}}
+      </select>
+      <button type="submit" class="btn btn-primary" aria-hidden="true">Delete</button>
+    </form>
+  </div>
+</div>
