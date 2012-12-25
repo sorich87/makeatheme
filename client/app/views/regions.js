@@ -59,7 +59,8 @@ module.exports = View.extend({
   , loadRegion: function (region) {
     var name = region.get("name");
 
-    app.trigger("region:load", region);
+    app.currentTheme.get("templates").getCurrent()
+      .setRegion(region.get("name"), region.get("slug"));
 
     $("#page").children(name)[0].outerHTML = region.get("build");
     $("#page").children(name).fadeOut().fadeIn();

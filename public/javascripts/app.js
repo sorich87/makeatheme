@@ -3550,7 +3550,8 @@ window.require.define({"views/regions": function(exports, require, module) {
     , loadRegion: function (region) {
       var name = region.get("name");
 
-      app.trigger("region:load", region);
+      app.currentTheme.get("templates").getCurrent()
+        .setRegion(region.get("name"), region.get("slug"));
 
       $("#page").children(name)[0].outerHTML = region.get("build");
       $("#page").children(name).fadeOut().fadeIn();
@@ -4141,7 +4142,6 @@ window.require.define({"views/templates": function(exports, require, module) {
     }
 
     , appEvents: {
-      "region:load": "saveRegion",
       "template:created": "render",
       "template:loaded": "render"
     }
@@ -4205,10 +4205,6 @@ window.require.define({"views/templates": function(exports, require, module) {
         this.collection.remove(cid);
         this.render();
       }
-    }
-
-    , saveRegion: function (region) {
-      this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
     }
   });
   

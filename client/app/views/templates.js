@@ -24,7 +24,6 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "region:load": "saveRegion",
     "template:created": "render",
     "template:loaded": "render"
   }
@@ -88,9 +87,5 @@ module.exports = View.extend({
       this.collection.remove(cid);
       this.render();
     }
-  }
-
-  , saveRegion: function (region) {
-    this.collection.getCurrent().setRegion(region.get("name"), region.get("slug"));
   }
 });
