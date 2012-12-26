@@ -2518,12 +2518,19 @@ window.require.define({"views/delete_template_form": function(exports, require, 
       "submit form": "deleteTemplate"
     },
 
+    appEvents: {
+      "template:created": "render"
+    },
+
     render: function () {
       var templates = [];
 
       this.collection.models.forEach(function (model) {
         if (model.get("name") !== "index") {
-          templates.push(model.toJSON());
+          templates.push({
+            cid: model.cid,
+            name: model.get("name")
+          });
         }
       });
 
@@ -2537,14 +2544,14 @@ window.require.define({"views/delete_template_form": function(exports, require, 
     deleteTemplate: function (e) {
       // Use window.top here because the modal is bound to the top window.
       var $element = window.top.$(e.currentTarget),
-          id = this.$(".template-id").val();
+          cid = this.$(".template-cid").val();
 
       e.preventDefault();
 
       if (confirm("Are you sure you want to delete this template?")) {
         $element.closest("#delete-template-modal").modal("hide");
 
-        this.collection.remove(id);
+        this.collection.remove(cid);
 
         this.render();
 
@@ -4118,7 +4125,7 @@ window.require.define({"views/template_switch": function(exports, require, modul
       return {
         templates: this.collection.map(function (template) {
           return {
-            id: template.id,
+            cid: template.cid,
             label: template.get("name"),
             active: template.get("name") === currentTemplate.get("name")
           };
@@ -4145,8 +4152,8 @@ window.require.define({"views/template_switch": function(exports, require, modul
     },
 
     switchTemplate: function (e) {
-      var id = e.currentTarget.getAttribute("data-id"),
-          template = this.collection.get(id);
+      var cid = e.currentTarget.getAttribute("data-cid"),
+          template = this.collection.get(cid);
 
       e.preventDefault();
 
@@ -4406,7 +4413,7 @@ window.require.define({"views/templates/delete_template_form": function(exports,
   function program1(depth0,data) {
     
     var buffer = "", stack1, stack2;
-    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large template-id\">\n          ";
+    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large template-cid\">\n          ";
     foundHelper = helpers.templates;
     stack1 = foundHelper || depth0.templates;
     stack2 = helpers.each;
@@ -4422,10 +4429,10 @@ window.require.define({"views/templates/delete_template_form": function(exports,
     
     var buffer = "", stack1;
     buffer += "\n            <option value=\"";
-    foundHelper = helpers._id;
-    stack1 = foundHelper || depth0._id;
+    foundHelper = helpers.cid;
+    stack1 = foundHelper || depth0.cid;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "_id", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\">";
     foundHelper = helpers.name;
     stack1 = foundHelper || depth0.name;
@@ -5423,11 +5430,11 @@ window.require.define({"views/templates/template_switch": function(exports, requ
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "><a href=\"#\" data-id=\"";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
+    buffer += "><a href=\"#\" data-cid=\"";
+    foundHelper = helpers.cid;
+    stack1 = foundHelper || depth0.cid;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\">";
     foundHelper = helpers.label;
     stack1 = foundHelper || depth0.label;

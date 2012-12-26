@@ -9,12 +9,19 @@ module.exports = View.extend({
     "submit form": "deleteTemplate"
   },
 
+  appEvents: {
+    "template:created": "render"
+  },
+
   render: function () {
     var templates = [];
 
     this.collection.models.forEach(function (model) {
       if (model.get("name") !== "index") {
-        templates.push(model.toJSON());
+        templates.push({
+          cid: model.cid,
+          name: model.get("name")
+        });
       }
     });
 
@@ -28,14 +35,14 @@ module.exports = View.extend({
   deleteTemplate: function (e) {
     // Use window.top here because the modal is bound to the top window.
     var $element = window.top.$(e.currentTarget),
-        id = this.$(".template-id").val();
+        cid = this.$(".template-cid").val();
 
     e.preventDefault();
 
     if (confirm("Are you sure you want to delete this template?")) {
       $element.closest("#delete-template-modal").modal("hide");
 
-      this.collection.remove(id);
+      this.collection.remove(cid);
 
       this.render();
 

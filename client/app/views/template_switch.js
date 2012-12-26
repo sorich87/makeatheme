@@ -14,7 +14,7 @@ module.exports = View.extend({
     return {
       templates: this.collection.map(function (template) {
         return {
-          id: template.id,
+          cid: template.cid,
           label: template.get("name"),
           active: template.get("name") === currentTemplate.get("name")
         };
@@ -41,8 +41,8 @@ module.exports = View.extend({
   },
 
   switchTemplate: function (e) {
-    var id = e.currentTarget.getAttribute("data-id"),
-        template = this.collection.get(id);
+    var cid = e.currentTarget.getAttribute("data-cid"),
+        template = this.collection.get(cid);
 
     e.preventDefault();
 
