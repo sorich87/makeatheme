@@ -1,43 +1,42 @@
 var View = require("views/base/view"),
-    app = require("application");
+    app = require("application"),
+    template = require("views/templates/template_switch");
 
 module.exports = View.extend({
   id: "templates-select",
   tagName: "li",
   className: "dropdown-submenu",
-  template: "template_switch",
   collection: app.currentTheme.get("templates"),
-
-  data: function () {
-    var currentTemplate = this.collection.getCurrent();
-
-    return {
-      templates: this.collection.map(function (template) {
-        return {
-          cid: template.cid,
-          label: template.get("name"),
-          active: template.get("name") === currentTemplate.get("name")
-        };
-      })
-    };
-  },
 
   events: {
     "click .dropdown-menu a": "switchTemplate"
   },
 
   appEvents: {
-    "region:created": "loadCurrentTemplate",
-    "region:deleted": "loadCurrentTemplate",
-    "region:loaded": "loadCurrentTemplate",
+    "region:created": "render",
+    "region:deleted": "render",
+    "region:loaded": "render",
     "template:created": "render",
     "template:deleted": "render"
   },
 
-  initialize: function () {
+  render: function () {
+    var currentTemplate = this.collection.getCurrent(),
+        templates;
+
+    templates = this.collection.map(function (template) {
+      return {
+        cid: template.cid,
+        label: template.get("name"),
+        active: template.get("name") === currentTemplate.get("name")
+      };
+    });
+
+    this.$el.empty().append(template({templates: templates}));
+
     this.loadCurrentTemplate();
 
-    View.prototype.initialize.call(this);
+    return this;
   },
 
   switchTemplate: function (e) {
