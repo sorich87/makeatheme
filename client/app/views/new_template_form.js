@@ -26,11 +26,11 @@ module.exports = View.extend({
     e.preventDefault();
 
     if (name) {
-      $element.closest("#template-form-modal").modal("hide");
-
-      attributes = _.pick(this.collection.getByName("index").attributes,
+      var attributes = _.pick(this.collection.getByName("index").attributes,
                           "template", "build", "regions");
       attributes.name = name;
+
+      $element.closest("#template-form-modal").modal("hide");
 
       this.collection.add(attributes);
       this.collection.setCurrent(attributes);
