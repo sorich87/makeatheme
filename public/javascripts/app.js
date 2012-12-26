@@ -114,25 +114,11 @@ window.require.define({"application": function(exports, require, module) {
       Object.freeze(this);
     }
 
-    // Create a new view, cleanup if the view previously existed
+    // Create a new view
     , createView: function (name, options) {
-      var views = this.views || {}
-        , View = require("views/" + name);
+      var View = require("views/" + name);
 
-      if (views[name] !== void 0) {
-        views[name].undelegateEvents();
-        if (!options || !options.el) {
-          views[name].remove();
-        }
-        views[name].off();
-        if ("teardown" in views[name]) {
-          views[name].teardown();
-        }
-      }
-
-      views[name] = new View(options);
-      this.views = views;
-      return views[name];
+      return new View(options);
     }
 
     , setBodyClasses: function () {
@@ -3299,6 +3285,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
     buildTemplateMenu: function () {
       var menu = this.$("#template-menu"),
           deleteTemplateView = app.createView("delete_template"),
+          newFooterView = app.createView("new_region", {name: "footer"}),
+          newHeaderView = app.createView("new_region", {name: "header"}),
           newTemplateView = app.createView("new_template"),
           templateSwitchView = app.createView("template_switch");
 
@@ -3306,6 +3294,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(newTemplateView.render().$el);
+        menu.append(newHeaderView.render().$el);
+        menu.append(newFooterView.render().$el);
         menu.append(this.divider());
       }
 
@@ -3319,6 +3309,95 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
     divider: function () {
       return "<li class='divider'></li>";
+    }
+  });
+
+  
+}});
+
+window.require.define({"views/new_region": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      template = require("views/templates/new_region");
+
+  module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown",
+
+    render: function () {
+      var name = this.options.name,
+          formView;
+
+      formView = app.createView("new_region_form", {
+        name: name
+      }).render();
+
+      this.subViews.push(formView);
+
+      this.$el.empty().append(template({
+        name: name,
+        label: name === "header" ? "Header" : "Footer"
+      }));
+
+      return this;
+    }
+  });
+  
+}});
+
+window.require.define({"views/new_region_form": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/new_region_form")
+    , app = require("application");
+
+  module.exports = View.extend({
+    collection: app.currentTheme.get("regions"),
+
+    events: {
+      "submit form": "addRegion"
+    },
+
+    render: function () {
+      var name = this.options.name;
+
+      this.$el.empty()
+        .append(template({
+          name: name,
+          label: name === "header" ? "Header" : "Footer"
+        }))
+        .appendTo($("#main", window.top.document));
+
+      return this;
+    },
+
+    addRegion: function (e) {
+      // Use window.top here because the modal is bound to the top window.
+      var $element = window.top.$(e.currentTarget),
+          $form = this.$("form"),
+          name = this.options.name,
+          slug = this.$(".slug").val();
+
+      e.preventDefault();
+
+      if (slug) {
+        var attributes = _.pick(this.collection.getByName(name).attributes,
+                            "name", "template", "build");
+
+        attributes.slug = slug;
+
+        $element.closest("#" + name + "-region-form-modal").modal("hide");
+
+        this.collection.add(attributes);
+
+        app.trigger("notification", "success", "The new " + name +
+                    " was created. It's a copy of the default one.");
+
+        app.trigger("region:created");
+
+      } else if ($form.children(".alert-error").length === 0) {
+        $form.prepend("<p class='alert alert-error'>" +
+                      "Please, enter a " + name + " name.</p>");
+      }
     }
   });
 
@@ -3522,8 +3601,11 @@ window.require.define({"views/regions": function(exports, require, module) {
     , collection: app.currentTheme.get("regions")
 
     , events: {
-        "change .x-header-select, .x-footer-select": "switchRegion"
-      , "click .x-header-new button, .x-footer-new button": "addRegion"
+      "change .x-header-select, .x-footer-select": "switchRegion"
+    }
+
+    , appEvents: {
+      "region:created": "render"
     }
 
     , objectEvents: {
@@ -3554,18 +3636,8 @@ window.require.define({"views/regions": function(exports, require, module) {
 
       slug = $(e.target).val();
 
-      this.toggleForm(name, slug);
-
       if (slug) {
         this.loadRegion(this.collection.getByName(name, slug));
-      }
-    }
-
-    , toggleForm: function (name, slug) {
-      if (slug) {
-        this.$(".x-" + name + "-new").hide("slow");
-      } else {
-        this.$(".x-" + name + "-new").show("slow");
       }
     }
 
@@ -3579,34 +3651,6 @@ window.require.define({"views/regions": function(exports, require, module) {
       $("#page").children(name).fadeOut().fadeIn();
 
       app.trigger("region:loaded", region);
-    }
-
-    , addRegion: function (e) {
-      var name, slug, region, $element;
-
-      if (e.currentTarget.className.indexOf("header") != -1) {
-        name = "header";
-      } else {
-        name = "footer";
-      }
-
-      slug = _.str.slugify(this.$(".x-" + name + "-new input").val());
-
-      if (!slug) {
-        app.trigger("notification", "error", "Please, enter a " + name + " name.");
-        return;
-      }
-
-      attributes = _.pick(this.collection.getByName(name).attributes, "name", "template", "build");
-      attributes.slug = slug;
-
-      region = new Region(attributes);
-      this.collection.add(region);
-      this.loadRegion(region);
-
-      $(e.currentTarget).parent().hide("slow");
-
-      app.trigger("notification", "success", "The new " + name + " was created. It's a copy of the default one.");
     }
 
     , addOne: function (region) {
@@ -4467,6 +4511,66 @@ window.require.define({"views/templates/menubar": function(exports, require, mod
     return buffer;});
 }});
 
+window.require.define({"views/templates/new_region": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-form-modal\">New ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/new_region_form": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<div id=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-form-modal\" class=\"modal hide fade\" tabindex=\"-1\"\n  role=\"dialog\" aria-labelledby=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-form-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-form-modal-header\">New ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large slug\" placeholder=\"";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " Name\" value=\"\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Create ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</button>\n    </form>\n  </div>\n</div>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/new_template": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4570,7 +4674,7 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <option value=\"\">new header</option>\n</select>\n<div class=\"x-header-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter header name\" />\n  <button class=\"x-header-add btn\">Add header</button>\n</div>\n\n<label for=\"template-footer\">Footer:</label>\n<select class=\"x-footer-select\" id=\"template-footer\">\n  ";
+    buffer += "\n</select>\n\n<label for=\"template-footer\">Footer:</label>\n<select class=\"x-footer-select\" id=\"template-footer\">\n  ";
     foundHelper = helpers.footers;
     stack1 = foundHelper || depth0.footers;
     stack2 = helpers.each;
@@ -4580,7 +4684,7 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  <option value=\"\">new footer</option>\n</select>\n<div class=\"x-footer-new\">\n  <input type=\"text\" value=\"\" placeholder=\"Enter footer name\" />\n  <button class=\"x-footer-add btn\">Add footer</button>\n</div>\n";
+    buffer += "\n</select>\n";
     return buffer;});
 }});
 

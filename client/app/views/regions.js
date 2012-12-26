@@ -9,8 +9,11 @@ module.exports = View.extend({
   , collection: app.currentTheme.get("regions")
 
   , events: {
-      "change .x-header-select, .x-footer-select": "switchRegion"
-    , "click .x-header-new button, .x-footer-new button": "addRegion"
+    "change .x-header-select, .x-footer-select": "switchRegion"
+  }
+
+  , appEvents: {
+    "region:created": "render"
   }
 
   , objectEvents: {
@@ -41,18 +44,8 @@ module.exports = View.extend({
 
     slug = $(e.target).val();
 
-    this.toggleForm(name, slug);
-
     if (slug) {
       this.loadRegion(this.collection.getByName(name, slug));
-    }
-  }
-
-  , toggleForm: function (name, slug) {
-    if (slug) {
-      this.$(".x-" + name + "-new").hide("slow");
-    } else {
-      this.$(".x-" + name + "-new").show("slow");
     }
   }
 
@@ -66,34 +59,6 @@ module.exports = View.extend({
     $("#page").children(name).fadeOut().fadeIn();
 
     app.trigger("region:loaded", region);
-  }
-
-  , addRegion: function (e) {
-    var name, slug, region, $element;
-
-    if (e.currentTarget.className.indexOf("header") != -1) {
-      name = "header";
-    } else {
-      name = "footer";
-    }
-
-    slug = _.str.slugify(this.$(".x-" + name + "-new input").val());
-
-    if (!slug) {
-      app.trigger("notification", "error", "Please, enter a " + name + " name.");
-      return;
-    }
-
-    attributes = _.pick(this.collection.getByName(name).attributes, "name", "template", "build");
-    attributes.slug = slug;
-
-    region = new Region(attributes);
-    this.collection.add(region);
-    this.loadRegion(region);
-
-    $(e.currentTarget).parent().hide("slow");
-
-    app.trigger("notification", "success", "The new " + name + " was created. It's a copy of the default one.");
   }
 
   , addOne: function (region) {

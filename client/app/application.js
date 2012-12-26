@@ -37,25 +37,11 @@ _.extend(Application, {
     Object.freeze(this);
   }
 
-  // Create a new view, cleanup if the view previously existed
+  // Create a new view
   , createView: function (name, options) {
-    var views = this.views || {}
-      , View = require("views/" + name);
+    var View = require("views/" + name);
 
-    if (views[name] !== void 0) {
-      views[name].undelegateEvents();
-      if (!options || !options.el) {
-        views[name].remove();
-      }
-      views[name].off();
-      if ("teardown" in views[name]) {
-        views[name].teardown();
-      }
-    }
-
-    views[name] = new View(options);
-    this.views = views;
-    return views[name];
+    return new View(options);
   }
 
   , setBodyClasses: function () {
