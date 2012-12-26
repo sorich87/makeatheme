@@ -2318,7 +2318,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , render: function () {
-      this.$el.empty().append(template({all: this.allBlocks}));
+      this.$el.empty().append(template({all: this.allBlocks()}));
 
       this.collection.reset(this.collection.models);
 
@@ -2395,7 +2395,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
         return;
       }
 
-      attributes = _.clone(_.find(this.allBlocks, function (block) {
+      attributes = _.clone(_.find(this.allBlocks(), function (block) {
         return block.name === name;
       }));
 

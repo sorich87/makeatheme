@@ -35,7 +35,7 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    this.$el.empty().append(template({all: this.allBlocks}));
+    this.$el.empty().append(template({all: this.allBlocks()}));
 
     this.collection.reset(this.collection.models);
 
@@ -112,7 +112,7 @@ module.exports = View.extend({
       return;
     }
 
-    attributes = _.clone(_.find(this.allBlocks, function (block) {
+    attributes = _.clone(_.find(this.allBlocks(), function (block) {
       return block.name === name;
     }));
 
