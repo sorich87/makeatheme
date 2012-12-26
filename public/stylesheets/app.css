@@ -6938,8 +6938,7 @@ body.theme.preview #canvas {
   position: absolute;
   right: 0;
 }
-#layout-editor #editor-toggle,
-#layout-editor #device-switch {
+#layout-editor #editor-toggle {
   position: absolute;
   margin: 10px 0 0 -30px;
   line-height: 30px;
@@ -6948,35 +6947,12 @@ body.theme.preview #canvas {
   cursor: pointer;
   border: 1px solid #eee;
 }
-#layout-editor #editor-toggle a,
-#layout-editor #device-switch a {
+#layout-editor #editor-toggle a {
   color: #000;
 }
 #layout-editor #editor-toggle {
   width: 28px;
   height: 30px;
-}
-#layout-editor #device-switch {
-  font-size: 16px;
-  margin-top: 50px;
-  padding-left: 4px;
-  width: 24px;
-}
-#layout-editor #device-switch ul {
-  margin: 0;
-}
-#layout-editor #device-switch a {
-  height: 30px;
-  line-height: 30px;
-  display: block;
-}
-#layout-editor #theme-meta {
-  padding: 10px;
-  border-bottom: 1px solid #1c1c1c;
-}
-#layout-editor #edit-actions {
-  height: 90%;
-  overflow: auto;
 }
 #layout-editor #style-edit,
 #layout-editor #blocks {
