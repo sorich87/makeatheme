@@ -2484,6 +2484,104 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/delete_region": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application"),
+      template = require("views/templates/delete_region");
+
+  module.exports = View.extend({
+    tagName: "li",
+    className: "dropdown",
+
+    render: function () {
+      var name = this.options.name,
+          formView;
+
+      formView = app.createView("delete_region_form", {
+        name: name
+      }).render();
+
+      this.subViews.push(formView);
+
+      this.$el.empty().append(template({
+        name: name,
+        label: name === "header" ? "Header": "Footer"
+      }));
+
+      return this;
+    }
+  });
+  
+}});
+
+window.require.define({"views/delete_region_form": function(exports, require, module) {
+  var View = require("views/base/view")
+    , template = require("views/templates/delete_region_form")
+    , app = require("application");
+
+  module.exports = View.extend({
+    collection: app.currentTheme.get("regions"),
+
+    events: {
+      "submit form": "deleteRegion"
+    },
+
+    appEvents: {
+      "region:created": "render"
+    },
+
+    render: function () {
+      var regions = [],
+          name = this.options.name;
+
+      this.collection.where({name: name}).forEach(function (model) {
+        if (model.get("slug") !== "default") {
+          regions.push({
+            cid: model.cid,
+            slug: model.get("slug")
+          });
+        }
+      });
+
+      this.$el.empty()
+        .append(template({
+          name: name,
+          label: name === "header" ? "Header": "Footer",
+          regions: regions
+        }))
+        .appendTo($("#main", window.top.document));
+
+      return this;
+    },
+
+    deleteRegion: function (e) {
+      // Use window.top here because the modal is bound to the top window.
+      var name = this.options.name,
+          $element = window.top.$(e.currentTarget),
+          cid = this.$(".region-cid").val();
+
+      e.preventDefault();
+
+      if (confirm("Are you sure you want to delete this " + name + "?")) {
+        $element.closest("#delete-" + name + "-region-modal").modal("hide");
+
+        app.currentTheme.get("templates").getCurrent()
+          .setRegion(name, "default");
+
+        this.collection.remove(cid);
+
+        this.render();
+
+        app.trigger("notification", "success", "The template has been deleted.");
+
+        app.trigger("region:deleted");
+      }
+    }
+  });
+
+  
+}});
+
 window.require.define({"views/delete_template": function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
@@ -3285,6 +3383,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
     buildTemplateMenu: function () {
       var menu = this.$("#template-menu"),
           deleteTemplateView = app.createView("delete_template"),
+          deleteFooterView = app.createView("delete_region", {name: "footer"}),
+          deleteHeaderView = app.createView("delete_region", {name: "header"}),
           footerSwitchView = app.createView("region_switch", {name: "footer"}),
           headerSwitchView = app.createView("region_switch", {name: "header"}),
           newFooterView = app.createView("new_region", {name: "footer"}),
@@ -3292,9 +3392,9 @@ window.require.define({"views/menubar": function(exports, require, module) {
           newTemplateView = app.createView("new_template"),
           templateSwitchView = app.createView("template_switch");
 
-      this.subViews.push(deleteTemplateView, footerSwitchView, headerSwitchView,
-                         newFooterView, newHeaderView, newTemplateView,
-                         templateSwitchView);
+      this.subViews.push(deleteFooterView, deleteHeaderView, deleteTemplateView,
+                         footerSwitchView, headerSwitchView, templateSwitchView,
+                         newFooterView, newHeaderView, newTemplateView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(newTemplateView.render().$el);
@@ -3309,6 +3409,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
         menu.append(headerSwitchView.render().$el);
         menu.append(footerSwitchView.render().$el);
         menu.append(this.divider());
+        menu.append(deleteHeaderView.render().$el);
+        menu.append(deleteFooterView.render().$el);
         menu.append(deleteTemplateView.render().$el);
       }
     },
@@ -3617,7 +3719,7 @@ window.require.define({"views/region_switch": function(exports, require, module)
         label: name === "header" ? "Header" : "Footer",
         regions: regions.map(function (region) {
           return {
-            id: region.cid,
+            cid: region.cid,
             slug: region.get("slug"),
             active: region.get("slug") === this.currentRegion().get("slug")
           };
@@ -3647,8 +3749,8 @@ window.require.define({"views/region_switch": function(exports, require, module)
     },
 
     switchRegion: function (e) {
-      var id = e.currentTarget.getAttribute("data-id"),
-          slug = this.collection.get(id).get("slug");
+      var cid = e.currentTarget.getAttribute("data-cid"),
+          slug = this.collection.get(cid).get("slug");
 
       e.preventDefault();
 
@@ -4396,6 +4498,107 @@ window.require.define({"views/templates/declaration": function(exports, require,
     return buffer;});
 }});
 
+window.require.define({"views/templates/delete_region": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+
+    buffer += "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#delete-";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-modal\">Delete a ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a>\n";
+    return buffer;});
+}});
+
+window.require.define({"views/templates/delete_region_form": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1, stack2;
+    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large region-cid\">\n          ";
+    foundHelper = helpers.regions;
+    stack1 = foundHelper || depth0.regions;
+    stack2 = helpers.each;
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n        </select>\n        <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Delete</button>\n      </form>\n    ";
+    return buffer;}
+  function program2(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n            <option value=\"";
+    foundHelper = helpers.cid;
+    stack1 = foundHelper || depth0.cid;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</option>\n          ";
+    return buffer;}
+
+  function program4(depth0,data) {
+    
+    var buffer = "", stack1;
+    buffer += "\n    <p>No ";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + " to delete.</p>\n    ";
+    return buffer;}
+
+    buffer += "<div id=\"delete-";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\"\n  aria-labelledby=\"delete-";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"delete-";
+    foundHelper = helpers.name;
+    stack1 = foundHelper || depth0.name;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "-region-modal-header\">Delete a ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</h3>\n  </div>\n  <div class=\"modal-body\">\n    ";
+    foundHelper = helpers.regions;
+    stack1 = foundHelper || depth0.regions;
+    stack2 = helpers['if'];
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.program(4, program4, data);
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n  </div>\n</div>\n";
+    return buffer;});
+}});
+
 window.require.define({"views/templates/delete_template": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4647,11 +4850,11 @@ window.require.define({"views/templates/region_switch": function(exports, requir
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "><a href=\"#\" data-id=\"";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
+    buffer += "><a href=\"#\" data-cid=\"";
+    foundHelper = helpers.cid;
+    stack1 = foundHelper || depth0.cid;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\">";
     foundHelper = helpers.slug;
     stack1 = foundHelper || depth0.slug;

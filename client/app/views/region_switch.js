@@ -15,7 +15,7 @@ module.exports = View.extend({
       label: name === "header" ? "Header" : "Footer",
       regions: regions.map(function (region) {
         return {
-          id: region.cid,
+          cid: region.cid,
           slug: region.get("slug"),
           active: region.get("slug") === this.currentRegion().get("slug")
         };
@@ -45,8 +45,8 @@ module.exports = View.extend({
   },
 
   switchRegion: function (e) {
-    var id = e.currentTarget.getAttribute("data-id"),
-        slug = this.collection.get(id).get("slug");
+    var cid = e.currentTarget.getAttribute("data-cid"),
+        slug = this.collection.get(cid).get("slug");
 
     e.preventDefault();
 
