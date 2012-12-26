@@ -2688,11 +2688,6 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
 
     , panels: [
         {
-          id: "regions"
-        , title: "Header &amp; Footer"
-        , view: "regionsView"
-      }
-      , {
           id: "blocks"
         , title: "Blocks"
         , view: "blocksView"
@@ -2700,13 +2695,11 @@ window.require.define({"views/edit_actions": function(exports, require, module) 
     ]
 
     , render: function () {
-      this.regionsView = app.createView("regions");
       this.blocksView = app.createView("blocks");
       this.styleEditView = app.createView("style_edit");
       this.layoutView = app.createView("layout");
 
-      this.subViews.push(this.regionsViews, this.blocksView,
-                         this.styleEditview, this.layoutView);
+      this.subViews.push(this.blocksView, this.styleEditview, this.layoutView);
 
       // Setup drag and drop and resize
       this.layoutView.render();
@@ -3285,12 +3278,16 @@ window.require.define({"views/menubar": function(exports, require, module) {
     buildTemplateMenu: function () {
       var menu = this.$("#template-menu"),
           deleteTemplateView = app.createView("delete_template"),
+          footerSwitchView = app.createView("region_switch", {name: "footer"}),
+          headerSwitchView = app.createView("region_switch", {name: "header"}),
           newFooterView = app.createView("new_region", {name: "footer"}),
           newHeaderView = app.createView("new_region", {name: "header"}),
           newTemplateView = app.createView("new_template"),
           templateSwitchView = app.createView("template_switch");
 
-      this.subViews.push(newTemplateView, templateSwitchView);
+      this.subViews.push(deleteTemplateView, footerSwitchView, headerSwitchView,
+                         newFooterView, newHeaderView, newTemplateView,
+                         templateSwitchView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(newTemplateView.render().$el);
@@ -3302,6 +3299,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
       menu.append(templateSwitchView.render().$el);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
+        menu.append(headerSwitchView.render().$el);
+        menu.append(footerSwitchView.render().$el);
         menu.append(this.divider());
         menu.append(deleteTemplateView.render().$el);
       }
@@ -3380,7 +3379,9 @@ window.require.define({"views/new_region_form": function(exports, require, modul
       e.preventDefault();
 
       if (slug) {
-        var attributes = _.pick(this.collection.getByName(name).attributes,
+        var attributes, regions;
+
+        attributes = _.pick(this.collection.getByName(name).attributes,
                             "name", "template", "build");
 
         attributes.slug = slug;
@@ -3388,6 +3389,8 @@ window.require.define({"views/new_region_form": function(exports, require, modul
         $element.closest("#" + name + "-region-form-modal").modal("hide");
 
         this.collection.add(attributes);
+
+        app.currentTheme.get("templates").getCurrent().setRegion(name, slug);
 
         app.trigger("notification", "success", "The new " + name +
                     " was created. It's a copy of the default one.");
@@ -3589,79 +3592,66 @@ window.require.define({"views/password_reset": function(exports, require, module
   
 }});
 
-window.require.define({"views/regions": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/regions")
-    , app = require("application")
-    , Region = require("models/region");
+window.require.define({"views/region_switch": function(exports, require, module) {
+  var View = require("views/base/view"),
+      app = require("application");
 
   module.exports = View.extend({
-      id: "x-region-select"
-    , className: "x-section"
-    , collection: app.currentTheme.get("regions")
+    tagName: "li",
+    className: "dropdown-submenu",
+    template: "region_switch",
+    collection: app.currentTheme.get("regions"),
 
-    , events: {
-      "change .x-header-select, .x-footer-select": "switchRegion"
-    }
+    data: function () {
+      var name = this.options.name,
+          regions = this.collection.where({name: name});
 
-    , appEvents: {
-      "region:created": "render"
-    }
+      return {
+        label: name === "header" ? "Header" : "Footer",
+        regions: regions.map(function (region) {
+          return {
+            id: region.cid,
+            slug: region.get("slug"),
+            active: region.get("slug") === this.currentRegion().get("slug")
+          };
+        }.bind(this))
+      };
+    },
 
-    , objectEvents: {
-      collection: {
-        "add": "addOne"
-      }
-    }
+    events: {
+      "click .dropdown-menu a": "switchRegion"
+    },
 
-    , render: function () {
-      this.$el.empty().append(template({
-          headers: this.collection.where({name: "header"}).map(function (header) { return header.attributes; })
-        , footers: this.collection.where({name: "footer"}).map(function (footer) { return footer.attributes; })
-      }));
+    appEvents: {
+      "region:created": "render",
+      "region:deleted": "render"
+    },
 
-      this.$(".x-header-new, .x-footer-new").hide();
+    initialize: function () {
+      View.prototype.initialize.call(this);
+    },
 
-      return this;
-    }
+    currentRegion: function () {
+      var name = this.options.name,
+          currentTemplate = app.currentTheme.get("templates").getCurrent(),
+          templateRegions = currentTemplate.get("regions");
 
-    , switchRegion: function (e) {
-      var name, slug, region;
+      return this.collection.getByName(name, templateRegions[name]);
+    },
 
-      if (e.target.className.indexOf("header") != -1) {
-        name = "header";
-      } else {
-        name = "footer";
-      }
+    switchRegion: function (e) {
+      var id = e.currentTarget.getAttribute("data-id"),
+          slug = this.collection.get(id).get("slug");
 
-      slug = $(e.target).val();
+      e.preventDefault();
 
-      if (slug) {
-        this.loadRegion(this.collection.getByName(name, slug));
-      }
-    }
-
-    , loadRegion: function (region) {
-      var name = region.get("name");
+      this.$(".active").removeClass("active");
+      $(e.currentTarget.parentNode).addClass("active");
 
       app.currentTheme.get("templates").getCurrent()
-        .setRegion(region.get("name"), region.get("slug"));
+        .setRegion(this.options.name, slug);
 
-      $("#page").children(name)[0].outerHTML = region.get("build");
-      $("#page").children(name).fadeOut().fadeIn();
-
-      app.trigger("region:loaded", region);
-    }
-
-    , addOne: function (region) {
-      var slug;
-
-      slug = region.get("slug");
-
-      this.$(".x-" + region.get("name") + "-select")
-        .children(":selected").removeAttr("selected").end()
-        .children("[value='']")
-          .before("<option value='" + slug + "' selected='selected'>" + slug + "</option>");
+      app.trigger("region:loaded");
     }
   });
   
@@ -4113,9 +4103,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
 window.require.define({"views/template_switch": function(exports, require, module) {
   var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/templates"),
-      Templates = require("collections/templates");
+      app = require("application");
 
   module.exports = View.extend({
     id: "templates-select",
@@ -4143,22 +4131,27 @@ window.require.define({"views/template_switch": function(exports, require, modul
     },
 
     appEvents: {
+      "region:created": "loadCurrentTemplate",
+      "region:deleted": "loadCurrentTemplate",
+      "region:loaded": "loadCurrentTemplate",
       "template:created": "render",
       "template:deleted": "render"
     },
 
     initialize: function () {
-      this.loadTemplate(this.collection.getCurrent());
+      this.loadCurrentTemplate();
 
       View.prototype.initialize.call(this);
     },
 
     switchTemplate: function (e) {
-      var id = e.currentTarget.getAttribute("data-id");
+      var id = e.currentTarget.getAttribute("data-id"),
+          template = this.collection.get(id);
 
       e.preventDefault();
 
-      this.loadTemplate(this.collection.get(id));
+      this.collection.setCurrent(template);
+      this.loadTemplate(template);
 
       this.$(".active").removeClass("active");
       $(e.currentTarget.parentNode).addClass("active");
@@ -4174,9 +4167,11 @@ window.require.define({"views/template_switch": function(exports, require, modul
 
       $("#page").fadeOut().empty().append(build).fadeIn();
 
-      this.collection.setCurrent(template);
-
       app.trigger("template:loaded", template);
+    }
+
+    , loadCurrentTemplate: function () {
+      this.loadTemplate(this.collection.getCurrent());
     }
   });
   
@@ -4625,6 +4620,60 @@ window.require.define({"views/templates/password_reset": function(exports, requi
 
 
     return "<div class=\"modal-header\">\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">New Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Remember your password? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
+}});
+
+window.require.define({"views/templates/region_switch": function(exports, require, module) {
+  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+    helpers = helpers || Handlebars.helpers;
+    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
+
+  function program1(depth0,data) {
+    
+    var buffer = "", stack1, stack2;
+    buffer += "\n  <li";
+    foundHelper = helpers.active;
+    stack1 = foundHelper || depth0.active;
+    stack2 = helpers['if'];
+    tmp1 = self.program(2, program2, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "><a href=\"#\" data-id=\"";
+    foundHelper = helpers.id;
+    stack1 = foundHelper || depth0.id;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "\">";
+    foundHelper = helpers.slug;
+    stack1 = foundHelper || depth0.slug;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a></li>\n  ";
+    return buffer;}
+  function program2(depth0,data) {
+    
+    
+    return " class=\"active\"";}
+
+    buffer += "<a tabindex=\"-1\" href=\"#\">Switch ";
+    foundHelper = helpers.label;
+    stack1 = foundHelper || depth0.label;
+    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
+    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
+    buffer += escapeExpression(stack1) + "</a>\n<ul class=\"dropdown-menu\">\n  ";
+    foundHelper = helpers.regions;
+    stack1 = foundHelper || depth0.regions;
+    stack2 = helpers.each;
+    tmp1 = self.program(1, program1, data);
+    tmp1.hash = {};
+    tmp1.fn = tmp1;
+    tmp1.inverse = self.noop;
+    stack1 = stack2.call(depth0, stack1, tmp1);
+    if(stack1 || stack1 === 0) { buffer += stack1; }
+    buffer += "\n</ul>\n";
+    return buffer;});
 }});
 
 window.require.define({"views/templates/regions": function(exports, require, module) {

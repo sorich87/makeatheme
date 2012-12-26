@@ -32,7 +32,9 @@ module.exports = View.extend({
     e.preventDefault();
 
     if (slug) {
-      var attributes = _.pick(this.collection.getByName(name).attributes,
+      var attributes, regions;
+
+      attributes = _.pick(this.collection.getByName(name).attributes,
                           "name", "template", "build");
 
       attributes.slug = slug;
@@ -40,6 +42,8 @@ module.exports = View.extend({
       $element.closest("#" + name + "-region-form-modal").modal("hide");
 
       this.collection.add(attributes);
+
+      app.currentTheme.get("templates").getCurrent().setRegion(name, slug);
 
       app.trigger("notification", "success", "The new " + name +
                   " was created. It's a copy of the default one.");

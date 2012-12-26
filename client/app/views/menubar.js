@@ -56,12 +56,16 @@ module.exports = View.extend({
   buildTemplateMenu: function () {
     var menu = this.$("#template-menu"),
         deleteTemplateView = app.createView("delete_template"),
+        footerSwitchView = app.createView("region_switch", {name: "footer"}),
+        headerSwitchView = app.createView("region_switch", {name: "header"}),
         newFooterView = app.createView("new_region", {name: "footer"}),
         newHeaderView = app.createView("new_region", {name: "header"}),
         newTemplateView = app.createView("new_template"),
         templateSwitchView = app.createView("template_switch");
 
-    this.subViews.push(newTemplateView, templateSwitchView);
+    this.subViews.push(deleteTemplateView, footerSwitchView, headerSwitchView,
+                       newFooterView, newHeaderView, newTemplateView,
+                       templateSwitchView);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
       menu.append(newTemplateView.render().$el);
@@ -73,6 +77,8 @@ module.exports = View.extend({
     menu.append(templateSwitchView.render().$el);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
+      menu.append(headerSwitchView.render().$el);
+      menu.append(footerSwitchView.render().$el);
       menu.append(this.divider());
       menu.append(deleteTemplateView.render().$el);
     }

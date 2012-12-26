@@ -8,11 +8,6 @@ module.exports = View.extend({
 
   , panels: [
       {
-        id: "regions"
-      , title: "Header &amp; Footer"
-      , view: "regionsView"
-    }
-    , {
         id: "blocks"
       , title: "Blocks"
       , view: "blocksView"
@@ -20,13 +15,11 @@ module.exports = View.extend({
   ]
 
   , render: function () {
-    this.regionsView = app.createView("regions");
     this.blocksView = app.createView("blocks");
     this.styleEditView = app.createView("style_edit");
     this.layoutView = app.createView("layout");
 
-    this.subViews.push(this.regionsViews, this.blocksView,
-                       this.styleEditview, this.layoutView);
+    this.subViews.push(this.blocksView, this.styleEditview, this.layoutView);
 
     // Setup drag and drop and resize
     this.layoutView.render();

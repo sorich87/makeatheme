@@ -1,7 +1,5 @@
 var View = require("views/base/view"),
-    app = require("application"),
-    template = require("views/templates/templates"),
-    Templates = require("collections/templates");
+    app = require("application");
 
 module.exports = View.extend({
   id: "templates-select",
@@ -29,22 +27,27 @@ module.exports = View.extend({
   },
 
   appEvents: {
+    "region:created": "loadCurrentTemplate",
+    "region:deleted": "loadCurrentTemplate",
+    "region:loaded": "loadCurrentTemplate",
     "template:created": "render",
     "template:deleted": "render"
   },
 
   initialize: function () {
-    this.loadTemplate(this.collection.getCurrent());
+    this.loadCurrentTemplate();
 
     View.prototype.initialize.call(this);
   },
 
   switchTemplate: function (e) {
-    var id = e.currentTarget.getAttribute("data-id");
+    var id = e.currentTarget.getAttribute("data-id"),
+        template = this.collection.get(id);
 
     e.preventDefault();
 
-    this.loadTemplate(this.collection.get(id));
+    this.collection.setCurrent(template);
+    this.loadTemplate(template);
 
     this.$(".active").removeClass("active");
     $(e.currentTarget.parentNode).addClass("active");
@@ -60,8 +63,10 @@ module.exports = View.extend({
 
     $("#page").fadeOut().empty().append(build).fadeIn();
 
-    this.collection.setCurrent(template);
-
     app.trigger("template:loaded", template);
+  }
+
+  , loadCurrentTemplate: function () {
+    this.loadTemplate(this.collection.getCurrent());
   }
 });
