@@ -5490,7 +5490,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    CSS Editor\n  </label>\n  <p><a href=\"#\" data-bypass=\"true\" class=\"back-to-general\">&lsaquo; Back</a></p>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
+    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    CSS Editor\n  </label>\n  <p><a href=\"#\" data-bypass=\"true\" class=\"back-to-blocks\">&lsaquo; Back</a></p>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
