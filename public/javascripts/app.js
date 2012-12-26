@@ -3703,28 +3703,35 @@ window.require.define({"views/password_reset": function(exports, require, module
 
 window.require.define({"views/region_switch": function(exports, require, module) {
   var View = require("views/base/view"),
-      app = require("application");
+      app = require("application"),
+      template = require("views/templates/region_switch");
 
   module.exports = View.extend({
     tagName: "li",
     className: "dropdown-submenu",
-    template: "region_switch",
     collection: app.currentTheme.get("regions"),
 
-    data: function () {
+    render: function () {
       var name = this.options.name,
-          regions = this.collection.where({name: name});
+          currentRegion = this.currentRegion(),
+          label = name === "header" ? "Header" : "Footer",
+          regions;
 
-      return {
-        label: name === "header" ? "Header" : "Footer",
-        regions: regions.map(function (region) {
-          return {
-            cid: region.cid,
-            slug: region.get("slug"),
-            active: region.get("slug") === this.currentRegion().get("slug")
-          };
-        }.bind(this))
-      };
+      regions = this.collection.where({name: name});
+      regions = regions.map(function (region) {
+        return {
+          cid: region.cid,
+          slug: region.get("slug"),
+          active: region.get("slug") === currentRegion.get("slug")
+        };
+      });
+
+      this.$el.empty().append(template({
+        label: label,
+        regions: regions
+      }));
+
+      return this;
     },
 
     events: {
