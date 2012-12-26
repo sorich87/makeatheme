@@ -4,7 +4,7 @@ var View = require("views/base/view")
   , app = require("application");
 
 module.exports = View.extend({
-    id: "x-block-insert"
+    id: "blocks"
   , className: "x-section"
   , collection: app.currentTheme.get("blocks")
 

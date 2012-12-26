@@ -6978,10 +6978,12 @@ body.theme.preview #canvas {
   height: 90%;
   overflow: auto;
 }
-#layout-editor #style-edit {
+#layout-editor #style-edit,
+#layout-editor #blocks {
   margin: 10px;
 }
-#layout-editor #style-edit .switch {
+#layout-editor #style-edit .switch,
+#layout-editor #blocks .switch {
   margin-right: 10px;
 }
 #layout-editor h4 {

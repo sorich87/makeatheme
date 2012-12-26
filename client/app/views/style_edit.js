@@ -13,7 +13,7 @@ module.exports = View.extend({
       "click .selector-choice a": "highlightElement"
     , "change .tag": "setTag"
 
-    , "click .back-to-general": "hideEditor"
+    , "click .back-to-blocks": "hideEditor"
     , "change input[name=style_advanced]": "switchEditor"
   }
 
@@ -108,13 +108,13 @@ module.exports = View.extend({
 
   , showEditor: function (element) {
     this.setColumn(element);
-    this.$el.siblings("#general").hide();
+    this.$el.siblings("#blocks").hide();
     this.$el.show();
   }
 
   , hideEditor: function () {
     this.$el.hide();
-    this.$el.siblings("#general").show();
+    this.$el.siblings("#blocks").show();
   }
 
   , switchEditor: function (e) {

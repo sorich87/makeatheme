@@ -2287,7 +2287,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
     , app = require("application");
 
   module.exports = View.extend({
-      id: "x-block-insert"
+      id: "blocks"
     , className: "x-section"
     , collection: app.currentTheme.get("blocks")
 
@@ -2782,84 +2782,10 @@ window.require.define({"views/download_theme": function(exports, require, module
   
 }});
 
-window.require.define({"views/edit_actions": function(exports, require, module) {
-  var app = require("application")
-    , View = require("views/base/view")
-    , mutations = require("lib/mutations")
-    , accordion_group = require("views/templates/accordion_group");
-
-  module.exports = View.extend({
-    id: "edit-actions"
-
-    , panels: [
-        {
-          id: "blocks"
-        , title: "Blocks"
-        , view: "blocksView"
-      }
-    ]
-
-    , render: function () {
-      this.blocksView = app.createView("blocks");
-      this.styleEditView = app.createView("style_edit");
-      this.layoutView = app.createView("layout");
-
-      this.subViews.push(this.blocksView, this.styleEditview, this.layoutView);
-
-      // Setup drag and drop and resize
-      this.layoutView.render();
-
-      this.$el.empty()
-        .append("<div id='general'></div>")
-        .children()
-          .append("<div class='accordion'>" + this.accordionGroups.apply(this) + "</div>")
-          .end()
-        .append(this.styleEditView.render().$el.hide());
-
-      for (var i in this.panels) {
-        if (!this.panels.hasOwnProperty(i)) {
-          return;
-        }
-
-        this.$("#editor-" + this.panels[i].id + " .accordion-inner")
-          .empty()
-          .append(this[this.panels[i].view].render().$el);
-      }
-
-      mutations.initialize();
-
-      return this;
-    }
-
-    , accordionGroups: function () {
-      var groups = "";
-
-      for (var i in this.panels) {
-        if (this.panels.hasOwnProperty(i)) {
-          groups += this.buildAccordionGroup(this.panels[i]);
-        }
-      }
-
-      return groups;
-    }
-
-    , buildAccordionGroup: function (attributes) {
-      return accordion_group({
-          parent: "editor-accordion"
-        , id: "editor-" + attributes.id
-        , title: attributes.title
-        , content: ""
-      });
-    }
-  });
-  
-}});
-
 window.require.define({"views/editor": function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
-    , mutations = require("lib/mutations")
-    , accordion_group = require("views/templates/accordion_group");
+    , mutations = require("lib/mutations");
 
   module.exports = View.extend({
     id: "layout-editor"
@@ -2878,16 +2804,23 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      var editorToggleView = app.createView("editor_toggle"),
-          actionsView = app.createView("edit_actions");
+      var blocksView = app.createView("blocks"),
+          styleEditView = app.createView("style_edit"),
+          layoutView = app.createView("layout"),
+          editorToggleView = app.createView("editor_toggle");
 
-      this.subViews.push(editorToggleView, actionsView);
+      this.subViews.push(editorToggleView, blocksView, styleEditView, layoutView);
 
       this.$el.empty()
         .append(editorToggleView.render().$el)
-        .append(actionsView.render().$el);
+        .append(blocksView.render().$el)
+        .append(styleEditView.render().$el.hide());
 
       this.$el.appendTo($("#main", window.top.document));
+
+      layoutView.render();
+
+      mutations.initialize();
 
       this.resize();
       this.preventActions();
@@ -4070,7 +4003,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         "click .selector-choice a": "highlightElement"
       , "change .tag": "setTag"
 
-      , "click .back-to-general": "hideEditor"
+      , "click .back-to-blocks": "hideEditor"
       , "change input[name=style_advanced]": "switchEditor"
     }
 
@@ -4165,13 +4098,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , showEditor: function (element) {
       this.setColumn(element);
-      this.$el.siblings("#general").hide();
+      this.$el.siblings("#blocks").hide();
       this.$el.show();
     }
 
     , hideEditor: function () {
       this.$el.hide();
-      this.$el.siblings("#general").show();
+      this.$el.siblings("#blocks").show();
     }
 
     , switchEditor: function (e) {
@@ -4292,41 +4225,6 @@ window.require.define({"views/template_switch": function(exports, require, modul
   
 }});
 
-window.require.define({"views/templates/accordion_group": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div class=\"accordion-group\">\n  <div class=\"accordion-heading\">\n    <h4 class=\"accordion-toggle\" data-toggle=\"collapse\" data-parent=\"#";
-    foundHelper = helpers.parent;
-    stack1 = foundHelper || depth0.parent;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "parent", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" data-target=\"#";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">\n      ";
-    foundHelper = helpers.title;
-    stack1 = foundHelper || depth0.title;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "title", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n    </h4>\n  </div>\n  <div id=\"";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" class=\"accordion-body collapse\">\n    <div class=\"accordion-inner\">\n      ";
-    foundHelper = helpers.content;
-    stack1 = foundHelper || depth0.content;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "content", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n    </div>\n  </div>\n</div>\n";
-    return buffer;});
-}});
-
 window.require.define({"views/templates/account": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4412,7 +4310,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
+    buffer += "<h4>Blocks</h4>\n<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
