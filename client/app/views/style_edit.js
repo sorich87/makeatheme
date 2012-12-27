@@ -42,7 +42,7 @@ module.exports = View.extend({
   , render: function () {
     var advanced = this.editorView === "advanced_style_edit" ? true : false,
         editorToggleView = app.createView("editor_toggle", {position: "left"}),
-        editorView;
+        editorView, tags;
 
     editorView = app.createView(this.editorView, {
         selector: this.selector
@@ -56,16 +56,19 @@ module.exports = View.extend({
 
     this.media = "all";
 
-    this.$el.empty().append(editorToggleView.render().$el);
-
-    this.$el.append(template({
+    tags = template({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
       , advanced: advanced
-    }));
+    });
 
-    this.$el.append(editorView.render().$el);
+    this.$el.empty()
+      .append("<div>")
+      .children()
+        .append(editorToggleView.render().$el)
+        .append(tags)
+        .append(editorView.render().$el);
 
     return this;
   }

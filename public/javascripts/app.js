@@ -2323,8 +2323,10 @@ window.require.define({"views/blocks": function(exports, require, module) {
       this.subViews.push(editorToggleView);
 
       this.$el.empty()
-        .append(editorToggleView.render().$el)
-        .append(template({all: this.allBlocks()}));
+        .append("<div>")
+        .children()
+          .append(editorToggleView.render().$el)
+          .append(template({all: this.allBlocks()}));
 
       this.collection.reset(this.collection.models);
 
@@ -2834,7 +2836,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$(".editor-sidebar").height($(window.top).height() - 60);
+      this.$(".editor-sidebar > div").height($(window.top).height() - 60);
     }
 
     // Prevent click, drag and submit on links, images and forms
@@ -2891,14 +2893,14 @@ window.require.define({"views/editor_toggle": function(exports, require, module)
 
       if (this.$el.hasClass("collapsed")) {
         style[this.margin] = "0";
-        $(e.currentTarget.parentNode).animate(style);
+        $(e.currentTarget.parentNode.parentNode).animate(style);
 
         this.$el
           .empty().append(this.initIcon)
           .removeClass("collapsed");
       } else {
         style[this.margin] = "-220px";
-        $(e.currentTarget.parentNode).animate(style);
+        $(e.currentTarget.parentNode.parentNode).animate(style);
 
         this.$el
           .empty().append(this.collapseIcon)
@@ -4052,7 +4054,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , render: function () {
       var advanced = this.editorView === "advanced_style_edit" ? true : false,
           editorToggleView = app.createView("editor_toggle", {position: "left"}),
-          editorView;
+          editorView, tags;
 
       editorView = app.createView(this.editorView, {
           selector: this.selector
@@ -4066,16 +4068,19 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       this.media = "all";
 
-      this.$el.empty().append(editorToggleView.render().$el);
-
-      this.$el.append(template({
+      tags = template({
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
         , advanced: advanced
-      }));
+      });
 
-      this.$el.append(editorView.render().$el);
+      this.$el.empty()
+        .append("<div>")
+        .children()
+          .append(editorToggleView.render().$el)
+          .append(tags)
+          .append(editorView.render().$el);
 
       return this;
     }

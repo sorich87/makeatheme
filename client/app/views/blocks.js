@@ -40,8 +40,10 @@ module.exports = View.extend({
     this.subViews.push(editorToggleView);
 
     this.$el.empty()
-      .append(editorToggleView.render().$el)
-      .append(template({all: this.allBlocks()}));
+      .append("<div>")
+      .children()
+        .append(editorToggleView.render().$el)
+        .append(template({all: this.allBlocks()}));
 
     this.collection.reset(this.collection.models);
 

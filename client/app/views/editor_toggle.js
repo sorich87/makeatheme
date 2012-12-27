@@ -36,14 +36,14 @@ module.exports = View.extend({
 
     if (this.$el.hasClass("collapsed")) {
       style[this.margin] = "0";
-      $(e.currentTarget.parentNode).animate(style);
+      $(e.currentTarget.parentNode.parentNode).animate(style);
 
       this.$el
         .empty().append(this.initIcon)
         .removeClass("collapsed");
     } else {
       style[this.margin] = "-220px";
-      $(e.currentTarget.parentNode).animate(style);
+      $(e.currentTarget.parentNode.parentNode).animate(style);
 
       this.$el
         .empty().append(this.collapseIcon)
