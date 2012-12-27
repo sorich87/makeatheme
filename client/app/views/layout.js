@@ -265,17 +265,14 @@ module.exports = View.extend({
     var parent = node.parentNode
       , parentId = parent.id;
 
-    if ((["HEADER", "FOOTER"].indexOf(parent.tagName) !== -1 &&
-         parent.children.length === 1) ||
+    if (parent.children.length === 1 ||
         (node.id.indexOf("x-") !== 0 && node.id.indexOf("y-") !== 0)) {
       node.className += " x-empty";
-    } else if (parent.children.length !== 1) {
+    } else {
       parent.removeChild(node);
 
       app.trigger("node:removed", node,
                   window.document.getElementById(parentId), "row");
     }
-
-    this.highlightEmpty();
   }
 });
