@@ -575,7 +575,7 @@ a:hover {
 }
 .navigation ul.menu,
 .navigation div.menu > ul {
-	display: none;
+	display: inline-block;
 }
 .navigation ul.menu.toggled-on,
 .menu-toggle {
