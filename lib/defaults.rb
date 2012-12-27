@@ -153,25 +153,6 @@ Built with Make A Theme</a>)
       header: '<header id="masthead" role="banner"><div class="row"></div></header>',
       footer: '<footer id="colophon" role="contentinfo"><div class="row"></div></footer>'
     }
-
-    CSS = %q(.row, .column { -webkit-box-sizing: border-box;
--moz-box-sizing: border-box; box-sizing: border-box; }
-.row { width: 100%; max-width: 100%; margin: 0 auto; }
-.row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
-.row.collapse .column { padding: 0; }
-.row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
-.row .row.collapse { margin: 0; }
-.column { float: left; min-height: 1px; padding: 0 7.6%; position: relative; }
-.column.centered { float: none; margin: 0 auto; }
-.row { *zoom: 1; }
-.row:before, .row:after { content: ""; display: table; }
-.row:after { clear: both; }
-@media only screen and (max-width: 650px) {
-  .row { width: auto; min-width: 0; margin-left: 0; margin-right: 0; }
-  .column { width: auto !important; float: none; }
-  .column:before, .column:after { content: ""; display: table; }
-  .column:after { clear: both; }
-})
   end
 
   module PHP
