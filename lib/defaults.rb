@@ -166,7 +166,7 @@ Built with Make A Theme</a>)
     BLOCKS = {
       article: %q(
 <?php if ( have_posts() ) : ?>
-<?php _s_content_nav( 'nav-above' ); ?>
+<?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
 <?php /* Start the Loop */ ?>
 <?php while ( have_posts() ) : the_post(); ?>
@@ -181,7 +181,7 @@ Built with Make A Theme</a>)
 
 <?php endwhile; ?>
 
-<?php _s_content_nav( 'nav-below' ); ?>
+<?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
 <?php elseif ( current_user_can( 'edit_posts' ) ) : ?>
 
@@ -193,11 +193,11 @@ Built with Make A Theme</a>)
       "article-single" => %q(
 <?php while ( have_posts() ) : the_post(); ?>
 
-  <?php _s_content_nav( 'nav-above' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
   <?php get_template_part( 'content', 'single' ); ?>
 
-  <?php _s_content_nav( 'nav-below' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
   <?php
     // If comments are open or we have at least one comment, load up the comment template
@@ -221,7 +221,7 @@ Built with Make A Theme</a>)
       article: %q(
 <?php if ( have_posts() ) : ?>
 
-  <?php _s_content_nav( 'nav-above' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
   <?php /* Start the Loop */ ?>
   <?php while ( have_posts() ) : the_post(); ?>
@@ -230,7 +230,7 @@ Built with Make A Theme</a>)
 
   <?php endwhile; ?>
 
-  <?php _s_content_nav( 'nav-below' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
 <?php else : ?>
 
@@ -288,7 +288,7 @@ if ( ! empty( $header_image ) ) : ?>
 
   // Add a page number if necessary:
   if ( $paged >= 2 || $page >= 2 )
-    echo ' | ' . sprintf( __( 'Page %s', '_s' ), max( $paged, $page ) );
+    echo ' | ' . sprintf( __( 'Page %s', '{{theme_slug}}' ), max( $paged, $page ) );
 
   ?></title>
 <link rel="profile" href="http://gmpg.org/xfn/11" />
@@ -317,14 +317,14 @@ if ( ! empty( $header_image ) ) : ?>
   </aside>
 
   <aside id="archives" class="widget">
-    <h1 class="widget-title"><?php _e( 'Archives', '_s' ); ?></h1>
+    <h1 class="widget-title"><?php _e( 'Archives', '{{theme_slug}}' ); ?></h1>
     <ul>
       <?php wp_get_archives( array( 'type' => 'monthly' ) ); ?>
     </ul>
   </aside>
 
   <aside id="meta" class="widget">
-    <h1 class="widget-title"><?php _e( 'Meta', '_s' ); ?></h1>
+    <h1 class="widget-title"><?php _e( 'Meta', '{{theme_slug}}' ); ?></h1>
     <ul>
       <?php wp_register(); ?>
       <li><?php wp_loginout(); ?></li>
