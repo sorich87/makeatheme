@@ -2109,12 +2109,12 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
     }
 
     , addDeclarationInputs: function (e) {
-      var selector = this.options.selector;
+      var selector = "#page " + this.options.selector;
 
       e.preventDefault();
 
       if (this.options.tag) {
-        selector = this.options.selector + " " + this.options.tag;
+        selector += " " + this.options.tag;
       }
 
       $(e.currentTarget).before(declaration_template({selector: selector}));
