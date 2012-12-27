@@ -51,9 +51,6 @@ module.exports = Backbone.Router.extend({
       return;
     }
 
-    $("#menubar", window.top.document).empty()
-      .append(app.createView("menubar").render().$el);
-
     if (app.currentUser.canEdit(app.currentTheme)) {
       app.createView("editor").render();
 
@@ -61,6 +58,9 @@ module.exports = Backbone.Router.extend({
     } else {
       $("body", window.top.document).addClass("preview");
     }
+
+    $("#menubar", window.top.document).empty()
+      .append(app.createView("menubar").render().$el);
   }
 
   , account: function () {

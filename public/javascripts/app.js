@@ -1856,9 +1856,6 @@ window.require.define({"router": function(exports, require, module) {
         return;
       }
 
-      $("#menubar", window.top.document).empty()
-        .append(app.createView("menubar").render().$el);
-
       if (app.currentUser.canEdit(app.currentTheme)) {
         app.createView("editor").render();
 
@@ -1866,6 +1863,9 @@ window.require.define({"router": function(exports, require, module) {
       } else {
         $("body", window.top.document).addClass("preview");
       }
+
+      $("#menubar", window.top.document).empty()
+        .append(app.createView("menubar").render().$el);
     }
 
     , account: function () {
