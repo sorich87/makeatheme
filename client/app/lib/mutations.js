@@ -109,7 +109,7 @@ module.exports = {
 
   , cleanupNode: function(node) {
     $(node)
-      .removeClass("x-current x-full x-not-full x-empty")
+      .removeClass("x-current x-full x-not-full x-empty ui-draggable-dragging")
       .children(".x-resize, .x-remove")
         .remove()
         .end()
