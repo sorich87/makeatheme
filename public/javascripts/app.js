@@ -2374,10 +2374,12 @@ window.require.define({"views/blocks": function(exports, require, module) {
     // If the element is inserted in a row,
     // load the actual template chuck to insert
     , insertBlock: function (element, id) {
-      var block = this.collection.get($(element).data("cid"));
+      var block = this.collection.get($(element).data("cid")),
+          build = this.addDataAttributes(block.get("build"), block.get("name"),
+                                         block.get("label"));
 
       element.outerHTML = "<div id='" + id + "' class='column " +
-        block.className() + "'>" + block.get("build") + "</div>";
+        block.className() + "'>" + build + "</div>";
 
       app.trigger("node:added", window.document.getElementById(id));
     }
@@ -2409,17 +2411,21 @@ window.require.define({"views/blocks": function(exports, require, module) {
         return block.name === name;
       }));
 
-      build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
-      build.firstChild.setAttribute("data-x-label", label);
-      build.firstChild.setAttribute("data-x-name", name);
-
-      attributes.build = build.outerHTML;
+      attributes.build = this.addDataAttributes(attributes.build);
       attributes.label = label;
 
       this.collection.add(attributes);
       this.render();
 
       app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
+    }
+
+    , addDataAttributes: function (build, name, label) {
+      build = (new DOMParser()).parseFromString(build, "text/html").body;
+      build.firstElementChild.setAttribute("data-x-label", label);
+      build.firstElementChild.setAttribute("data-x-name", name);
+
+      return build.outerHTML;
     }
 
     , removeBlock: function (e) {
