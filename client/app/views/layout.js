@@ -41,8 +41,8 @@ module.exports = View.extend({
   }
 
   , appEvents: {
-    "region:loaded": "highLightEmpty",
-    "template:loaded": "highLightEmpty"
+    "region:loaded": "highlightEmpty",
+    "template:loaded": "highlightEmpty"
   }
 
   , initialize: function () {
@@ -52,7 +52,7 @@ module.exports = View.extend({
     View.prototype.initialize.call(this);
   }
 
-  , highLightEmpty: function () {
+  , highlightEmpty: function () {
     this.$(".row").each(function (i, row) {
       var $row = $(row);
 

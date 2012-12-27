@@ -2950,8 +2950,8 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
 
     , appEvents: {
-      "region:loaded": "highLightEmpty",
-      "template:loaded": "highLightEmpty"
+      "region:loaded": "highlightEmpty",
+      "template:loaded": "highlightEmpty"
     }
 
     , initialize: function () {
@@ -2961,7 +2961,7 @@ window.require.define({"views/layout": function(exports, require, module) {
       View.prototype.initialize.call(this);
     }
 
-    , highLightEmpty: function () {
+    , highlightEmpty: function () {
       this.$(".row").each(function (i, row) {
         var $row = $(row);
 
