@@ -29,7 +29,8 @@ module.exports = View.extend({
     e.preventDefault();
 
     $("#theme", window.top.document).animate({
-        width: "1440px"
+        width: "auto"
+      , "min-width": "1600px"
       , left: "50%"
       , "margin-left": "-50%"
     });
@@ -40,6 +41,7 @@ module.exports = View.extend({
 
     $("#theme", window.top.document).animate({
         width: "768px"
+      , "min-width": "768px"
       , left: "50%"
       , "margin-left": "-384px"
     });
@@ -50,6 +52,7 @@ module.exports = View.extend({
 
     $("#theme", window.top.document).animate({
         width: "480px"
+      , "min-width": "480px"
       , left: "50%"
       , "margin-left": "-240px"
     });

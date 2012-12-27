@@ -6866,6 +6866,7 @@ body.theme #main {
   width: 100%;
 }
 #canvas {
+  background-color: #c1c1c1;
   width: 100%;
   overflow: auto;
   position: absolute;
