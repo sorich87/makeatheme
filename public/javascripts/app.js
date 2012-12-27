@@ -2288,7 +2288,7 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
   module.exports = View.extend({
       id: "blocks"
-    , className: "x-section"
+    , className: "editor-sidebar"
     , collection: app.currentTheme.get("blocks")
 
     , events: {
@@ -2318,7 +2318,13 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
 
     , render: function () {
-      this.$el.empty().append(template({all: this.allBlocks()}));
+      var editorToggleView = app.createView("editor_toggle", {position: "right"});
+
+      this.subViews.push(editorToggleView);
+
+      this.$el.empty()
+        .append(editorToggleView.render().$el)
+        .append(template({all: this.allBlocks()}));
 
       this.collection.reset(this.collection.models);
 
@@ -2788,9 +2794,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     , mutations = require("lib/mutations");
 
   module.exports = View.extend({
-    id: "layout-editor"
-
-    , initialize: function () {
+    initialize: function () {
       $(window).on("resize", this.resize.bind(this));
 
       View.prototype.initialize.call(this);
@@ -2806,15 +2810,13 @@ window.require.define({"views/editor": function(exports, require, module) {
     , render: function () {
       var blocksView = app.createView("blocks"),
           styleEditView = app.createView("style_edit"),
-          layoutView = app.createView("layout"),
-          editorToggleView = app.createView("editor_toggle");
+          layoutView = app.createView("layout");
 
-      this.subViews.push(editorToggleView, blocksView, styleEditView, layoutView);
+      this.subViews.push(blocksView, styleEditView, layoutView);
 
       this.$el.empty()
-        .append(editorToggleView.render().$el)
         .append(blocksView.render().$el)
-        .append(styleEditView.render().$el.hide());
+        .append(styleEditView.render().$el);
 
       this.$el.appendTo($("#main", window.top.document));
 
@@ -2825,13 +2827,11 @@ window.require.define({"views/editor": function(exports, require, module) {
       this.resize();
       this.preventActions();
 
-      app.trigger("editor:loaded");
-
       return this;
     }
 
     , resize: function () {
-      this.$el.height($(window.top).height() - 40);
+      this.$(".editor-sidebar").height($(window.top).height() - 40);
     }
 
     // Prevent click, drag and submit on links, images and forms
@@ -2854,34 +2854,52 @@ window.require.define({"views/editor_toggle": function(exports, require, module)
     , View = require("views/base/view");
 
   module.exports = View.extend({
-    id: "editor-toggle"
+    className: "editor-toggle"
 
     , events: {
       "click": "toggleEditor"
     }
 
+    , initialize: function () {
+      var initIcon, collapseIcon;
+
+      if (this.options.position === "left") {
+        this.initIcon = "&rarr;";
+        this.collapseIcon = "&larr;";
+        this.margin = "margin-right";
+      } else {
+        this.initIcon = "&larr;";
+        this.collapseIcon = "&rarr;";
+        this.margin = "margin-left";
+      }
+
+      View.prototype.initialize.call(this);
+    }
+
     , render: function () {
-      this.el.innerHTML = "&rarr;";
+      this.el.className += " " + this.options.position;
+      this.el.innerHTML = this.initIcon;
 
       return this;
     }
 
     , toggleEditor: function (e) {
-      if (this.el.className === "collapsed") {
-        $(e.currentTarget.parentNode).animate({"margin-right": "0"});
-        $("#canvas", window.top.document).animate({
-          width: this.canvasWidth
-        });
-        this.el.innerHTML = "&rarr;";
-        this.el.className = "";
+      var style = {};
+
+      if (this.$el.hasClass("collapsed")) {
+        style[this.margin] = "0";
+        $(e.currentTarget.parentNode).animate(style);
+
+        this.$el
+          .empty().append(this.initIcon)
+          .removeClass("collapsed");
       } else {
-        this.canvasWidth = $("#canvas", window.top.document).css("width");
+        style[this.margin] = "-220px";
+        $(e.currentTarget.parentNode).animate(style);
 
-        $(e.currentTarget.parentNode).animate({"margin-right": "-250px"});
-        $("#canvas", window.top.document).animate({width: "100%"});
-
-        this.el.innerHTML = "&larr;";
-        this.el.className = "collapsed";
+        this.$el
+          .empty().append(this.collapseIcon)
+          .addClass("collapsed");
       }
     }
   });
@@ -3997,18 +4015,16 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
   module.exports = View.extend({
       id: "style-edit"
-    , className: "x-section"
+    , className: "editor-sidebar"
 
     , events: {
         "click .selector-choice a": "highlightElement"
       , "change .tag": "setTag"
-
-      , "click .back-to-blocks": "hideEditor"
       , "change input[name=style_advanced]": "switchEditor"
     }
 
     , appEvents: {
-      "column:highlight": "showEditor",
+      "column:highlight": "setColumn",
       "resize:end": "changeWidth"
     }
 
@@ -4033,16 +4049,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
     , render: function () {
       var advanced = this.editorView === "advanced_style_edit" ? true : false,
+          editorToggleView = app.createView("editor_toggle", {position: "left"}),
           editorView;
-
-      this.media = "all";
-
-      this.el.innerHTML = template({
-          htmlTags: this.tagOptions()
-        , selector: this.selector
-        , parents: $(this.selector).parents().get().reverse()
-        , advanced: advanced
-      });
 
       editorView = app.createView(this.editorView, {
           selector: this.selector
@@ -4051,7 +4059,19 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         , customCSS: this.customCSS
         , currentCSS: this.currentElementStyle(!advanced)
       });
-      this.subViews.push(editorView);
+
+      this.subViews.push(editorView, editorToggleView);
+
+      this.media = "all";
+
+      this.$el.empty().append(editorToggleView.render().$el);
+
+      this.$el.append(template({
+          htmlTags: this.tagOptions()
+        , selector: this.selector
+        , parents: $(this.selector).parents().get().reverse()
+        , advanced: advanced
+      }));
 
       this.$el.append(editorView.render().$el);
 
@@ -4094,17 +4114,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
 
       this.selector = selector;
       this.render();
-    }
-
-    , showEditor: function (element) {
-      this.setColumn(element);
-      this.$el.siblings("#blocks").hide();
-      this.$el.show();
-    }
-
-    , hideEditor: function () {
-      this.$el.hide();
-      this.$el.siblings("#blocks").show();
     }
 
     , switchEditor: function (e) {
@@ -4310,7 +4319,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     buffer += escapeExpression(stack1) + "</option>\n      ";
     return buffer;}
 
-    buffer += "<h4>Blocks</h4>\n<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select>\n      ";
+    buffer += "<h4>Blocks</h4>\n<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select class=\"span2\">\n      ";
     foundHelper = helpers.all;
     stack1 = foundHelper || depth0.all;
     stack2 = helpers.each;
@@ -4320,7 +4329,7 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </select>\n  </label>\n  <input class=\"new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
+    buffer += "\n    </select>\n  </label>\n  <input class=\"span2 new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn btn-primary\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
     return buffer;});
 }});
 
@@ -4938,7 +4947,7 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     var buffer = "", stack1, stack2, stack3, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
 
 
-    buffer += "<div class=\"accordion\" id=\"visual-style\">\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-typography\">\n        Typography\n      </h4>\n    </div>\n    <div id=\"style-typography\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-family\">Font family</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-family\" name=\"font-family\" class=\"input-medium\">\n              <option";
+    buffer += "<div class=\"accordion\" id=\"visual-style\">\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h5 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-typography\">\n        Typography\n      </h5>\n    </div>\n    <div id=\"style-typography\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-font-family\">Font family</label>\n          <div class=\"controls\">\n            <select id=\"visual-font-family\" name=\"font-family\" class=\"input-medium\">\n              <option";
     stack1 = "Arial, Helvetica, sans-serif";
     foundHelper = helpers.fontFamily;
     stack2 = foundHelper || depth0.fontFamily;
@@ -5308,7 +5317,7 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     if(typeof stack3 === functionType) { stack1 = stack3.call(depth0, stack2, stack1, { hash: {} }); }
     else if(stack3=== undef) { stack1 = helperMissing.call(depth0, "selected", stack2, stack1, { hash: {} }); }
     else { stack1 = stack3; }
-    buffer += escapeExpression(stack1) + " value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h4>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" class=\"input-medium color\"\n              name=\"color\" value=\"";
+    buffer += escapeExpression(stack1) + " value=\"uppercase\">uppercase</option>\n            </select>\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h5 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-color\">\n        Color & Background\n      </h5>\n    </div>\n    <div id=\"style-color\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-color\">Color</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-color\" class=\"input-medium color\"\n              name=\"color\" value=\"";
     foundHelper = helpers.color;
     stack1 = foundHelper || depth0.color;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -5318,7 +5327,7 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     stack1 = foundHelper || depth0.backgroundColor;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "backgroundColor", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-margins\">\n        Margins\n      </h4>\n    </div>\n    <div id=\"style-margins\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-top\">Top Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-top\" class=\"input-mini\"\n              name=\"margin-top\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h5 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-margins\">\n        Margins\n      </h5>\n    </div>\n    <div id=\"style-margins\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-margin-top\">Top Margin</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-margin-top\" class=\"input-mini\"\n              name=\"margin-top\" value=\"";
     foundHelper = helpers.marginTop;
     stack1 = foundHelper || depth0.marginTop;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -5338,7 +5347,7 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     stack1 = foundHelper || depth0.marginLeft;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "marginLeft", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h4 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-padding\">\n        Padding\n      </h4>\n    </div>\n    <div id=\"style-padding\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-top\">Top Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-top\" class=\"input-mini\"\n              name=\"padding-top\" value=\"";
+    buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n  <div class=\"accordion-group\">\n    <div class=\"accordion-heading\">\n      <h5 class=\"accordion-toggle\" data-toggle=\"collapse\"\n        data-parent=\"#visual-style\" data-target=\"#style-padding\">\n        Padding\n      </h5>\n    </div>\n    <div id=\"style-padding\" class=\"accordion-body collapse\">\n      <div class=\"accordion-inner\">\n\n        <div class=\"controls-group\">\n          <label for=\"visual-padding-top\">Top Padding</label>\n          <div class=\"controls\">\n            <input type=\"text\" id=\"visual-padding-top\" class=\"input-mini\"\n              name=\"padding-top\" value=\"";
     foundHelper = helpers.paddingTop;
     stack1 = foundHelper || depth0.paddingTop;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
@@ -5480,7 +5489,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n    ";
     return buffer;}
 
-    buffer += "<div class=\"switch clearfix\">\n  <label class=\"checkbox pull-right\">\n    <input";
+    buffer += "<h4>Style Editor</h4>\n\n<div class=\"switch clearfix\">\n  <label class=\"checkbox\">\n    <input";
     foundHelper = helpers.advanced;
     stack1 = foundHelper || depth0.advanced;
     stack2 = helpers['if'];
@@ -5490,7 +5499,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    CSS Editor\n  </label>\n  <p><a href=\"#\" data-bypass=\"true\" class=\"back-to-blocks\">&lsaquo; Back</a></p>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
+    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    Show Advanced Editor\n  </label>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
@@ -5720,8 +5729,7 @@ window.require.define({"views/theme": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$el.width($(window).width() - 250)
-        .height($(window).height() - 40);
+      this.$el.height($(window).height() - 40);
     }
   });
   

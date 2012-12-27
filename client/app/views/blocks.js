@@ -5,7 +5,7 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     id: "blocks"
-  , className: "x-section"
+  , className: "editor-sidebar"
   , collection: app.currentTheme.get("blocks")
 
   , events: {
@@ -35,7 +35,13 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    this.$el.empty().append(template({all: this.allBlocks()}));
+    var editorToggleView = app.createView("editor_toggle", {position: "right"});
+
+    this.subViews.push(editorToggleView);
+
+    this.$el.empty()
+      .append(editorToggleView.render().$el)
+      .append(template({all: this.allBlocks()}));
 
     this.collection.reset(this.collection.models);
 

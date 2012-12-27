@@ -3,13 +3,13 @@
 <ul class="rects"></ul>
 <form class="new-block-select hide">
   <legend>Add New Block</legend>
-    <select>
+    <select class="span2">
       {{#each all}}
       <option value="{{name}}">{{label}}</option>
       {{/each}}
     </select>
   </label>
-  <input class="new-block-name" type="text" value="" placeholder="Enter block name" />
-  <button class="new-block-add btn">Add block</button>
+  <input class="span2 new-block-name" type="text" value="" placeholder="Enter block name" />
+  <button class="new-block-add btn btn-primary">Add block</button>
 </form>
 <button class="new-block">&plus; New Block</button>

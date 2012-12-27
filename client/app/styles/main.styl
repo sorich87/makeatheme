@@ -145,17 +145,14 @@ body.theme {
     width: 100%;
   }
 }
-body.theme.preview #canvas {
-  width: 100% !important;
-}
 #canvas {
+  width: 100%;
   overflow: auto;
-  float: left;
   position: absolute;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #theme {
-  width: 1440px;
+  min-width: 1600px;
   height: 100%;
   position: absolute;
 }
@@ -214,44 +211,41 @@ body.theme.preview #canvas {
 }
 
 /* Editor */
-#layout-editor {
+.editor-sidebar {
   color: grayDarker;
-  width: 250px;
-  padding: 0;
+  background-color: white;
+  width: 200px;
+  padding: 10px;
   margin: 0;
   position: absolute;
-  right: 0;
 
-  #editor-toggle {
+  .editor-toggle {
     position: absolute;
-    margin: 10px 0 0 -30px;
+    margin-top: 10px;
     line-height: 30px;
     background: white;
     text-align: center;
     cursor: pointer;
     border: 1px solid #EEE;
+    width: 28px;
+    height: 30px;
 
     a {
       color: black;
     }
   }
-
-  #editor-toggle {
-    width: 28px;
-    height: 30px;
+  .editor-toggle.right {
+    right: 0;
+    margin-right: -30px;
+  }
+  .editor-toggle.left {
+    left: 0;
+    margin-left: -30px;
   }
 
-  #style-edit,
-  #blocks {
-    margin: 10px;
-
-    .switch {
-      margin-right: 10px;
-    }
-  }
-
-  h4 {
+  h5 {
     margin: 0;
+    font-weight: bold;
   }
   ul {
     margin: 0 0 10px;
@@ -358,6 +352,9 @@ body.theme.preview #canvas {
     overflow-y: scroll;
     max-height: 500px;
   }
+}
+#style-edit {
+  right: 0;
 }
 
 // Fontello fonts used for tablet, phone and PC icons

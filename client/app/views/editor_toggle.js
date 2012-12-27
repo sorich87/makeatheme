@@ -2,34 +2,52 @@ var app = require("application")
   , View = require("views/base/view");
 
 module.exports = View.extend({
-  id: "editor-toggle"
+  className: "editor-toggle"
 
   , events: {
     "click": "toggleEditor"
   }
 
+  , initialize: function () {
+    var initIcon, collapseIcon;
+
+    if (this.options.position === "left") {
+      this.initIcon = "&rarr;";
+      this.collapseIcon = "&larr;";
+      this.margin = "margin-right";
+    } else {
+      this.initIcon = "&larr;";
+      this.collapseIcon = "&rarr;";
+      this.margin = "margin-left";
+    }
+
+    View.prototype.initialize.call(this);
+  }
+
   , render: function () {
-    this.el.innerHTML = "&rarr;";
+    this.el.className += " " + this.options.position;
+    this.el.innerHTML = this.initIcon;
 
     return this;
   }
 
   , toggleEditor: function (e) {
-    if (this.el.className === "collapsed") {
-      $(e.currentTarget.parentNode).animate({"margin-right": "0"});
-      $("#canvas", window.top.document).animate({
-        width: this.canvasWidth
-      });
-      this.el.innerHTML = "&rarr;";
-      this.el.className = "";
+    var style = {};
+
+    if (this.$el.hasClass("collapsed")) {
+      style[this.margin] = "0";
+      $(e.currentTarget.parentNode).animate(style);
+
+      this.$el
+        .empty().append(this.initIcon)
+        .removeClass("collapsed");
     } else {
-      this.canvasWidth = $("#canvas", window.top.document).css("width");
+      style[this.margin] = "-220px";
+      $(e.currentTarget.parentNode).animate(style);
 
-      $(e.currentTarget.parentNode).animate({"margin-right": "-250px"});
-      $("#canvas", window.top.document).animate({width: "100%"});
-
-      this.el.innerHTML = "&larr;";
-      this.el.className = "collapsed";
+      this.$el
+        .empty().append(this.collapseIcon)
+        .addClass("collapsed");
     }
   }
 });

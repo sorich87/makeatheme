@@ -3,9 +3,7 @@ var app = require("application")
   , mutations = require("lib/mutations");
 
 module.exports = View.extend({
-  id: "layout-editor"
-
-  , initialize: function () {
+  initialize: function () {
     $(window).on("resize", this.resize.bind(this));
 
     View.prototype.initialize.call(this);
@@ -21,15 +19,13 @@ module.exports = View.extend({
   , render: function () {
     var blocksView = app.createView("blocks"),
         styleEditView = app.createView("style_edit"),
-        layoutView = app.createView("layout"),
-        editorToggleView = app.createView("editor_toggle");
+        layoutView = app.createView("layout");
 
-    this.subViews.push(editorToggleView, blocksView, styleEditView, layoutView);
+    this.subViews.push(blocksView, styleEditView, layoutView);
 
     this.$el.empty()
-      .append(editorToggleView.render().$el)
       .append(blocksView.render().$el)
-      .append(styleEditView.render().$el.hide());
+      .append(styleEditView.render().$el);
 
     this.$el.appendTo($("#main", window.top.document));
 
@@ -40,13 +36,11 @@ module.exports = View.extend({
     this.resize();
     this.preventActions();
 
-    app.trigger("editor:loaded");
-
     return this;
   }
 
   , resize: function () {
-    this.$el.height($(window.top).height() - 40);
+    this.$(".editor-sidebar").height($(window.top).height() - 40);
   }
 
   // Prevent click, drag and submit on links, images and forms

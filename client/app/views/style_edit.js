@@ -7,18 +7,16 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     id: "style-edit"
-  , className: "x-section"
+  , className: "editor-sidebar"
 
   , events: {
       "click .selector-choice a": "highlightElement"
     , "change .tag": "setTag"
-
-    , "click .back-to-blocks": "hideEditor"
     , "change input[name=style_advanced]": "switchEditor"
   }
 
   , appEvents: {
-    "column:highlight": "showEditor",
+    "column:highlight": "setColumn",
     "resize:end": "changeWidth"
   }
 
@@ -43,16 +41,8 @@ module.exports = View.extend({
 
   , render: function () {
     var advanced = this.editorView === "advanced_style_edit" ? true : false,
+        editorToggleView = app.createView("editor_toggle", {position: "left"}),
         editorView;
-
-    this.media = "all";
-
-    this.el.innerHTML = template({
-        htmlTags: this.tagOptions()
-      , selector: this.selector
-      , parents: $(this.selector).parents().get().reverse()
-      , advanced: advanced
-    });
 
     editorView = app.createView(this.editorView, {
         selector: this.selector
@@ -61,7 +51,19 @@ module.exports = View.extend({
       , customCSS: this.customCSS
       , currentCSS: this.currentElementStyle(!advanced)
     });
-    this.subViews.push(editorView);
+
+    this.subViews.push(editorView, editorToggleView);
+
+    this.media = "all";
+
+    this.$el.empty().append(editorToggleView.render().$el);
+
+    this.$el.append(template({
+        htmlTags: this.tagOptions()
+      , selector: this.selector
+      , parents: $(this.selector).parents().get().reverse()
+      , advanced: advanced
+    }));
 
     this.$el.append(editorView.render().$el);
 
@@ -104,17 +106,6 @@ module.exports = View.extend({
 
     this.selector = selector;
     this.render();
-  }
-
-  , showEditor: function (element) {
-    this.setColumn(element);
-    this.$el.siblings("#blocks").hide();
-    this.$el.show();
-  }
-
-  , hideEditor: function () {
-    this.$el.hide();
-    this.$el.siblings("#blocks").show();
   }
 
   , switchEditor: function (e) {
