@@ -3178,12 +3178,14 @@ window.require.define({"views/layout": function(exports, require, module) {
            parent.children.length === 1) ||
           (node.id.indexOf("x-") !== 0 && node.id.indexOf("y-") !== 0)) {
         node.className += " x-empty";
-      } else {
+      } else if (parent.children.length !== 1) {
         parent.removeChild(node);
 
         app.trigger("node:removed", node,
                     window.document.getElementById(parentId), "row");
       }
+
+      this.highlightEmpty();
     }
   });
   
