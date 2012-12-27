@@ -38,6 +38,7 @@ module.exports = View.extend({
 
     mutations.initialize();
 
+    this.resize();
     this.preventActions();
 
     return this;

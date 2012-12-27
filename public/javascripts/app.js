@@ -2836,6 +2836,7 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       mutations.initialize();
 
+      this.resize();
       this.preventActions();
 
       return this;
