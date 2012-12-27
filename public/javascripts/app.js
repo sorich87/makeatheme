@@ -2834,7 +2834,7 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
 
     , resize: function () {
-      this.$(".editor-sidebar").height($(window.top).height() - 40);
+      this.$(".editor-sidebar").height($(window.top).height() - 60);
     }
 
     // Prevent click, drag and submit on links, images and forms

@@ -6935,6 +6935,7 @@ body.theme #main {
   padding: 10px;
   margin: 0;
   position: absolute;
+  overflow: auto;
 }
 .editor-sidebar .editor-toggle {
   position: absolute;

@@ -40,7 +40,7 @@ module.exports = View.extend({
   }
 
   , resize: function () {
-    this.$(".editor-sidebar").height($(window.top).height() - 40);
+    this.$(".editor-sidebar").height($(window.top).height() - 60);
   }
 
   // Prevent click, drag and submit on links, images and forms
