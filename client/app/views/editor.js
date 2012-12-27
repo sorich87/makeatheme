@@ -3,6 +3,11 @@ var app = require("application")
   , mutations = require("lib/mutations");
 
 module.exports = View.extend({
+  appEvents: {
+    "blocks:loaded": "resize",
+    "style:loaded": "resize"
+  },
+
   initialize: function () {
     $(window).on("resize", this.resize.bind(this));
 
@@ -33,7 +38,6 @@ module.exports = View.extend({
 
     mutations.initialize();
 
-    this.resize();
     this.preventActions();
 
     return this;

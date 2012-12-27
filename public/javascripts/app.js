@@ -2330,6 +2330,8 @@ window.require.define({"views/blocks": function(exports, require, module) {
 
       this.collection.reset(this.collection.models);
 
+      app.trigger("blocks:loaded");
+
       return this;
     }
 
@@ -2799,6 +2801,11 @@ window.require.define({"views/editor": function(exports, require, module) {
     , mutations = require("lib/mutations");
 
   module.exports = View.extend({
+    appEvents: {
+      "blocks:loaded": "resize",
+      "style:loaded": "resize"
+    },
+
     initialize: function () {
       $(window).on("resize", this.resize.bind(this));
 
@@ -2829,7 +2836,6 @@ window.require.define({"views/editor": function(exports, require, module) {
 
       mutations.initialize();
 
-      this.resize();
       this.preventActions();
 
       return this;
@@ -4081,6 +4087,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           .append(editorToggleView.render().$el)
           .append(tags)
           .append(editorView.render().$el);
+
+      app.trigger("style:loaded");
 
       return this;
     }

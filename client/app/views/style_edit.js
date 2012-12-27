@@ -70,6 +70,8 @@ module.exports = View.extend({
         .append(tags)
         .append(editorView.render().$el);
 
+    app.trigger("style:loaded");
+
     return this;
   }
 

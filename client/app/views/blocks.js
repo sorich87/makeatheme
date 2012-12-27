@@ -47,6 +47,8 @@ module.exports = View.extend({
 
     this.collection.reset(this.collection.models);
 
+    app.trigger("blocks:loaded");
+
     return this;
   }
 
