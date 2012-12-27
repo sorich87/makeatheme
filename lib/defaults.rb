@@ -150,7 +150,7 @@ Built with Make A Theme</a>)
     }
 
     REGIONS = {
-      header: '<header id="branding" role="banner"><div class="row"></div></header>',
+      header: '<header id="masthead" role="banner"><div class="row"></div></header>',
       footer: '<footer id="colophon" role="contentinfo"><div class="row"></div></footer>'
     }
 
