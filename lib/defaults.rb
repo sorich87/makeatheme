@@ -140,9 +140,9 @@ Nunc iaculis suscipit dui.</p></pre>
 
       sidebar: %q({{widget_search}}{{widget_text}}),
 
-      credits: %q(<a href="http://www.makeatheme.com/"
+      credits: %q(Built with <a href="http://www.makeatheme.com/"
 title="Responsive HTML5 and WordPress themes editor" rel="generator">
-Built with Make A Theme</a>)
+Make A Theme</a>.)
     }
 
     TEMPLATES = {
@@ -261,7 +261,12 @@ if ( ! empty( $header_image ) ) : ?>
 </nav>
 ),
 
-      sidebar: "<?php get_sidebar(<% unless block.label == 'Default' %> '<%= block.label.underscore %>' <% end %>); ?>"
+      sidebar: "<?php get_sidebar(<% unless block.label == 'Default' %> '<%= block.label.underscore %>' <% end %>); ?>",
+
+      credits: %q(<?php do_action( '{{theme_slug}}_credits' ); ?>
+<a href="http://wordpress.org/" title="<?php esc_attr_e( 'A Semantic Personal Publishing Platform', '{{theme_slug}}' ); ?>" rel="generator"><?php printf( __( 'Proudly powered by %s', '{{theme_slug}}' ), 'WordPress' ); ?></a>
+<span class="sep"> | </span>
+<?php printf( __( 'Built with %s.', '{{theme_slug}}' ), '<a href="http://www.makeatheme.com/" rel="designer">Make A Theme</a>' ); ?>)
     }
 
     REGIONS = {
