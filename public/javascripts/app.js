@@ -2787,17 +2787,22 @@ window.require.define({"views/download_theme": function(exports, require, module
     },
 
     archiveSuccess: function (e) {
+      e.currentTarget.close();
+
       this.waitingForArchive = false;
 
       app.trigger("notification", "success", "Theme archives updated.");
     },
 
     archiveErrors: function (e) {
+      e.currentTarget.close();
+
       this.waitingForArchive = false;
 
       app.trigger("notification", "error", "Error updating the theme archives.");
     }
   });
+
   
 }});
 
