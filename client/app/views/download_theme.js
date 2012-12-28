@@ -40,14 +40,19 @@ module.exports = View.extend({
   },
 
   archiveSuccess: function (e) {
+    e.currentTarget.close();
+
     this.waitingForArchive = false;
 
     app.trigger("notification", "success", "Theme archives updated.");
   },
 
   archiveErrors: function (e) {
+    e.currentTarget.close();
+
     this.waitingForArchive = false;
 
     app.trigger("notification", "error", "Error updating the theme archives.");
   }
 });
+
