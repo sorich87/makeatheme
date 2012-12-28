@@ -7,32 +7,25 @@ var View = require("views/base/view")
 
 module.exports = View.extend({
     id: "style-edit"
-  , className: "x-section"
+  , className: "editor-sidebar"
 
   , events: {
       "click .selector-choice a": "highlightElement"
     , "change .tag": "setTag"
-
-    , "click .back-to-general": "hideEditor"
     , "change input[name=style_advanced]": "switchEditor"
   }
 
-  , initialize: function () {
-    app.on("column:highlight", this.setColumn, this);
-    app.on("column:highlight", this.showEditor, this);
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("resize:end", this.changeWidth, this);
-
-    this.selector = "body";
-    this.customCSS = app.editor.style;
-    this.editorView = "simple_style_edit";
+  , appEvents: {
+    "column:highlight": "setColumn",
+    "resize:end": "changeWidth"
   }
 
-  , teardown: function () {
-    app.off("column:highlight", this.setColumn, this);
-    app.off("column:highlight", this.showEditor, this);
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("resize:end", this.changeWidth, this);
+  , initialize: function () {
+    this.selector = "body";
+    this.customCSS = app.currentTheme.get("style");
+    this.editorView = "simple_style_edit";
+
+    View.prototype.initialize.call(this);
   }
 
   , setTag: function (e) {
@@ -47,24 +40,37 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var computedStyle = this.editorView === "simple_style_edit" ? true : false;
+    var advanced = this.editorView === "advanced_style_edit" ? true : false,
+        editorToggleView = app.createView("editor_toggle", {position: "left"}),
+        editorView, tags;
 
-    this.media = "all";
-
-    this.el.innerHTML = template({
-        htmlTags: this.tagOptions()
-      , selector: this.selector
-      , parents: $(this.selector).parents().get().reverse()
-      , advanced: this.editorView === "advanced_style_edit" ? true : false
-    });
-
-    this.$el.append(app.createView(this.editorView, {
+    editorView = app.createView(this.editorView, {
         selector: this.selector
       , tag: this.tag
       , media: this.media
       , customCSS: this.customCSS
-      , currentCSS: this.currentElementStyle(computedStyle)
-    }).render().$el);
+      , currentCSS: this.currentElementStyle(!advanced)
+    });
+
+    this.subViews.push(editorView, editorToggleView);
+
+    this.media = "all";
+
+    tags = template({
+        htmlTags: this.tagOptions()
+      , selector: this.selector
+      , parents: $(this.selector).parents().get().reverse()
+      , advanced: advanced
+    });
+
+    this.$el.empty()
+      .append("<div>")
+      .children()
+        .append(editorToggleView.render().$el)
+        .append(tags)
+        .append(editorView.render().$el);
+
+    app.trigger("style:loaded");
 
     return this;
   }
@@ -79,10 +85,6 @@ module.exports = View.extend({
       });
       return group;
     });
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.style = this.customCSS.getRules();
   }
 
   , changeWidth: function (selector, width) {
@@ -109,16 +111,6 @@ module.exports = View.extend({
 
     this.selector = selector;
     this.render();
-  }
-
-  , showEditor: function () {
-    this.$el.siblings("#general").hide();
-    this.$el.show();
-  }
-
-  , hideEditor: function () {
-    this.$el.hide();
-    this.$el.siblings("#general").show();
   }
 
   , switchEditor: function (e) {

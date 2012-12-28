@@ -93,8 +93,8 @@ yellowLight =         #ffffe0
 }
 
 body {
-  padding-top: 60px;
-  padding-bottom: 60px;
+  padding-top: 40px;
+  padding-bottom: 40px;
   line-height: 1.6em;
 }
 [contenteditable=true]:hover,
@@ -127,7 +127,7 @@ body {
 /* Notification */
 #notifications {
   right: 15px;
-  top: 75px;
+  top: 55px;
   position: fixed;
   z-index: 99999;
   width: 300px;
@@ -135,23 +135,25 @@ body {
 
 /* Theme page */
 body.theme {
-  padding-top: 60px;
+  padding-top: 40px;
   padding-bottom: 0;
   overflow: hidden;
-}
-body.theme #main {
-  padding: 0;
-  margin: 0;
-  width: 100%;
+
+  #main {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+  }
 }
 #canvas {
+  background-color: grayLighter;
+  width: 100%;
   overflow: auto;
-  float: left;
   position: absolute;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #theme {
-  width: 1440px;
+  min-width: 1600px;
   height: 100%;
   position: absolute;
 }
@@ -179,7 +181,6 @@ body.theme #main {
   border-bottom-right-radius: 0;
 }
 .dropdown-menu {
-  width: 100%;
   border-radius: 0;
 }
 .typeahead {
@@ -211,71 +212,45 @@ body.theme #main {
 }
 
 /* Editor */
-#layout-editor {
+.editor-sidebar {
   color: grayDarker;
-  width: 250px;
-  padding: 0;
+  background-color: white;
+  width: 200px;
+  padding: 10px;
   margin: 0;
   position: absolute;
-  right: 0;
 
-  #editor-toggle,
-  #device-switch {
+  > div {
+    overflow: auto;
+  }
+
+  .editor-toggle {
     position: absolute;
-    margin: 10px 0 0 -30px;
+    margin-top: 10px;
     line-height: 30px;
     background: white;
     text-align: center;
     cursor: pointer;
     border: 1px solid #EEE;
+    width: 28px;
+    height: 30px;
 
     a {
       color: black;
     }
   }
-
-  #editor-toggle {
-    width: 28px;
-    height: 30px;
+  .editor-toggle.right {
+    right: 0;
+    margin-right: -30px;
+  }
+  .editor-toggle.left {
+    left: 0;
+    margin-left: -30px;
   }
 
-  #device-switch {
-    font-size: 16px;
-    margin-top: 50px;
-    padding-left: 4px;
-    width: 24px;
-
-    ul {
-      margin: 0;
-    }
-
-    a {
-      height: 30px;
-      line-height: 30px;
-      display: block;
-    }
-  }
-
-  #theme-meta {
-    padding: 10px;
-    border-bottom: 1px solid grayDarker;
-  }
-
-  #edit-actions {
-    height: 90%;
-    overflow: auto;
-  }
-
-  #style-edit {
-    margin: 10px;
-
-    .switch {
-      margin-right: 10px;
-    }
-  }
-
-  h4 {
+  h5 {
     margin: 0;
+    font-weight: bold;
   }
   ul {
     margin: 0 0 10px;
@@ -373,12 +348,6 @@ body.theme #main {
   input.hide {
     display: none;
   }
-  #customize-button,
-  #download-button,
-  #save-button {
-    margin: 10px;
-    text-align: center;
-  }
   #templates-preview {
     padding: 10px;
     margin-bottom: 20px;
@@ -389,7 +358,11 @@ body.theme #main {
     max-height: 500px;
   }
 }
+#style-edit {
+  right: 0;
+}
 
+// Fontello fonts used for tablet, phone and PC icons
 @font-face {
   font-family: 'fontello';
   src: url("../font/fontello.eot");
@@ -417,4 +390,20 @@ body.theme #main {
 .f-icon-tablet:before { content: '\e7b1'; } /* '' */
 .f-icon-monitor:before { content: '💻'; } /* '\1f4bb' */
 .f-icon-mobile:before { content: '📱'; } /* '\1f4f1' */
+
+
+// Custom icons for WordPress and HTML5
+[class^="c-icon-"],
+[class*=" c-icon-"] {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  margin-right: 3px;
+  line-height: 14px;
+  vertical-align: text-top;
+  background-repeat: no-repeat;
+}
+.c-icon-html5 { background-image: url("../images/icon-html5.png"); }
+.c-icon-wordpress { background-image: url("../images/icon-wordpress.png"); }
 

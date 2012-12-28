@@ -1,17 +1,22 @@
 var View = require("views/base/view")
-  , application = require("application")
   , cssProperties = require("lib/css_properties")
   , template = require("views/templates/theme");
 
 module.exports = View.extend({
-  initialize: function () {
+  id: "canvas"
+
+  , initialize: function () {
     $("body").on("mouseenter", "[name=property]", this.typeahead);
     $(window).on("resize", this.resize.bind(this));
+
+    View.prototype.initialize.call(this);
   }
 
   , teardown: function () {
     $("body").off("mouseenter", "[name=property]", this.typeahead);
     $(window).off("resize", this.resize.bind(this));
+
+    View.prototype.teardown.call(this);
   }
 
   , render: function () {
@@ -30,7 +35,6 @@ module.exports = View.extend({
   }
 
   , resize: function () {
-    this.$("#canvas").width($(window).width() - 250)
-      .height($(window).height() - 60);
+    this.$el.height($(window).height() - 40);
   }
 });

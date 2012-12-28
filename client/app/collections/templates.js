@@ -18,7 +18,7 @@ module.exports = Collection.extend({
       return template.get("current") === true;
     });
 
-    if (! current) {
+    if (!current) {
       current = this.getByName("index");
     }
 
@@ -31,6 +31,11 @@ module.exports = Collection.extend({
 
     if (oldCurrent) {
       oldCurrent.set("current", false);
+    }
+
+    // If template is an array of attributes, get the corresponding model.
+    if (template.name) {
+      template = this.getByName(template.name);
     }
 
     template.set("current", true);

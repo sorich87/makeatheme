@@ -131,7 +131,7 @@ module ThemeHelper
     if theme.save
       theme.archive_job_id = generate_theme_archive(theme)
 
-      status 201
+      status 200
       respond_with theme
     else
       status 400

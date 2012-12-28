@@ -12,10 +12,11 @@ _.extend(Application, {
 
     // Setup notifications handling
     // Append to top window in case document is in an iframe
-    this.reuseView("notifications").render()
+    this.createView("notifications").render()
       .$el.appendTo($("body", window.top.document));
 
     this.setCurrentUser();
+    this.setCurrentTheme();
 
     // Initialize router
     this.router = new Router();
@@ -24,13 +25,10 @@ _.extend(Application, {
     mixpanel.initialize();
 
     // Render the login and logout links
-    this.reuseView("auth_links").render();
+    this.createView("auth_links").render();
 
     // Set per-view body classes
     this.setBodyClasses();
-
-    // Holds editor settings and data
-    this.editor = {};
 
     // When login or registration modal is closed, go back to the previous page
     this.authRedirect();
@@ -39,39 +37,11 @@ _.extend(Application, {
     Object.freeze(this);
   }
 
-  // Create a new view, cleanup if the view previously existed
+  // Create a new view
   , createView: function (name, options) {
-    var views = this.views || {}
-      , View = require("views/" + name);
+    var View = require("views/" + name);
 
-    if (views[name] !== void 0) {
-      views[name].undelegateEvents();
-      if (!options || !options.el) {
-        views[name].remove();
-      }
-      views[name].off();
-      if ("teardown" in views[name]) {
-        views[name].teardown();
-      }
-    }
-
-    views[name] = new View(options);
-    this.views = views;
-    return views[name];
-  }
-
-  // Return existing view, otherwise create a new one
-  , reuseView: function(name, options) {
-    var views = this.views || {}
-      , View = require("views/" + name);
-
-    if (views[name] !== void 0) {
-      return views[name];
-    }
-
-    views[name] = new View(options);
-    this.views = views;
-    return views[name];
+    return new View(options);
   }
 
   , setBodyClasses: function () {
@@ -98,6 +68,32 @@ _.extend(Application, {
 
     this.on("theme:created", this.updateCurrentUserThemes, this);
     this.on("theme:copied", this.updateCurrentUserThemes, this);
+  }
+
+  , setCurrentTheme: function () {
+    var Theme = require("models/theme"),
+        Blocks = require("collections/blocks"),
+        Regions = require("collections/regions"),
+        Templates = require("collections/templates"),
+        CustomCSS = require("lib/custom_css");
+
+    if (this.data.theme) {
+      this.currentTheme = new Theme(this.data.theme);
+
+      if (this.data.theme_pieces) {
+        var blocks = new Blocks(this.data.theme_pieces.blocks),
+            regions = new Regions(this.data.theme_pieces.regions),
+            templates = new Templates(this.data.theme_pieces.templates);
+
+        this.currentTheme.set("blocks", blocks);
+        this.currentTheme.set("regions", regions);
+        this.currentTheme.set("templates", templates);
+      }
+
+      if (this.data.style) {
+        this.currentTheme.set("style", new CustomCSS(this.data.style));
+      }
+    }
   }
 
   , updateCurrentUserThemes: function (theme) {

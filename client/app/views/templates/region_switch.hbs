@@ -1,0 +1,6 @@
+<a tabindex="-1" href="#">Switch {{label}}</a>
+<ul class="dropdown-menu">
+  {{#each regions}}
+  <li{{#if active}} class="active"{{/if}}><a href="#" data-cid="{{cid}}">{{slug}}</a></li>
+  {{/each}}
+</ul>

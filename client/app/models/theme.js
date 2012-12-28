@@ -10,4 +10,27 @@ module.exports = Model.extend({
     , author: ""
     , screenshot_uri: ""
   }
+
+  , toJSON: function () {
+    var attributes = _.clone(this.attributes);
+
+    ["blocks", "regions", "templates"].forEach(function (object) {
+      if (!attributes[object].models) {
+        return [];
+      }
+
+      var filter = function (model) {
+        return _.pick(model.attributes, "_id", "label", "name", "slug",
+                      "template");
+      };
+
+      attributes[object] = _.map(attributes[object].models, filter);
+    });
+
+    if ("getRules" in attributes.style) {
+      attributes.style = attributes.style.getRules();
+    }
+
+    return attributes;
+  }
 });

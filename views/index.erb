@@ -11,6 +11,12 @@ you can use on your website, sell to earn money or share with others for free.">
     <!-- Le styles -->
     <link rel="stylesheet" href="/stylesheets/app.css">
 
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="/ico/favicon.png">
+
     <script src="/javascripts/vendor.js"></script>
     <script src="/javascripts/app.js"></script>
     <script>
@@ -58,22 +64,19 @@ var _ratchet=["da5801c5f17740b384d92b3c1eee864e", _ratchetParams];
 
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container-fluid">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/" data-bypass="true">Make A Theme <sup>beta</sup></a>
           <div class="pull-right" id="auth-links">
           </div>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li><a href="http://www.makeatheme.com/" data-bypass="true">Home</a></li>
-              <li><a href="http://support.makeatheme.com/">Support</a></li>
-              <li><a href="http://blog.makeatheme.com/">Blog</a></li>
-            </ul>
-          </div><!--/.nav-collapse -->
+          <ul id="main-nav" class="nav">
+            <li><a href="/" data-bypass="true"><i class="icon-home"></i> Dashboard</a></li>
+          </ul>
+          <div id="menubar">
+          </div>
         </div>
       </div>
     </div>

@@ -9,12 +9,10 @@ module.exports = View.extend({
     "click .delete": "confirmDeletion"
   }
 
-  , initialize: function () {
-    this.collection.on("reset", this.addAll, this);
-  }
-
-  , teardown: function () {
-    this.collection.off("reset", this.addAll, this);
+  , objectEvents: {
+    collection: {
+      "reset": "addAll"
+    }
   }
 
   , render: function () {

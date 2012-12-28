@@ -15,23 +15,19 @@ module.exports = Backbone.Router.extend({
 
   , themes: function () {
     this.userOnly();
-
-    $("#main").empty()
-      .append(app.createView("themes").render().$el);
+    this.view = app.createView("themes");
+    this.render();
   }
 
   , user_themes: function () {
     this.userOnly();
-
-    $("#main").empty()
-      .append(app.createView("user_themes").render().$el);
+    this.view = app.createView("user_themes");
+    this.render();
   }
 
   , theme: function (id) {
-    app.createView("theme", {
-        themeID: id
-      , el: $("#main")
-    }).render();
+    this.view = app.createView("theme", {themeID: id});
+    this.render();
 
     jQuery(function ($) {
       $("body").on("click", ".accordion-toggle", function (e) {
@@ -49,41 +45,51 @@ module.exports = Backbone.Router.extend({
   }
 
   , edit: function (id) {
-    if (app.data.theme === void 0) {
-      window.top.Backbone.history.navigate("/404", {trigger: true, replace: true});
+    if (app.currentTheme === void 0) {
+      $("#main", window.top.document).empty()
+        .append(app.createView("not_found").render().$el);
       return;
     }
 
-    app.createView("editor").render();
+    if (app.currentUser.canEdit(app.currentTheme)) {
+      app.createView("editor").render();
+
+      $("body", window.top.document).addClass("edit");
+    } else {
+      $("body", window.top.document).addClass("preview");
+    }
+
+    $("#menubar", window.top.document).empty()
+      .append(app.createView("menubar").render().$el);
   }
 
   , account: function () {
     this.userOnly();
-
-    $("#main").empty().append(app.createView("account").render().$el);
+    this.view = app.createView("account");
+    this.render();
   }
 
   , login: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("login").render().$el);
+    this.view = app.createView("login");
+    this.render();
   }
 
   , register: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("register").render().$el);
+    this.view = app.createView("register");
+    this.render();
   }
 
   , reset_password: function () {
     this.anonymousOnly();
-
-    $("#main").empty().append(app.createView("password_reset").render().$el);
+    this.view = app.createView("password_reset");
+    this.render();
   }
 
   , notFound: function (action) {
-    $("#main").empty()
-      .append(app.reuseView("not_found").render().$el);
+    this.view = app.createView("not_found");
+    this.render();
   }
 
   , userOnly: function () {
@@ -98,5 +104,15 @@ module.exports = Backbone.Router.extend({
       document.location = "/";
       return true;
     }
+  }
+
+  , render: function () {
+    if (this._currentView) {
+      this._currentView.teardown();
+    }
+
+    this._currentView = this.view;
+
+    $("#main").empty().append(this.view.render().$el);
   }
 });

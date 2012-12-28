@@ -146,121 +146,13 @@ Built with Make A Theme</a>)
     }
 
     TEMPLATES = {
-      index: %q[<div id="main">
-<div class="row">
-<div class="column entry-content">
-<h1>Welcome to Make A Theme!</h1>
-<p>This is a small guide to get you started. Reading it will give you
-an idea of how to build your theme within a few minutes.</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>How is a theme structured?</h2>
-<p>A theme is made of several templates. You can switch templates and
-add new ones by clicking &quot;Current Template&quot; to the right of
-the screen.<br />
-A template is made of a header, a content area and a footer.
-Do you see the blue areas marked "HEADER" and "FOOTER" above and below?
-These are the header and footer of this template and you can add blocks there.
-More on how to add blocks below.<br />
-Several templates can share the same header and/or footer.<br />
-Click &quot;Header & Footer&quot; to the right of the screen to select
-which header and footer the current template uses or to add a new header
-or footer.</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>What is a block?</h2>
-<p>Blocks are the components of a theme that you can actually see.
-A block can be an article, a navigation, a header image, a search form.<br />
-To insert a block in the template, drag it and drop it right here.
-Go ahead! Drag the "Navigation" block and drop it right here.<br />
-After droping a block in the template, you can move it to another location,
-resize it or delete it. What are you waiting for? Try it!
-You see how it's funny?<br />
-You can create new blocks as well. By example, you may want to create
-several blocks of the same type to apply different styling to them.<br />
-We will be adding plenty of types of blocks in the future that you can use.
-Like slideshows, galleries, etc. Please be patient. Remember,
-we are in a very early stage...</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>What is &quot;Style&quot; for?</h2>
-<p>Under &quot;Style&quot;, is where, you guessed it, you can add styling
-to the elements on the page. You can add colors, backgrounds, width, etc.
-In fact, you can add any style supported by the CSS specification.<br />
-Click on the block you just inserted, then click on
-&quot;Add Declaration&quot; under &quot;Style&quot;.
-Click &quot;Add rule&quot;. Now add a rule. By example,
-type &quot;color&quot; in the property field and &quot;#f00&quot;
-in the value field.<br />
-Do you see how the template is now beautiful? Well, not really.
-But it will be when you add your creative touch! ;)</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>How to share with others?</h2>
-<p>Just copy the URL under &quot;Share&quot; and sent it to them.
-Soon, we will be adding more collaboration tools.</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>How to download the result?</h2>
-<p>First, you will need to save it. You are too shy!
-Click the &quot;Save Changes&quot; button now.
-Then wait for the archives to be built.<br />
-The download button will appear and you will be able to download
-in HTML5 or WordPress format.</p>
-</div>
-</div>
-
-<div class="row">
-<div class="column entry-content">
-<h2>Is that all?</h2>
-<p>Yes, now you know everything to get you started. This tutorial is
-made of several blocks. Delete them and make your next theme!<br />
-<b>PS:</b> If you are too busy (or lazy) to make a new theme from scratch,
-you can copy an existing one and modify it. Click "New Theme" in the site
-navigation bar to go back to the list of themes.</p>
-</div>
-</div>
-</div>]
+      index: '<div id="main"><div class="row"></div></div>'
     }
 
     REGIONS = {
-      header: '<header id="branding" role="banner"><div class="row"></div></header>',
+      header: '<header id="masthead" role="banner"><div class="row"></div></header>',
       footer: '<footer id="colophon" role="contentinfo"><div class="row"></div></footer>'
     }
-
-    CSS = %q(.row, .column { -webkit-box-sizing: border-box;
--moz-box-sizing: border-box; box-sizing: border-box; }
-.row { width: 100%; max-width: 100%; margin: 0 auto; }
-.row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
-.row.collapse .column { padding: 0; }
-.row .row { width: auto; max-width: none; min-width: 0; margin: 0 -7.6%; }
-.row .row.collapse { margin: 0; }
-.column { float: left; min-height: 1px; padding: 0 7.6%; position: relative; }
-.column.centered { float: none; margin: 0 auto; }
-.row { *zoom: 1; }
-.row:before, .row:after { content: ""; display: table; }
-.row:after { clear: both; }
-@media only screen and (max-width: 650px) {
-  .row { width: auto; min-width: 0; margin-left: 0; margin-right: 0; }
-  .column { width: auto !important; float: none; }
-  .column:before, .column:after { content: ""; display: table; }
-  .column:after { clear: both; }
-})
   end
 
   module PHP
@@ -274,7 +166,7 @@ navigation bar to go back to the list of themes.</p>
     BLOCKS = {
       article: %q(
 <?php if ( have_posts() ) : ?>
-<?php _s_content_nav( 'nav-above' ); ?>
+<?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
 <?php /* Start the Loop */ ?>
 <?php while ( have_posts() ) : the_post(); ?>
@@ -289,7 +181,7 @@ navigation bar to go back to the list of themes.</p>
 
 <?php endwhile; ?>
 
-<?php _s_content_nav( 'nav-below' ); ?>
+<?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
 <?php elseif ( current_user_can( 'edit_posts' ) ) : ?>
 
@@ -301,11 +193,11 @@ navigation bar to go back to the list of themes.</p>
       "article-single" => %q(
 <?php while ( have_posts() ) : the_post(); ?>
 
-  <?php _s_content_nav( 'nav-above' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
   <?php get_template_part( 'content', 'single' ); ?>
 
-  <?php _s_content_nav( 'nav-below' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
   <?php
     // If comments are open or we have at least one comment, load up the comment template
@@ -329,7 +221,7 @@ navigation bar to go back to the list of themes.</p>
       article: %q(
 <?php if ( have_posts() ) : ?>
 
-  <?php _s_content_nav( 'nav-above' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-above' ); ?>
 
   <?php /* Start the Loop */ ?>
   <?php while ( have_posts() ) : the_post(); ?>
@@ -338,7 +230,7 @@ navigation bar to go back to the list of themes.</p>
 
   <?php endwhile; ?>
 
-  <?php _s_content_nav( 'nav-below' ); ?>
+  <?php {{theme_slug}}_content_nav( 'nav-below' ); ?>
 
 <?php else : ?>
 
@@ -396,7 +288,7 @@ if ( ! empty( $header_image ) ) : ?>
 
   // Add a page number if necessary:
   if ( $paged >= 2 || $page >= 2 )
-    echo ' | ' . sprintf( __( 'Page %s', '_s' ), max( $paged, $page ) );
+    echo ' | ' . sprintf( __( 'Page %s', '{{theme_slug}}' ), max( $paged, $page ) );
 
   ?></title>
 <link rel="profile" href="http://gmpg.org/xfn/11" />
@@ -425,14 +317,14 @@ if ( ! empty( $header_image ) ) : ?>
   </aside>
 
   <aside id="archives" class="widget">
-    <h1 class="widget-title"><?php _e( 'Archives', '_s' ); ?></h1>
+    <h1 class="widget-title"><?php _e( 'Archives', '{{theme_slug}}' ); ?></h1>
     <ul>
       <?php wp_get_archives( array( 'type' => 'monthly' ) ); ?>
     </ul>
   </aside>
 
   <aside id="meta" class="widget">
-    <h1 class="widget-title"><?php _e( 'Meta', '_s' ); ?></h1>
+    <h1 class="widget-title"><?php _e( 'Meta', '{{theme_slug}}' ); ?></h1>
     <ul>
       <?php wp_register(); ?>
       <li><?php wp_loginout(); ?></li>

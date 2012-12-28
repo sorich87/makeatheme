@@ -5,16 +5,14 @@ var View = require("views/base/view")
 module.exports = View.extend({
   collection: app.currentUser.get("themes"),
 
-  initialize: function () {
-    app.on("theme:deleted", this.render, this);
-  },
-
-  teardown: function () {
-    app.off("theme:deleted", this.render, this);
+  appEvents: {
+    "theme:deleted": "render"
   },
 
   render: function () {
     var listView = app.createView("theme_list", {collection: this.collection});
+
+    this.subViews.push(listView);
 
     this.$el.empty()
       .append(template({count: this.collection.length}))

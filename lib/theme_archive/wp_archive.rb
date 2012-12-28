@@ -6,6 +6,7 @@ module ThemeArchive
 
     def initialize(theme)
       @locals = {}.merge(Defaults::PHP::CONTENT)
+      @locals.merge!(theme_slug: theme.slug)
       @tags_class = LiquidTags::PHPBlock
 
       super theme
@@ -49,6 +50,8 @@ module ThemeArchive
 
       template = beautify(template[:template], 'html')
       data = render_template(template, @locals)
+      # Double render is necessary to prefix PHP functions with theme slug
+      data = render_template(data, @locals)
       header + data + footer
     end
 
@@ -84,7 +87,8 @@ module ThemeArchive
 
     def sidebar_data(sidebar)
       data = render_template(Defaults::PHP::SIDEBAR, {
-        block_slug: sidebar.label.underscore
+        block_slug: sidebar.label.underscore,
+        theme_slug: @theme.slug
       })
       data
     end

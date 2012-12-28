@@ -4,9 +4,9 @@ var View = require("views/base/view")
   , app = require("application");
 
 module.exports = View.extend({
-    id: "x-block-insert"
-  , className: "x-section"
-  , collection: app.editor.blocks
+    id: "blocks"
+  , className: "editor-sidebar"
+  , collection: app.currentTheme.get("blocks")
 
   , events: {
       "click .new-block": "showForm"
@@ -15,35 +15,39 @@ module.exports = View.extend({
     , "mouseover .x-drag": "makeDraggable"
   }
 
-  , initialize: function () {
-    this.collection.on("reset", this.addAll, this);
-    this.collection.on("add", this.addOne, this);
-    this.collection.on("remove", this.removeOne, this);
+  , objectEvents: {
+    collection: {
+      "reset": "addAll",
+      "add": "addOne",
+      "remove": "removeOne"
+    }
+  }
 
-    app.on("mutations:started", this.makeMutable, this);
-    app.on("save:before", this.addThemeAttributes, this);
-    app.on("block:inserted", this.insertBlock, this);
+  , appEvents: {
+    "block:inserted": "insertBlock"
+  }
 
-    this.allBlocks = _.map(app.data.blocks, function (block) {
+  , allBlocks: function () {
+    return _.map(app.data.blocks, function (block) {
       block.label = _.str.titleize(_.str.humanize(block.name));
       return block;
     });
   }
 
-  , teardown: function () {
-    this.collection.off("reset", this.addAll, this);
-    this.collection.off("add", this.addOne, this);
-    this.collection.off("remove", this.removeOne, this);
-
-    app.off("mutations:started", this.makeMutable, this);
-    app.off("save:before", this.addThemeAttributes, this);
-    app.off("block:inserted", this.insertBlock, this);
-  }
-
   , render: function () {
-    this.$el.empty().append(template({all: this.allBlocks}));
+    var editorToggleView = app.createView("editor_toggle", {position: "right"});
+
+    this.subViews.push(editorToggleView);
+
+    this.$el.empty()
+      .append("<div>")
+      .children()
+        .append(editorToggleView.render().$el)
+        .append(template({all: this.allBlocks()}));
 
     this.collection.reset(this.collection.models);
+
+    app.trigger("blocks:loaded");
 
     return this;
   }
@@ -87,16 +91,14 @@ module.exports = View.extend({
   // If the element is inserted in a row,
   // load the actual template chuck to insert
   , insertBlock: function (element, id) {
-    var block = this.collection.getByCid($(element).data("cid"));
+    var block = this.collection.get($(element).data("cid")),
+        build = this.addDataAttributes(block.get("build"), block.get("name"),
+                                       block.get("label"));
 
     element.outerHTML = "<div id='" + id + "' class='column " +
-      block.className() + "'>" + block.get("build") + "</div>";
+      block.className() + "'>" + build + "</div>";
 
     app.trigger("node:added", window.document.getElementById(id));
-  }
-
-  , makeMutable: function (pieces) {
-    pieces.blocks = this.collection;
   }
 
   , showForm: function (e) {
@@ -122,15 +124,11 @@ module.exports = View.extend({
       return;
     }
 
-    attributes = _.clone(_.find(this.allBlocks, function (block) {
+    attributes = _.clone(_.find(this.allBlocks(), function (block) {
       return block.name === name;
     }));
 
-    build = (new DOMParser()).parseFromString(attributes.build, "text/html").body;
-    build.firstChild.setAttribute("data-x-label", label);
-    build.firstChild.setAttribute("data-x-name", name);
-
-    attributes.build = build.outerHTML;
+    attributes.build = this.addDataAttributes(attributes.build);
     attributes.label = label;
 
     this.collection.add(attributes);
@@ -139,17 +137,19 @@ module.exports = View.extend({
     app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
   }
 
+  , addDataAttributes: function (build, name, label) {
+    build = (new DOMParser()).parseFromString(build, "text/html").body;
+    build.firstElementChild.setAttribute("data-x-label", label);
+    build.firstElementChild.setAttribute("data-x-name", name);
+
+    return build.outerHTML;
+  }
+
   , removeBlock: function (e) {
     if (confirm("Are you sure you want to delete this block?")) {
       var cid = $(e.currentTarget).parent().data("cid");
       this.collection.remove(cid);
       this.render();
     }
-  }
-
-  , addThemeAttributes: function (attributes) {
-    attributes.blocks = _.map(this.collection.models, function (block) {
-      return _.pick(block.attributes, "_id", "name", "label", "template");
-    });
   }
 });

@@ -1,58 +1,51 @@
 var app = require("application")
   , View = require("views/base/view")
-  , data = require("lib/editor_data")
-  , mutations = require("lib/mutations")
-  , theme_meta = require("views/templates/theme_meta")
-  , accordion_group = require("views/templates/accordion_group");
+  , mutations = require("lib/mutations");
 
 module.exports = View.extend({
-  id: "layout-editor"
+  appEvents: {
+    "blocks:loaded": "resize",
+    "style:loaded": "resize"
+  },
 
-  , initialize: function () {
-    _.extend(app.editor, {
-        preview_only: !!app.data.preview_only
-      , templates: data.templates
-      , regions: data.regions
-      , blocks: data.blocks
-      , style: data.style
-    });
-
+  initialize: function () {
     $(window).on("resize", this.resize.bind(this));
+
+    View.prototype.initialize.call(this);
   }
 
   , teardown: function () {
     $(window).off("resize", this.resize.bind(this));
+
+    View.prototype.teardown.call(this);
   }
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    var actions_view;
+    var blocksView = app.createView("blocks"),
+        styleEditView = app.createView("style_edit"),
+        layoutView = app.createView("layout");
+
+    this.subViews.push(blocksView, styleEditView, layoutView);
 
     this.$el.empty()
-      .append(app.createView("editor_toggle").render().$el)
-      .append(app.createView("device_switch").render().$el)
-      .append(app.createView("theme_meta").render().$el);
-
-    if (app.data.theme.author_id === app.currentUser.id) {
-      actions_view = "edit_actions";
-    } else {
-      actions_view = "preview_actions";
-    }
-
-    this.$el.append(app.createView(actions_view).render().$el);
+      .append(blocksView.render().$el)
+      .append(styleEditView.render().$el);
 
     this.$el.appendTo($("#main", window.top.document));
 
+    layoutView.render();
+
+    mutations.initialize();
+
     this.resize();
     this.preventActions();
-
-    app.trigger("editor:loaded");
 
     return this;
   }
 
   , resize: function () {
-    this.$el.height($(window.top).height() - 60);
+    this.$(".editor-sidebar > div").height($(window.top).height() - 60);
   }
 
   // Prevent click, drag and submit on links, images and forms

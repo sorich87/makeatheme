@@ -11,12 +11,10 @@ module.exports = View.extend({
     "click #logout": "deleteSession"
   }
 
-  , initialize: function () {
-    this.model.on("change", this.render, this);
-  }
-
-  , teardown: function () {
-    this.model.off("change", this.render, this);
+  , objectEvents: {
+    model: {
+      "change": "render"
+    }
   }
 
   , render: function () {

@@ -40,19 +40,19 @@ module.exports = View.extend({
     , "mouseenter .x-resize": "makeResizeable"
   }
 
+  , appEvents: {
+    "region:loaded": "highlightEmpty",
+    "template:loaded": "highlightEmpty"
+  }
+
   , initialize: function () {
     this.$el.addClass("editing");
     this.makeDroppable();
-    app.on("region:loaded", this.highLightEmpty, this);
-    app.on("template:loaded", this.highLightEmpty, this);
+
+    View.prototype.initialize.call(this);
   }
 
-  , teardown: function () {
-    app.off("region:loaded", this.highLightEmpty, this);
-    app.off("template:loaded", this.highLightEmpty, this);
-  }
-
-  , highLightEmpty: function () {
+  , highlightEmpty: function () {
     this.$(".row").each(function (i, row) {
       var $row = $(row);
 
@@ -265,8 +265,7 @@ module.exports = View.extend({
     var parent = node.parentNode
       , parentId = parent.id;
 
-    if ((["HEADER", "FOOTER"].indexOf(parent.tagName) !== -1 &&
-         parent.children.length === 1) ||
+    if (parent.children.length === 1 ||
         (node.id.indexOf("x-") !== 0 && node.id.indexOf("y-") !== 0)) {
       node.className += " x-empty";
     } else {

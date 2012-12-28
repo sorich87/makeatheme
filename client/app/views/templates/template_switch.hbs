@@ -1,0 +1,6 @@
+<a tabindex="-1" href="#">Switch Template</a>
+<ul class="dropdown-menu">
+  {{#each templates}}
+  <li{{#if active}} class="active"{{/if}}><a href="#" data-cid="{{cid}}">{{label}}</a></li>
+  {{/each}}
+</ul>
