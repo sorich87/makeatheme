@@ -25,7 +25,9 @@ module ThemeArchive
         template = template + Defaults::PHP::REGIONS[:footer]
       end
 
-      render_template(template, @locals)
+      data = render_template(template, @locals)
+      # Double render is necessary to prefix PHP functions with theme slug
+      render_template(data, @locals)
     end
 
     def region_filename(region)
