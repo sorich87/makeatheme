@@ -6935,6 +6935,7 @@ body.theme #main {
   padding: 10px;
   margin: 0;
   position: absolute;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .editor-sidebar > div {
   overflow: auto;
@@ -6946,7 +6947,6 @@ body.theme #main {
   background: #fff;
   text-align: center;
   cursor: pointer;
-  border: 1px solid #eee;
   width: 28px;
   height: 30px;
 }
@@ -6955,11 +6955,13 @@ body.theme #main {
 }
 .editor-sidebar .editor-toggle.right {
   right: 0;
-  margin-right: -30px;
+  margin-right: -28px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
 }
 .editor-sidebar .editor-toggle.left {
   left: 0;
-  margin-left: -30px;
+  margin-left: -28px;
+  box-shadow: -1px 1px 3px rgba(0,0,0,0.1);
 }
 .editor-sidebar h5 {
   margin: 0;

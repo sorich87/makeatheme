@@ -219,6 +219,7 @@ body.theme {
   padding: 10px;
   margin: 0;
   position: absolute;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   > div {
     overflow: auto;
@@ -231,7 +232,6 @@ body.theme {
     background: white;
     text-align: center;
     cursor: pointer;
-    border: 1px solid #EEE;
     width: 28px;
     height: 30px;
 
@@ -241,11 +241,13 @@ body.theme {
   }
   .editor-toggle.right {
     right: 0;
-    margin-right: -30px;
+    margin-right: -28px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
   }
   .editor-toggle.left {
     left: 0;
-    margin-left: -30px;
+    margin-left: -28px;
+    box-shadow: -1px 1px 3px rgba(0, 0, 0, 0.1);
   }
 
   h5 {
