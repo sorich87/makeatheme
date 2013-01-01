@@ -6819,6 +6819,15 @@ body {
   padding-bottom: 40px;
   line-height: 1.6em;
 }
+@media (max-width: 979px) {
+  body {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .navbar-fixed-top {
+    margin-bottom: 0;
+  }
+}
 [contenteditable=true]:hover,
 [contenteditable=true]:focus {
   background-color: #ffffe0;
@@ -6855,7 +6864,6 @@ body {
 }
 /* Theme page */
 body.theme {
-  padding-top: 40px;
   padding-bottom: 0;
   overflow: hidden;
 }
@@ -6869,6 +6877,7 @@ body.theme #main {
   width: 100%;
   overflow: auto;
   position: absolute;
+  left: 0;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 #theme {
@@ -7058,6 +7067,9 @@ body.edit #theme {
 .editor-sidebar .accordion-inner {
   overflow-y: scroll;
   max-height: 500px;
+}
+#blocks {
+  left: 0;
 }
 #style-edit {
   right: 0;
