@@ -24,9 +24,11 @@ error do
 end
 
 get '/jobs/:job_id', provides: 'text/event-stream' do
+  cache_control :no_cache
+
   status = Sidekiq::Status::get(params[:job_id])
 
-  return unless status
+  halt 404 unless status
 
   stream :keep_open do |out|
     if status == 'complete'
@@ -35,6 +37,9 @@ get '/jobs/:job_id', provides: 'text/event-stream' do
     elsif status == 'failed'
       out << "event: errors\n"
       out << "data: failed\n\n"
+    else
+      out << "event: ping\n"
+      out << "data: #{Time.now}\n\n"
     end
   end
 end
