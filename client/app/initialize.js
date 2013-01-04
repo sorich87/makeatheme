@@ -13,7 +13,7 @@ jQuery(function($) {
   // an entry in the browser history.
   $(window.top.document).on("click", "a:not([data-bypass])", function(e) {
     var href = { prop: $(this).prop("href"), attr: $(this).attr("href") }
-    , root = location.protocol + "//" + location.host + "/";
+    , root = window.top.location.protocol + "//" + window.top.location.host + "/";
 
     if (href.attr === "#") {
       return;
