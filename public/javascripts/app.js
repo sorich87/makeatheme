@@ -4609,7 +4609,7 @@ window.require.define({"views/templates/device_switch": function(exports, requir
     var foundHelper, self=this;
 
 
-    return "<a tabindex=\"-1\" href=\"#\">Switch Device</a>\n<ul class=\"dropdown-menu\">\n  <li class=\"active\"><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"f-icon-monitor\"></i> PC</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"f-icon-tablet\"></i> Tablet</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"f-icon-mobile\"></i> Phone</a></li>\n</ul>\n";});
+    return "<a tabindex=\"-1\" href=\"#\">Switch Device</a>\n<ul class=\"dropdown-menu\">\n  <li class=\"active\"><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"icon-desktop\"></i> PC</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"icon-tablet\"></i> Tablet</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"icon-mobile-phone\"></i> Phone</a></li>\n</ul>\n";});
 }});
 
 window.require.define({"views/templates/download_theme": function(exports, require, module) {
