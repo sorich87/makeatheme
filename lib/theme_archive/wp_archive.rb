@@ -129,7 +129,7 @@ module ThemeArchive
         template = ERB.new(File.read(file_path))
 
         # Add it to the zipfile
-        zipfile.get_output_stream(zip_path) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{zip_path}") do |f|
           f.puts template.result(get_binding(@theme))
         end
       end
