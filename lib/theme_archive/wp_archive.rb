@@ -15,14 +15,11 @@ module ThemeArchive
     protected
 
     def region_data(region)
-      template = beautify(region[:template], 'html')
-
-      if 'header' == region[:name]
-        template = Defaults::PHP::REGIONS[:header] + template
-      end
-
-      if 'footer' == region[:name]
-        template = template + Defaults::PHP::REGIONS[:footer]
+      case region[:name]
+      when 'header'
+        template = Defaults::PHP::REGIONS[:header] + region[:template]
+      when 'footer'
+        template = region[:template] + Defaults::PHP::REGIONS[:footer]
       end
 
       data = render_template(template, @locals)
@@ -50,8 +47,7 @@ module ThemeArchive
         header = "<?php\n/**\n * Template Name: #{template.name}\n */\n?>\n" + header
       end
 
-      template = beautify(template[:template], 'html')
-      data = render_template(template, @locals)
+      data = render_template(template[:template], @locals)
       # Double render is necessary to prefix PHP functions with theme slug
       data = render_template(data, @locals)
       header + data + footer

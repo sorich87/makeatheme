@@ -24,7 +24,7 @@ module ThemeArchive
       body += render_template(data, @locals)
       body += '</div></body>'
 
-      data = before_body + beautify(body, 'html') + after_body
+      data = before_body + body + after_body
 
       # Hacky way to make image URLs relative
       data.gsub("src='/", "src='").gsub('src="/', 'src="')
@@ -70,10 +70,6 @@ module ThemeArchive
 
     def after_body
       return "\n</html>"
-    end
-
-    def stylesheet_data(style)
-      beautify(super, 'css')
     end
 
     def compile_other_files(zipfile)

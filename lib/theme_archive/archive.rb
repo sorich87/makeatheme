@@ -162,16 +162,6 @@ module ThemeArchive
     def get_binding(theme)
       binding
     end
-
-    def beautify(source, lang)
-      # Remove tabs and line breaks from the source before
-      # So that the output is consistent.
-      source.gsub!(/[\t\n]/, '')
-
-      beauty_uri = URI('http://beautify.makeatheme.com/')
-      res = Net::HTTP.post_form(beauty_uri, source: source, lang: lang)
-      res.body
-    end
   end
 
 end
