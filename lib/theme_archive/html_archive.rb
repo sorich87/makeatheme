@@ -81,7 +81,7 @@ module ThemeArchive
       Dir[headers_dir].each do |header_path|
         filename = File.basename(header_path)
 
-        zipfile.get_output_stream("images/headers/#{filename}") do |f|
+        zipfile.get_output_stream("#{@theme.slug}/images/headers/#{filename}") do |f|
           f.puts File.read(header_path)
         end
       end

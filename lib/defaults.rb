@@ -7,7 +7,6 @@ module Defaults
         home_url: '',
         header_image_url: '/images/headers/dandelion.jpeg',
         header_image_width: '100%',
-        header_image_height: 'auto',
         search_form: %q(<form method="get" id="searchform" action="{{home_url}}" role="search">
   <label for="s" class="assistive-text">Search</label>
   <input type="text" class="field" name="s" id="s" placeholder="Search &hellip;" />
@@ -73,7 +72,7 @@ Nunc iaculis suscipit dui.</p></pre>
 </hgroup>),
 
       header_image: %q(<a href="{{site_url}}">
-  <img src='{{header_image_url}}' width='{{header_image_width}}' height='{{header_image_height}}' alt='' />
+  <img src='{{header_image_url}}' width='{{header_image_width}}' alt='' />
 </a>),
 
       navigation: %q(<nav role="navigation">

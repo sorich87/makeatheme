@@ -54,7 +54,7 @@ class Theme
   after_initialize :add_default_template
 
   has_attached_file :screenshot,
-    styles: { thumb: '300x225#' },
+    styles: { thumb: '600x450#' },
     :convert_options => { :thumb => '-strip' },
     fog_public: true,
     path: ':class/:id/:attachment/:basename-:style.:extension',

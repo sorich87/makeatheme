@@ -22,12 +22,12 @@ module.exports = View.extend({
   },
 
   waitForArchive: function (theme) {
-    var eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
+    this.eventSource = new EventSource("/jobs/" + theme.get("archive_job_id"));
 
     this.waitingForArchive = true;
 
-    eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
-    eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
+    this.eventSource.addEventListener("success", this.archiveSuccess.bind(this), false);
+    this.eventSource.addEventListener("errors", this.archiveErrors.bind(this), false);
   },
 
   askForPatience: function (e) {
@@ -39,16 +39,16 @@ module.exports = View.extend({
     }
   },
 
-  archiveSuccess: function (e) {
-    e.currentTarget.close();
+  archiveSuccess: function () {
+    this.eventSource.close();
 
     this.waitingForArchive = false;
 
     app.trigger("notification", "success", "Theme archives updated.");
   },
 
-  archiveErrors: function (e) {
-    e.currentTarget.close();
+  archiveErrors: function () {
+    this.eventSource.close();
 
     this.waitingForArchive = false;
 

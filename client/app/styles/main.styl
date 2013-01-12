@@ -97,6 +97,16 @@ body {
   padding-bottom: 40px;
   line-height: 1.6em;
 }
+@media (max-width: 979px) {
+  body {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .navbar-fixed-top {
+    margin-bottom: 0;
+  }
+}
 [contenteditable=true]:hover,
 [contenteditable=true]:focus {
   background-color: yellowLight;
@@ -135,7 +145,6 @@ body {
 
 /* Theme page */
 body.theme {
-  padding-top: 40px;
   padding-bottom: 0;
   overflow: hidden;
 
@@ -150,12 +159,15 @@ body.theme {
   width: 100%;
   overflow: auto;
   position: absolute;
+  left: 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 #theme {
-  min-width: 1600px;
   height: 100%;
   position: absolute;
+}
+body.edit #theme {
+  min-width: 1600px;
 }
 #new-theme {
   margin: 60px 0 0;
@@ -360,37 +372,12 @@ body.theme {
     max-height: 500px;
   }
 }
+#blocks {
+  left: 0;
+}
 #style-edit {
   right: 0;
 }
-
-// Fontello fonts used for tablet, phone and PC icons
-@font-face {
-  font-family: 'fontello';
-  src: url("../font/fontello.woff") format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-[class^="f-icon-"]:before,
-[class*=" f-icon-"]:before {
-  font-family: 'fontello';
-  font-style: normal;
-  font-weight: normal;
-  speak: none;
-  display: inline-block;
-  text-decoration: inherit;
-  width: 1em;
-  margin-right: 0.2em;
-  text-align: center;
-  opacity: 0.7;
-  text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
-  line-height: 1.2em;
-  font-size: 120%;
-}
-
-.f-icon-tablet:before { content: '\e7b1'; } /* '' */
-.f-icon-monitor:before { content: '💻'; } /* '\1f4bb' */
-.f-icon-mobile:before { content: '📱'; } /* '\1f4f1' */
 
 
 // Custom icons for WordPress and HTML5

@@ -49,7 +49,7 @@ module ThemeArchive
         filename = region_filename(region)
         return if filename.nil?
 
-        zipfile.get_output_stream(filename) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{filename}") do |f|
           f.puts region_data(region)
         end
       end
@@ -66,7 +66,7 @@ module ThemeArchive
         filename = template_filename(template)
         return if filename.nil?
 
-        zipfile.get_output_stream(filename) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{filename}") do |f|
           f.puts template_data(template)
         end
       end
@@ -83,7 +83,7 @@ module ThemeArchive
         filename = sidebar_filename(sidebar)
         return if filename.nil?
 
-        zipfile.get_output_stream(filename) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{filename}") do |f|
           f.puts sidebar_data(sidebar)
         end
       end
@@ -100,7 +100,7 @@ module ThemeArchive
         filename = asset_filename(asset)
         return if filename.nil?
 
-        zipfile.get_output_stream(filename) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{filename}") do |f|
           f.puts asset_data(asset)
         end
       end
@@ -108,7 +108,7 @@ module ThemeArchive
       @theme.external_assets.each do |asset_url|
         filename = asset_url.split('/').last.strip
         filename = "images/#{filename}"
-        zipfile.get_output_stream(filename) do |f|
+        zipfile.get_output_stream("#{@theme.slug}/#{filename}") do |f|
           open(asset_url, 'rb') do |io|
             f.puts io.read
           end
@@ -128,7 +128,7 @@ module ThemeArchive
 
     def compile_stylesheets(zipfile)
       style = @theme.css(true)
-      zipfile.get_output_stream('style.css') do |f|
+      zipfile.get_output_stream("#{@theme.slug}/style.css") do |f|
         f.puts stylesheet_data(style)
       end
     end
@@ -142,7 +142,7 @@ module ThemeArchive
 
     # Include screenshot file in archive
     def compile_screenshot(zipfile)
-      zipfile.get_output_stream('screenshot.png') do |f|
+      zipfile.get_output_stream("#{@theme.slug}/screenshot.png") do |f|
         open(@theme.screenshot.url(:thumb), 'rb') do |io|
           f.puts io.read if @theme.screenshot.file?
         end
