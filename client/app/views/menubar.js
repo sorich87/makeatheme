@@ -16,7 +16,8 @@ module.exports = View.extend({
 
     this.buildFileMenu();
     this.buildViewMenu();
-    this.buildTemplateMenu();
+
+    this.loadTemplate();
 
     return this;
   },
@@ -26,16 +27,14 @@ module.exports = View.extend({
         copyThemeView = app.createView("copy_theme"),
         renameThemeView = app.createView("rename_theme"),
         saveThemeView = app.createView("save_theme"),
-        shareThemeView = app.createView("share_theme"),
         downloadThemeView = app.createView("download_theme");
 
-    this.subViews.push(copyThemeView, saveThemeView, shareThemeView,
+    this.subViews.push(copyThemeView, saveThemeView, renameThemeView,
                        downloadThemeView);
 
     if (app.currentUser.canEdit(app.currentTheme)) {
       menu.append(saveThemeView.render().$el);
       menu.append(renameThemeView.render().$el);
-      menu.append(shareThemeView.render().$el);
       menu.append(this.divider());
       menu.append(downloadThemeView.render().$el);
       menu.append(this.divider());
@@ -53,43 +52,22 @@ module.exports = View.extend({
     menu.append(deviceSwitchView.render().$el);
   },
 
-  buildTemplateMenu: function () {
-    var menu = this.$("#template-menu"),
-        deleteTemplateView = app.createView("delete_template"),
-        deleteFooterView = app.createView("delete_region", {name: "footer"}),
-        deleteHeaderView = app.createView("delete_region", {name: "header"}),
-        footerSwitchView = app.createView("region_switch", {name: "footer"}),
-        headerSwitchView = app.createView("region_switch", {name: "header"}),
-        newFooterView = app.createView("new_region", {name: "footer"}),
-        newHeaderView = app.createView("new_region", {name: "header"}),
-        newTemplateView = app.createView("new_template"),
-        templateSwitchView = app.createView("template_switch");
-
-    this.subViews.push(deleteFooterView, deleteHeaderView, deleteTemplateView,
-                       footerSwitchView, headerSwitchView, templateSwitchView,
-                       newFooterView, newHeaderView, newTemplateView);
-
-    if (app.currentUser.canEdit(app.currentTheme)) {
-      menu.append(newTemplateView.render().$el);
-      menu.append(newHeaderView.render().$el);
-      menu.append(newFooterView.render().$el);
-      menu.append(this.divider());
-    }
-
-    menu.append(templateSwitchView.render().$el);
-
-    if (app.currentUser.canEdit(app.currentTheme)) {
-      menu.append(headerSwitchView.render().$el);
-      menu.append(footerSwitchView.render().$el);
-      menu.append(this.divider());
-      menu.append(deleteHeaderView.render().$el);
-      menu.append(deleteFooterView.render().$el);
-      menu.append(deleteTemplateView.render().$el);
-    }
-  },
-
   divider: function () {
     return "<li class='divider'></li>";
+  }
+
+  // Save current template, display it and trigger template:loaded event
+  , loadTemplate: function () {
+    var template = app.currentTheme.get("templates").getCurrent(),
+        regions = app.currentTheme.get("regions"),
+        templateRegions = template.get("regions"),
+        header = regions.getByName("header", templateRegions.header),
+        footer = regions.getByName("footer", templateRegions.footer),
+        build = header.get("build") + template.get("build") + footer.get("build");
+
+    $("#page").fadeOut().empty().append(build).fadeIn();
+
+    app.trigger("template:loaded", template);
   }
 });
 

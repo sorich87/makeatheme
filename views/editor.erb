@@ -30,16 +30,6 @@
   </script>
 
   <link rel="stylesheet" href="/stylesheets/editor.css">
-
-  <% if Sinatra::Base.production? %>
-    <script>
-var _ratchetParams = {"server.environment": "production"};
-var _ratchet=["da5801c5f17740b384d92b3c1eee864e", _ratchetParams];
-(function(w,d){w.onerror=function(){_ratchet.push(arguments);};var i=function(){var s=d.createElement("script");var 
- f=d.getElementsByTagName("script")[0];s.src="//d2tf6sbdgil6xr.cloudfront.net/js/1/ratchet.min.js";s.async=!0;
- f.parentNode.insertBefore(s,f);};if(w.addEventListener){w.addEventListener("load",i,!1);}else{w.attachEvent("onload",i);}})(window,document);
-  </script>
-  <% end %>
 </head>
 <body>
   <div id="page" class="hfeed site"><p class="x-loading">Loading... Please wait.</p></div>

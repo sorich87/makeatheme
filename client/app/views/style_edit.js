@@ -12,7 +12,6 @@ module.exports = View.extend({
   , events: {
       "click .selector-choice a": "highlightElement"
     , "change .tag": "setTag"
-    , "change input[name=style_advanced]": "switchEditor"
   }
 
   , appEvents: {
@@ -23,7 +22,6 @@ module.exports = View.extend({
   , initialize: function () {
     this.selector = "body";
     this.customCSS = app.currentTheme.get("style");
-    this.editorView = "simple_style_edit";
 
     View.prototype.initialize.call(this);
   }
@@ -40,16 +38,15 @@ module.exports = View.extend({
   }
 
   , render: function () {
-    var advanced = this.editorView === "advanced_style_edit" ? true : false,
-        editorToggleView = app.createView("editor_toggle", {position: "left"}),
+    var editorToggleView = app.createView("editor_toggle", {position: "left"}),
         editorView, tags;
 
-    editorView = app.createView(this.editorView, {
+    editorView = app.createView("simple_style_edit", {
         selector: this.selector
       , tag: this.tag
       , media: this.media
       , customCSS: this.customCSS
-      , currentCSS: this.currentElementStyle(!advanced)
+      , currentCSS: this.currentElementStyle()
     });
 
     this.subViews.push(editorView, editorToggleView);
@@ -60,7 +57,6 @@ module.exports = View.extend({
         htmlTags: this.tagOptions()
       , selector: this.selector
       , parents: $(this.selector).parents().get().reverse()
-      , advanced: advanced
     });
 
     this.$el.empty()
@@ -113,17 +109,7 @@ module.exports = View.extend({
     this.render();
   }
 
-  , switchEditor: function (e) {
-    if (e.currentTarget.checked) {
-      this.editorView = "advanced_style_edit";
-    } else {
-      this.editorView = "simple_style_edit";
-    }
-
-    this.render();
-  }
-
-  , currentElementStyle: function (computed) {
+  , currentElementStyle: function () {
     var style, declarations, $element, $fakeElement;
 
     if (this.tag) {
@@ -137,14 +123,7 @@ module.exports = View.extend({
       $element = $(this.selector);
     }
 
-    if (computed) {
-      style = _.clone(window.getComputedStyle($element.get(0)));
-    } else {
-      declarations = this.customCSS.getDeclarations($element.get(0));
-      if (declarations) {
-        style = declarations[this.media];
-      }
-    }
+    style = _.clone(window.getComputedStyle($element.get(0)));
 
     if ($fakeElement) {
       $fakeElement.remove();

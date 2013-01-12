@@ -32,7 +32,7 @@ module.exports = View.extend({
 
     $.ajax({
       type: "POST",
-      url: "/themes/fork",
+      url: "/themes",
       contentType: "application/json; charset=UTF-8",
       data: JSON.stringify({id: this.model.id}),
       success: function (data) {

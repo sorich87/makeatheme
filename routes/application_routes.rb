@@ -19,10 +19,6 @@ error 406 do
   end
 end
 
-error do
-  Ratchetio.report_exception(env['sinatra.error'])
-end
-
 get '/jobs/:job_id', provides: 'text/event-stream' do
   cache_control :no_cache
 

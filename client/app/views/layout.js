@@ -30,9 +30,6 @@ module.exports = View.extend({
       // Highlight columns.
       "click .column": "highlightColumns"
 
-      // Remove column
-    , "click .column .x-remove": "removeColumn"
-
     , "mouseenter .column": "makeDraggable"
 
     , "mouseenter .row": "makeDroppable"
@@ -108,12 +105,6 @@ module.exports = View.extend({
     if ($column.children(".x-resize").length === 0) {
       $column.html(function (i, html) {
         return html + "<div class='x-resize' title='Resize element'>&rang;</div>";
-      });
-    }
-
-    if ($column.children(".x-remove").length === 0) {
-      $column.html(function (i, html) {
-        return html + "<div class='x-remove' title='Remove element'>&times;</div>";
       });
     }
 

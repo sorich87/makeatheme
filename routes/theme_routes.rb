@@ -4,29 +4,11 @@ get '/themes' do
   respond_with results: @themes, pagination: json_pagination_for(@themes)
 end
 
-post '/themes' do
-  protect!
-
-  new_theme = Theme.new(
-    name: JSON.parse(request.body.read)['name'],
-    author: current_user
-  )
-  new_theme.save
-
-  if new_theme.save
-    Jobs::ThemeArchive.perform_async(new_theme.id)
-
-    halt new_theme.to_json
-  else
-    halt 400, new_theme.errors.to_json
-  end
-end
-
 get '/themes/:id' do
   respond_with theme
 end
 
-post '/themes/fork' do
+post '/themes' do
   protect!
 
   id = JSON.parse(request.body.read)['id']
@@ -47,12 +29,8 @@ get '/themes/:id/preview', provides: 'html' do
   respond_with_preview!
 end
 
-get '/themes/:id/download/?:type?' do
-  if params[:type] == 'wordpress'
-    archive = theme.wp_archive
-  else
-    archive = theme.html_archive
-  end
+get '/themes/:id/download' do
+  archive = theme.wp_archive
 
   halt 404 unless archive.file?
 

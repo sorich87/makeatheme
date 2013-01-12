@@ -25,7 +25,6 @@ class User
 
   attr_protected :password_hash
 
-  before_create :subscribe_to_newsletter
   before_save :generate_password_hash
 
   def to_fullname
@@ -85,9 +84,5 @@ class User
       self.password_salt = BCrypt::Engine.generate_salt
       self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
     end
-  end
-
-  def subscribe_to_newsletter
-    Jobs::NewsletterSubscription.perform_async(self.id)
   end
 end

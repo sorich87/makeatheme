@@ -36,10 +36,6 @@ class Theme
   field :screenshot_content_type
   field :screenshot_file_size,    :type => Integer
   field :screenshot_updated_at,   :type => DateTime
-  field :html_archive_file_name
-  field :html_archive_content_type
-  field :html_archive_file_size,    :type => Integer
-  field :html_archive_updated_at,   :type => DateTime
   field :wp_archive_file_name
   field :wp_archive_content_type
   field :wp_archive_file_size,    :type => Integer
@@ -59,14 +55,6 @@ class Theme
     fog_public: true,
     path: ':class/:id/:attachment/:basename-:style.:extension',
     default_url: '/images/screenshot-missing.png'
-
-  has_attached_file :html_archive,
-    fog_public: false,
-    path: ':class/:id/:attachment/:filename'
-
-  validates_attachment :html_archive,
-    :content_type => { :content_type => 'application/zip' },
-    :size => { :less_than => 1.megabyte }
 
   has_attached_file :wp_archive,
     fog_public: false,
@@ -148,7 +136,6 @@ class Theme
     theme.assign_attributes({
       listed: false,
       screenshot: nil,
-      html_archive: nil,
       wp_archive: nil
     }.merge(attributes))
     theme

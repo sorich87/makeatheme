@@ -33,24 +33,3 @@ else
   end
 end
 
-# Error handling via Ratchet
-if defined?(Ratchetio)
-  module Ratchetio
-    class Sidekiq
-      def call(worker, msg, queue)
-        begin
-          yield
-        rescue => e
-          Ratchetio.report_exception(e, msg)
-          raise
-        end
-      end
-    end
-  end
-
-  Sidekiq.configure_server do |config|
-    config.server_middleware do |chain|
-      chain.add ::Ratchetio::Sidekiq
-    end
-  end
-end

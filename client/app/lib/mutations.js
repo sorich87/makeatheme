@@ -110,7 +110,7 @@ module.exports = {
   , cleanupNode: function(node) {
     $(node)
       .removeClass("x-current x-full x-not-full x-empty ui-draggable-dragging")
-      .children(".x-resize, .x-remove")
+      .children(".x-resize")
         .remove()
         .end()
       .find("a[data-bypass=true]")

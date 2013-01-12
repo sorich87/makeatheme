@@ -81,8 +81,7 @@ window.require.define({"application": function(exports, require, module) {
 
   _.extend(Application, {
     initialize: function() {
-      var Router = require("router")
-        , mixpanel = require("lib/mixpanel");
+      var Router = require("router");
 
       // Set debug flag.
       this.debug = this.data.debug;
@@ -97,9 +96,6 @@ window.require.define({"application": function(exports, require, module) {
 
       // Initialize router
       this.router = new Router();
-
-      // Initialize Mixpanel tracking
-      mixpanel.initialize();
 
       // Render the login and logout links
       this.createView("auth_links").render();
@@ -1371,121 +1367,6 @@ window.require.define({"lib/matches_selector": function(exports, require, module
   
 }});
 
-window.require.define({"lib/mixpanel": function(exports, require, module) {
-  // Mixpanel tracking.
-  // If debug is enabled, log data to console instead of sending to Mixpanel.
-  var debug
-    , app = require("application");
-
-  debug = {
-    people: {
-      identify: function (user_id) {
-        console.log("mixpanel.identify");
-        console.log(user_id);
-      }
-
-      , increment: function (properties) {
-        console.log("mixpanel.people.increment");
-        console.log(properties);
-      }
-      , set: function (properties) {
-        console.log("mixpanel.people.set");
-        console.log(properties);
-      }
-    }
-
-    , track: function (name, properties) {
-      console.log("mixpanel.track");
-      console.log(name);
-      console.log(properties);
-    }
-  };
-
-  module.exports = {
-    initialize: function () {
-      if (app.debug) {
-        window.mixpanel = debug;
-      }
-
-      if (!("mixpanel" in window)) {
-        return;
-      }
-
-      // Update user's attributes on login and registration.
-      app.on("registration", this.setUserAttributes);
-      app.on("login", this.setUserLastLogin);
-
-      // Track click on elements with data-event attribute.
-      $("body").on("click", "[data-event]", this.trackClickEvent.bind(this));
-
-      // Track some routes.
-      Backbone.history.on("route", this.trackRouteChange.bind(this));
-    }
-
-    , setUserAttributes: function (user) {
-      mixpanel.people.set({
-          $created: new Date(user.get("created_at"))
-        , $email: user.get("email")
-        , $first_name: user.get("first_name")
-        , $last_name: user.get("last_name")
-      });
-      mixpanel.people.identify(user.id);
-
-      mixpanel.track("Registration");
-    }
-
-    , setUserLastLogin: function (user) {
-      mixpanel.people.set({$last_login: new Date()});
-      mixpanel.people.identify(user.id);
-
-      mixpanel.track("Login");
-    }
-
-    // data-event attribute should be in the format
-    // "eventName:[propertyKey:propertyValue]*"
-    , trackClickEvent: function (e) {
-      var double
-        , properties = {}
-        , details = e.currentTarget.getAttribute("data-event").split(":")
-        , name = details.splice(0, 1)[0]
-        , methodName = "trackUser" + name.replace(/\s/g,"");
-
-      while (details.length > 0) {
-        double = details.splice(0, 2);
-        properties[double[0]] = double[1];
-      }
-
-      mixpanel.track(name, properties);
-
-      // Update user's attributes in relevant cases as well.
-      if (this[methodName] !== void 0) {
-        this[methodName](properties);
-      }
-    }
-
-    , trackUserDownload: function (properties) {
-      mixpanel.people.increment(properties.format + " downloads");
-    }
-
-    , trackUserNewTheme: function (properties) {
-      mixpanel.people.increment("themes " + properties.type);
-    }
-
-    , trackRouteChange: function (router, name) {
-      switch (name) {
-        case "index":
-          mixpanel.track("Home Page Visit");
-          break;
-
-        case "register":
-          mixpanel.track("Registration Form Loaded");
-          break;
-      }
-    }
-  };
-  
-}});
-
 window.require.define({"lib/mutations": function(exports, require, module) {
   // Copy changes from the template build.
 
@@ -1599,7 +1480,7 @@ window.require.define({"lib/mutations": function(exports, require, module) {
     , cleanupNode: function(node) {
       $(node)
         .removeClass("x-current x-full x-not-full x-empty ui-draggable-dragging")
-        .children(".x-resize, .x-remove")
+        .children(".x-resize")
           .remove()
           .end()
         .find("a[data-bypass=true]")
@@ -2022,139 +1903,6 @@ window.require.define({"views/account": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/advanced_style_edit": function(exports, require, module) {
-  // CSS style edit.
-
-  var View = require("views/base/view")
-    , declaration_template = require("views/templates/declaration")
-    , rule_template = require("views/templates/rule")
-    , app = require("application")
-    , html_tags = require("lib/html_tags");
-
-  module.exports = View.extend({
-    events: {
-        "click .add-rule": "addRuleInputs"
-      , "keyup .rules input": "editRule"
-      , "change .rules input": "editRule"
-
-      , "click .add-declaration": "addDeclarationInputs"
-      , "keyup .selector input": "editDeclaration"
-      , "change .selector input": "editDeclaration"
-    }
-
-    , render: function () {
-      var html = ""
-        , declarations = this.options.currentCSS
-        , i;
-
-      if (declarations) {
-        for (i = 0; i < declarations.length; i++) {
-          html += declaration_template(declarations[i]);
-        }
-      }
-
-      html += "<button class='btn add-declaration'>Add declaration</button>";
-
-      this.$el.empty().append(html);
-
-      // Overline low specificity rules.
-      this.markNonAppliedRules();
-
-      return this;
-    }
-
-    , addRuleInputs: function (e) {
-      var $button = $(e.currentTarget)
-        , $ul = $button.siblings("ul");
-
-      e.preventDefault();
-
-      $ul.append(rule_template({
-        selector: $button.siblings(".selector").find("input").val()
-      }));
-    }
-
-    , editRule: function (e, element) {
-      var selector, index
-        , $li = $(e.target).parent();
-
-      property = $li.find("input[name=property]").val();
-      value = $li.find("input[name=value]").val();
-      index = $li.find("input[name=index]").val() || null;
-      selector = $li.find("input[name=selector]").val();
-
-      // Trim whitespace and comma from selector to avoid DOM exception 12
-      selector = selector.trim().replace(/^[^a-zA-Z#\.\[]|\W+$/g, "");
-
-      if (property && value) {
-        index = this.options.customCSS.insertRule({
-            selector: selector
-          , property: property
-          , value: value
-          , index: index
-          , media: this.options.media
-        });
-      } else {
-        if (index) {
-          this.options.customCSS.deleteRule(index, this.options.media);
-          index = "";
-        }
-
-        if (!property && !value && e.type === "change") {
-          $li.remove();
-        }
-      }
-
-      $li.find("input[name=index]").val(index);
-    }
-
-    , addDeclarationInputs: function (e) {
-      var selector = "#page " + this.options.selector;
-
-      e.preventDefault();
-
-      if (this.options.tag) {
-        selector += " " + this.options.tag;
-      }
-
-      $(e.currentTarget).before(declaration_template({selector: selector}));
-    }
-
-    , editDeclaration: function (e) {
-      var $input = $(e.currentTarget)
-        , value = $input.val();
-
-      if (!value && e.type === "change") {
-        $input.closest(".declaration-inputs").remove();
-      }
-
-      $input
-        .parent()
-          .siblings("ul")
-            .find("input[name=selector]")
-              .val(value)
-              .trigger("change");
-    }
-
-    , markNonAppliedRules: function () {
-      var applied = {};
-      this.$(".rules input[name=property]").each(function () {
-        var similar = applied[this.value];
-
-        if (similar === void 0) {
-          applied[this.value] = this;
-          return;
-        }
-
-        if (this.parentNode.parentNode !== similar.parentNode.parentNode) {
-          $(this.parentNode).addClass("inactive");
-        }
-      });
-    }
-  });
-  
-}});
-
 window.require.define({"views/auth_links": function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
@@ -2280,165 +2028,6 @@ window.require.define({"views/base/view": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/blocks": function(exports, require, module) {
-  // Display list of blocks to insert
-  var View = require("views/base/view")
-    , template = require("views/templates/blocks")
-    , app = require("application");
-
-  module.exports = View.extend({
-      id: "blocks"
-    , className: "editor-sidebar"
-    , collection: app.currentTheme.get("blocks")
-
-    , events: {
-        "click .new-block": "showForm"
-      , "submit .new-block-select": "addBlock"
-      , "click .close": "removeBlock"
-      , "mouseover .x-drag": "makeDraggable"
-    }
-
-    , objectEvents: {
-      collection: {
-        "reset": "addAll",
-        "add": "addOne",
-        "remove": "removeOne"
-      }
-    }
-
-    , appEvents: {
-      "block:inserted": "insertBlock"
-    }
-
-    , allBlocks: function () {
-      return _.map(app.data.blocks, function (block) {
-        block.label = _.str.titleize(_.str.humanize(block.name));
-        return block;
-      });
-    }
-
-    , render: function () {
-      var editorToggleView = app.createView("editor_toggle", {position: "right"});
-
-      this.subViews.push(editorToggleView);
-
-      this.$el.empty()
-        .append("<div>")
-        .children()
-          .append(editorToggleView.render().$el)
-          .append(template({all: this.allBlocks()}));
-
-      this.collection.reset(this.collection.models);
-
-      app.trigger("blocks:loaded");
-
-      return this;
-    }
-
-    , makeDraggable: function (e) {
-      this.$(e.currentTarget).draggable({
-          addClasses: false
-        , helper: function() {
-          // Append a clone to the body to avoid overflow on parent accordion.
-          return $(this).clone().appendTo("body");
-        }
-        , revert: "invalid"
-        , scroll: false
-        , zIndex: 99999
-      });
-    }
-
-    , addOne: function (block) {
-      var remove = "";
-
-      if (block.get("label") != "Default") {
-        remove = " <span class='close' title='Delete block'>&times;</span>";
-      }
-
-      this.$("ul").append("<li class='x-drag' data-cid='" + block.cid + "'>" +
-                          "<span>&Dagger;</span> " + block.label() + remove + "</li>");
-    }
-
-    , addAll: function () {
-      this.$("ul").empty();
-
-      _.each(this.collection.models, function (block) {
-        this.addOne(block);
-      }, this);
-    }
-
-    , removeOne: function (block) {
-      this.$("span[data-cid='" + block.cid + "']").closest("li").remove();
-    }
-
-    // If the element is inserted in a row,
-    // load the actual template chuck to insert
-    , insertBlock: function (element, id) {
-      var block = this.collection.get($(element).data("cid")),
-          build = this.addDataAttributes(block.get("build"), block.get("name"),
-                                         block.get("label"));
-
-      element.outerHTML = "<div id='" + id + "' class='column " +
-        block.className() + "'>" + build + "</div>";
-
-      app.trigger("node:added", window.document.getElementById(id));
-    }
-
-    , showForm: function (e) {
-      var $div = this.$(".new-block-select");
-
-      if ($div.is(":hidden")) {
-        $div.show("normal");
-      } else {
-        $div.hide("normal");
-      }
-    }
-
-    , addBlock: function (e) {
-      var name, label, attributes, block, build;
-
-      e.preventDefault();
-
-      name = this.$(".new-block-select select").val();
-      label = this.$(".new-block-name").val();
-
-      if (!label) {
-        app.trigger("notification", "error", "Please, enter a block name.");
-        return;
-      }
-
-      attributes = _.clone(_.find(this.allBlocks(), function (block) {
-        return block.name === name;
-      }));
-
-      attributes.build = this.addDataAttributes(attributes.build);
-      attributes.label = label;
-
-      this.collection.add(attributes);
-      this.render();
-
-      app.trigger("notification", "success", "New block created. Drag and drop into the page to add it.");
-    }
-
-    , addDataAttributes: function (build, name, label) {
-      build = (new DOMParser()).parseFromString(build, "text/html").body;
-      build.firstElementChild.setAttribute("data-x-label", label);
-      build.firstElementChild.setAttribute("data-x-name", name);
-
-      return build.outerHTML;
-    }
-
-    , removeBlock: function (e) {
-      if (confirm("Are you sure you want to delete this block?")) {
-        var cid = $(e.currentTarget).parent().data("cid");
-        this.collection.remove(cid);
-        this.render();
-      }
-    }
-  });
-  
-}});
-
 window.require.define({"views/copy_theme": function(exports, require, module) {
   var app = require("application"),
       View = require("views/base/view"),
@@ -2474,7 +2063,7 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
 
       $.ajax({
         type: "POST",
-        url: "/themes/fork",
+        url: "/themes",
         contentType: "application/json; charset=UTF-8",
         data: JSON.stringify({id: this.model.id}),
         success: function (data) {
@@ -2497,185 +2086,6 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
       });
     }
   });
-  
-}});
-
-window.require.define({"views/delete_region": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/delete_region");
-
-  module.exports = View.extend({
-    tagName: "li",
-    className: "dropdown",
-
-    render: function () {
-      var name = this.options.name,
-          formView;
-
-      formView = app.createView("delete_region_form", {
-        name: name
-      }).render();
-
-      this.subViews.push(formView);
-
-      this.$el.empty().append(template({
-        name: name,
-        label: name === "header" ? "Header": "Footer"
-      }));
-
-      return this;
-    }
-  });
-  
-}});
-
-window.require.define({"views/delete_region_form": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/delete_region_form")
-    , app = require("application");
-
-  module.exports = View.extend({
-    collection: app.currentTheme.get("regions"),
-
-    events: {
-      "submit form": "deleteRegion"
-    },
-
-    appEvents: {
-      "region:created": "render"
-    },
-
-    render: function () {
-      var regions = [],
-          name = this.options.name;
-
-      this.collection.where({name: name}).forEach(function (model) {
-        if (model.get("slug") !== "default") {
-          regions.push({
-            cid: model.cid,
-            slug: model.get("slug")
-          });
-        }
-      });
-
-      this.$el.empty()
-        .append(template({
-          name: name,
-          label: name === "header" ? "Header": "Footer",
-          regions: regions
-        }))
-        .appendTo($("#main", window.top.document));
-
-      return this;
-    },
-
-    deleteRegion: function (e) {
-      // Use window.top here because the modal is bound to the top window.
-      var name = this.options.name,
-          $element = window.top.$(e.currentTarget),
-          cid = this.$(".region-cid").val();
-
-      e.preventDefault();
-
-      if (confirm("Are you sure you want to delete this " + name + "?")) {
-        $element.closest("#delete-" + name + "-region-modal").modal("hide");
-
-        app.currentTheme.get("templates").getCurrent()
-          .setRegion(name, "default");
-
-        this.collection.remove(cid);
-
-        this.render();
-
-        app.trigger("notification", "success", "The template has been deleted.");
-
-        app.trigger("region:deleted");
-      }
-    }
-  });
-
-  
-}});
-
-window.require.define({"views/delete_template": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/delete_template");
-
-  module.exports = View.extend({
-    tagName: "li",
-    className: "dropdown",
-
-    render: function () {
-      var formView = app.createView("delete_template_form").render();
-
-      this.subViews.push(formView);
-
-      this.$el.empty().append(template());
-
-      return this;
-    }
-  });
-  
-}});
-
-window.require.define({"views/delete_template_form": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/delete_template_form")
-    , app = require("application");
-
-  module.exports = View.extend({
-    collection: app.currentTheme.get("templates"),
-
-    events: {
-      "submit form": "deleteTemplate"
-    },
-
-    appEvents: {
-      "template:created": "render"
-    },
-
-    render: function () {
-      var templates = [];
-
-      this.collection.models.forEach(function (model) {
-        if (model.get("name") !== "index") {
-          templates.push({
-            cid: model.cid,
-            name: model.get("name")
-          });
-        }
-      });
-
-      this.$el.empty()
-        .append(template({templates: templates}))
-        .appendTo($("#main", window.top.document));
-
-      return this;
-    },
-
-    deleteTemplate: function (e) {
-      // Use window.top here because the modal is bound to the top window.
-      var $element = window.top.$(e.currentTarget),
-          cid = this.$(".template-cid").val();
-
-      e.preventDefault();
-
-      if (confirm("Are you sure you want to delete this template?")) {
-        $element.closest("#delete-template-modal").modal("hide");
-
-        this.collection.remove(cid);
-
-        this.render();
-
-        app.trigger("notification", "success", "The template has been deleted.");
-
-        app.trigger("template:deleted");
-      }
-    }
-  });
-
   
 }});
 
@@ -2831,14 +2241,12 @@ window.require.define({"views/editor": function(exports, require, module) {
 
     // Show editor when "template:loaded" event is triggered
     , render: function () {
-      var blocksView = app.createView("blocks"),
-          styleEditView = app.createView("style_edit"),
+      var styleEditView = app.createView("style_edit"),
           layoutView = app.createView("layout");
 
-      this.subViews.push(blocksView, styleEditView, layoutView);
+      this.subViews.push(styleEditView, layoutView);
 
       this.$el.empty()
-        .append(blocksView.render().$el)
         .append(styleEditView.render().$el);
 
       this.$el.appendTo($("#main", window.top.document));
@@ -2962,9 +2370,6 @@ window.require.define({"views/layout": function(exports, require, module) {
         // Highlight columns.
         "click .column": "highlightColumns"
 
-        // Remove column
-      , "click .column .x-remove": "removeColumn"
-
       , "mouseenter .column": "makeDraggable"
 
       , "mouseenter .row": "makeDroppable"
@@ -3040,12 +2445,6 @@ window.require.define({"views/layout": function(exports, require, module) {
       if ($column.children(".x-resize").length === 0) {
         $column.html(function (i, html) {
           return html + "<div class='x-resize' title='Resize element'>&rang;</div>";
-        });
-      }
-
-      if ($column.children(".x-remove").length === 0) {
-        $column.html(function (i, html) {
-          return html + "<div class='x-remove' title='Remove element'>&times;</div>";
         });
       }
 
@@ -3316,7 +2715,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
 
       this.buildFileMenu();
       this.buildViewMenu();
-      this.buildTemplateMenu();
+
+      this.loadTemplate();
 
       return this;
     },
@@ -3326,16 +2726,14 @@ window.require.define({"views/menubar": function(exports, require, module) {
           copyThemeView = app.createView("copy_theme"),
           renameThemeView = app.createView("rename_theme"),
           saveThemeView = app.createView("save_theme"),
-          shareThemeView = app.createView("share_theme"),
           downloadThemeView = app.createView("download_theme");
 
-      this.subViews.push(copyThemeView, saveThemeView, shareThemeView,
+      this.subViews.push(copyThemeView, saveThemeView, renameThemeView,
                          downloadThemeView);
 
       if (app.currentUser.canEdit(app.currentTheme)) {
         menu.append(saveThemeView.render().$el);
         menu.append(renameThemeView.render().$el);
-        menu.append(shareThemeView.render().$el);
         menu.append(this.divider());
         menu.append(downloadThemeView.render().$el);
         menu.append(this.divider());
@@ -3353,211 +2751,22 @@ window.require.define({"views/menubar": function(exports, require, module) {
       menu.append(deviceSwitchView.render().$el);
     },
 
-    buildTemplateMenu: function () {
-      var menu = this.$("#template-menu"),
-          deleteTemplateView = app.createView("delete_template"),
-          deleteFooterView = app.createView("delete_region", {name: "footer"}),
-          deleteHeaderView = app.createView("delete_region", {name: "header"}),
-          footerSwitchView = app.createView("region_switch", {name: "footer"}),
-          headerSwitchView = app.createView("region_switch", {name: "header"}),
-          newFooterView = app.createView("new_region", {name: "footer"}),
-          newHeaderView = app.createView("new_region", {name: "header"}),
-          newTemplateView = app.createView("new_template"),
-          templateSwitchView = app.createView("template_switch");
-
-      this.subViews.push(deleteFooterView, deleteHeaderView, deleteTemplateView,
-                         footerSwitchView, headerSwitchView, templateSwitchView,
-                         newFooterView, newHeaderView, newTemplateView);
-
-      if (app.currentUser.canEdit(app.currentTheme)) {
-        menu.append(newTemplateView.render().$el);
-        menu.append(newHeaderView.render().$el);
-        menu.append(newFooterView.render().$el);
-        menu.append(this.divider());
-      }
-
-      menu.append(templateSwitchView.render().$el);
-
-      if (app.currentUser.canEdit(app.currentTheme)) {
-        menu.append(headerSwitchView.render().$el);
-        menu.append(footerSwitchView.render().$el);
-        menu.append(this.divider());
-        menu.append(deleteHeaderView.render().$el);
-        menu.append(deleteFooterView.render().$el);
-        menu.append(deleteTemplateView.render().$el);
-      }
-    },
-
     divider: function () {
       return "<li class='divider'></li>";
     }
-  });
 
-  
-}});
+    // Save current template, display it and trigger template:loaded event
+    , loadTemplate: function () {
+      var template = app.currentTheme.get("templates").getCurrent(),
+          regions = app.currentTheme.get("regions"),
+          templateRegions = template.get("regions"),
+          header = regions.getByName("header", templateRegions.header),
+          footer = regions.getByName("footer", templateRegions.footer),
+          build = header.get("build") + template.get("build") + footer.get("build");
 
-window.require.define({"views/new_region": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/new_region");
+      $("#page").fadeOut().empty().append(build).fadeIn();
 
-  module.exports = View.extend({
-    tagName: "li",
-    className: "dropdown",
-
-    render: function () {
-      var name = this.options.name,
-          formView;
-
-      formView = app.createView("new_region_form", {
-        name: name
-      }).render();
-
-      this.subViews.push(formView);
-
-      this.$el.empty().append(template({
-        name: name,
-        label: name === "header" ? "Header" : "Footer"
-      }));
-
-      return this;
-    }
-  });
-  
-}});
-
-window.require.define({"views/new_region_form": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/new_region_form")
-    , app = require("application");
-
-  module.exports = View.extend({
-    collection: app.currentTheme.get("regions"),
-
-    events: {
-      "submit form": "addRegion"
-    },
-
-    render: function () {
-      var name = this.options.name;
-
-      this.$el.empty()
-        .append(template({
-          name: name,
-          label: name === "header" ? "Header" : "Footer"
-        }))
-        .appendTo($("#main", window.top.document));
-
-      return this;
-    },
-
-    addRegion: function (e) {
-      // Use window.top here because the modal is bound to the top window.
-      var $element = window.top.$(e.currentTarget),
-          $form = this.$("form"),
-          name = this.options.name,
-          slug = this.$(".slug").val();
-
-      e.preventDefault();
-
-      if (slug) {
-        var attributes, regions;
-
-        attributes = _.pick(this.collection.getByName(name).attributes,
-                            "name", "template", "build");
-
-        attributes.slug = slug;
-
-        $element.closest("#" + name + "-region-form-modal").modal("hide");
-
-        this.collection.add(attributes);
-
-        app.currentTheme.get("templates").getCurrent().setRegion(name, slug);
-
-        app.trigger("notification", "success", "The new " + name +
-                    " was created. It's a copy of the default one.");
-
-        app.trigger("region:created");
-
-      } else if ($form.children(".alert-error").length === 0) {
-        $form.prepend("<p class='alert alert-error'>" +
-                      "Please, enter a " + name + " name.</p>");
-      }
-    }
-  });
-
-  
-}});
-
-window.require.define({"views/new_template": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/new_template");
-
-  module.exports = View.extend({
-    tagName: "li",
-    className: "dropdown",
-
-    render: function () {
-      var formView = app.createView("new_template_form").render();
-
-      this.subViews.push(formView);
-
-      this.$el.empty().append(template());
-
-      return this;
-    }
-  });
-  
-}});
-
-window.require.define({"views/new_template_form": function(exports, require, module) {
-  var View = require("views/base/view")
-    , template = require("views/templates/new_template_form")
-    , app = require("application");
-
-  module.exports = View.extend({
-    collection: app.currentTheme.get("templates"),
-
-    events: {
-      "submit form": "addTemplate"
-    },
-
-    render: function () {
-      this.$el.empty()
-        .append(template())
-        .appendTo($("#main", window.top.document));
-
-      return this;
-    },
-
-    addTemplate: function (e) {
-      // Use window.top here because the modal is bound to the top window.
-      var $element = window.top.$(e.currentTarget),
-          $form = this.$("form"),
-          name = this.$(".name").val();
-
-      e.preventDefault();
-
-      if (name) {
-        var attributes = _.pick(this.collection.getByName("index").attributes,
-                            "template", "build", "regions");
-        attributes.name = name;
-
-        $element.closest("#template-form-modal").modal("hide");
-
-        this.collection.add(attributes);
-        this.collection.setCurrent(attributes);
-
-        app.trigger("notification", "success", "The new template was created. " +
-                    "It's a copy of the default one.");
-
-        app.trigger("template:created");
-
-      } else if ($form.children(".alert-error").length === 0) {
-        $form.prepend("<p class='alert alert-error'>" +
-                      "Template name can't be empty.</p>");
-      }
+      app.trigger("template:loaded", template);
     }
   });
 
@@ -3921,47 +3130,6 @@ window.require.define({"views/save_theme": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/share_theme": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/share_theme");
-
-  module.exports = View.extend({
-    tagName: "li",
-    className: "dropdown",
-
-    render: function () {
-      var shareLinkView = app.createView("share_theme_link").render();
-
-      this.subViews.push(shareLinkView);
-
-      this.$el.empty().append(template());
-
-      return this;
-    }
-  });
-  
-}});
-
-window.require.define({"views/share_theme_link": function(exports, require, module) {
-  var View = require("views/base/view")
-    , app = require("application",
-      template = require("views/templates/share_theme_link"));
-
-  module.exports = View.extend({
-    id: "share-link",
-
-    render: function () {
-      this.$el.empty()
-        .append(template({theme: app.currentTheme.id}))
-        .appendTo($("#main", window.top.document));
-
-      return this;
-    }
-  });
-  
-}});
-
 window.require.define({"views/simple_style_edit": function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
@@ -4042,7 +3210,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , events: {
         "click .selector-choice a": "highlightElement"
       , "change .tag": "setTag"
-      , "change input[name=style_advanced]": "switchEditor"
     }
 
     , appEvents: {
@@ -4053,7 +3220,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     , initialize: function () {
       this.selector = "body";
       this.customCSS = app.currentTheme.get("style");
-      this.editorView = "simple_style_edit";
 
       View.prototype.initialize.call(this);
     }
@@ -4070,16 +3236,15 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
 
     , render: function () {
-      var advanced = this.editorView === "advanced_style_edit" ? true : false,
-          editorToggleView = app.createView("editor_toggle", {position: "left"}),
+      var editorToggleView = app.createView("editor_toggle", {position: "left"}),
           editorView, tags;
 
-      editorView = app.createView(this.editorView, {
+      editorView = app.createView("simple_style_edit", {
           selector: this.selector
         , tag: this.tag
         , media: this.media
         , customCSS: this.customCSS
-        , currentCSS: this.currentElementStyle(!advanced)
+        , currentCSS: this.currentElementStyle()
       });
 
       this.subViews.push(editorView, editorToggleView);
@@ -4090,7 +3255,6 @@ window.require.define({"views/style_edit": function(exports, require, module) {
           htmlTags: this.tagOptions()
         , selector: this.selector
         , parents: $(this.selector).parents().get().reverse()
-        , advanced: advanced
       });
 
       this.$el.empty()
@@ -4143,17 +3307,7 @@ window.require.define({"views/style_edit": function(exports, require, module) {
       this.render();
     }
 
-    , switchEditor: function (e) {
-      if (e.currentTarget.checked) {
-        this.editorView = "advanced_style_edit";
-      } else {
-        this.editorView = "simple_style_edit";
-      }
-
-      this.render();
-    }
-
-    , currentElementStyle: function (computed) {
+    , currentElementStyle: function () {
       var style, declarations, $element, $fakeElement;
 
       if (this.tag) {
@@ -4167,95 +3321,13 @@ window.require.define({"views/style_edit": function(exports, require, module) {
         $element = $(this.selector);
       }
 
-      if (computed) {
-        style = _.clone(window.getComputedStyle($element.get(0)));
-      } else {
-        declarations = this.customCSS.getDeclarations($element.get(0));
-        if (declarations) {
-          style = declarations[this.media];
-        }
-      }
+      style = _.clone(window.getComputedStyle($element.get(0)));
 
       if ($fakeElement) {
         $fakeElement.remove();
       }
 
       return style;
-    }
-  });
-  
-}});
-
-window.require.define({"views/template_switch": function(exports, require, module) {
-  var View = require("views/base/view"),
-      app = require("application"),
-      template = require("views/templates/template_switch");
-
-  module.exports = View.extend({
-    id: "templates-select",
-    tagName: "li",
-    className: "dropdown-submenu",
-    collection: app.currentTheme.get("templates"),
-
-    events: {
-      "click .dropdown-menu a": "switchTemplate"
-    },
-
-    appEvents: {
-      "region:created": "render",
-      "region:deleted": "render",
-      "region:loaded": "render",
-      "template:created": "render",
-      "template:deleted": "render"
-    },
-
-    render: function () {
-      var currentTemplate = this.collection.getCurrent(),
-          templates;
-
-      templates = this.collection.map(function (template) {
-        return {
-          cid: template.cid,
-          label: template.get("name"),
-          active: template.get("name") === currentTemplate.get("name")
-        };
-      });
-
-      this.$el.empty().append(template({templates: templates}));
-
-      this.loadCurrentTemplate();
-
-      return this;
-    },
-
-    switchTemplate: function (e) {
-      var cid = e.currentTarget.getAttribute("data-cid"),
-          template = this.collection.get(cid);
-
-      e.preventDefault();
-
-      this.collection.setCurrent(template);
-      this.loadTemplate(template);
-
-      this.$(".active").removeClass("active");
-      $(e.currentTarget.parentNode).addClass("active");
-    }
-
-    // Save current template, display it and trigger template:loaded event
-    , loadTemplate: function (template) {
-      var regions = app.currentTheme.get("regions"),
-          templateRegions = template.get("regions"),
-          header = regions.getByName("header", templateRegions.header),
-          footer = regions.getByName("footer", templateRegions.footer),
-          build = header.get("build") + template.get("build") + footer.get("build");
-
-      $("#page").fadeOut().empty().append(build).fadeIn();
-
-      app.trigger("template:loaded", template);
-    }
-
-    , loadCurrentTemplate: function () {
-      this.loadTemplate(this.collection.getCurrent());
     }
   });
   
@@ -4325,41 +3397,6 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     return buffer;});
 }});
 
-window.require.define({"views/templates/blocks": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n      <option value=\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n      ";
-    return buffer;}
-
-    buffer += "<h4>Blocks</h4>\n<p>Drag and drop to insert</p>\n<ul class=\"rects\"></ul>\n<form class=\"new-block-select hide\">\n  <legend>Add New Block</legend>\n    <select class=\"span2\">\n      ";
-    foundHelper = helpers.all;
-    stack1 = foundHelper || depth0.all;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n    </select>\n  </label>\n  <input class=\"span2 new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn btn-primary\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
-    return buffer;});
-}});
-
 window.require.define({"views/templates/copy_theme": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4368,7 +3405,7 @@ window.require.define({"views/templates/copy_theme": function(exports, require, 
   function program1(depth0,data) {
     
     
-    return "\n  <a href=\"#\" data-bypass=\"true\" id=\"copy-theme\"\n    data-event=\"New Theme:type:copy\"><i class=\"icon-copy\"></i> Copy Theme</a>\n";}
+    return "\n  <a href=\"#\" data-bypass=\"true\" id=\"copy-theme\"><i class=\"icon-copy\"></i> Copy Theme</a>\n";}
 
   function program3(depth0,data) {
     
@@ -4438,171 +3475,6 @@ window.require.define({"views/templates/declaration": function(exports, require,
     return buffer;});
 }});
 
-window.require.define({"views/templates/delete_region": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#delete-";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-modal\">Delete a ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/delete_region_form": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1, stack2;
-    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large region-cid\">\n          ";
-    foundHelper = helpers.regions;
-    stack1 = foundHelper || depth0.regions;
-    stack2 = helpers.each;
-    tmp1 = self.program(2, program2, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n        </select>\n        <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Delete</button>\n      </form>\n    ";
-    return buffer;}
-  function program2(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n            <option value=\"";
-    foundHelper = helpers.cid;
-    stack1 = foundHelper || depth0.cid;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.slug;
-    stack1 = foundHelper || depth0.slug;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n          ";
-    return buffer;}
-
-  function program4(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n    <p>No ";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + " to delete.</p>\n    ";
-    return buffer;}
-
-    buffer += "<div id=\"delete-";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\"\n  aria-labelledby=\"delete-";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"delete-";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-modal-header\">Delete a ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</h3>\n  </div>\n  <div class=\"modal-body\">\n    ";
-    foundHelper = helpers.regions;
-    stack1 = foundHelper || depth0.regions;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.program(4, program4, data);
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </div>\n</div>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/delete_template": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#delete-template-modal\">Delete a Template</a>\n";});
-}});
-
-window.require.define({"views/templates/delete_template_form": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1, stack2;
-    buffer += "\n      <form class=\"form-inline\">\n        <select class=\"input-large template-cid\">\n          ";
-    foundHelper = helpers.templates;
-    stack1 = foundHelper || depth0.templates;
-    stack2 = helpers.each;
-    tmp1 = self.program(2, program2, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n        </select>\n        <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Delete</button>\n      </form>\n    ";
-    return buffer;}
-  function program2(depth0,data) {
-    
-    var buffer = "", stack1;
-    buffer += "\n            <option value=\"";
-    foundHelper = helpers.cid;
-    stack1 = foundHelper || depth0.cid;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</option>\n          ";
-    return buffer;}
-
-  function program4(depth0,data) {
-    
-    
-    return "\n      <p>No template to delete.</p>\n    ";}
-
-    buffer += "<div id=\"delete-template-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"delete-template-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"delete-template-modal-header\">Delete a Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    ";
-    foundHelper = helpers.templates;
-    stack1 = foundHelper || depth0.templates;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.program(4, program4, data);
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n  </div>\n</div>\n";
-    return buffer;});
-}});
-
 window.require.define({"views/templates/device_switch": function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
@@ -4623,12 +3495,7 @@ window.require.define({"views/templates/download_theme": function(exports, requi
     stack1 = foundHelper || depth0.id;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download\" data-event=\"Download:format:HTML\"\n  target=\"_blank\" data-bypass=\"true\"><i class=\"c-icon-html5\"></i> Download HTML5</a>\n<a href=\"/themes/";
-    foundHelper = helpers.id;
-    stack1 = foundHelper || depth0.id;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "/download/wordpress\" data-event=\"Download:format:WordPress\"\n  target=\"_blank\" data-bypass=\"true\"><i class=\"c-icon-wordpress\"></i> Download WordPress</a>\n";
+    buffer += escapeExpression(stack1) + "/download\" target=\"_blank\" data-bypass=\"true\"><i class=\"icon-download\"></i> Download</a>\n";
     return buffer;});
 }});
 
@@ -4652,86 +3519,8 @@ window.require.define({"views/templates/menubar": function(exports, require, mod
     stack1 = foundHelper || depth0.theme_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Template <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"template-menu\"></ul>\n  </li>\n</ul>\n";
+    buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n</ul>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/new_region": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-form-modal\">New ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/new_region_form": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div id=\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-form-modal\" class=\"modal hide fade\" tabindex=\"-1\"\n  role=\"dialog\" aria-labelledby=\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-form-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"";
-    foundHelper = helpers.name;
-    stack1 = foundHelper || depth0.name;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "-region-form-modal-header\">New ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large slug\" placeholder=\"";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + " Name\" value=\"\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Create ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</button>\n    </form>\n  </div>\n</div>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/new_template": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#template-form-modal\"\n  id=\"share-theme\">New Template</a>\n";});
-}});
-
-window.require.define({"views/templates/new_template_form": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<div id=\"template-form-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"template-form-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"template-form-modal-header\">New Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large name\" placeholder=\"Template Name\" value=\"\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Create Template</button>\n    </form>\n  </div>\n</div>\n";});
 }});
 
 window.require.define({"views/templates/not_found": function(exports, require, module) {
@@ -4770,60 +3559,6 @@ window.require.define({"views/templates/password_reset": function(exports, requi
 
 
     return "<div class=\"modal-header\">\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">New Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Remember your password? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
-}});
-
-window.require.define({"views/templates/region_switch": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1, stack2;
-    buffer += "\n  <li";
-    foundHelper = helpers.active;
-    stack1 = foundHelper || depth0.active;
-    stack2 = helpers['if'];
-    tmp1 = self.program(2, program2, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "><a href=\"#\" data-cid=\"";
-    foundHelper = helpers.cid;
-    stack1 = foundHelper || depth0.cid;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.slug;
-    stack1 = foundHelper || depth0.slug;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "slug", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a></li>\n  ";
-    return buffer;}
-  function program2(depth0,data) {
-    
-    
-    return " class=\"active\"";}
-
-    buffer += "<a tabindex=\"-1\" href=\"#\">Switch ";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a>\n<ul class=\"dropdown-menu\">\n  ";
-    foundHelper = helpers.regions;
-    stack1 = foundHelper || depth0.regions;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</ul>\n";
-    return buffer;});
 }});
 
 window.require.define({"views/templates/regions": function(exports, require, module) {
@@ -4942,30 +3677,6 @@ window.require.define({"views/templates/save_theme": function(exports, require, 
 
 
     return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-save\"></i> Save Theme</a>\n";});
-}});
-
-window.require.define({"views/templates/share_theme": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var foundHelper, self=this;
-
-
-    return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#share-modal\"\n  id=\"share-theme\"><i class=\"icon-share\"></i> Share Theme</a>\n";});
-}});
-
-window.require.define({"views/templates/share_theme_link": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-
-    buffer += "<div id=\"share-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"share-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"share-modal-header\">Share Theme</h3>\n  </div>\n  <div class=\"modal-body\">\n    <p>This theme can be viewed by anyone you give the following link to.<br />\n    Please share it with care.</p>\n    <div class=\"well well-small\">http://makeatheme.com/themes/";
-    foundHelper = helpers.theme;
-    stack1 = foundHelper || depth0.theme;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</div>\n  </div>\n</div>\n";
-    return buffer;});
 }});
 
 window.require.define({"views/templates/simple_style_edit": function(exports, require, module) {
@@ -5405,17 +4116,12 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
 
   function program1(depth0,data) {
     
-    
-    return " checked=\"checked\"";}
-
-  function program3(depth0,data) {
-    
     var buffer = "", stack1, stack2;
     buffer += "\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers.each;
-    tmp1 = self.program(4, program4, data);
+    tmp1 = self.program(2, program2, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -5423,22 +4129,22 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;}
-  function program4(depth0,data) {
+  function program2(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n";
     foundHelper = helpers.id;
     stack1 = foundHelper || depth0.id;
     stack2 = helpers['if'];
-    tmp1 = self.program(5, program5, data);
+    tmp1 = self.program(3, program3, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
-    tmp1.inverse = self.program(7, program7, data);
+    tmp1.inverse = self.program(5, program5, data);
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;}
-  function program5(depth0,data) {
+  function program3(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n<a href=\"#\" data-selector=\"#";
@@ -5454,7 +4160,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "</a> &gt;\n";
     return buffer;}
 
-  function program7(depth0,data) {
+  function program5(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n<a href=\"#\" data-selector=\"";
@@ -5470,7 +4176,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + "</a> &gt;\n";
     return buffer;}
 
-  function program9(depth0,data) {
+  function program7(depth0,data) {
     
     var buffer = "", stack1, stack2;
     buffer += "\n  <optgroup label=\"";
@@ -5482,7 +4188,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.tags;
     stack1 = foundHelper || depth0.tags;
     stack2 = helpers.each;
-    tmp1 = self.program(10, program10, data);
+    tmp1 = self.program(8, program8, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -5490,7 +4196,7 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </optgroup>\n  ";
     return buffer;}
-  function program10(depth0,data) {
+  function program8(depth0,data) {
     
     var buffer = "", stack1;
     buffer += "\n    <option value=\"";
@@ -5516,21 +4222,11 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     buffer += escapeExpression(stack1) + ")</option>\n    ";
     return buffer;}
 
-    buffer += "<h4>Style Editor</h4>\n\n<div class=\"switch clearfix\">\n  <label class=\"checkbox\">\n    <input";
-    foundHelper = helpers.advanced;
-    stack1 = foundHelper || depth0.advanced;
-    stack2 = helpers['if'];
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n      type=\"checkbox\" value=\"1\" name=\"style_advanced\" />\n    Show Advanced Editor\n  </label>\n</div>\n\n<p class=\"selector-choice\">\nElement:\n";
+    buffer += "<h4>Style Editor</h4>\n\n<p class=\"selector-choice\">\nElement:\n";
     foundHelper = helpers.parents;
     stack1 = foundHelper || depth0.parents;
     stack2 = helpers['if'];
-    tmp1 = self.program(3, program3, data);
+    tmp1 = self.program(1, program1, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
@@ -5545,62 +4241,13 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     foundHelper = helpers.htmlTags;
     stack1 = foundHelper || depth0.htmlTags;
     stack2 = helpers.each;
-    tmp1 = self.program(9, program9, data);
+    tmp1 = self.program(7, program7, data);
     tmp1.hash = {};
     tmp1.fn = tmp1;
     tmp1.inverse = self.noop;
     stack1 = stack2.call(depth0, stack1, tmp1);
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n</select>\n";
-    return buffer;});
-}});
-
-window.require.define({"views/templates/template_switch": function(exports, require, module) {
-  module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
-    helpers = helpers || Handlebars.helpers;
-    var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
-
-  function program1(depth0,data) {
-    
-    var buffer = "", stack1, stack2;
-    buffer += "\n  <li";
-    foundHelper = helpers.active;
-    stack1 = foundHelper || depth0.active;
-    stack2 = helpers['if'];
-    tmp1 = self.program(2, program2, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "><a href=\"#\" data-cid=\"";
-    foundHelper = helpers.cid;
-    stack1 = foundHelper || depth0.cid;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "cid", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\">";
-    foundHelper = helpers.label;
-    stack1 = foundHelper || depth0.label;
-    if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
-    else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "</a></li>\n  ";
-    return buffer;}
-  function program2(depth0,data) {
-    
-    
-    return " class=\"active\"";}
-
-    buffer += "<a tabindex=\"-1\" href=\"#\">Switch Template</a>\n<ul class=\"dropdown-menu\">\n  ";
-    foundHelper = helpers.templates;
-    stack1 = foundHelper || depth0.templates;
-    stack2 = helpers.each;
-    tmp1 = self.program(1, program1, data);
-    tmp1.hash = {};
-    tmp1.fn = tmp1;
-    tmp1.inverse = self.noop;
-    stack1 = stack2.call(depth0, stack1, tmp1);
-    if(stack1 || stack1 === 0) { buffer += stack1; }
-    buffer += "\n</ul>\n";
     return buffer;});
 }});
 
@@ -5700,7 +4347,7 @@ window.require.define({"views/templates/themes": function(exports, require, modu
     var foundHelper, self=this;
 
 
-    return "<h3 class=\"page-title\">Create a new theme from scratch</h3>\n<form id=\"new-theme\" class=\"form-inline\">\n  <input type=\"text\" class=\"input-medium\" name=\"theme_name\" placeholder=\"Theme Name\">\n  <button data-event=\"New Theme:type:from scratch\"\n    class=\"btn btn-primary\" data-bypass=\"true\">\n    Create Theme</button>\n</form>\n<h3 class=\"page-title\">Or copy a theme below</h3>\n";});
+    return "<h3 class=\"page-title\">Choose a theme below</h3>\n";});
 }});
 
 window.require.define({"views/templates/user_themes": function(exports, require, module) {
@@ -5845,10 +4492,6 @@ window.require.define({"views/themes": function(exports, require, module) {
   module.exports = View.extend({
     collection: new Themes(app.data.themes),
 
-    events: {
-      "submit #new-theme": "createTheme"
-    },
-
     render: function () {
       var listView = app.createView("theme_list", {collection: this.collection});
 
@@ -5859,43 +4502,6 @@ window.require.define({"views/themes": function(exports, require, module) {
         .append(listView.render().$el);
 
       return this;
-    },
-
-    createTheme: function (e) {
-      var data = {name: this.$("input[name=theme_name]").val().trim()};
-
-      e.preventDefault();
-
-      if (!data.name) {
-        app.trigger("notification", "error", "Please fill in the theme name");
-        return;
-      }
-
-      // Set timeout so that button is disabled after all script are run
-      // to avoid blocking event bubbling
-      setTimeout(function () {
-        this.$("button").attr("disabled", "true").html("Please wait...");
-      }, 0);
-
-      $.ajax({
-        type: "POST",
-        url: "/themes",
-        contentType: "application/json; charset=UTF-8",
-        data: JSON.stringify(data),
-        success: function (data) {
-          var theme = JSON.parse(data);
-
-          app.trigger("theme:created", theme);
-
-          Backbone.history.navigate("/themes/" + theme._id, true);
-        },
-        error: function () {
-          this.$("button").removeAttr("disabled").html("Create Theme");
-
-          app.trigger("notification", "error", "Unable to create a theme. " +
-                      "Please try again.");
-        }.bind(this)
-      });
     }
   });
 

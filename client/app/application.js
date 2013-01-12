@@ -4,8 +4,7 @@ Application = window.Application || {};
 
 _.extend(Application, {
   initialize: function() {
-    var Router = require("router")
-      , mixpanel = require("lib/mixpanel");
+    var Router = require("router");
 
     // Set debug flag.
     this.debug = this.data.debug;
@@ -20,9 +19,6 @@ _.extend(Application, {
 
     // Initialize router
     this.router = new Router();
-
-    // Initialize Mixpanel tracking
-    mixpanel.initialize();
 
     // Render the login and logout links
     this.createView("auth_links").render();

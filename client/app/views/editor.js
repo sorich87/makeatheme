@@ -22,14 +22,12 @@ module.exports = View.extend({
 
   // Show editor when "template:loaded" event is triggered
   , render: function () {
-    var blocksView = app.createView("blocks"),
-        styleEditView = app.createView("style_edit"),
+    var styleEditView = app.createView("style_edit"),
         layoutView = app.createView("layout");
 
-    this.subViews.push(blocksView, styleEditView, layoutView);
+    this.subViews.push(styleEditView, layoutView);
 
     this.$el.empty()
-      .append(blocksView.render().$el)
       .append(styleEditView.render().$el);
 
     this.$el.appendTo($("#main", window.top.document));
