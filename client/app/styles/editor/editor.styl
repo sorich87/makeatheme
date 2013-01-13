@@ -14,7 +14,6 @@ red =                 #dd261d
 yellowLight =         #ffffe0
 
 div.x-name,
-div.x-remove,
 div.x-resize {
   font-size: 12px;
   font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
@@ -35,29 +34,9 @@ div.x-resize {
   margin-top: 9px;
   color: blue;
 }
-div.x-remove {
-  font-size: 12px;
-  line-height: 12px;
-  width: 12px;
-  height: 12px;
-  text-align: center;
-  color: red;
-  background-color: yellowLight;
-  cursor: pointer;
-  display: block;
-}
-.column div.x-remove {
-  position: absolute;
-  right: 0;
-  top: 0;
-  display: none;
-}
 .column.x-current div.x-resize {
   display: block;
   cursor: col-resize;
-}
-.column.x-current div.x-remove {
-  display: block;
 }
 .column.x-current a {
   cursor: move;
