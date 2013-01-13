@@ -120,7 +120,7 @@ module ThemeHelper
       template: index[:full]
   end
 
-  # Save or fork theme
+  # Save theme
   def respond_with_saved_theme!(theme, attrs)
     theme.name = attrs[:name]
     theme.regions = attrs[:regions].map { |region| Region.new(region) }
