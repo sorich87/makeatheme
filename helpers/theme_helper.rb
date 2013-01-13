@@ -123,7 +123,6 @@ module ThemeHelper
   # Save or fork theme
   def respond_with_saved_theme!(theme, attrs)
     theme.name = attrs[:name]
-    theme.blocks = attrs[:blocks].map { |block| Block.new(block) }
     theme.regions = attrs[:regions].map { |region| Region.new(region) }
     theme.templates = attrs[:templates].map { |template| Template.new(template) }
     theme.style = attrs[:style]
