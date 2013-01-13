@@ -23,7 +23,7 @@ describe "Theme customization" do
       @theme.save!
     end
 
-    @json = File.read('./spec/request/customization_request.json')
+    @json = File.read('./spec/request/theme_request.json')
   end
 
   it 'should require authentication' do
@@ -40,12 +40,8 @@ describe "Theme customization" do
       @theme.reload
     end
 
-    it 'should be successful (status 201)' do
-      last_response.status.should == 201
-    end
-
-    it 'should create a fork' do
-      @theme.forks.count.should > 0
+    it 'should be successful' do
+      last_response.status.should == 200
     end
   end
 end

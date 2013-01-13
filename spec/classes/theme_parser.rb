@@ -1,3 +1,0 @@
-describe ThemeParser do
-
-end

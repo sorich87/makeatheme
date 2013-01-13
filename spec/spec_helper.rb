@@ -19,7 +19,7 @@ Fog.mock!
 
 # Sample restricted path as we don't have one :]
 get '/restricted' do
-  forbid and return unless authenticated?
+  protect!
   status 201
 end
 
