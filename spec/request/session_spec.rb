@@ -18,7 +18,7 @@ describe :session do
       last_response.status.should == 400
     end
 
-    it 'should not be OK with a valid password combination' do
+    it 'should not be OK with an invalid password combination' do
       post '/session', @user_attributes.merge(:password => "wrong_password").to_json
       last_response.status.should == 400
     end
