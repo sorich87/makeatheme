@@ -3376,7 +3376,7 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     stack1 = foundHelper || depth0.last_name;
     if(typeof stack1 === functionType) { stack1 = stack1.call(depth0, { hash: {} }); }
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "last_name", { hash: {} }); }
-    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\"><i class=\"icon-wrench\"></i> Settings</a></li>\n        <li><a href=\"//support.makeatheme.com\" target=\"_blank\" id=\"support\"><i class=\"icon-question-sign\"></i> Help & Feedback</a></li>\n        <li><a href=\"#\" id=\"logout\"><i class=\"icon-signout\"></i> Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
+    buffer += escapeExpression(stack1) + "\n        <b class=\"caret\"></b>\n      </a>\n      <ul class=\"dropdown-menu\">\n        <li><a href=\"/account\" id=\"account\" data-bypass=\"true\"><i class=\"icon-wrench\"></i> Settings</a></li>\n        <li><a href=\"//support.makeatheme.com\" target=\"_blank\" id=\"support\"><i class=\"icon-question-sign\"></i> Help & Feedback</a></li>\n        <li><a href=\"#\" id=\"logout\"><i class=\"icon-signout\"></i> Log out</a></li>\n      </ul>\n    </li>\n  </ul>\n";
     return buffer;}
 
   function program3(depth0,data) {
