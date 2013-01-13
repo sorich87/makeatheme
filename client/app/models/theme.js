@@ -14,8 +14,8 @@ module.exports = Model.extend({
   , toJSON: function () {
     var attributes = _.clone(this.attributes);
 
-    ["blocks", "regions", "templates"].forEach(function (object) {
-      if (!attributes[object].models) {
+    ["regions", "templates"].forEach(function (object) {
+      if (!attributes[object] || !attributes[object].models) {
         return [];
       }
 
@@ -27,7 +27,7 @@ module.exports = Model.extend({
       attributes[object] = _.map(attributes[object].models, filter);
     });
 
-    if ("getRules" in attributes.style) {
+    if (attributes.style && "getRules" in attributes.style) {
       attributes.style = attributes.style.getRules();
     }
 
