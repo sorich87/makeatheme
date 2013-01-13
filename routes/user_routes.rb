@@ -22,7 +22,7 @@ post '/users' do
   end
 end
 
-put '/users' do
+put '/users/:id' do
   params = JSON.parse(request.body.read, symbolize_names: true)
   user = User.find(params[:id])
 
@@ -43,8 +43,12 @@ put '/users' do
   end
 end
 
-delete '/users' do
+delete '/users/:id' do
   protect!
+
+  user = User.find(params[:id])
+
+  halt 401 unless user.id == current_user.id
 
   current_user.destroy
 end

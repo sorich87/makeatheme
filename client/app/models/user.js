@@ -16,7 +16,7 @@ module.exports = Model.extend({
     var collection = new Themes(this.attributes.themes);
   }
 
-  , url: "/users"
+  , urlRoot: "/users"
 
   , validation: {
     first_name: {

@@ -1769,7 +1769,7 @@ window.require.define({"models/user": function(exports, require, module) {
       var collection = new Themes(this.attributes.themes);
     }
 
-    , url: "/users"
+    , urlRoot: "/users"
 
     , validation: {
       first_name: {
