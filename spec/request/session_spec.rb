@@ -1,15 +1,6 @@
 describe :session do
   before(:each) do
     header "HTTP_ACCEPT", "application/json"
-
-    @user_attributes = {
-      email: "test_user@example.com",
-      password: "test_password",
-      first_name: "Test",
-      last_name: "User"
-    }
-
-    @user = User.find_or_create_by(@user_attributes)
   end
 
   describe 'authentication' do
@@ -19,32 +10,32 @@ describe :session do
     end
 
     it 'should not be OK with an invalid password combination' do
-      post '/session', @user_attributes.merge(:password => "wrong_password").to_json
+      post '/session', current_user_attributes.merge(:password => "wrong_password").to_json
       last_response.status.should == 400
     end
 
     it 'should be OK with a valid password combination' do
-      post '/session', @user_attributes.to_json
+      log_in!
       last_response.status.should == 201
     end
   end
 
   describe 'de-authenticating' do
     it "should be OK if we're authenticated" do
-      post '/session', @user_attributes.to_json
-      delete '/session'
+      log_in!
+      log_out!
       last_response.status.should == 204
     end
 
     it "actually, it's fine all the time.. :)" do
-      delete '/session'
+      log_out!
       last_response.status.should == 204
     end
   end
 
   describe 'being authenticated' do
     it "should be OK to visit a restricted area" do
-      post '/session', @user_attributes.to_json
+      log_in!
       get '/restricted'
       last_response.status.should == 201
     end
@@ -52,7 +43,7 @@ describe :session do
 
   describe 'not being authenticated' do
     it "should not be able to visit restricted areas" do
-      delete '/session'
+      log_out!
       get '/restricted'
       last_response.status.should == 401
     end
