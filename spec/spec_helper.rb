@@ -28,10 +28,13 @@ def do_not_send_email
   Pony.stub!(:deliver)
 end
 
+Dir["./spec/support/**/*.rb"].sort.each {|f| require f}
+
 RSpec.configure do |conf|
   conf.include Rack::Test::Methods
   conf.include Mongoid::Matchers
   conf.include Paperclip::Shoulda::Matchers
+  conf.include SessionHelpers
   conf.mock_with :rspec
 
   conf.before(:suite) do
@@ -44,3 +47,4 @@ RSpec.configure do |conf|
     header 'Accept', 'application/json'
   end
 end
+

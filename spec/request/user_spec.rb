@@ -1,21 +1,20 @@
 describe :user do
+  before do
+    @user_attributes = {
+      email: "test_user@example.com",
+      password: "test_password",
+      first_name: "Test",
+      last_name: "User"
+    }
+  end
+
+  after(:each) do
+    User.destroy_all(email: @user_attributes[:email])
+  end
+
   describe :registration do
-    before do
-      @user_attributes = {
-        email: "test_user@example.com",
-        password: "test_password",
-        first_name: "Test",
-        last_name: "User"
-      }
-    end
-
-    before(:each) do
-      user = User.where(:email => @user_attributes[:email]).first
-      user.destroy if user
-    end
-
     describe "with valid attributes" do
-      before do
+      before(:each) do
         post '/users', @user_attributes.to_json
       end
 
@@ -46,7 +45,7 @@ describe :user do
     end
 
     describe "with invalid attributes" do
-      before do
+      before(:each) do
         invalid_attributes = @user_attributes.merge(:email => nil)
         post '/users', invalid_attributes.to_json
       end
@@ -64,14 +63,7 @@ describe :user do
 
   describe :password_reset do
     before(:each) do
-      @user_attributes = {
-        email: "test_user@example.com",
-        password: "test_password",
-        first_name: "Test",
-        last_name: "User"
-      }
-
-      @user = User.find_or_create_by(@user_attributes)
+      @user = User.create(@user_attributes)
       @user.initiate_password_reset!(12345)
     end
 
@@ -98,9 +90,8 @@ describe :user do
       end
     end
 
-    describe 'creation' do
-      before do
-        @user.reload
+    describe 'confirmation' do
+      before(:each) do
         get "/users/#{@user.id}/reset_password/#{@user.password_reset_token}"
       end
 
