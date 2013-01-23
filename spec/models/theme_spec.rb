@@ -11,34 +11,57 @@ describe Theme do
     @valid_attributes = {
       :author => @user
     }
+
+    @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
+    @theme.save
+  end
+
+  after do
+    @user.destroy
+    @theme.destroy
   end
 
   specify 'sample .zip should exist' do
     File.exists?(@valid_theme_zip).should be_true
   end
 
+  it { should be_timestamped_document }
+
+  it { should have_fields(:name, :uri, :version, :description, :listed, :style) }
+  it { should have_fields(:screenshot_file_name, :screenshot_content_type) }
+  it { should have_fields(:wp_archive_file_name, :wp_archive_content_type) }
+  it { should have_fields(:screenshot_file_size, :wp_archive_file_size).of_type(Integer) }
+  it { should have_fields(:screenshot_updated_at, :wp_archive_updated_at).of_type(DateTime) }
+
   it { should validate_presence_of(:name) }
   it { should validate_presence_of(:author) }
 
-  it { should belong_to(:author) }
+  it { should belong_to(:author).of_type(User) }
+  it { should belong_to(:parent).of_type(Theme) }
+
+  it { should embed_many(:blocks) }
+  it { should embed_many(:regions) }
+  it { should embed_many(:templates) }
+
+  it { should have_many(:forks).of_type(Theme) }
+
+  it { should have_and_belong_to_many(:assets).with_autosave }
 
   it { should validate_attachment_content_type(:wp_archive).allowing('application/zip') }
   it { should validate_attachment_size(:wp_archive).less_than(1.megabyte) }
 
-  it 'should respond to new_from_zip' do
+  it 'should have import methods' do
     Theme.should respond_to(:new_from_zip)
+    Theme.should respond_to(:create_from_zip)
   end
+  it { should respond_to(:generate_archive) }
+  it { should respond_to(:generate_archive!) }
   it { should respond_to(:fork) }
   it { should respond_to(:fork!) }
   it { should respond_to(:forks) }
   it { should respond_to(:fork?) }
 
   describe '.new_from_zip' do
-    before do
-      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
-      @theme.save
-    end
-
     it 'should work given a valid .zip file' do
       @theme.should be_persisted
     end
@@ -54,22 +77,15 @@ describe Theme do
     it 'should not be a fork' do
       @theme.fork?.should be_false
     end
-
-    it 'should create embedded theme templates' do
-      @theme.templates.count.should > 0
-    end
-
-    it 'should create embedded theme regions' do
-      @theme.regions.count.should > 0
-    end
   end
 
   context 'forking' do
     before do
-      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
-      @theme.save!
-
       @fork = @theme.fork
+    end
+
+    after do
+      @fork.destroy
     end
 
     it 'should create a new valid theme' do
@@ -109,9 +125,5 @@ describe Theme do
   end
 
   describe 'destroy' do
-    before do
-      @theme = Theme.new_from_zip(@valid_theme_zip, @valid_attributes)
-      @theme.save
-    end
   end
 end
