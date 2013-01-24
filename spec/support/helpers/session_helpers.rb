@@ -18,8 +18,9 @@ module SessionHelpers
     attributes
   end
 
-  def log_in!
-    post '/session', current_user_attributes.to_json
+  def log_in!(user_attributes = nil)
+    user_attributes = current_user_attributes if user_attributes.nil?
+    post '/session', user_attributes.to_json
   end
 
   def log_out!
