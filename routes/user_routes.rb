@@ -23,8 +23,8 @@ post '/users' do
 end
 
 put '/users/:id' do
-  params = JSON.parse(request.body.read, symbolize_names: true)
   user = User.find(params[:id])
+  params = JSON.parse(request.body.read, symbolize_names: true)
 
   unless user.has_password?(params[:current_password])
     status 400
