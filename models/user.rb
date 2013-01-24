@@ -72,7 +72,7 @@ class User
     self.save!
   end
 
-  def verify_password!(suspect)
+  def has_password?(suspect)
     suspect_hash = BCrypt::Engine.hash_secret(suspect, self.password_salt)
     return suspect_hash == self.password_hash
   end

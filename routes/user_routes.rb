@@ -26,7 +26,7 @@ put '/users/:id' do
   params = JSON.parse(request.body.read, symbolize_names: true)
   user = User.find(params[:id])
 
-  unless user.verify_password!(params[:current_password])
+  unless user.has_password?(params[:current_password])
     status 400
     body({current_password: ["invalid"]}.to_json)
     return
