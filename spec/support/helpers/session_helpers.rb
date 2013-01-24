@@ -4,18 +4,18 @@ module SessionHelpers
   end
 
   def current_user_attributes
-    @attributes = {
+    attributes = {
       email: "current_user@example.com",
       password: "test_password",
       first_name: "Test",
       last_name: "User"
     }
 
-    unless User.where(email: @attributes[:email]).first
-      User.create(@attributes)
+    unless User.where(email: attributes[:email]).first
+      User.create(attributes)
     end
 
-    @attributes
+    attributes
   end
 
   def log_in!
