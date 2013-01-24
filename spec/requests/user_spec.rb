@@ -61,8 +61,60 @@ describe :user do
     end
   end
 
-  describe :password_reset do
+  describe :edit do
     before(:each) do
+      @user = User.create(@user_attributes)
+    end
+
+    it 'should fail if current password not sent' do
+      put "/users/#{@user.id}", @user_attributes.to_json
+      last_response.status.should == 400
+      JSON.parse(last_response.body).should have_key('current_password')
+    end
+
+    it 'should be successful with valid attributes' do
+      attributes = @user_attributes
+      attributes.merge!(current_password: @user_attributes[:password])
+
+      put "/users/#{@user.id}", attributes.to_json
+      last_response.status.should == 202
+    end
+
+    it 'should fail with invalid attributes' do
+      attributes = @user_attributes
+      attributes.merge!(
+        email: '',
+        current_password: @user_attributes[:password]
+      )
+
+      put "/users/#{@user.id}", attributes.to_json
+      last_response.status.should == 400
+      JSON.parse(last_response.body).should have_key('email')
+    end
+  end
+
+  describe :deletion do
+    before(:each) do
+      @user = User.create(@user_attributes)
+    end
+
+    it 'should be successful if user is the current user' do
+      log_in!(@user_attributes)
+      delete "/users/#{@user.id}"
+      @user.reload
+      User.find(@user.id).should be_nil
+    end
+
+    it 'should not be successful if user is not the current user' do
+      log_in!
+      delete "/users/#{@user.id}"
+      @user.reload
+      User.find(@user.id).should_not be_nil
+    end
+  end
+
+  describe :password_reset do
+    before do
       @user = User.create(@user_attributes)
     end
 
