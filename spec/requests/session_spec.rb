@@ -1,8 +1,4 @@
 describe :session do
-  before(:each) do
-    header "HTTP_ACCEPT", "application/json"
-  end
-
   describe 'authentication' do
     it 'should not be OK with an empty request' do
       post '/session', '{}'
