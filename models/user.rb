@@ -23,7 +23,7 @@ class User
 
   has_many :themes, :inverse_of => :author
 
-  attr_protected :password_hash
+  attr_accessible :first_name, :last_name, :email, :password
 
   before_save :generate_password_hash
 
