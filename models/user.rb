@@ -57,7 +57,7 @@ class User
     self.password_reset_salt = BCrypt::Engine.generate_salt
     self.password_reset_hash = BCrypt::Engine.hash_secret(password, self.password_reset_salt)
     self.password_reset_sent_at = Time.now
-    self.save
+    self.save!
   end
 
   def reset_password!
@@ -69,7 +69,7 @@ class User
     self.password_reset_salt = ''
     self.password_reset_hash = ''
     self.password_reset_sent_at = nil
-    self.save
+    self.save!
   end
 
   def verify_password!(suspect)
