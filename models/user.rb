@@ -80,9 +80,10 @@ class User
   private
 
   def generate_password_hash
-    if password.present?
+    if self.password.present?
       self.password_salt = BCrypt::Engine.generate_salt
-      self.password_hash = BCrypt::Engine.hash_secret(password, password_salt)
+      self.password_hash = BCrypt::Engine.hash_secret(self.password, self.password_salt)
+      self.password = ''
     end
   end
 end
