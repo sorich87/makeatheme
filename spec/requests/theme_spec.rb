@@ -9,13 +9,15 @@ describe :theme do
         description: "Some theme."
       }
 
-      if @theme.nil?
-        zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
-        @theme = Theme.new_from_zip(zip, @theme_attributes)
-        @theme.save!
-      end
+      zip = File.join('./spec/fixtures/themes/basic_valid_theme.zip')
+      @theme = Theme.new_from_zip(zip, @theme_attributes)
+      @theme.save!
 
-      @json = File.read('./spec/request/theme_request.json')
+      @json = File.read('./spec/fixtures/themes/theme_request.json')
+    end
+
+    after do
+      @theme.destroy
     end
 
     it 'should require authentication' do

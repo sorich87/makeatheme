@@ -64,7 +64,6 @@ describe :user do
   describe :password_reset do
     before(:each) do
       @user = User.create(@user_attributes)
-      @user.initiate_password_reset!(12345)
     end
 
     describe 'initiation' do
@@ -92,6 +91,7 @@ describe :user do
 
     describe 'confirmation' do
       before(:each) do
+        @user.initiate_password_reset!(12345)
         get "/users/#{@user.id}/reset_password/#{@user.password_reset_token}"
       end
 
