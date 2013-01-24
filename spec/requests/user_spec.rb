@@ -12,6 +12,24 @@ describe :user do
     User.destroy_all(email: @user_attributes[:email])
   end
 
+  describe :listing do
+    before(:each) do
+      @user = User.create!(@user_attributes)
+      get '/users'
+    end
+
+    it 'should be successful' do
+      last_response.status.should == 200
+    end
+
+    it 'should return the user details' do
+      last_response.body.should == {
+        results: [@user],
+        pagination: {per_page: 25, total_results: 1}
+      }.to_json
+    end
+  end
+
   describe :registration do
     describe "with valid attributes" do
       before(:each) do
