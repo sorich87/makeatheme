@@ -1,3 +1,8 @@
+get '/users' do
+  @users = User.all.order_by([:email]).page(params[:page])
+
+  respond_with results: @users, pagination: json_pagination_for(@users)
+end
 
 post '/users' do
   user_params = JSON.parse(request.body.read)
