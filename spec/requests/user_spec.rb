@@ -14,6 +14,7 @@ describe :user do
 
   describe :listing do
     before(:each) do
+      admin_log_in!
       @user = User.create!(@user_attributes)
       get '/users'
     end
@@ -22,10 +23,10 @@ describe :user do
       last_response.status.should == 200
     end
 
-    it 'should return the user details' do
+    it 'should return all the users details' do
       last_response.body.should == {
-        results: [@user],
-        pagination: {per_page: 25, total_results: 1}
+        results: [current_user, @user],
+        pagination: {per_page: 25, total_results: 2}
       }.to_json
     end
   end
@@ -47,7 +48,7 @@ describe :user do
 
       it 'should log the user in' do
         get '/restricted'
-        last_response.status.should == 201
+        last_response.status.should == 200
       end
     end
 
@@ -81,6 +82,7 @@ describe :user do
 
   describe :edit do
     before(:each) do
+      admin_log_in!
       @user = User.create(@user_attributes)
     end
 
@@ -113,21 +115,14 @@ describe :user do
 
   describe :deletion do
     before(:each) do
+      admin_log_in!
       @user = User.create(@user_attributes)
     end
 
-    it 'should be successful if user is the current user' do
-      log_in!(@user_attributes)
+    it 'should be successful' do
       delete "/users/#{@user.id}"
       @user.reload
       User.find(@user.id).should be_nil
-    end
-
-    it 'should not be successful if user is not the current user' do
-      log_in!
-      delete "/users/#{@user.id}"
-      @user.reload
-      User.find(@user.id).should_not be_nil
     end
   end
 
@@ -172,7 +167,7 @@ describe :user do
 
       it 'should log the user in' do
         get '/restricted'
-        last_response.status.should == 201
+        last_response.status.should == 200
       end
     end
   end

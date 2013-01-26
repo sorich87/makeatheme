@@ -15,4 +15,14 @@ module SessionHelper
   def protect!
     halt 401 unless authenticated?
   end
+
+  def admin_only!
+    halt 401 unless authenticated? && current_user.is_admin?
+  end
+
+  def admin_or_owner_only!(user)
+    halt 401 unless authenticated? &&
+      (current_user.is_admin? || current_user.id == user.id)
+  end
 end
+

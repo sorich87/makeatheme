@@ -17,10 +17,21 @@ end
 
 Fog.mock!
 
-# Sample restricted path as we don't have one :]
+# Sample restricted paths as we don't have one :]
 get '/restricted' do
-  forbid and return unless authenticated?
-  status 201
+  protect!
+  status 200
+end
+
+get '/admin_only' do
+  admin_only!
+  status 200
+end
+
+get '/admin_or_owner_only/:id' do
+  user = User.find(params[:id])
+  admin_or_owner_only!(user)
+  status 200
 end
 
 # http://stackoverflow.com/q/8504101/354531

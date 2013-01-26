@@ -23,6 +23,13 @@ module SessionHelpers
     post '/session', user_attributes.to_json
   end
 
+  def admin_log_in!(user_attributes = nil)
+    user = current_user
+    user.admin = true
+    user.save!
+    log_in!(user_attributes)
+  end
+
   def log_out!
     delete '/session'
   end
