@@ -8,6 +8,7 @@ class User
   field :first_name, :type => String
   field :last_name, :type => String
   field :email, :type => String
+  field :admin, :type => Boolean, :default => false
   field :password_hash, :type => String
   field :password_salt, :type => String
   field :password_reset_token, :type => String
@@ -29,6 +30,10 @@ class User
 
   def to_fullname
     "#{self.first_name} #{self.last_name}"
+  end
+
+  def is_admin?
+    self.admin
   end
 
   def self.authenticate(email, password)
@@ -87,3 +92,4 @@ class User
     end
   end
 end
+

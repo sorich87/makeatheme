@@ -45,6 +45,18 @@ describe User do
     end
   end
 
+  describe '.is_admin?' do
+    it 'should be false if the user is not an admin' do
+      @user.is_admin?.should == false
+    end
+
+    it 'should be true if the user is an admin' do
+      @user.admin = true
+      @user.is_admin?.should == true
+      @user.admin = false
+    end
+  end
+
   describe '.authenticate' do
     it 'should return the user if email and password are correct' do
       user = User.authenticate(@user_attributes[:email], @user_attributes[:password])

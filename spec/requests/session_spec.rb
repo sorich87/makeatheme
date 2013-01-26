@@ -1,4 +1,8 @@
 describe :session do
+  after(:each) do
+    log_out!
+  end
+
   describe 'authentication' do
     it 'should not be OK with an empty request' do
       post '/session', '{}'
@@ -29,19 +33,79 @@ describe :session do
     end
   end
 
-  describe 'being authenticated' do
-    it "should be OK to visit a restricted area" do
-      log_in!
-      get '/restricted'
-      last_response.status.should == 201
+  describe 'access to restricted areas' do
+    describe 'as unauthenticated user' do
+      it 'should not be OK' do
+        get '/restricted'
+        last_response.status.should == 401
+      end
+
+      it 'should not be OK for admin or owner only areas' do
+        get "/admin_or_owner_only/#{current_user.id}"
+        last_response.status.should == 401
+      end
+
+      it 'should not be OK for admin only areas' do
+        get '/admin_only'
+        last_response.status.should == 401
+      end
+    end
+
+    describe 'as authenticated user' do
+      before(:each) do
+        log_in!
+      end
+
+      it 'should be OK' do
+        get '/restricted'
+        last_response.status.should == 200
+      end
+
+      it 'should be OK for admin or owner only areas' do
+        get "/admin_or_owner_only/#{current_user.id}"
+        last_response.status.should == 200
+      end
+
+      it 'should not be OK for admin only areas' do
+        get '/admin_only'
+        last_response.status.should == 401
+      end
+    end
+
+    describe 'as admin' do
+      before(:each) do
+        admin_log_in!
+      end
+
+      it 'should be OK' do
+        get '/restricted'
+        last_response.status.should == 200
+      end
+
+      it 'should be OK for admin or owner only areas' do
+        get "/admin_or_owner_only/#{current_user.id}"
+        last_response.status.should == 200
+      end
+
+      it 'should be OK for admin only areas' do
+        get '/admin_only'
+        last_response.status.should == 200
+      end
     end
   end
 
-  describe 'not being authenticated' do
-    it "should not be able to visit restricted areas" do
-      log_out!
-      get '/restricted'
-      last_response.status.should == 401
+  describe 'access to other users area' do
+    it 'should be OK for admins' do
+      user = User.create!(
+        email: "test_user@example.com",
+        password: "test_password",
+        first_name: "Test",
+        last_name: "User"
+      )
+
+      admin_log_in!
+      get "/admin_or_owner_only/#{user.id}"
+      last_response.status.should == 200
     end
   end
 end

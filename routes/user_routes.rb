@@ -1,4 +1,6 @@
 get '/users' do
+  admin_only!
+
   @users = User.all.order_by([:email]).page(params[:page])
 
   respond_with results: @users, pagination: json_pagination_for(@users)
@@ -29,6 +31,9 @@ end
 
 put '/users/:id' do
   user = User.find(params[:id])
+
+  admin_or_owner_only!(user)
+
   params = JSON.parse(request.body.read, symbolize_names: true)
 
   unless user.has_password?(params[:current_password])
@@ -49,13 +54,11 @@ put '/users/:id' do
 end
 
 delete '/users/:id' do
-  protect!
-
   user = User.find(params[:id])
 
-  halt 401 unless user.id == current_user.id
+  admin_or_owner_only!(user)
 
-  current_user.destroy
+  user.destroy
 end
 
 post '/users/reset_password' do
@@ -93,3 +96,4 @@ get '/users/:user_id/reset_password/:reset_token' do
     respond_with error: "Password reset token expired"
   end
 end
+
