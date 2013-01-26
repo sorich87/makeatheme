@@ -1,22 +1,51 @@
 describe :session do
+  before do
+    @user_attributes = {
+      email: "test_user@example.com",
+      password: "test_password",
+      first_name: "Test",
+      last_name: "User"
+    }
+  end
+
   after(:each) do
     log_out!
   end
 
   describe 'authentication' do
-    it 'should not be OK with an empty request' do
-      post '/session', '{}'
-      last_response.status.should == 400
+    describe 'with a password' do
+      it 'should not be OK with an empty request' do
+        post '/session', '{}'
+        last_response.status.should == 400
+      end
+
+      it 'should not be OK with an invalid password combination' do
+        post '/session', current_user_attributes.merge(:password => "wrong_password").to_json
+        last_response.status.should == 400
+      end
+
+      it 'should be OK with a valid password combination' do
+        log_in!
+        last_response.status.should == 201
+      end
     end
 
-    it 'should not be OK with an invalid password combination' do
-      post '/session', current_user_attributes.merge(:password => "wrong_password").to_json
-      last_response.status.should == 400
-    end
+    describe 'with an API key' do
+      before do
+        @user = User.new(@user_attributes)
+        @user.api_key = 'testkey1'
+        @user.save!
+      end
 
-    it 'should be OK with a valid password combination' do
-      log_in!
-      last_response.status.should == 201
+      it 'should be OK with a valid key' do
+        get '/restricted', api_key: @user.api_key
+        last_response.status.should == 200
+      end
+
+      it 'should not be OK with an invalid key' do
+        get '/restricted', api_key: 'testkey2'
+        last_response.status.should == 401
+      end
     end
   end
 
@@ -96,12 +125,7 @@ describe :session do
 
   describe 'access to other users area' do
     it 'should be OK for admins' do
-      user = User.create!(
-        email: "test_user@example.com",
-        password: "test_password",
-        first_name: "Test",
-        last_name: "User"
-      )
+      user = User.create!(@user_attributes)
 
       admin_log_in!
       get "/admin_or_owner_only/#{user.id}"

@@ -6,6 +6,12 @@ module SessionHelper
 
   def current_user
     @current_user ||= User.find(session[:user_id]) if session[:user_id]
+
+    if params[:api_key]
+      @current_user = User.where(api_key: params[:api_key]).first
+    end
+
+    @current_user
   end
 
   def authenticated?

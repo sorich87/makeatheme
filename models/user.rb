@@ -15,6 +15,7 @@ class User
   field :password_reset_hash, :type => String
   field :password_reset_salt, :type => String
   field :password_reset_sent_at, :type => Time
+  field :api_key, :type => String
 
   attr_accessor :password
 

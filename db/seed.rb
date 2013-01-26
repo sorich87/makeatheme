@@ -1,12 +1,15 @@
 author = User.first
 
 unless author
-  author = User.create(
-    first_name: "Emil",
-    last_name: "Ahlbaeck",
-    email: "e.ahlback@gmail.com",
-    password: "push.ly"
+  author = User.new(
+    first_name: 'Admin',
+    last_name: 'ADMIN',
+    email: 'admin@admin.dev',
+    password: 'admin'
   )
+  author.admin = true
+  author.api_key = 'admin'
+  author.save!
 end
 
 Dir[File.join(File.dirname(__FILE__), 'themes', '*.zip')].each do |theme_file|
