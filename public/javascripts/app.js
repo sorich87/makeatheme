@@ -2057,8 +2057,8 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
       // Set timeout so that button is disabled after all script are run
       // to avoid blocking event bubbling
       setTimeout(function () {
-        element.setAttribute("disabled", "true");
-        element.innerHTML = "Started the Photocopier";
+        element.setAttribute("data-bypass", "true");
+        element.innerHTML = "Copying the theme &hellip;";
       }, 0);
 
       $.ajax({
@@ -2077,7 +2077,7 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
           window.top.Backbone.history.navigate("/themes/" + theme._id, true);
         },
         error: function () {
-          element.removeAttribute("disabled");
+          element.removeAttribute("data-bypass");
           element.innerHTML = "Copy Theme";
 
           app.trigger("notification", "error", "Error. Unable to copy theme. " +
