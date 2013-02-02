@@ -2466,16 +2466,17 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
     }
 
     , copyTheme: function (e) {
+      if (this.copying === true) {
+        return;
+      }
+
       var element = e.currentTarget;
+
+      this.copying = true;
 
       e.preventDefault();
 
-      // Set timeout so that button is disabled after all script are run
-      // to avoid blocking event bubbling
-      setTimeout(function () {
-        element.setAttribute("data-bypass", "true");
-        element.innerHTML = "Copying the theme &hellip;";
-      }, 0);
+      element.innerHTML = "Copying the theme &hellip;";
 
       $.ajax({
         type: "POST",
@@ -2485,20 +2486,23 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
         success: function (data) {
           var theme = JSON.parse(data);
 
+          this.copying = false;
+
           window.top.Application.trigger("theme:copied", theme);
 
           app.trigger("notification", "success", "The theme has been copied. " +
                       "Now start editing.");
 
           window.top.Backbone.history.navigate("/themes/" + theme._id, true);
-        },
+        }.bind(this),
         error: function () {
-          element.removeAttribute("data-bypass");
+          this.copying = false;
+
           element.innerHTML = "Copy Theme";
 
           app.trigger("notification", "error", "Error. Unable to copy theme. " +
                       "Please reload the page and try again.");
-        }
+        }.bind(this)
       });
     }
   });
