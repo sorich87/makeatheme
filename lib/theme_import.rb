@@ -13,6 +13,7 @@ module ThemeImport
       theme = self.new(attributes)
       import = ThemeImport.new(zip_file)
 
+      theme.screenshot = import.screenshot
       theme.templates = import.templates
       theme.regions = import.regions
       theme.write_attributes(import.attributes)
@@ -53,12 +54,13 @@ module ThemeImport
   end
 
   class ThemeImport
-    attr_accessor :templates, :regions, :static_files, :attributes
+    attr_accessor :templates, :regions, :screenshot, :static_files, :attributes
 
     def initialize(zip_file)
       @zip_file = zip_file
       @templates = []
       @regions = []
+      @screenshot = nil
       @static_files = []
       @attributes = {}
 
@@ -74,7 +76,10 @@ module ThemeImport
         read_theme_info_file(zip_file)
       elsif filename =~ /\Astyle\.css\z/
         read_css_file(zip_file)
-      elsif filename =~ /\A[^_\.](?>\/?[a-zA-Z0-9_-]+)+\.\w+\z/ # Ignore dotted files or __MACOSX files & such
+      elsif filename =~ /\Ascreenshot\.(gif|jpg|jpeg|png)\z/
+        add_screenshot_file(zip_file)
+      elsif filename !=~ /\Ascreenshot\.(gif|jpg|jpeg|png)\z/ &&
+        filename =~ /\A[^_\.](?>\/?[a-zA-Z0-9_-]+)+\.\w+\z/ # Ignore dotted files or __MACOSX files & such
         add_static_file(zip_file)
       end
     end
@@ -112,7 +117,15 @@ module ThemeImport
       end
     end
 
+    def add_screenshot_file(entry)
+      @screenshot = read_static_file(entry)
+    end
+
     def add_static_file(entry)
+      @static_files << read_static_file(entry)
+    end
+
+    def read_static_file(entry)
       filename = File.basename(entry.to_s)
 
       tempfile = File.open(File.join(Dir.mktmpdir, filename), 'w+')
@@ -122,7 +135,7 @@ module ThemeImport
         tempfile.rewind
       end
 
-      @static_files << tempfile
+      tempfile
     end
 
     def read_theme_info_file(entry)
