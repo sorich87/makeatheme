@@ -9,11 +9,11 @@ describe :theme do
         description: "Some theme."
       }
 
-      zip = File.join('./spec/fixtures/themes/basic_valid_theme.zip')
+      zip = File.join('.', 'spec', 'fixtures', 'basic_valid_theme.zip')
       @theme = Theme.new_from_zip(zip, @theme_attributes)
       @theme.save!
 
-      @json = File.read('./spec/fixtures/themes/theme_request.json')
+      @json = File.read(File.join('.', 'spec', 'fixtures', 'theme_request.json'))
     end
 
     after do

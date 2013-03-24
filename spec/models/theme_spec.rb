@@ -7,7 +7,7 @@ describe Theme do
       last_name: "User"
     )
 
-    @valid_theme_zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
+    @valid_theme_zip = File.join('.', 'spec', 'fixtures', 'basic_valid_theme.zip')
     @valid_attributes = {
       :author => @user
     }
@@ -114,12 +114,12 @@ describe Theme do
     end
 
     describe 'static theme files' do
-      it 'should have the same static files' do
-        @fork.asset_ids == @theme.asset_ids
+      it 'should have static files' do
+        @fork.assets.should_not be_empty
       end
 
-      it 'should not have any static files' do
-        @fork.assets.should be_empty
+      it 'should have the same static files' do
+        @fork.asset_ids == @theme.asset_ids
       end
     end
   end

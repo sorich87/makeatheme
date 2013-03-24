@@ -29,7 +29,7 @@ describe :user do
 
       it 'should log the user in' do
         get '/restricted'
-        last_response.status.should == 201
+        last_response.status.should == 200
       end
     end
 
@@ -102,7 +102,7 @@ describe :user do
 
       it 'should log the user in' do
         get '/restricted'
-        last_response.status.should == 201
+        last_response.status.should == 200
       end
     end
   end

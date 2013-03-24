@@ -10,12 +10,12 @@ describe :theme do
       }
 
       if @theme.nil?
-        zip = File.join('.', 'spec/fixtures/themes', 'basic_valid_theme.zip')
+        zip = File.join('.', 'spec', 'fixtures', 'basic_valid_theme.zip')
         @theme = Theme.new_from_zip(zip, @theme_attributes)
         @theme.save!
       end
 
-      @json = File.read('./spec/request/theme_request.json')
+      @json = File.read(File.join('.', 'spec', 'fixtures', 'theme_request.json'))
     end
 
     it 'should require authentication' do
