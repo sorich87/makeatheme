@@ -61,16 +61,21 @@
     throw new Error('Cannot find module "' + name + '"');
   };
 
-  var define = function(bundle) {
-    for (var key in bundle) {
-      if (has(bundle, key)) {
-        modules[key] = bundle[key];
+  var define = function(bundle, fn) {
+    if (typeof bundle === 'object') {
+      for (var key in bundle) {
+        if (has(bundle, key)) {
+          modules[key] = bundle[key];
+        }
       }
+    } else {
+      modules[bundle] = fn;
     }
-  }
+  };
 
   globals.require = require;
   globals.require.define = define;
+  globals.require.register = define;
   globals.require.brunch = true;
 })();
 
@@ -86,7 +91,6 @@
   }
 })(window.console = window.console || {});
 ;
-
 /*!
  * jQuery JavaScript Library v1.7.2
  * http://jquery.com/
@@ -9492,7 +9496,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 })( window );
 ;
-
 //     Underscore.js 1.3.3
 //     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore is freely distributable under the MIT license.
@@ -10553,7 +10556,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 }).call(this);
 ;
-
 //     Backbone.js 0.9.9
 
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
@@ -12088,7 +12090,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 }).call(this);
 ;
-
 // Extend Backbone.History by adding methods to browse through the history
 // Mirrors the window.History API
 
@@ -12119,7 +12120,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   });
 })(_, Backbone);
 ;
-
 // Backbone.Validation v0.7.0
 //
 // Copyright (c) 2011-2012 Thomas Pedersen
@@ -12723,7 +12723,6 @@ Backbone.Validation = (function(_){
 }(_));
 ;
 
-
 _.extend(Backbone.Validation.callbacks, {
   valid: function(view, attr, selector) {
     var control, group;
@@ -12769,7 +12768,6 @@ _.extend(Backbone.Validation.callbacks, {
   }
 });
 ;
-
 /*!
  * jQuery UI Core 1.9.0
  * http://jqueryui.com
@@ -13108,7 +13106,6 @@ $.extend( $.ui, {
 
 })( jQuery );
 ;
-
 /*!
  * jQuery UI Widget 1.9.0
  * http://jqueryui.com
@@ -13612,7 +13609,6 @@ if ( $.uiBackCompat !== false ) {
 
 })( jQuery );
 ;
-
 /*!
  * jQuery UI Mouse 1.9.0
  * http://jqueryui.com
@@ -13783,7 +13779,6 @@ $.widget("ui.mouse", {
 
 })(jQuery);
 ;
-
 /*!
  * jQuery UI Draggable 1.9.0
  * http://jqueryui.com
@@ -14605,7 +14600,6 @@ $.ui.plugin.add("draggable", "zIndex", {
 
 })(jQuery);
 ;
-
 /*!
  * jQuery UI Droppable 1.9.0
  * http://jqueryui.com
@@ -14901,7 +14895,6 @@ $.ui.ddmanager = {
 
 })(jQuery);
 ;
-
 /* =============================================================
  * bootstrap-collapse.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#collapse
@@ -15058,7 +15051,6 @@ $.ui.ddmanager = {
   })
 
 }(window.jQuery);;
-
 /* =========================================================
  * bootstrap-modal.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#modals
@@ -15294,7 +15286,6 @@ $.ui.ddmanager = {
 
 }(window.jQuery);
 ;
-
 /* ==========================================================
  * bootstrap-alert.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#alerts
@@ -15383,7 +15374,6 @@ $.ui.ddmanager = {
   $(document).on('click.alert.data-api', dismiss, Alert.prototype.close)
 
 }(window.jQuery);;
-
 /* ===================================================
  * bootstrap-transition.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#transitions
@@ -15444,7 +15434,6 @@ $.ui.ddmanager = {
   })
 
 }(window.jQuery);;
-
 /* ============================================================
  * bootstrap-dropdown.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#dropdowns
@@ -15593,7 +15582,6 @@ $.ui.ddmanager = {
     .on('keydown.dropdown.data-api touchstart.dropdown.data-api', toggle + ', [role=menu]' , Dropdown.prototype.keydown)
 
 }(window.jQuery);;
-
 /* =============================================================
  * bootstrap-typeahead.js v2.2.0
  * http://twitter.github.com/bootstrap/javascript.html#typeahead
@@ -15905,7 +15893,6 @@ $.ui.ddmanager = {
 
 }(window.jQuery);
 ;
-
 // lib/handlebars/base.js
 var Handlebars = {};
 
@@ -16130,7 +16117,6 @@ Handlebars.VM = {
 Handlebars.template = Handlebars.VM.template;
 ;
 ;
-
 /**
  * Calculates the specificity of CSS selectors
  * http://www.w3.org/TR/css3-selectors/#specificity
@@ -16274,7 +16260,6 @@ if (typeof exports !== 'undefined') {
 	exports.calculate = SPECIFICITY.calculate;
 }
 ;
-
 /*
  * DOMParser HTML extension
  * 2012-02-02
@@ -16330,7 +16315,6 @@ if (typeof exports !== 'undefined') {
 }(DOMParser));
 
 ;
-
 ;(function (global) {
 
 if ("EventSource" in global) return;
@@ -16509,7 +16493,6 @@ global.EventSource = EventSource;
  
 })(this);
 ;
-
 // Spectrum Colorpicker v1.0.0
 // https://github.com/bgrins/spectrum
 // Author: Brian Grinstead
@@ -18175,7 +18158,6 @@ global.EventSource = EventSource;
 })(this, jQuery);
 
 ;
-
 // Underscore.string
 // (c) 2010 Esa-Matti Suuronen <esa-matti aet suuronen dot org>
 // Underscore.strings is freely distributable under the terms of the MIT license.
@@ -18696,4 +18678,3 @@ global.EventSource = EventSource;
 
 }(this || window));
 ;
-

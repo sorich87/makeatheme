@@ -61,20 +61,25 @@
     throw new Error('Cannot find module "' + name + '"');
   };
 
-  var define = function(bundle) {
-    for (var key in bundle) {
-      if (has(bundle, key)) {
-        modules[key] = bundle[key];
+  var define = function(bundle, fn) {
+    if (typeof bundle === 'object') {
+      for (var key in bundle) {
+        if (has(bundle, key)) {
+          modules[key] = bundle[key];
+        }
       }
+    } else {
+      modules[bundle] = fn;
     }
-  }
+  };
 
   globals.require = require;
   globals.require.define = define;
+  globals.require.register = define;
   globals.require.brunch = true;
 })();
 
-window.require.define({"application": function(exports, require, module) {
+window.require.register("application", function(exports, require, module) {
   // Application bootstrapper.
 
   Application = window.Application || {};
@@ -191,17 +196,15 @@ window.require.define({"application": function(exports, require, module) {
 
   module.exports = Application;
   
-}});
-
-window.require.define({"collections/base/collection": function(exports, require, module) {
+});
+window.require.register("collections/base/collection", function(exports, require, module) {
   // Base class for all collections.
   module.exports = Backbone.Collection.extend({
     
   });
   
-}});
-
-window.require.define({"collections/blocks": function(exports, require, module) {
+});
+window.require.register("collections/blocks", function(exports, require, module) {
   // Blocks collection class.
   var Collection = require("collections/base/collection")
     , Block = require("models/block");
@@ -216,9 +219,8 @@ window.require.define({"collections/blocks": function(exports, require, module) 
     }
   });
   
-}});
-
-window.require.define({"collections/regions": function(exports, require, module) {
+});
+window.require.register("collections/regions", function(exports, require, module) {
   // Regions collection class.
   var Collection = require("collections/base/collection")
     , Region = require("models/region");
@@ -238,9 +240,8 @@ window.require.define({"collections/regions": function(exports, require, module)
     }
   });
   
-}});
-
-window.require.define({"collections/templates": function(exports, require, module) {
+});
+window.require.register("collections/templates", function(exports, require, module) {
   // Templates collection class.
   var Collection = require("collections/base/collection")
     , Template = require("models/template");
@@ -285,9 +286,8 @@ window.require.define({"collections/templates": function(exports, require, modul
     }
   });
   
-}});
-
-window.require.define({"collections/themes": function(exports, require, module) {
+});
+window.require.register("collections/themes", function(exports, require, module) {
   // Themes collection class.
   var Collection = require("collections/base/collection")
     , Theme = require("models/theme");
@@ -297,9 +297,8 @@ window.require.define({"collections/themes": function(exports, require, module) 
     , url: "/themes"
   });
   
-}});
-
-window.require.define({"initialize": function(exports, require, module) {
+});
+window.require.register("initialize", function(exports, require, module) {
   var app = require('application');
 
   (function ($, window) {
@@ -346,9 +345,8 @@ window.require.define({"initialize": function(exports, require, module) {
   })(jQuery, window);
 
   
-}});
-
-window.require.define({"lib/css_properties": function(exports, require, module) {
+});
+window.require.register("lib/css_properties", function(exports, require, module) {
   // List of all CSS properties
   // Used for autocomplete
   module.exports = [
@@ -666,9 +664,8 @@ window.require.define({"lib/css_properties": function(exports, require, module) 
     "z-index"
   ];
   
-}});
-
-window.require.define({"lib/custom_css": function(exports, require, module) {
+});
+window.require.register("lib/custom_css", function(exports, require, module) {
   var match = require("./matches_selector");
 
   /**
@@ -972,9 +969,8 @@ window.require.define({"lib/custom_css": function(exports, require, module) {
 
   module.exports = CustomCSS;
   
-}});
-
-window.require.define({"lib/html_tags": function(exports, require, module) {
+});
+window.require.register("lib/html_tags", function(exports, require, module) {
   // HTML tags list.
 
   module.exports = [
@@ -1325,9 +1321,8 @@ window.require.define({"lib/html_tags": function(exports, require, module) {
     }
   ];
   
-}});
-
-window.require.define({"lib/matches_selector": function(exports, require, module) {
+});
+window.require.register("lib/matches_selector", function(exports, require, module) {
   // Cross-browser way to check if a selector matches an element.
 
   /**
@@ -1374,9 +1369,8 @@ window.require.define({"lib/matches_selector": function(exports, require, module
     return false;
   }
   
-}});
-
-window.require.define({"lib/mixpanel": function(exports, require, module) {
+});
+window.require.register("lib/mixpanel", function(exports, require, module) {
   // Mixpanel tracking.
   // If debug is enabled, log data to console instead of sending to Mixpanel.
   var debug
@@ -1489,9 +1483,8 @@ window.require.define({"lib/mixpanel": function(exports, require, module) {
     }
   };
   
-}});
-
-window.require.define({"lib/mutations": function(exports, require, module) {
+});
+window.require.register("lib/mutations", function(exports, require, module) {
   // Copy changes from the template build.
 
   var app = require("application");
@@ -1612,9 +1605,8 @@ window.require.define({"lib/mutations": function(exports, require, module) {
     }
   };
   
-}});
-
-window.require.define({"lib/view_helpers": function(exports, require, module) {
+});
+window.require.register("lib/view_helpers", function(exports, require, module) {
   var app = require("application")
     , User = require("models/user");
 
@@ -1626,16 +1618,14 @@ window.require.define({"lib/view_helpers": function(exports, require, module) {
     return value === current ? " selected='selected'" : "";
   });
   
-}});
-
-window.require.define({"models/base/model": function(exports, require, module) {
+});
+window.require.register("models/base/model", function(exports, require, module) {
   // Base class for all models.
   module.exports = Backbone.Model.extend({
   });
   
-}});
-
-window.require.define({"models/block": function(exports, require, module) {
+});
+window.require.register("models/block", function(exports, require, module) {
   // Block model class.
   var Model = require("models/base/model");
 
@@ -1668,9 +1658,8 @@ window.require.define({"models/block": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"models/region": function(exports, require, module) {
+});
+window.require.register("models/region", function(exports, require, module) {
   // Region model class.
   var Model = require("models/base/model");
 
@@ -1690,9 +1679,8 @@ window.require.define({"models/region": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"models/template": function(exports, require, module) {
+});
+window.require.register("models/template", function(exports, require, module) {
   // Template model class.
   var Model = require("models/base/model");
 
@@ -1713,9 +1701,8 @@ window.require.define({"models/template": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"models/theme": function(exports, require, module) {
+});
+window.require.register("models/theme", function(exports, require, module) {
   // Theme model class.
   var Model = require("models/base/model");
 
@@ -1753,9 +1740,8 @@ window.require.define({"models/theme": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"models/user": function(exports, require, module) {
+});
+window.require.register("models/user", function(exports, require, module) {
   // User model class.
   var Model = require("models/base/model")
     , Themes = require("collections/themes");
@@ -1805,9 +1791,8 @@ window.require.define({"models/user": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"router": function(exports, require, module) {
+});
+window.require.register("router", function(exports, require, module) {
   var app = require("application");
 
   module.exports = Backbone.Router.extend({
@@ -1927,9 +1912,8 @@ window.require.define({"router": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/account": function(exports, require, module) {
+});
+window.require.register("views/account", function(exports, require, module) {
   // User account edit and delete.
 
   var app = require("application"),
@@ -2025,9 +2009,8 @@ window.require.define({"views/account": function(exports, require, module) {
   });
 
   
-}});
-
-window.require.define({"views/advanced_style_edit": function(exports, require, module) {
+});
+window.require.register("views/advanced_style_edit", function(exports, require, module) {
   // CSS style edit.
 
   var View = require("views/base/view")
@@ -2158,9 +2141,8 @@ window.require.define({"views/advanced_style_edit": function(exports, require, m
     }
   });
   
-}});
-
-window.require.define({"views/auth_links": function(exports, require, module) {
+});
+window.require.register("views/auth_links", function(exports, require, module) {
   // Display the login and register links
   var View = require("views/base/view")
     , template = require("views/templates/auth_links")
@@ -2213,9 +2195,8 @@ window.require.define({"views/auth_links": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/base/view": function(exports, require, module) {
+});
+window.require.register("views/base/view", function(exports, require, module) {
   var app = require("application");
 
   require("lib/view_helpers");
@@ -2283,9 +2264,8 @@ window.require.define({"views/base/view": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/blocks": function(exports, require, module) {
+});
+window.require.register("views/blocks", function(exports, require, module) {
   // Display list of blocks to insert
   var View = require("views/base/view")
     , template = require("views/templates/blocks")
@@ -2442,9 +2422,8 @@ window.require.define({"views/blocks": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/copy_theme": function(exports, require, module) {
+});
+window.require.register("views/copy_theme", function(exports, require, module) {
   var app = require("application"),
       View = require("views/base/view"),
       template = require("views/templates/copy_theme");
@@ -2507,9 +2486,8 @@ window.require.define({"views/copy_theme": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/delete_region": function(exports, require, module) {
+});
+window.require.register("views/delete_region", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/delete_region");
@@ -2537,9 +2515,8 @@ window.require.define({"views/delete_region": function(exports, require, module)
     }
   });
   
-}});
-
-window.require.define({"views/delete_region_form": function(exports, require, module) {
+});
+window.require.register("views/delete_region_form", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/delete_region_form")
     , app = require("application");
@@ -2605,9 +2582,8 @@ window.require.define({"views/delete_region_form": function(exports, require, mo
   });
 
   
-}});
-
-window.require.define({"views/delete_template": function(exports, require, module) {
+});
+window.require.register("views/delete_template", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/delete_template");
@@ -2627,9 +2603,8 @@ window.require.define({"views/delete_template": function(exports, require, modul
     }
   });
   
-}});
-
-window.require.define({"views/delete_template_form": function(exports, require, module) {
+});
+window.require.register("views/delete_template_form", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/delete_template_form")
     , app = require("application");
@@ -2686,9 +2661,8 @@ window.require.define({"views/delete_template_form": function(exports, require, 
   });
 
   
-}});
-
-window.require.define({"views/device_switch": function(exports, require, module) {
+});
+window.require.register("views/device_switch", function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
     , device_switch = require("views/templates/device_switch");
@@ -2751,9 +2725,8 @@ window.require.define({"views/device_switch": function(exports, require, module)
   });
 
   
-}});
-
-window.require.define({"views/download_theme": function(exports, require, module) {
+});
+window.require.register("views/download_theme", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
     , template = require("views/templates/download_theme");
@@ -2813,9 +2786,8 @@ window.require.define({"views/download_theme": function(exports, require, module
   });
 
   
-}});
-
-window.require.define({"views/editor": function(exports, require, module) {
+});
+window.require.register("views/editor", function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view")
     , mutations = require("lib/mutations");
@@ -2879,9 +2851,8 @@ window.require.define({"views/editor": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/editor_toggle": function(exports, require, module) {
+});
+window.require.register("views/editor_toggle", function(exports, require, module) {
   var app = require("application")
     , View = require("views/base/view");
 
@@ -2936,9 +2907,8 @@ window.require.define({"views/editor_toggle": function(exports, require, module)
     }
   });
   
-}});
-
-window.require.define({"views/layout": function(exports, require, module) {
+});
+window.require.register("views/layout", function(exports, require, module) {
   var totalColumnsWidth, isRowFull
     , View = require("views/base/view")
     , app = require("application")
@@ -3218,9 +3188,8 @@ window.require.define({"views/layout": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/login": function(exports, require, module) {
+});
+window.require.register("views/login", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
     , Themes = require("collections/themes");
@@ -3304,9 +3273,8 @@ window.require.define({"views/login": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/menubar": function(exports, require, module) {
+});
+window.require.register("views/menubar", function(exports, require, module) {
   var app = require("application"),
       View = require("views/base/view"),
       menubar = require("views/templates/menubar");
@@ -3403,9 +3371,8 @@ window.require.define({"views/menubar": function(exports, require, module) {
   });
 
   
-}});
-
-window.require.define({"views/new_region": function(exports, require, module) {
+});
+window.require.register("views/new_region", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/new_region");
@@ -3433,9 +3400,8 @@ window.require.define({"views/new_region": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/new_region_form": function(exports, require, module) {
+});
+window.require.register("views/new_region_form", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/new_region_form")
     , app = require("application");
@@ -3496,9 +3462,8 @@ window.require.define({"views/new_region_form": function(exports, require, modul
   });
 
   
-}});
-
-window.require.define({"views/new_template": function(exports, require, module) {
+});
+window.require.register("views/new_template", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/new_template");
@@ -3518,9 +3483,8 @@ window.require.define({"views/new_template": function(exports, require, module) 
     }
   });
   
-}});
-
-window.require.define({"views/new_template_form": function(exports, require, module) {
+});
+window.require.register("views/new_template_form", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/new_template_form")
     , app = require("application");
@@ -3571,9 +3535,8 @@ window.require.define({"views/new_template_form": function(exports, require, mod
   });
 
   
-}});
-
-window.require.define({"views/not_found": function(exports, require, module) {
+});
+window.require.register("views/not_found", function(exports, require, module) {
   var View = require("views/base/view");
 
   module.exports = View.extend({
@@ -3581,9 +3544,8 @@ window.require.define({"views/not_found": function(exports, require, module) {
     , template: "not_found"
   });
   
-}});
-
-window.require.define({"views/notifications": function(exports, require, module) {
+});
+window.require.register("views/notifications", function(exports, require, module) {
   // Notifications view
   // Show all notifications in an ul
   // Listen to notification events to render a notification and append it to the ul
@@ -3612,9 +3574,8 @@ window.require.define({"views/notifications": function(exports, require, module)
     }
   });
   
-}});
-
-window.require.define({"views/password_reset": function(exports, require, module) {
+});
+window.require.register("views/password_reset", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application");
 
@@ -3681,9 +3642,8 @@ window.require.define({"views/password_reset": function(exports, require, module
     }
   });
   
-}});
-
-window.require.define({"views/region_switch": function(exports, require, module) {
+});
+window.require.register("views/region_switch", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/region_switch");
@@ -3753,9 +3713,8 @@ window.require.define({"views/region_switch": function(exports, require, module)
     }
   });
   
-}});
-
-window.require.define({"views/register": function(exports, require, module) {
+});
+window.require.register("views/register", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application");
 
@@ -3820,9 +3779,8 @@ window.require.define({"views/register": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/rename_theme": function(exports, require, module) {
+});
+window.require.register("views/rename_theme", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/rename_theme");
@@ -3842,9 +3800,8 @@ window.require.define({"views/rename_theme": function(exports, require, module) 
     }
   });
   
-}});
-
-window.require.define({"views/rename_theme_form": function(exports, require, module) {
+});
+window.require.register("views/rename_theme_form", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/rename_theme_form")
     , Themes = require("collections/themes")
@@ -3888,9 +3845,8 @@ window.require.define({"views/rename_theme_form": function(exports, require, mod
   });
 
   
-}});
-
-window.require.define({"views/save_theme": function(exports, require, module) {
+});
+window.require.register("views/save_theme", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/save_theme");
@@ -3928,9 +3884,8 @@ window.require.define({"views/save_theme": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/share_theme": function(exports, require, module) {
+});
+window.require.register("views/share_theme", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/share_theme");
@@ -3950,9 +3905,8 @@ window.require.define({"views/share_theme": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/share_theme_link": function(exports, require, module) {
+});
+window.require.register("views/share_theme_link", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application",
       template = require("views/templates/share_theme_link"));
@@ -3969,9 +3923,8 @@ window.require.define({"views/share_theme_link": function(exports, require, modu
     }
   });
   
-}});
-
-window.require.define({"views/simple_style_edit": function(exports, require, module) {
+});
+window.require.register("views/simple_style_edit", function(exports, require, module) {
   var View = require("views/base/view")
     , app = require("application")
     , template = require("views/templates/simple_style_edit");
@@ -4034,9 +3987,8 @@ window.require.define({"views/simple_style_edit": function(exports, require, mod
     }
   });
   
-}});
-
-window.require.define({"views/style_edit": function(exports, require, module) {
+});
+window.require.register("views/style_edit", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/style_edit")
     , declaration_template = require("views/templates/declaration")
@@ -4193,9 +4145,8 @@ window.require.define({"views/style_edit": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/template_switch": function(exports, require, module) {
+});
+window.require.register("views/template_switch", function(exports, require, module) {
   var View = require("views/base/view"),
       app = require("application"),
       template = require("views/templates/template_switch");
@@ -4268,9 +4219,8 @@ window.require.define({"views/template_switch": function(exports, require, modul
     }
   });
   
-}});
-
-window.require.define({"views/templates/account": function(exports, require, module) {
+});
+window.require.register("views/templates/account", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4293,9 +4243,8 @@ window.require.define({"views/templates/account": function(exports, require, mod
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "email", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">Current Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"current_password\">\n      </div>\n    </div>\n  </fieldset>\n\n  <fieldset>\n    <legend>Change Password <small>(leave the fields below blank if not changing)</small></legend>\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password\">New Password</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n      </div>\n    </div>\n\n    <div class=\"control-group\">\n      <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n      <div class=\"controls\">\n        <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n      </div>\n    </div>\n  </fieldset>\n\n  <div class=\"control-group\">\n    <div class=\"controls\">\n      <button type=\"submit\" class=\"btn btn-primary submit\">Save Changes</button>\n    </div>\n  </div>\n</form>\n\n<div class=\"span6\">\n  <button id=\"delete-user\" class=\"btn btn-danger pull-right\">Delete Account</button>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/auth_links": function(exports, require, module) {
+});
+window.require.register("views/templates/auth_links", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4332,9 +4281,8 @@ window.require.define({"views/templates/auth_links": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/blocks": function(exports, require, module) {
+});
+window.require.register("views/templates/blocks", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4367,9 +4315,8 @@ window.require.define({"views/templates/blocks": function(exports, require, modu
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n    </select>\n  </label>\n  <input class=\"span2 new-block-name\" type=\"text\" value=\"\" placeholder=\"Enter block name\" />\n  <button class=\"new-block-add btn btn-primary\">Add block</button>\n</form>\n<button class=\"new-block\">&plus; New Block</button>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/copy_theme": function(exports, require, module) {
+});
+window.require.register("views/templates/copy_theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this;
@@ -4395,9 +4342,8 @@ window.require.define({"views/templates/copy_theme": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/declaration": function(exports, require, module) {
+});
+window.require.register("views/templates/declaration", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4445,9 +4391,8 @@ window.require.define({"views/templates/declaration": function(exports, require,
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </ul>\n  <button class=\"btn btn-mini add-rule\">Add rule</button>\n  <p>}</p>\n</form>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/delete_region": function(exports, require, module) {
+});
+window.require.register("views/templates/delete_region", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4465,9 +4410,8 @@ window.require.define({"views/templates/delete_region": function(exports, requir
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</a>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/delete_region_form": function(exports, require, module) {
+});
+window.require.register("views/templates/delete_region_form", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4546,18 +4490,16 @@ window.require.define({"views/templates/delete_region_form": function(exports, r
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </div>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/delete_template": function(exports, require, module) {
+});
+window.require.register("views/templates/delete_template", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#delete-template-modal\">Delete a Template</a>\n";});
-}});
-
-window.require.define({"views/templates/delete_template_form": function(exports, require, module) {
+});
+window.require.register("views/templates/delete_template_form", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4610,18 +4552,16 @@ window.require.define({"views/templates/delete_template_form": function(exports,
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n  </div>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/device_switch": function(exports, require, module) {
+});
+window.require.register("views/templates/device_switch", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a tabindex=\"-1\" href=\"#\">Switch Device</a>\n<ul class=\"dropdown-menu\">\n  <li class=\"active\"><a href=\"#\" data-bypass=\"true\" class=\"pc-size\"><i class=\"icon-desktop\"></i> PC</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"tablet-size\"><i class=\"icon-tablet\"></i> Tablet</a></li>\n  <li><a href=\"#\" data-bypass=\"true\" class=\"phone-size\"><i class=\"icon-mobile-phone\"></i> Phone</a></li>\n</ul>\n";});
-}});
-
-window.require.define({"views/templates/download_theme": function(exports, require, module) {
+});
+window.require.register("views/templates/download_theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4639,18 +4579,16 @@ window.require.define({"views/templates/download_theme": function(exports, requi
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
     buffer += escapeExpression(stack1) + "/download/wordpress\" data-event=\"Download:format:WordPress\"\n  target=\"_blank\" data-bypass=\"true\"><i class=\"c-icon-wordpress\"></i> Download WordPress</a>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/login": function(exports, require, module) {
+});
+window.require.register("views/templates/login", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<div class=\"modal-header\">\n  <h3>Please authenticate yourself</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Log In</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Forgot your password? <a href=\"/reset_password\" data-dismiss=\"modal\">Reset password</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
-}});
-
-window.require.define({"views/templates/menubar": function(exports, require, module) {
+});
+window.require.register("views/templates/menubar", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4663,9 +4601,8 @@ window.require.define({"views/templates/menubar": function(exports, require, mod
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme_name", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</li>\n  <li class=\"divider-vertical\"></li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">File <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"file-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">View <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"view-menu\"></ul>\n  </li>\n  <li class=\"dropdown\">\n    <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">Template <b class=\"caret\"></b></a>\n    <ul class=\"dropdown-menu\" id=\"template-menu\"></ul>\n  </li>\n</ul>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/new_region": function(exports, require, module) {
+});
+window.require.register("views/templates/new_region", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4683,9 +4620,8 @@ window.require.define({"views/templates/new_region": function(exports, require, 
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</a>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/new_region_form": function(exports, require, module) {
+});
+window.require.register("views/templates/new_region_form", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4723,36 +4659,32 @@ window.require.define({"views/templates/new_region_form": function(exports, requ
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "label", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</button>\n    </form>\n  </div>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/new_template": function(exports, require, module) {
+});
+window.require.register("views/templates/new_template", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#template-form-modal\"\n  id=\"share-theme\">New Template</a>\n";});
-}});
-
-window.require.define({"views/templates/new_template_form": function(exports, require, module) {
+});
+window.require.register("views/templates/new_template_form", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<div id=\"template-form-modal\" class=\"modal hide fade\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"template-form-modal-header\" aria-hidden=\"true\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n    <h3 id=\"template-form-modal-header\">New Template</h3>\n  </div>\n  <div class=\"modal-body\">\n    <form class=\"form-inline\">\n      <input type=\"text\" class=\"input-large name\" placeholder=\"Template Name\" value=\"\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Create Template</button>\n    </form>\n  </div>\n</div>\n";});
-}});
-
-window.require.define({"views/templates/not_found": function(exports, require, module) {
+});
+window.require.register("views/templates/not_found", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<h1 class=\"page-header\">Ooops! We screwed up. :(</h1>\n<p class=\"lead\">Sorry, the page you were looking for doesn’t exist.</p>\n<p>Go back to <a href=\"/\" title=\"www.makeatheme.com\">homepage</a> or\n<a href='http://support.makeatheme.com'>contact us</a> about a problem.</p>\n";});
-}});
-
-window.require.define({"views/templates/notification": function(exports, require, module) {
+});
+window.require.register("views/templates/notification", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4770,18 +4702,16 @@ window.require.define({"views/templates/notification": function(exports, require
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "text", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</li>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/password_reset": function(exports, require, module) {
+});
+window.require.register("views/templates/password_reset", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<div class=\"modal-header\">\n  <h3>Reset password</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\" id=\"password_reset\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" name=\"email\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"password\">New Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" name=\"password\" class=\"input-xlarge\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary\">Send reset email</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Remember your password? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n    <li>Don't have an account yet? <a href=\"/register\" data-dismiss=\"modal\">Register</a></li>\n  </ul>\n</div>\n";});
-}});
-
-window.require.define({"views/templates/region_switch": function(exports, require, module) {
+});
+window.require.register("views/templates/region_switch", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4833,9 +4763,8 @@ window.require.define({"views/templates/region_switch": function(exports, requir
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n</ul>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/regions": function(exports, require, module) {
+});
+window.require.register("views/templates/regions", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4894,27 +4823,24 @@ window.require.define({"views/templates/regions": function(exports, require, mod
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n</select>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/register": function(exports, require, module) {
+});
+window.require.register("views/templates/register", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<div class=\"modal-header\">\n  <h3>Create a free account</h3>\n</div>\n<div class=\"modal-body\">\n  <form class=\"form-horizontal\">\n    <fieldset>\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-first-name\">First Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"first_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-last-name\">Last Name</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"last_name\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-email\">Email Address</label>\n        <div class=\"controls\">\n          <input type=\"text\" class=\"input-xlarge\" name=\"email\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password\">Password</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <label class=\"control-label\" for=\"new-password-confirmation\">Password Confirmation</label>\n        <div class=\"controls\">\n          <input type=\"password\" class=\"input-xlarge\" name=\"password_confirmation\">\n        </div>\n      </div>\n\n      <div class=\"control-group\">\n        <div class=\"controls\">\n          <button type=\"submit\" class=\"btn btn-primary submit\">Register</button>\n        </div>\n      </div>\n    </fieldset>\n  </form>\n  <ul class=\"unstyled\">\n    <li>Already have an account? <a href=\"/login\" data-dismiss=\"modal\">Log in</a></li>\n  </ul>\n</div>\n";});
-}});
-
-window.require.define({"views/templates/rename_theme": function(exports, require, module) {
+});
+window.require.register("views/templates/rename_theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#rename-theme-modal\"><i class=\"icon-edit\"></i> Rename Theme</a>\n";});
-}});
-
-window.require.define({"views/templates/rename_theme_form": function(exports, require, module) {
+});
+window.require.register("views/templates/rename_theme_form", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4927,9 +4853,8 @@ window.require.define({"views/templates/rename_theme_form": function(exports, re
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "name", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\">\n      <button type=\"submit\" class=\"btn btn-primary\" aria-hidden=\"true\">Rename</button>\n    </form>\n  </div>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/rule": function(exports, require, module) {
+});
+window.require.register("views/templates/rule", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4942,27 +4867,24 @@ window.require.define({"views/templates/rule": function(exports, require, module
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "selector", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" />\n  <input type=\"hidden\" name=\"index\" />\n</li>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/save_theme": function(exports, require, module) {
+});
+window.require.register("views/templates/save_theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a href=\"#\" data-bypass=\"true\" id=\"save-theme\"><i class=\"icon-save\"></i> Save Theme</a>\n";});
-}});
-
-window.require.define({"views/templates/share_theme": function(exports, require, module) {
+});
+window.require.register("views/templates/share_theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<a href=\"#\" data-bypass=\"true\" data-toggle=\"modal\" data-target=\"#share-modal\"\n  id=\"share-theme\"><i class=\"icon-share\"></i> Share Theme</a>\n";});
-}});
-
-window.require.define({"views/templates/share_theme_link": function(exports, require, module) {
+});
+window.require.register("views/templates/share_theme_link", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -4975,9 +4897,8 @@ window.require.define({"views/templates/share_theme_link": function(exports, req
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "theme", { hash: {} }); }
     buffer += escapeExpression(stack1) + "</div>\n  </div>\n</div>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/simple_style_edit": function(exports, require, module) {
+});
+window.require.register("views/templates/simple_style_edit", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, stack3, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5405,9 +5326,8 @@ window.require.define({"views/templates/simple_style_edit": function(exports, re
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "paddingLeft", { hash: {} }); }
     buffer += escapeExpression(stack1) + "\" />\n          </div>\n        </div>\n\n      </div>\n    </div>\n  </div>\n\n</div>\n\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/style_edit": function(exports, require, module) {
+});
+window.require.register("views/templates/style_edit", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5562,9 +5482,8 @@ window.require.define({"views/templates/style_edit": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n</select>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/template_switch": function(exports, require, module) {
+});
+window.require.register("views/templates/template_switch", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5611,18 +5530,16 @@ window.require.define({"views/templates/template_switch": function(exports, requ
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n</ul>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/templates": function(exports, require, module) {
+});
+window.require.register("views/templates/templates", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<p>Click to change</p>\n<ul class=\"rects\"></ul>\n";});
-}});
-
-window.require.define({"views/templates/theme": function(exports, require, module) {
+});
+window.require.register("views/templates/theme", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5635,9 +5552,8 @@ window.require.define({"views/templates/theme": function(exports, require, modul
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "id", { hash: {} }); }
     buffer += escapeExpression(stack1) + "/edit\" frameborder=\"0\" width=\"100%\" height=\"100%\"></iframe>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/theme_list": function(exports, require, module) {
+});
+window.require.register("views/templates/theme_list", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, stack2, foundHelper, tmp1, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5701,18 +5617,16 @@ window.require.define({"views/templates/theme_list": function(exports, require, 
     if(stack1 || stack1 === 0) { buffer += stack1; }
     buffer += "\n      </div>\n    </div>\n  </div>\n</li>\n";
     return buffer;});
-}});
-
-window.require.define({"views/templates/themes": function(exports, require, module) {
+});
+window.require.register("views/templates/themes", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var foundHelper, self=this;
 
 
     return "<h3 class=\"page-title\">Create a new theme from scratch</h3>\n<form id=\"new-theme\" class=\"form-inline\">\n  <input type=\"text\" class=\"input-medium\" name=\"theme_name\" placeholder=\"Theme Name\">\n  <button data-event=\"New Theme:type:from scratch\"\n    class=\"btn btn-primary\" data-bypass=\"true\">\n    Create Theme</button>\n</form>\n<h3 class=\"page-title\">Or copy a theme below</h3>\n";});
-}});
-
-window.require.define({"views/templates/user_themes": function(exports, require, module) {
+});
+window.require.register("views/templates/user_themes", function(exports, require, module) {
   module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
     helpers = helpers || Handlebars.helpers;
     var buffer = "", stack1, foundHelper, self=this, functionType="function", helperMissing=helpers.helperMissing, undef=void 0, escapeExpression=this.escapeExpression;
@@ -5725,9 +5639,8 @@ window.require.define({"views/templates/user_themes": function(exports, require,
     else if(stack1=== undef) { stack1 = helperMissing.call(depth0, "count", { hash: {} }); }
     buffer += escapeExpression(stack1) + ")</small>\n  <a href=\"/themes\" class=\"btn btn-primary\">Create a New Theme</a>\n</h1>\n";
     return buffer;});
-}});
-
-window.require.define({"views/theme": function(exports, require, module) {
+});
+window.require.register("views/theme", function(exports, require, module) {
   var View = require("views/base/view")
     , cssProperties = require("lib/css_properties")
     , template = require("views/templates/theme");
@@ -5769,9 +5682,8 @@ window.require.define({"views/theme": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/theme_list": function(exports, require, module) {
+});
+window.require.register("views/theme_list", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/theme_list")
     , app = require("application");
@@ -5843,9 +5755,8 @@ window.require.define({"views/theme_list": function(exports, require, module) {
     }
   });
   
-}});
-
-window.require.define({"views/themes": function(exports, require, module) {
+});
+window.require.register("views/themes", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/themes")
     , Themes = require("collections/themes")
@@ -5909,9 +5820,8 @@ window.require.define({"views/themes": function(exports, require, module) {
   });
 
   
-}});
-
-window.require.define({"views/user_themes": function(exports, require, module) {
+});
+window.require.register("views/user_themes", function(exports, require, module) {
   var View = require("views/base/view")
     , template = require("views/templates/user_themes")
     , app = require("application");
@@ -5937,5 +5847,4 @@ window.require.define({"views/user_themes": function(exports, require, module) {
   });
 
   
-}});
-
+});
